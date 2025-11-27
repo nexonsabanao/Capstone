@@ -1,6 +1,7 @@
 package com.example.nutriority.data
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -8,6 +9,7 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.nutriority.R // <-- Import R class to access resources
 import com.example.nutriority.models.Article
 import com.example.nutriority.models.Exercise
 import com.example.nutriority.models.Meal
@@ -79,29 +81,41 @@ abstract class AppDatabase : RoomDatabase() {
 
             private suspend fun prePopulateDatabase(context: Context, db: AppDatabase) {
                 val gson = Gson()
+                try {
                 val packageName = context.packageName
 
-                // --- 1. Pre-populate Articles (No change) ---
+                // A safe way to get a resource ID or a default
+                fun getSafeImageResId(imageName: String): Int {
+                    val resId = context.resources.getIdentifier(imageName, "drawable", packageName)
+                    return if (resId != 0) {
+                        resId
+                    } else {
+                        Log.w("AppDatabase", "Missing drawable resource: $imageName. Using placeholder.")
+                        R.drawable.img_balanced_diet // Use your placeholder image
+                    }
+                }
+
+                // --- 1. Pre-populate Articles (Now safe) ---
                 val articleType = object : TypeToken<List<Article>>() {}.type
                 val articles: List<Article> = gson.fromJson(
                     context.assets.open("articles.json").bufferedReader().use(BufferedReader::readText),
                     articleType
                 )
-                articles.forEach { it.imageResId = context.resources.getIdentifier(it.imageName, "drawable", packageName) }
+                articles.forEach { it.imageResId = getSafeImageResId(it.imageName) }
                 db.articlesDao().insertAllArticles(articles)
 
 
-                // --- 2. Pre-populate Meals (No change) ---
+                // --- 2. Pre-populate Meals (Now safe) ---
                 val mealType = object : TypeToken<List<Meal>>() {}.type
                 val meals: List<Meal> = gson.fromJson(
                     context.assets.open("meals.json").bufferedReader().use(BufferedReader::readText),
                     mealType
                 )
-                meals.forEach { it.imageResId = context.resources.getIdentifier(it.imageName, "drawable", packageName) }
+                meals.forEach { it.imageResId = getSafeImageResId(it.imageName) }
                 db.mealDao().insertAllMeals(meals)
 
 
-                // --- 3. Pre-populate Workouts and Exercises (IMPROVED LOGIC) ---
+                // --- 3. Pre-populate Workouts and Exercises (Now safe) ---
                 data class WorkoutJson(val workout: Workout, val exercises: List<Exercise>)
                 val workoutType = object : TypeToken<List<WorkoutJson>>() {}.type
                 val workoutData: List<WorkoutJson> = gson.fromJson(
@@ -113,15 +127,17 @@ abstract class AppDatabase : RoomDatabase() {
                     // First, insert the parent workout to get its auto-generated ID
                     val workoutId = db.workoutDao().insertWorkout(workoutJsonItem.workout)
 
-                    // Now, assign this new ID to all child exercises
+                    // Now, assign this new ID and a safe image resource to all child exercises
                     workoutJsonItem.exercises.forEach { exercise ->
-                        exercise.imageResId = context.resources.getIdentifier(exercise.imageName, "drawable", packageName)
-                        // FIX: Corrected the property name from "workoutId" to "workoutId"
+                        exercise.imageResId = getSafeImageResId(exercise.imageName)
                         exercise.workoutId = workoutId.toInt()
                     }
 
                     // Finally, insert the correctly linked exercises
                     db.workoutDao().insertAllExercises(workoutJsonItem.exercises)
+                }
+                } catch (e: Exception) {
+                    Log.e("AppDatabase", "Failed to pre-populate database: ", e)
                 }
             }
         }

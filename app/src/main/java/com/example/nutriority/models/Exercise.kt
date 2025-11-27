@@ -22,15 +22,16 @@ data class Exercise(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
-    val name: String,
-    val sets: String,
-    val reps: String,
-    val rest: String,
-    val description: String,
-    val imageName: String,
+    val name: String = "",
+    // Provide defaults to make deserialization from JSON safe even when fields are missing.
+    val sets: String = "",
+    val reps: String = "",
+    val rest: String = "",
+    val description: String = "",
+    val imageName: String = "",
 
-    // THE FIX IS HERE: Change 'val' to 'var'
-    var workoutId: Int = 0 // This allows it to be reassigned
+    // Keep workoutId mutable so pre-population can assign the generated parent ID
+    var workoutId: Int = 0
 ) {
     @Ignore
     var imageResId: Int = 0
