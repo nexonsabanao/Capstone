@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".onboarding.screens.FirstScreen">
+
+    <!-- Guideline for 6% top margin, consistent with other screens -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/top_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.06" />
+
+    <!-- Skip Button - Corrected Spacing -->
+
+    <!-- Guideline for 94% bottom margin, consistent with other screens -->
+
+    <TextView
+        android:id="@+id/skipButton"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="24dp"
+        android:alpha="0.7"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:paddingHorizontal="8dp"
+        android:text="skip"
+        android:textColor="@color/dark_gray"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/title_select_gender"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/top_guideline"
+        app:layout_constraintVertical_bias="1.0"
+        tools:ignore="TouchTargetSizeCheck" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bottom_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.94" />
+
+    <!-- TITLE CONSTRAINTS CORRECTED HERE -->
+    <TextView
+        android:id="@+id/title_select_gender"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="80dp"
+        android:fontFamily="@font/barlow_bold"
+        android:gravity="center_horizontal"
+        android:text="@string/select_gender"
+        android:textColor="@color/dark_gray"
+        android:textSize="28sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/top_guideline" />
+
+    <!-- NEW TEXTVIEW ADDED HERE -->
+    <TextView
+        android:id="@+id/subtitle_select_gender"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_horizontal"
+        android:text="Let us know you better"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@id/title_select_gender"
+        app:layout_constraintStart_toStartOf="@id/title_select_gender"
+        app:layout_constraintTop_toBottomOf="@id/title_select_gender" />
+
+    <!--
+        The gender selection groups are centered vertically between the
+        title and the next button.
+    -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/male_group"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:alpha="0.5"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:contentDescription="@string/male"
+        android:focusable="true"
+        app:layout_constraintBottom_toTopOf="@+id/next_button"
+        app:layout_constraintEnd_toStartOf="@+id/female_group"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subtitle_select_gender">
+
+        <ImageView
+            android:id="@+id/male_gender_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/gender_male"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/male_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/barlow_bold"
+            android:text="@string/male"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/male_gender_image" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/female_group"
+        android:layout_width="87dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:alpha="0.5"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:contentDescription="@string/female"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/male_group"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/male_group"
+        app:layout_constraintTop_toTopOf="@+id/male_group">
+
+        <ImageView
+            android:id="@+id/female_gender_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/gender_female"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/female_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/barlow_bold"
+            android:text="@string/female"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/female_gender_image" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- This button now has horizontal margin -->
+    <Button
+        android:id="@+id/next_button"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:alpha="0.4"
+        android:backgroundTint="#00A78B"
+        android:paddingVertical="16dp"
+        android:text="@string/action_next"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/bottom_guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

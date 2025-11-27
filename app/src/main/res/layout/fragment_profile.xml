@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".ProfileFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="32dp">
+
+        <!-- Header -->
+        <TextView
+            android:id="@+id/profile_header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="My Profile"
+            android:textAppearance="?attr/textAppearanceHeadline5"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/edit_profile_button"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="Edit"
+            app:icon="@drawable/ic_edit"
+            app:layout_constraintBottom_toBottomOf="@id/profile_header_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/profile_header_title" />
+
+        <!-- === PHYSICAL STATS SECTION === -->
+        <TextView
+            android:id="@+id/stats_header"
+            style="@style/ProfileSectionHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Physical Stats"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profile_header_title" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/stats_card"
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/stats_header">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp">
+
+                <!-- Gender -->
+                <TextView
+                    android:id="@+id/gender_label"
+                    style="@style/ProfileTableLabel"
+                    android:text="Gender"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@+id/height_label"/>
+
+                <TextView
+                    android:id="@+id/profile_gender"
+                    style="@style/ProfileTableValue"
+                    android:layout_width="0dp"
+                    app:layout_constraintBaseline_toBaselineOf="@id/gender_label"
+                    app:layout_constraintStart_toEndOf="@id/gender_label"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="Male" />
+
+                <!-- Height -->
+                <TextView
+                    android:id="@+id/height_label"
+                    style="@style/ProfileTableLabel"
+                    android:text="Height"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/gender_label"
+                    app:layout_constraintBottom_toTopOf="@+id/weight_label"/>
+
+                <TextView
+                    android:id="@+id/profile_height"
+                    style="@style/ProfileTableValue"
+                    android:layout_width="0dp"
+                    app:layout_constraintBaseline_toBaselineOf="@id/height_label"
+                    app:layout_constraintStart_toEndOf="@id/height_label"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="180.0 cm" />
+
+                <!-- Weight -->
+                <TextView
+                    android:id="@+id/weight_label"
+                    style="@style/ProfileTableLabel"
+                    android:text="Weight"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/height_label"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <TextView
+                    android:id="@+id/profile_weight"
+                    style="@style/ProfileTableValue"
+                    android:layout_width="0dp"
+                    app:layout_constraintBaseline_toBaselineOf="@id/weight_label"
+                    app:layout_constraintStart_toEndOf="@id/weight_label"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="75.0 kg" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- === GOALS & LIFESTYLE SECTION === -->
+        <TextView
+            android:id="@+id/goals_header"
+            style="@style/ProfileSectionHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Goals &amp; Lifestyle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/stats_card" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/goals_card"
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/goals_header">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp">
+
+                <!-- Goal -->
+                <TextView
+                    android:id="@+id/goal_label"
+                    style="@style/ProfileTableLabel"
+                    android:text="Primary Goal"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@+id/activity_label"/>
+
+                <TextView
+                    android:id="@+id/profile_goal"
+                    style="@style/ProfileTableValue"
+                    android:layout_width="0dp"
+                    app:layout_constraintBaseline_toBaselineOf="@id/goal_label"
+                    app:layout_constraintStart_toEndOf="@id/goal_label"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="Build Muscle" />
+
+                <!-- Activity Level -->
+                <TextView
+                    android:id="@+id/activity_label"
+                    style="@style/ProfileTableLabel"
+                    android:text="Activity Level"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/goal_label"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <TextView
+                    android:id="@+id/profile_activity_level"
+                    style="@style/ProfileTableValue"
+                    android:layout_width="0dp"
+                    app:layout_constraintBaseline_toBaselineOf="@id/activity_label"
+                    app:layout_constraintStart_toEndOf="@id/activity_label"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="Active (3-5 days/week)" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+
+        <!-- === PREFERENCES SECTION === -->
+        <TextView
+            android:id="@+id/prefs_header"
+            style="@style/ProfileSectionHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Preferences"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/goals_card" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/prefs_card"
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/prefs_header">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp">
+
+                <!-- Diet Preference -->
+                <TextView
+                    android:id="@+id/diet_label"
+                    style="@style/ProfileTableLabel"
+                    android:text="Preferred Diet"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/profile_preferred_diet"
+                    style="@style/ProfileTableValue"
+                    android:layout_width="0dp"
+                    app:layout_constraintBaseline_toBaselineOf="@id/diet_label"
+                    app:layout_constraintStart_toEndOf="@id/diet_label"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="Balanced" />
+
+                <!-- Workout Preference -->
+                <TextView
+                    android:id="@+id/workout_label"
+                    style="@style/ProfileTableLabel"
+                    android:text="Workout Style"
+                    app:layout_constraintTop_toBottomOf="@id/diet_label"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <TextView
+                    android:id="@+id/profile_workout_preference"
+                    style="@style/ProfileTableValue"
+                    android:layout_width="0dp"
+                    app:layout_constraintBaseline_toBaselineOf="@id/workout_label"
+                    app:layout_constraintStart_toEndOf="@id/workout_label"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="Calisthenics" />
+
+                <!-- Excluded Ingredients -->
+                <TextView
+                    android:id="@+id/excluded_label"
+                    style="@style/ProfileTableLabel"
+                    android:text="Excluded Ingredients"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/workout_label"/>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/profile_excluded_ingredients"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:paddingHorizontal="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/excluded_label"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <!-- Chips will be added programmatically -->
+                    <com.google.android.material.chip.Chip
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Peanuts" />
+                    <com.google.android.material.chip.Chip
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Shellfish" />
+                    <com.google.android.material.chip.Chip
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Some very long ingredient name" />
+                </com.google.android.material.chip.ChipGroup>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#00CCCCCC"> <!-- A semi-transparent grey for the ripple color -->
+    <item android:id="@android:color/transparent">
+        <color android:color="@android:color/transparent" />
+    </item>
+
+</ripple>

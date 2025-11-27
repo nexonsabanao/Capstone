@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".onboarding.screens.SeventhScreen">
+
+    <!-- TextView to display user's input values one by one -->
+    <TextView
+        android:id="@+id/user_data_recap_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:fontFamily="@font/barlow_regular"
+        android:text="Calculating your plan..."
+        android:textAlignment="center"
+        android:textColor="@color/dark_gray"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/loading_progress_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Gender: Male" />
+
+    <!-- Central Circular Loading Indicator -->
+    <ProgressBar
+        android:id="@+id/loading_progress_bar"
+        android:layout_width="123dp"
+        android:layout_height="110dp"
+        android:layout_marginTop="32dp"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/green"
+        app:layout_constraintBottom_toTopOf="@id/bmi_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/user_data_recap_text" />
+
+    <!-- Container for BMI display at the bottom -->
+    <LinearLayout
+        android:id="@+id/bmi_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loading_progress_bar">
+
+        <TextView
+            android:id="@+id/bmi_title_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/barlow_semibold"
+            android:text="Your BMI"
+            android:textColor="@color/dark_gray"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/bmi_value_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/barlow_bold"
+            android:textSize="48sp"
+            tools:text="21.5"
+            tools:textColor="@color/green" />
+
+        <TextView
+            android:id="@+id/bmi_category_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/barlow_semibold"
+            android:textAllCaps="true"
+            android:textSize="16sp"
+            tools:text="Normal"
+            tools:textColor="@color/green" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
