@@ -1,0 +1,23 @@
+[
+  {
+    "title": "The Benefits of a High-Protein Diet",
+    "author": "Jane Doe, PhD",
+    "readingTime": "5 min read",
+    "category": "Nutrition",
+    "imageName": "article_protein"
+  },
+  {
+    "title": "Understanding Macronutrients",
+    "author": "John Smith, R.D.",
+    "readingTime": "8 min read",
+    "category": "Nutrition",
+    "imageName": "article_macros"
+  },
+  {
+    "title": "Mindful Eating: A Beginner's Guide",
+    "author": "Emily White",
+    "readingTime": "6 min read",
+    "category": "Wellness",
+    "imageName": "article_mindful"
+  }
+]

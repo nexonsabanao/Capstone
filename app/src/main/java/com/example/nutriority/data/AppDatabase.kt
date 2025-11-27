@@ -5,14 +5,18 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.nutriority.Models.Article
-import com.example.nutriority.Models.Exercise
-import com.example.nutriority.Models.Meal
-import com.example.nutriority.Models.Workout
+import com.example.nutriority.models.Article
+import com.example.nutriority.models.Exercise
+import com.example.nutriority.models.Meal
+import com.example.nutriority.models.Workout
 import com.example.nutriority.data.dao.ArticlesDao
 import com.example.nutriority.data.dao.MealDao
 import com.example.nutriority.data.dao.WorkoutDao
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,8 +24,8 @@ import java.io.BufferedReader
 
 @Database(
     entities = [Meal::class, Workout::class, Article::class, Exercise::class],
-    version = 6, // 1. INCREMENT version due to schema changes
-    exportSchema = false
+    version = 7,
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -34,133 +38,91 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase {
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Empty for now
+            }
+        }
+
+        fun getDatabase(context: Context, appScope: CoroutineScope): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "nutriority_database"
                 )
-                    .fallbackToDestructiveMigration()
-                    .addCallback(AppDatabaseCallback(context))
+                    .addMigrations(MIGRATION_6_7)
+                    .addCallback(AppDatabaseCallback(context, appScope))
                     .build()
                 INSTANCE = instance
                 instance
             }
         }
 
-        private class AppDatabaseCallback(private val context: Context) : RoomDatabase.Callback() {
-            override fun onCreate(db: SupportSQLiteDatabase) {
-                super.onCreate(db)
+        private class AppDatabaseCallback(
+            private val context: Context,
+            private val scope: CoroutineScope
+        ) : RoomDatabase.Callback() {
+
+            override fun onOpen(db: SupportSQLiteDatabase) {
+                super.onOpen(db)
                 INSTANCE?.let { database ->
-                    CoroutineScope(Dispatchers.IO).launch {
-                        // Call all three pre-population functions
-                        prePopulateWorkoutsAndExercises(context, database.workoutDao())
-                        prePopulateMeals(context, database.mealDao())
-                        prePopulateArticles(context, database.articlesDao())
+                    scope.launch(Dispatchers.IO) {
+                        if (database.workoutDao().getWorkoutCount() == 0) { // Check workout table instead
+                            database.withTransaction {
+                                prePopulateDatabase(context, database)
+                            }
+                        }
                     }
                 }
             }
 
-            private suspend fun prePopulateArticles(context: Context, articlesDao: ArticlesDao) {
-                val articles = listOf(
-                    Article(
-                        title = "The Benefits of a High-Protein Diet",
-                        author = "Jane Doe, PhD",
-                        readingTime = "5 min read",
-                        category = "Nutrition",
-                        imageResId = context.resources.getIdentifier("article_protein", "drawable", context.packageName)
-                    ),
-                    Article(
-                        title = "Understanding Macronutrients",
-                        author = "John Smith, R.D.",
-                        readingTime = "8 min read",
-                        category = "Nutrition",
-                        imageResId = context.resources.getIdentifier("article_macros", "drawable", context.packageName)
-                    ),
-                    Article(
-                        title = "Mindful Eating: A Beginner's Guide",
-                        author = "Emily White",
-                        readingTime = "6 min read",
-                        category = "Wellness",
-                        imageResId = context.resources.getIdentifier("article_mindful", "drawable", context.packageName)
-                    )
+            private suspend fun prePopulateDatabase(context: Context, db: AppDatabase) {
+                val gson = Gson()
+                val packageName = context.packageName
+
+                // --- 1. Pre-populate Articles (No change) ---
+                val articleType = object : TypeToken<List<Article>>() {}.type
+                val articles: List<Article> = gson.fromJson(
+                    context.assets.open("articles.json").bufferedReader().use(BufferedReader::readText),
+                    articleType
+                )
+                articles.forEach { it.imageResId = context.resources.getIdentifier(it.imageName, "drawable", packageName) }
+                db.articlesDao().insertAllArticles(articles)
+
+
+                // --- 2. Pre-populate Meals (No change) ---
+                val mealType = object : TypeToken<List<Meal>>() {}.type
+                val meals: List<Meal> = gson.fromJson(
+                    context.assets.open("meals.json").bufferedReader().use(BufferedReader::readText),
+                    mealType
+                )
+                meals.forEach { it.imageResId = context.resources.getIdentifier(it.imageName, "drawable", packageName) }
+                db.mealDao().insertAllMeals(meals)
+
+
+                // --- 3. Pre-populate Workouts and Exercises (IMPROVED LOGIC) ---
+                data class WorkoutJson(val workout: Workout, val exercises: List<Exercise>)
+                val workoutType = object : TypeToken<List<WorkoutJson>>() {}.type
+                val workoutData: List<WorkoutJson> = gson.fromJson(
+                    context.assets.open("workouts.json").bufferedReader().use(BufferedReader::readText),
+                    workoutType
                 )
 
-                // Insert all articles into the database
-                articles.forEach { articlesDao.insertArticle(it) }
-            }
+                workoutData.forEach { workoutJsonItem ->
+                    // First, insert the parent workout to get its auto-generated ID
+                    val workoutId = db.workoutDao().insertWorkout(workoutJsonItem.workout)
 
-            private suspend fun prePopulateMeals(context: Context, mealDao: MealDao) {
-                val meals = listOf(
-                    Meal(
-                        name = "Avocado Toast",
-                        calories = "350 kcal",
-                        category = "Vegetarian",
-                        time = "Breakfast",
-                        ingredients = listOf("2 slices of whole-wheat bread", "1 ripe avocado", "1 pinch of salt", "1 pinch of red pepper flakes"),
-                        imageResId = context.resources.getIdentifier("meal_avocado_toast", "drawable", context.packageName)
-                    ),
-                    Meal(
-                        name = "Chicken Salad",
-                        calories = "450 kcal",
-                        category = "Low Carb",
-                        time = "Lunch",
-                        ingredients = listOf("150g grilled chicken breast", "50g mixed greens", "1/2 cucumber", "1/4 red onion", "2 tbsp vinaigrette"),
-                        imageResId = context.resources.getIdentifier("meal_chicken_salad", "drawable", context.packageName)
-                    ),
-                    Meal(
-                        name = "Quinoa Bowl",
-                        calories = "400 kcal",
-                        category = "Balanced Diet",
-                        time = "Dinner",
-                        ingredients = listOf("1 cup cooked quinoa", "1/2 cup black beans", "1/2 cup corn", "1/4 avocado", "Salsa and lime to taste"),
-                        imageResId = context.resources.getIdentifier("meal_quinoa_bowl", "drawable", context.packageName)
-                    )
-                )
-                meals.forEach { mealDao.insertMeal(it) }
-            }
+                    // Now, assign this new ID to all child exercises
+                    workoutJsonItem.exercises.forEach { exercise ->
+                        exercise.imageResId = context.resources.getIdentifier(exercise.imageName, "drawable", packageName)
+                        // FIX: Corrected the property name from "workoutId" to "workoutId"
+                        exercise.workoutId = workoutId.toInt()
+                    }
 
-            private suspend fun prePopulateWorkoutsAndExercises(context: Context, workoutDao: WorkoutDao) {
-                // 2. UPDATE Workout to include targetMuscle
-                val calisthenicsWorkout = Workout(
-                    id = 1,
-                    name = "Calisthenics Basics",
-                    description = "Master the fundamentals of bodyweight training.",
-                    category = "Beginner",
-                    targetMuscle = "Full Body", // Added targetMuscle
-                    imageResId = context.resources.getIdentifier("workout_calisthenics", "drawable", context.packageName)
-                )
-                workoutDao.insertWorkout(calisthenicsWorkout)
-
-                // 3. UPDATE Exercises to include targetMuscle
-                val exercises = listOf(
-                    Exercise(
-                        workoutId = 1,
-                        name = "Push-Ups",
-                        description = "A classic bodyweight exercise that strengthens the chest, shoulders, and triceps.",
-                        reps = "3 sets of 12-15 reps",
-                        targetMuscle = "Chest, Shoulders, Triceps", // Added targetMuscle
-                        imageResId = context.resources.getIdentifier("exercise_pushup", "drawable", context.packageName)
-                    ),
-                    Exercise(
-                        workoutId = 1,
-                        name = "Squats",
-                        description = "A fundamental lower body exercise that targets the quadriceps, hamstrings, and glutes.",
-                        reps = "3 sets of 15-20 reps",
-                        targetMuscle = "Legs, Glutes", // Added targetMuscle
-                        imageResId = context.resources.getIdentifier("exercise_squat", "drawable", context.packageName)
-                    ),
-                    Exercise(
-                        workoutId = 1,
-                        name = "Plank",
-                        description = "An isometric core strength exercise.",
-                        reps = "3 sets, hold for 30-60 seconds",
-                        targetMuscle = "Core", // Added targetMuscle
-                        imageResId = context.resources.getIdentifier("exercise_plank", "drawable", context.packageName)
-                    )
-                )
-                exercises.forEach { workoutDao.insertExercise(it) }
+                    // Finally, insert the correctly linked exercises
+                    db.workoutDao().insertAllExercises(workoutJsonItem.exercises)
+                }
             }
         }
     }

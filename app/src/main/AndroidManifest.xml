@@ -28,7 +28,7 @@
 
         <!-- Home Activity (MUST BE REGISTERED HERE) -->
         <activity
-            android:name=".ui.HomeActivity"
+            android:name=".ui.BottomNavigationActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 

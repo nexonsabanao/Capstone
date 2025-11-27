@@ -5,23 +5,48 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.example.nutriority.Models.Exercise
-import com.example.nutriority.Models.Workout
-import com.example.nutriority.Models.WorkoutWithExercises
+import com.example.nutriority.models.Exercise
+import com.example.nutriority.models.Workout
+import com.example.nutriority.models.WorkoutWithExercises
 import kotlinx.coroutines.flow.Flow
+
 
 @Dao
 interface WorkoutDao {
 
-    // --- Insert Operations ---
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWorkout(workout: Workout)
+    // --- Insert Operations for Pre-population ---
 
+    /**
+     * Inserts a single workout and returns its new auto-generated ID.
+     * This is crucial for linking exercises during pre-population.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWorkout(workout: Workout): Long
+
+    /**
+     * Inserts a single exercise.
+     * Note: For pre-population, insertAllExercises is more efficient.
+     */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExercise(exercise: Exercise)
 
+    /**
+     * Inserts a list of exercises.
+     * Used in AppDatabase to efficiently insert all children after linking them to a parent workout.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllExercises(exercises: List<Exercise>)
+
 
     // --- Query Operations ---
+
+    /**
+     * Returns the total number of workouts in the table.
+     * Used in AppDatabase on startup to check if pre-population is needed.
+     */
+    // FIX: Corrected the table name by removing the trailing space.
+    @Query("SELECT COUNT(id) FROM workouts")
+    suspend fun getWorkoutCount(): Int
 
     /**
      * Gets a list of all high-level workouts (e.g., Calisthenics, Full Body).

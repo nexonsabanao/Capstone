@@ -1,4 +1,4 @@
-package com.example.nutriority.Models.Adapters
+package com.example.nutriority.models.Adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.nutriority.Models.Meal
+import com.example.nutriority.models.Meal
 import com.example.nutriority.databinding.ItemMealPreviewBinding
 
 // 2. CHANGE RecyclerView.Adapter to ListAdapter

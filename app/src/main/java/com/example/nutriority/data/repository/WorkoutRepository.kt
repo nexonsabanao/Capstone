@@ -1,8 +1,8 @@
 package com.example.nutriority.data.repository
 
-import com.example.nutriority.Models.Exercise
-import com.example.nutriority.Models.Workout
-import com.example.nutriority.Models.WorkoutWithExercises
+import com.example.nutriority.models.Exercise
+import com.example.nutriority.models.Workout
+import com.example.nutriority.models.WorkoutWithExercises
 import com.example.nutriority.data.dao.WorkoutDao
 import kotlinx.coroutines.flow.Flow
 

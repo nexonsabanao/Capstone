@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.nutriority.Models.Article
+import com.example.nutriority.models.Article
 import kotlinx.coroutines.flow.Flow
 
 @Dao // Marks the class as a Data Access Object for Room
@@ -25,8 +25,9 @@ interface ArticlesDao {
      * If any article already exists, it will be replaced.
      * @param articles The list of Article objects to insert.
      */
+    // FIX: Renamed from insertAll to insertAllArticles
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(articles: List<Article>)
+    suspend fun insertAllArticles(articles: List<Article>)
 
     /**
      * Updates an existing article in the table.

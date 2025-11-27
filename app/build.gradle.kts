@@ -71,7 +71,10 @@ dependencies {
     //Room db
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler) // **** THIS IS THE MISSING LINE ****
+    ksp(libs.androidx.room.compiler)
+
+    // Gson dependency
+    implementation("com.google.code.gson:gson:2.10.1")
 
 
 

@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.nutriority.databinding.FragmentSplashBinding
-import com.example.nutriority.ui.HomeActivity
+import com.example.nutriority.ui.BottomNavigationActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -36,7 +36,7 @@ class SplashFragment : Fragment() {
             delay(3000)
 
             if (onBoardingIsFinished()) {
-                val intent = Intent(requireContext(), HomeActivity::class.java)
+                val intent = Intent(requireContext(), BottomNavigationActivity::class.java)
                 startActivity(intent)
 
                 requireActivity().finish()

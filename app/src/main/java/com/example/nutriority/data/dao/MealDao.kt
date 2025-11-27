@@ -1,13 +1,12 @@
 package com.example.nutriority.data.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.nutriority.Models.Meal
+import com.example.nutriority.models.Meal
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -20,6 +19,16 @@ interface MealDao {
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMeal(meal: Meal)
+
+    // --- THIS IS THE NEW FUNCTION YOU NEED TO ADD ---
+    /**
+     * Inserts a list of meals in a single transaction. If a meal with the same
+     * primary key already exists, it will be replaced.
+     * @param meals The list of meal objects to insert.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllMeals(meals: List<Meal>)
+    // ----------------------------------------------------
 
     /**
      * Updates an existing meal in the table.

@@ -9,9 +9,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.nutriority.Models.Adapters.ArticleAdapter
-import com.example.nutriority.Models.Adapters.MealAdapter
-import com.example.nutriority.Models.Adapters.WorkoutAdapter
+import com.example.nutriority.models.Adapters.ArticleAdapter
+import com.example.nutriority.models.Adapters.MealAdapter
+import com.example.nutriority.models.Adapters.WorkoutAdapter
 import com.example.nutriority.databinding.FragmentHomeBinding
 import com.example.nutriority.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch

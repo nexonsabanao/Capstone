@@ -18,7 +18,7 @@ import com.example.nutriority.R
 import com.example.nutriority.data.User
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentSeventhScreenBinding
-import com.example.nutriority.ui.HomeActivity // 2. Add this import
+import com.example.nutriority.ui.BottomNavigationActivity // 2. Add this import
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.floor
@@ -65,7 +65,7 @@ class SeventhScreen : Fragment() {
             finishOnboarding()
 
             // 2. Create an Intent to start HomeActivity.
-            val intent = Intent(requireActivity(), HomeActivity::class.java)
+            val intent = Intent(requireActivity(), BottomNavigationActivity::class.java)
             startActivity(intent)
 
             // 3. Finish the current MainActivity so the user cannot go back to onboarding.

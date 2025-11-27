@@ -3,9 +3,9 @@ package com.example.nutriority.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nutriority.Models.Article
-import com.example.nutriority.Models.Meal
-import com.example.nutriority.Models.Workout
+import com.example.nutriority.models.Article
+import com.example.nutriority.models.Meal
+import com.example.nutriority.models.Workout
 import com.example.nutriority.data.AppDatabase
 import com.example.nutriority.data.repository.ArticleRepository
 import com.example.nutriority.data.repository.MealRepository
@@ -32,7 +32,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         // Get DAOs from the AppDatabase instance
-        val database = AppDatabase.getDatabase(application)
+        // FIX: Pass viewModelScope as the second argument
+        val database = AppDatabase.getDatabase(application, viewModelScope)
         val mealDao = database.mealDao()
         val workoutDao = database.workoutDao()
         val articlesDao = database.articlesDao()

@@ -1,4 +1,4 @@
-package com.example.nutriority.Models
+package com.example.nutriority.models
 
 import androidx.room.Embedded
 import androidx.room.Relation

@@ -1,6 +1,6 @@
 package com.example.nutriority.data.repository
 
-import com.example.nutriority.Models.Article
+import com.example.nutriority.models.Article
 import com.example.nutriority.data.dao.ArticlesDao
 import kotlinx.coroutines.flow.Flow
 
@@ -41,7 +41,8 @@ class ArticleRepository(private val articlesDao: ArticlesDao) {
      * @param articles The list of article objects to insert.
      */
     suspend fun insertAll(articles: List<Article>) {
-        articlesDao.insertAll(articles)
+        // FIX: Changed to call the correct DAO function name
+        articlesDao.insertAllArticles(articles)
     }
 
     /**

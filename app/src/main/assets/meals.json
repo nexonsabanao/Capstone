@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Avocado Toast",
+    "calories": "350 kcal",
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["2 slices of whole-wheat bread", "1 ripe avocado", "1 pinch of salt", "1 pinch of red pepper flakes"],
+    "imageName": "meal_avocado_toast"
+  },
+  {
+    "name": "Chicken Salad",
+    "calories": "450 kcal",
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["150g grilled chicken breast", "50g mixed greens", "1/2 cucumber", "1/4 red onion", "2 tbsp vinaigrette"],
+    "imageName": "meal_chicken_salad"
+  },
+  {
+    "name": "Quinoa Bowl",
+    "calories": "400 kcal",
+    "category": "Balanced Diet",
+    "time": "Dinner",
+    "ingredients": ["1 cup cooked quinoa", "1/2 cup black beans", "1/2 cup corn", "1/4 avocado", "Salsa and lime to taste"],
+    "imageName": "meal_quinoa_bowl"
+  }
+]

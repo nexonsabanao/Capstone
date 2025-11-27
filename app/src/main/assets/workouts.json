@@ -1,0 +1,38 @@
+[
+  {
+    "workout": {
+      "id": 1,
+      "name": "Calisthenics Basics",
+      "description": "Master the fundamentals of bodyweight training.",
+      "category": "Beginner",
+      "targetMuscle": "Full Body",
+      "imageName": "workout_calisthenics"
+    },
+    "exercises": [
+      {
+        "workoutId": 1,
+        "name": "Push-Ups",
+        "description": "A classic bodyweight exercise that strengthens the chest, shoulders, and triceps.",
+        "reps": "3 sets of 12-15 reps",
+        "targetMuscle": "Chest, Shoulders, Triceps",
+        "imageName": "exercise_pushup"
+      },
+      {
+        "workoutId": 1,
+        "name": "Squats",
+        "description": "A fundamental lower body exercise that targets the quadriceps, hamstrings, and glutes.",
+        "reps": "3 sets of 15-20 reps",
+        "targetMuscle": "Legs, Glutes",
+        "imageName": "exercise_squat"
+      },
+      {
+        "workoutId": 1,
+        "name": "Plank",
+        "description": "An isometric core strength exercise.",
+        "reps": "3 sets, hold for 30-60 seconds",
+        "targetMuscle": "Core",
+        "imageName": "exercise_plank"
+      }
+    ]
+  }
+]

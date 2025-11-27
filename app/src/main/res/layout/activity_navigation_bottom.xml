@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.HomeActivity">
+    tools:context=".ui.BottomNavigationActivity">
 
     <!-- This will host your fragments (Home, Workout, etc.) -->
     <androidx.fragment.app.FragmentContainerView
