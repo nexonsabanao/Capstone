@@ -9,7 +9,7 @@ import android.view.animation.AccelerateInterpolator
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
+import com.example.nutriority.BaseFragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
@@ -21,6 +21,7 @@ import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentThirdScreenBinding
 import com.google.android.material.card.MaterialCardView
+import com.example.nutriority.utils.applySystemBarsInsets
 
 private sealed class ActivityLevel(val value: String) {
     object Sedentary : ActivityLevel("Sedentary")
@@ -28,7 +29,7 @@ private sealed class ActivityLevel(val value: String) {
     object Active : ActivityLevel("Active")
 }
 
-class ThirdScreen : Fragment() {
+class ThirdScreen : BaseFragment() {
 
     private var _binding: FragmentThirdScreenBinding? = null
     private val binding get() = _binding!!

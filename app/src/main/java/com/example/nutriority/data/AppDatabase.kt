@@ -26,8 +26,8 @@ import java.io.BufferedReader
 
 @Database(
     entities = [Meal::class, Workout::class, Article::class, Exercise::class],
-    version = 7,
-    exportSchema = true
+    version = 8,
+    exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -46,6 +46,15 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        // Migration 7 -> 8: Create an index on exercises(workoutId) to satisfy Room's
+        // recommendation and avoid full table scans when parent table changes.
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Create the index safely if it doesn't exist
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_exercises_workoutId ON exercises(workoutId)")
+            }
+        }
+
         fun getDatabase(context: Context, appScope: CoroutineScope): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -53,7 +62,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "nutriority_database"
                 )
-                    .addMigrations(MIGRATION_6_7)
+                    .addMigrations(MIGRATION_6_7, MIGRATION_7_8)
                     .addCallback(AppDatabaseCallback(context, appScope))
                     .build()
                 INSTANCE = instance
@@ -115,7 +124,6 @@ abstract class AppDatabase : RoomDatabase() {
                 db.mealDao().insertAllMeals(meals)
 
 
-                // --- 3. Pre-populate Workouts and Exercises (Now safe) ---
                 data class WorkoutJson(val workout: Workout, val exercises: List<Exercise>)
                 val workoutType = object : TypeToken<List<WorkoutJson>>() {}.type
                 val workoutData: List<WorkoutJson> = gson.fromJson(
@@ -124,16 +132,13 @@ abstract class AppDatabase : RoomDatabase() {
                 )
 
                 workoutData.forEach { workoutJsonItem ->
-                    // First, insert the parent workout to get its auto-generated ID
                     val workoutId = db.workoutDao().insertWorkout(workoutJsonItem.workout)
 
-                    // Now, assign this new ID and a safe image resource to all child exercises
                     workoutJsonItem.exercises.forEach { exercise ->
                         exercise.imageResId = getSafeImageResId(exercise.imageName)
                         exercise.workoutId = workoutId.toInt()
                     }
 
-                    // Finally, insert the correctly linked exercises
                     db.workoutDao().insertAllExercises(workoutJsonItem.exercises)
                 }
                 } catch (e: Exception) {

@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import com.example.nutriority.BaseFragment
+import com.example.nutriority.utils.applySystemBarsInsets
 import androidx.fragment.app.setFragmentResult
 import com.example.nutriority.databinding.FragmentWelcomeBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.example.nutriority.utils.applySystemBarsInsets
 
-class WelcomeFragment : Fragment() {
+class WelcomeFragment : BaseFragment() {
 
     private var _binding: FragmentWelcomeBinding? = null
     private val binding get() = _binding!!

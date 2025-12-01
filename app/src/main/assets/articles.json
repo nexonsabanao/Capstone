@@ -4,20 +4,20 @@
     "author": "Jane Doe, PhD",
     "readingTime": "5 min read",
     "category": "Nutrition",
-    "imageName": "article_protein"
+    "imageName": "img_balanced_diet"
   },
   {
     "title": "Understanding Macronutrients",
     "author": "John Smith, R.D.",
     "readingTime": "8 min read",
     "category": "Nutrition",
-    "imageName": "article_macros"
+    "imageName": "img_balanced_diet"
   },
   {
     "title": "Mindful Eating: A Beginner's Guide",
     "author": "Emily White",
     "readingTime": "6 min read",
     "category": "Wellness",
-    "imageName": "article_mindful"
+    "imageName": "img_balanced_diet"
   }
 ]

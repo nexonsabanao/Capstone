@@ -4,6 +4,7 @@ package com.example.nutriority.models
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
@@ -16,7 +17,8 @@ import androidx.room.PrimaryKey
             childColumns = ["workoutId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["workoutId"]) ]
 )
 data class Exercise(
     @PrimaryKey(autoGenerate = true)

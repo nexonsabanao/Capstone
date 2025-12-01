@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import com.example.nutriority.BaseFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -14,9 +14,10 @@ import com.example.nutriority.models.Adapters.MealAdapter
 import com.example.nutriority.models.Adapters.WorkoutAdapter
 import com.example.nutriority.databinding.FragmentHomeBinding
 import com.example.nutriority.viewmodel.HomeViewModel
+import com.example.nutriority.utils.applySystemBarsInsets
 import kotlinx.coroutines.launch
 
-class HomeFragment : Fragment() {
+class HomeFragment : BaseFragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -38,6 +39,8 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Insets handled by BaseFragment
 
         setupRecyclerViews()
         observeViewModel()

@@ -37,7 +37,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/profile_header_title" />
 
-        <!-- === PHYSICAL STATS SECTION === -->
+        <!-- === 1. PHYSICAL STATS SECTION === -->
         <TextView
             android:id="@+id/stats_header"
             style="@style/ProfileSectionHeader"
@@ -120,7 +120,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- === GOALS & LIFESTYLE SECTION === -->
+        <!-- === 2. GOALS & LIFESTYLE SECTION === -->
         <TextView
             android:id="@+id/goals_header"
             style="@style/ProfileSectionHeader"
@@ -186,7 +186,7 @@
         </com.google.android.material.card.MaterialCardView>
 
 
-        <!-- === PREFERENCES SECTION === -->
+        <!-- === 3. PREFERENCES SECTION === -->
         <TextView
             android:id="@+id/prefs_header"
             style="@style/ProfileSectionHeader"
@@ -229,22 +229,22 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     tools:text="Balanced" />
 
-                <!-- Workout Preference -->
+                <!-- Age -->
                 <TextView
-                    android:id="@+id/workout_label"
+                    android:id="@+id/age_label"
                     style="@style/ProfileTableLabel"
-                    android:text="Workout Style"
+                    android:text="Age"
                     app:layout_constraintTop_toBottomOf="@id/diet_label"
                     app:layout_constraintStart_toStartOf="parent"/>
 
                 <TextView
-                    android:id="@+id/profile_workout_preference"
+                    android:id="@+id/profile_age"
                     style="@style/ProfileTableValue"
                     android:layout_width="0dp"
-                    app:layout_constraintBaseline_toBaselineOf="@id/workout_label"
-                    app:layout_constraintStart_toEndOf="@id/workout_label"
+                    app:layout_constraintBaseline_toBaselineOf="@id/age_label"
+                    app:layout_constraintStart_toEndOf="@id/age_label"
                     app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="Calisthenics" />
+                    tools:text="30" />
 
                 <!-- Excluded Ingredients -->
                 <TextView
@@ -252,7 +252,7 @@
                     style="@style/ProfileTableLabel"
                     android:text="Excluded Ingredients"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/workout_label"/>
+                    app:layout_constraintTop_toBottomOf= "@id/age_label"/>
 
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/profile_excluded_ingredients"
@@ -281,6 +281,47 @@
                 </com.google.android.material.chip.ChipGroup>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- === 4. PERSONALIZED PLAN SECTION === -->
+        <TextView
+            android:id="@+id/plan_header"
+            style="@style/ProfileSectionHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Personalized Plan"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/prefs_card" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/plan_card"
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/plan_header">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:id="@+id/profile_plan_summary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="No plan yet — finish onboarding to generate a personalized plan." />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

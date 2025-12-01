@@ -5,12 +5,12 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import com.example.nutriority.BaseFragment
 import androidx.viewpager2.widget.ViewPager2
 import com.example.nutriority.databinding.FragmentViewPagerBinding
 import com.example.nutriority.onboarding.screens.*
 
-class ViewPagerFragment : Fragment() {
+class ViewPagerFragment : BaseFragment() {
 
     private var _binding: FragmentViewPagerBinding? = null
     private val binding get() = _binding!!
@@ -24,6 +24,8 @@ class ViewPagerFragment : Fragment() {
         _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
         return binding.root
     }
+
+    private var pageChangeCallback: ViewPager2.OnPageChangeCallback? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,6 +41,24 @@ class ViewPagerFragment : Fragment() {
 
         binding.viewPager.adapter = adapter
         binding.viewPager.isUserInputEnabled = false
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        // Notify child fragments which page is selected. We use a fragment-result so that
+        // children can decide whether to start expensive work only when they become visible.
+        // Register the callback once and keep a reference so it can be removed onDestroyView.
+        if (pageChangeCallback == null) {
+            pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    childFragmentManager.setFragmentResult("pageSelected", Bundle().apply {
+                        putInt("position", position)
+                    })
+                }
+            }
+            binding.viewPager.registerOnPageChangeCallback(pageChangeCallback!!)
+        }
     }
 
     private fun setupNavigationListeners() {
@@ -84,6 +104,8 @@ class ViewPagerFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        pageChangeCallback?.let { binding.viewPager.unregisterOnPageChangeCallback(it) }
+        pageChangeCallback = null
         _binding = null
     }
 }

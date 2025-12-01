@@ -1,7 +1,7 @@
 package com.example.nutriority
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import com.example.nutriority.BaseFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +16,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [MealFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class MealFragment : Fragment() {
+class MealFragment : BaseFragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
@@ -36,6 +36,8 @@ class MealFragment : Fragment() {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_meal, container, false)
     }
+
+    // Insets handled by BaseFragment
 
     companion object {
         /**
