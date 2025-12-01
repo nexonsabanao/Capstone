@@ -40,6 +40,9 @@
 
     <string name="height_format">%.1f cm</string>
     <string name="weight_format">%.1f kg</string>
+    <string name="no_plan_available">No personalized plan available — complete onboarding to create one.</string>
+    <string name="no_age_available">Age not set</string>
+    <string name="no_goal_available">Goal not set</string>
 
 </resources>
     

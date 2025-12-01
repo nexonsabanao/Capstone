@@ -5,19 +5,9 @@
     android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="20dp"
+    android:paddingBottom="24dp"
     tools:context=".onboarding.screens.FirstScreen">
-
-    <!-- Guideline for 6% top margin, consistent with other screens -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/top_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.06" />
-
-    <!-- Skip Button - Corrected Spacing -->
-
-    <!-- Guideline for 94% bottom margin, consistent with other screens -->
 
     <TextView
         android:id="@+id/skipButton"
@@ -36,18 +26,10 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/title_select_gender"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/top_guideline"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bottom_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.94" />
-
-    <!-- TITLE CONSTRAINTS CORRECTED HERE -->
     <TextView
         android:id="@+id/title_select_gender"
         android:layout_width="0dp"
@@ -61,9 +43,8 @@
         android:textSize="28sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/top_guideline" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- NEW TEXTVIEW ADDED HERE -->
     <TextView
         android:id="@+id/subtitle_select_gender"
         android:layout_width="0dp"
@@ -76,10 +57,6 @@
         app:layout_constraintStart_toStartOf="@id/title_select_gender"
         app:layout_constraintTop_toBottomOf="@id/title_select_gender" />
 
-    <!--
-        The gender selection groups are centered vertically between the
-        title and the next button.
-    -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/male_group"
         android:layout_width="100dp"
@@ -162,7 +139,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- This button now has horizontal margin -->
     <Button
         android:id="@+id/next_button"
         style="@style/Widget.Material3.Button"
@@ -174,7 +150,7 @@
         android:paddingVertical="16dp"
         android:text="@string/action_next"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@id/bottom_guideline"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

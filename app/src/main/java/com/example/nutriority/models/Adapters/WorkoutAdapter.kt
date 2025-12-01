@@ -35,20 +35,24 @@ class WorkoutAdapter : ListAdapter<Workout, WorkoutAdapter.WorkoutViewHolder>(Wo
      * It binds the workout data to the views in the ViewHolder.
      */
     override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int) {
-        // 3. USE getItem(position), a built-in method from ListAdapter.
         val currentWorkout = getItem(position)
         holder.binding.apply {
+            // FIX: Separate the two lines of code.
             workoutName.text = currentWorkout.name
             workoutTarget.text = currentWorkout.targetMuscle
-            workoutImage.setImageResource(currentWorkout.imageResId)
+
+            val resId = if (currentWorkout.imageResId != 0) {
+                currentWorkout.imageResId
+            } else {
+                val context = workoutImage.context
+                context.resources.getIdentifier(currentWorkout.imageName, "drawable", context.packageName)
+            }
+            workoutImage.setImageResource(resId)
         }
     }
 
-    // 4. REMOVE getItemCount() and updateData().
-    // ListAdapter handles these functions internally and more efficiently.
 
-    // 5. ADD the required DiffUtil.ItemCallback class.
-    // This tells the ListAdapter how to efficiently calculate changes in the list.
+// This tells the ListAdapter how to efficiently calculate changes in the list.
     class WorkoutDiffCallback : DiffUtil.ItemCallback<Workout>() {
         override fun areItemsTheSame(oldItem: Workout, newItem: Workout): Boolean {
             // Check if the items represent the same object (e.g., by their unique ID).

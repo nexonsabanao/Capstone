@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import com.example.nutriority.BaseFragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
@@ -18,7 +18,7 @@ private sealed class Gender(val value: String) {
     object Female : Gender("Female")
 }
 
-class FirstScreen : Fragment() {
+class FirstScreen : BaseFragment() {
 
     private var _binding: FragmentFirstScreenBinding? = null
     private val binding get() = _binding!!
@@ -42,6 +42,8 @@ class FirstScreen : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // Set up the observer here. It's safe because it's tied to the viewLifecycleOwner.
         observeAndSetInitialState()
+
+        // Insets now applied by BaseFragment
     }
 
     // --- THE FIX: PART 1 ---

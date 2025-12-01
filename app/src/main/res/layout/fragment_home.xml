@@ -6,17 +6,13 @@
     android:id="@+id/home_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="20dp"
+    android:paddingBottom="24dp"
     android:background="@android:color/white"
     android:fitsSystemWindows="true"
     tools:context=".HomeFragment">
 
-    <!-- TOP GUIDELINE 6% -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_top_6pct"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp" />
+    <!-- top spacing handled by root padding + BaseFragment insets -->
 
     <!-- FIXED HOME TITLE -->
     <TextView
@@ -28,7 +24,7 @@
         android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/guideline_top_6pct" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- SCROLLABLE CONTENT -->
     <androidx.core.widget.NestedScrollView

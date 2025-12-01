@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
-import androidx.fragment.app.Fragment
+import com.example.nutriority.BaseFragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
@@ -15,8 +15,9 @@ import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentFifthScreenBinding
 import com.google.android.material.chip.Chip
+import com.example.nutriority.utils.applySystemBarsInsets
 
-class FifthScreen : Fragment() {
+class FifthScreen : BaseFragment() {
 
     private var _binding: FragmentFifthScreenBinding? = null
     private val binding get() = _binding!!

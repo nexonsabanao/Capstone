@@ -8,21 +8,7 @@
     android:paddingVertical="24dp"
     tools:context=".onboarding.screens.WelcomeFragment">
 
-    <!-- Guideline for 5% top margin -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/top_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.035" />
-
-    <!-- Guideline for 5% bottom margin -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bottom_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.965" />
+    <!-- top/bottom spacing handled by root padding + BaseFragment insets -->
 
     <TextView
         android:id="@+id/welcome_title"
@@ -36,7 +22,7 @@
         app:layout_constraintBottom_toTopOf="@+id/accept_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/top_guideline"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.1"
         app:layout_constraintVertical_chainStyle="spread_inside" />
 
@@ -70,7 +56,7 @@
         android:paddingVertical="16dp"
         android:text="Continue"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@id/bottom_guideline"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

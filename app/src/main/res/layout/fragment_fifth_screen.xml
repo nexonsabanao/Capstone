@@ -4,25 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="20dp"
+    android:paddingBottom="24dp"
     android:background="@android:color/transparent"
     tools:context=".onboarding.screens.FifthScreen">
 
-    <!-- Guidelines -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/top_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.06" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bottom_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.94" />
-
-    <!-- Back Button -->
     <ImageView
         android:id="@+id/backButton"
         android:layout_width="32dp"
@@ -36,11 +22,10 @@
         android:src="@drawable/ic_arrow_back"
         app:layout_constraintBottom_toTopOf="@+id/titleTextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/top_guideline"
+        app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/dark_gray"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <!-- Skip Button -->
     <TextView
         android:id="@+id/finishButton"
         android:layout_width="wrap_content"
@@ -60,7 +45,6 @@
         app:layout_constraintTop_toTopOf="@+id/backButton"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <!-- Title -->
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="0dp"
@@ -74,9 +58,8 @@
         android:textSize="28sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/top_guideline" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Subtitle -->
     <TextView
         android:id="@+id/subtitleTextView"
         android:layout_width="0dp"
@@ -89,7 +72,6 @@
         app:layout_constraintStart_toStartOf="@id/titleTextView"
         app:layout_constraintTop_toBottomOf="@id/titleTextView" />
 
-    <!-- Scrollable Chip Group -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -110,7 +92,6 @@
             app:chipSpacingHorizontal="8dp"
             app:chipSpacingVertical="4dp">
 
-            <!-- Chips with no checkmarks -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_nuts"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
@@ -276,7 +257,6 @@
         </com.google.android.material.chip.ChipGroup>
     </ScrollView>
 
-    <!-- Next/Finish Button -->
     <Button
         android:id="@+id/nextButton"
         style="@style/Widget.Material3.Button"
@@ -288,7 +268,7 @@
         android:text="Next"
         android:textColor="@color/white"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@id/bottom_guideline"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

@@ -11,25 +11,32 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
+import com.example.nutriority.BaseFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
+import androidx.core.os.bundleOf
 import com.example.nutriority.R
 import com.example.nutriority.data.User
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentSeventhScreenBinding
 import com.example.nutriority.ui.BottomNavigationActivity // 2. Add this import
+import com.example.nutriority.utils.applySystemBarsInsets
+import com.example.nutriority.planner.PlannerService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 import kotlin.math.pow
 
-class SeventhScreen : Fragment() {
+class SeventhScreen : BaseFragment() {
 
     private var _binding: FragmentSeventhScreenBinding? = null
     private val binding get() = _binding!!
 
     private val userViewModel: UserViewModel by activityViewModels()
+
+    // Ensure the recap animation only runs when the page becomes visible (not when preloaded).
+    private var recapAnimationStarted = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSeventhScreenBinding.inflate(inflater, container, false)
@@ -39,7 +46,18 @@ class SeventhScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.bmiContainer.alpha = 0f
-        runRecapAnimation()
+
+        // 1) If the ViewPager is already on the final page, start immediately.
+        val parentVp = parentFragment?.view?.findViewById<ViewPager2>(R.id.viewPager)
+        if (parentVp?.currentItem == 8) {
+            startRecapIfNeeded()
+        }
+
+        // 2) Otherwise, wait for the ViewPager to signal which page is selected.
+        parentFragmentManager.setFragmentResultListener("pageSelected", this) { _, bundle ->
+            val position = bundle?.getInt("position") ?: -1
+            if (position == 8) startRecapIfNeeded()
+        }
     }
 
     private fun runRecapAnimation() {
@@ -61,7 +79,20 @@ class SeventhScreen : Fragment() {
 
             // --- THIS IS THE CORRECTED LOGIC ---
 
-            // 1. Mark onboarding as finished in SharedPreferences.
+            // 1. Generate a personalized plan and save a short summary so the app can display it later.
+            try {
+                val generatedPlan = PlannerService.generatePlanForUser(user)
+                val summary = PlannerService.planSummary(generatedPlan)
+                requireActivity()
+                    .getSharedPreferences("onBoarding", Context.MODE_PRIVATE)
+                    .edit()
+                    .putString("personalized_plan_summary", summary)
+                    .apply()
+            } catch (e: Exception) {
+                // Keep going without blocking the flow if anything goes wrong
+            }
+
+            // 2. Mark onboarding as finished in SharedPreferences.
             finishOnboarding()
 
             // 2. Create an Intent to start HomeActivity.
@@ -72,6 +103,13 @@ class SeventhScreen : Fragment() {
             requireActivity().finish()
 
             // --- END OF CORRECTED LOGIC ---
+        }
+    }
+
+    private fun startRecapIfNeeded() {
+        if (!recapAnimationStarted) {
+            recapAnimationStarted = true
+            runRecapAnimation()
         }
     }
 
@@ -111,9 +149,8 @@ class SeventhScreen : Fragment() {
 
         val details = mutableListOf(
             "Activity: ${user.activityLevel}",
-            "Goal: ${user.goal}",
             "Diet: ${user.preferredDiet}",
-            "Workout: ${user.workoutPreference}"
+            "Goal: ${user.goal}"
         )
 
         if (user.excludedIngredients.isNotEmpty()) {

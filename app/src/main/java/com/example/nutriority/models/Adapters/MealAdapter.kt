@@ -21,7 +21,14 @@ class MealAdapter : ListAdapter<Meal, MealAdapter.MealViewHolder>(MealDiffCallba
         fun bind(meal: Meal) {
             binding.mealName.text = meal.name
             binding.mealCalories.text = meal.calories // Correctly gets the string
-            binding.mealImage.setImageResource(meal.imageResId)
+            val resId = if (meal.imageResId != 0) {
+                meal.imageResId
+            } else {
+                // FIX: Use context.resources.getIdentifier to find the drawable ID by name
+                val context = binding.mealImage.context
+                context.resources.getIdentifier(meal.imageName, "drawable", context.packageName)
+            }
+            binding.mealImage.setImageResource(resId)
         }
     }
 

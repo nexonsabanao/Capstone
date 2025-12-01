@@ -3,23 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="20dp"
+    android:paddingBottom="24dp"
     android:background="@android:color/transparent"
     tools:context=".onboarding.screens.SixthScreen">
 
-    <!-- Top Guidelines and Navigation -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/top_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.06" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bottom_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.94" />
+    <!-- top/bottom spacing handled by root padding + BaseFragment insets -->
 
     <ImageView
         android:id="@+id/backButton"
@@ -34,7 +23,7 @@
         android:src="@drawable/ic_arrow_back"
         app:layout_constraintBottom_toTopOf="@+id/titleTextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/top_guideline"
+        app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/dark_gray"
         tools:ignore="TouchTargetSizeCheck" />
 
@@ -71,7 +60,7 @@
         android:textSize="28sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/top_guideline" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Scrollable Options -->
     <ScrollView
@@ -227,7 +216,7 @@
         android:textColor="@color/white"
         android:enabled="false"
         android:alpha="0.5"
-        app:layout_constraintBottom_toBottomOf="@id/bottom_guideline"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

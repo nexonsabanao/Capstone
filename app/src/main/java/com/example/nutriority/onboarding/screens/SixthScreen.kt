@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
+import com.example.nutriority.BaseFragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
@@ -14,14 +14,15 @@ import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentSixthScreenBinding
 import com.google.android.material.card.MaterialCardView
+import com.example.nutriority.utils.applySystemBarsInsets
 
 private sealed class UserGoal(val value: String) {
-    object LoseWeight : UserGoal("Weight loss")
+    object LoseWeight : UserGoal("Lose Weight")
     object BuildMuscle : UserGoal("Build Muscle")
     object KeepFit : UserGoal("Keep Fit")
 }
 
-class SixthScreen : Fragment() {
+class SixthScreen : BaseFragment() {
 
     private var _binding: FragmentSixthScreenBinding? = null
     private val binding get() = _binding!!
