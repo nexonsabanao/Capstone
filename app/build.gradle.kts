@@ -67,6 +67,7 @@ dependencies {
 
     // I added
     implementation(libs.androidx.core.splashscreen)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     //Room db
     implementation(libs.androidx.room.runtime)

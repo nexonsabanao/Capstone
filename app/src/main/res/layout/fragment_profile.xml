@@ -1,330 +1,546 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="20dp"
-    android:paddingBottom="24dp"
-    android:fillViewport="true"
-    tools:context=".ProfileFragment">
+    android:background="#F5F5F5"
+    android:padding="16dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="32dp">
+        android:orientation="vertical">
 
-        <!-- Header -->
+        <!-- REPORT SECTION -->
         <TextView
-            android:id="@+id/profile_header_title"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvReportTitle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:text="My Profile"
-            android:textAppearance="?attr/textAppearanceHeadline5"
+            android:text="REPORT"
+            android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:gravity="center"
+            android:paddingBottom="16dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/edit_profile_button"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
+        <!-- Metrics Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:text="Edit"
-            app:icon="@drawable/ic_edit"
-            app:layout_constraintBottom_toBottomOf="@id/profile_header_title"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/profile_header_title" />
+            android:orientation="horizontal"
+            android:paddingBottom="16dp">
 
-        <!-- === 1. PHYSICAL STATS SECTION === -->
-        <TextView
-            android:id="@+id/stats_header"
-            style="@style/ProfileSectionHeader"
-            android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/metric_card"
+                android:padding="12dp"
+                android:layout_marginEnd="4dp">
+
+                <TextView
+                    android:id="@+id/tvWorkoutValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Workout"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/metric_card"
+                android:padding="12dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp">
+
+                <TextView
+                    android:id="@+id/tvKcalValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kcal"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/metric_card"
+                android:padding="12dp"
+                android:layout_marginStart="4dp">
+
+                <TextView
+                    android:id="@+id/tvMinuteValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Minute"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- History Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Physical Stats"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_header_title" />
+            android:orientation="vertical"
+            android:background="@drawable/section_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/stats_card"
-            style="?attr/materialCardViewOutlinedStyle"
-            android:layout_width="0dp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="History"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvDayStreak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Day Streak 0"
+                android:textSize="14sp"
+                android:paddingBottom="8dp" />
+
+            <!-- Calendar placeholder -->
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="220dp" />
+        </LinearLayout>
+
+        <!-- ====================================================== -->
+        <!-- ============= UPDATED WEIGHT SECTION ================= -->
+        <!-- ====================================================== -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/stats_header">
+            android:orientation="vertical"
+            android:background="@drawable/section_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Weight"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingBottom="8dp" />
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="8dp">
-
-                <!-- Gender -->
-                <TextView
-                    android:id="@+id/gender_label"
-                    style="@style/ProfileTableLabel"
-                    android:text="Gender"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toTopOf="@+id/height_label"/>
+                android:orientation="horizontal"
+                android:paddingBottom="8dp">
 
                 <TextView
-                    android:id="@+id/profile_gender"
-                    style="@style/ProfileTableValue"
-                    android:layout_width="0dp"
-                    app:layout_constraintBaseline_toBaselineOf="@id/gender_label"
-                    app:layout_constraintStart_toEndOf="@id/gender_label"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="Male" />
-
-                <!-- Height -->
-                <TextView
-                    android:id="@+id/height_label"
-                    style="@style/ProfileTableLabel"
-                    android:text="Height"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/gender_label"
-                    app:layout_constraintBottom_toTopOf="@+id/weight_label"/>
-
-                <TextView
-                    android:id="@+id/profile_height"
-                    style="@style/ProfileTableValue"
-                    android:layout_width="0dp"
-                    app:layout_constraintBaseline_toBaselineOf="@id/height_label"
-                    app:layout_constraintStart_toEndOf="@id/height_label"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="180.0 cm" />
-
-                <!-- Weight -->
-                <TextView
-                    android:id="@+id/weight_label"
-                    style="@style/ProfileTableLabel"
-                    android:text="Weight"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/height_label"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
-
-                <TextView
-                    android:id="@+id/profile_weight"
-                    style="@style/ProfileTableValue"
-                    android:layout_width="0dp"
-                    app:layout_constraintBaseline_toBaselineOf="@id/weight_label"
-                    app:layout_constraintStart_toEndOf="@id/weight_label"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="75.0 kg" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- === 2. GOALS & LIFESTYLE SECTION === -->
-        <TextView
-            android:id="@+id/goals_header"
-            style="@style/ProfileSectionHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Goals &amp; Lifestyle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/stats_card" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/goals_card"
-            style="?attr/materialCardViewOutlinedStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/goals_header">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingVertical="8dp">
-
-                <!-- Goal -->
-                <TextView
-                    android:id="@+id/goal_label"
-                    style="@style/ProfileTableLabel"
-                    android:text="Primary Goal"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toTopOf="@+id/activity_label"/>
-
-                <TextView
-                    android:id="@+id/profile_goal"
-                    style="@style/ProfileTableValue"
-                    android:layout_width="0dp"
-                    app:layout_constraintBaseline_toBaselineOf="@id/goal_label"
-                    app:layout_constraintStart_toEndOf="@id/goal_label"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="Build Muscle" />
-
-                <!-- Activity Level -->
-                <TextView
-                    android:id="@+id/activity_label"
-                    style="@style/ProfileTableLabel"
-                    android:text="Activity Level"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/goal_label"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
-
-                <TextView
-                    android:id="@+id/profile_activity_level"
-                    style="@style/ProfileTableValue"
-                    android:layout_width="0dp"
-                    app:layout_constraintBaseline_toBaselineOf="@id/activity_label"
-                    app:layout_constraintStart_toEndOf="@id/activity_label"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="Active (3-5 days/week)" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-
-        <!-- === 3. PREFERENCES SECTION === -->
-        <TextView
-            android:id="@+id/prefs_header"
-            style="@style/ProfileSectionHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Preferences"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/goals_card" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/prefs_card"
-            style="?attr/materialCardViewOutlinedStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/prefs_header">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingVertical="8dp">
-
-                <!-- Diet Preference -->
-                <TextView
-                    android:id="@+id/diet_label"
-                    style="@style/ProfileTableLabel"
-                    android:text="Preferred Diet"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
-
-                <TextView
-                    android:id="@+id/profile_preferred_diet"
-                    style="@style/ProfileTableValue"
-                    android:layout_width="0dp"
-                    app:layout_constraintBaseline_toBaselineOf="@id/diet_label"
-                    app:layout_constraintStart_toEndOf="@id/diet_label"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="Balanced" />
-
-                <!-- Age -->
-                <TextView
-                    android:id="@+id/age_label"
-                    style="@style/ProfileTableLabel"
-                    android:text="Age"
-                    app:layout_constraintTop_toBottomOf="@id/diet_label"
-                    app:layout_constraintStart_toStartOf="parent"/>
-
-                <TextView
-                    android:id="@+id/profile_age"
-                    style="@style/ProfileTableValue"
-                    android:layout_width="0dp"
-                    app:layout_constraintBaseline_toBaselineOf="@id/age_label"
-                    app:layout_constraintStart_toEndOf="@id/age_label"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="30" />
-
-                <!-- Excluded Ingredients -->
-                <TextView
-                    android:id="@+id/excluded_label"
-                    style="@style/ProfileTableLabel"
-                    android:text="Excluded Ingredients"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf= "@id/age_label"/>
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/profile_excluded_ingredients"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:paddingHorizontal="16dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/excluded_label"
-                    app:layout_constraintBottom_toBottomOf="parent">
-
-                    <!-- Chips will be added programmatically -->
-                    <com.google.android.material.chip.Chip
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="Peanuts" />
-                    <com.google.android.material.chip.Chip
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="Shellfish" />
-                    <com.google.android.material.chip.Chip
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="Some very long ingredient name" />
-                </com.google.android.material.chip.ChipGroup>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- === 4. PERSONALIZED PLAN SECTION === -->
-        <TextView
-            android:id="@+id/plan_header"
-            style="@style/ProfileSectionHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Personalized Plan"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/prefs_card" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/plan_card"
-            style="?attr/materialCardViewOutlinedStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/plan_header">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingVertical="8dp">
+                    android:layout_weight="1"
+                    android:text="Current: " />
 
                 <TextView
-                    android:id="@+id/profile_plan_summary"
+                    android:id="@+id/tvCurrentWeight"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:padding="12dp"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="No plan yet — finish onboarding to generate a personalized plan." />
+                    android:layout_weight="1"
+                    android:text="61 kg"
+                    android:textStyle="bold" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Heaviest: " />
 
-        </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:id="@+id/tvHeaviestWeight"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="61 kg" />
+            </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lightest: " />
+
+                <TextView
+                    android:id="@+id/tvLightestWeight"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="54 kg" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Height: " />
+
+                <TextView
+                    android:id="@+id/tvHeight"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="165 cm" />
+            </LinearLayout>
+
+            <!-- CHART REPLACEMENT -->
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/weightChart"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- WEIGHT INPUT CONTROLS -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <EditText
+                    android:id="@+id/etWeightInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Enter weight (kg)"
+                    android:inputType="numberDecimal"
+                    android:layout_marginEnd="8dp"/>
+
+                <Button
+                    android:id="@+id/btnLogWeight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Log Weight" />
+            </LinearLayout>
+
+        </LinearLayout>
+        <!-- ====================================================== -->
+        <!-- =========== END OF UPDATED WEIGHT SECTION ============ -->
+        <!-- ====================================================== -->
+
+        <!-- BMI Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/section_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BMI: "
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvBMI"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="22.4"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvBMIStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" (Healthy weight)"
+                android:textSize="14sp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- DIET TRACKING SECTION -->
+        <TextView
+            android:id="@+id/tvDietTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DIET TRACKING"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp" />
+
+        <!-- Remaining Calories -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/section_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remaining Calories"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvRemainingCalories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1280 kcal"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Macronutrients -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/section_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Macronutrients"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Protein" />
+
+                <ProgressBar
+                    android:id="@+id/progressProtein"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:max="182"
+                    android:progress="88" />
+
+                <TextView
+                    android:id="@+id/tvProtein"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="88/182g"
+                    android:gravity="end" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Fat" />
+
+                <ProgressBar
+                    android:id="@+id/progressFat"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:max="65"
+                    android:progress="65" />
+
+                <TextView
+                    android:id="@+id/tvFat"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="65/54g"
+                    android:gravity="end" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Carbs" />
+
+                <ProgressBar
+                    android:id="@+id/progressCarbs"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:max="303"
+                    android:progress="54" />
+
+                <TextView
+                    android:id="@+id/tvCarbs"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="54/303g"
+                    android:gravity="end" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Food Intake -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/section_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvFoodIntake"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Food intake 1145 kcal"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingBottom="8dp" />
+
+            <!-- Breakfast -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Breakfast"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvBreakfast"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hard-Boiled Egg" />
+
+                <TextView
+                    android:id="@+id/tvBreakfastCalories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="710 kcal" />
+
+                <TextView
+                    android:id="@+id/tvBreakfastProtein"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="63g protein" />
+            </LinearLayout>
+
+            <!-- Lunch -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lunch"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvLunch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rice with Meat" />
+
+                <TextView
+                    android:id="@+id/tvLunchCalories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="435 kcal" />
+
+                <TextView
+                    android:id="@+id/tvLunchProtein"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="25g protein" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="16dp">
+
+            <Button
+                android:id="@+id/btnLog"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Log"
+                android:backgroundTint="#2196F3"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btnEdit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Edit"
+                android:backgroundTint="#2196F3"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
