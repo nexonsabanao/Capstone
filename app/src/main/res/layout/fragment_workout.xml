@@ -17,7 +17,6 @@
         android:paddingTop="20dp"
         android:paddingBottom="24dp">
 
-        <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -49,7 +48,6 @@
                 android:stateListAnimator="@null" />
         </LinearLayout>
 
-        <!-- Segment control -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
@@ -81,8 +79,6 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Library Section -->
-        <!-- Library Section -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -126,7 +122,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Plans Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -152,8 +147,6 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Big plan card -->
-        <!-- Big plan card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="140dp"
@@ -202,7 +195,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Focus Section header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -228,14 +220,12 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- List of focus items -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:orientation="vertical">
 
-            <!-- Item 1 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -269,7 +259,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Item 2 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -303,7 +292,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Item 3 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

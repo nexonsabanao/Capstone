@@ -9,8 +9,6 @@
     android:background="@android:color/transparent"
     tools:context=".onboarding.screens.FourthScreen">
 
-    <!-- top/bottom spacing handled by root padding + BaseFragment insets -->
-
     <ImageView
         android:id="@+id/backButton"
         android:layout_width="32dp"
@@ -92,7 +90,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Balanced Card - UPDATED STRUCTURE -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/balancedCard"
                 android:layout_width="match_parent"
@@ -158,7 +155,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Low Carb Card - UPDATED STRUCTURE -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/lowCarbCard"
                 android:layout_width="match_parent"
@@ -224,7 +220,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Vegetarian Card - UPDATED STRUCTURE -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/vegetarianCard"
                 android:layout_width="match_parent"
@@ -293,7 +288,6 @@
         </RadioGroup>
     </ScrollView>
 
-    <!-- Next Button (Unchanged) -->
     <Button
         android:id="@+id/nextButton"
         style="@style/Widget.Material3.Button"

@@ -8,7 +8,6 @@
     android:background="@android:color/transparent"
     tools:context=".onboarding.screens.ThirdScreen">
 
-    <!-- top/bottom spacing handled by root padding + BaseFragment insets -->
 
     <ImageView
         android:id="@+id/backButton"
@@ -73,23 +72,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- **** THIS IS THE FIX **** -->
-        <!-- 1. Add this LinearLayout wrapper -->
         <LinearLayout
             android:id="@+id/radioGroupContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:animateLayoutChanges="false">
-
-            <!-- 2. Your RadioGroup now goes inside the wrapper -->
+v
             <RadioGroup
                 android:id="@+id/lifestyleRadioGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- All your MaterialCardViews (sedentaryCard, etc.) go here... -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/sedentaryCard"
                     android:layout_width="match_parent"

@@ -8,7 +8,7 @@
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
-    app:strokeWidth="0dp">  <!-- This line removes the outline -->
+    app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -25,7 +25,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:src="@tools:sample/backgrounds/scenic" />
 
-        <!-- ... other views like the gradient ... -->
 
         <TextView
             android:id="@+id/workout_name"
@@ -41,7 +40,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="Full Body Strength" />
 
-        <!-- FIX IS HERE: Make sure this TextView exists and has the correct ID -->
         <TextView
             android:id="@+id/workout_target"
             android:layout_width="0dp"

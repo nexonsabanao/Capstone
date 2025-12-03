@@ -10,13 +10,12 @@
     app:cardBackgroundColor="@android:color/white"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
-    app:strokeWidth="0dp">  <!-- ADD THIS LINE -->
+    app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Meal Image -->
         <ImageView
             android:id="@+id/meal_image"
             android:layout_width="0dp"
@@ -28,7 +27,6 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
-        <!-- Meal Name -->
         <TextView
             android:id="@+id/meal_name"
             android:layout_width="0dp"
@@ -45,7 +43,6 @@
             app:layout_constraintTop_toBottomOf="@id/meal_image"
             tools:text="Avocado Toast with Egg" />
 
-        <!-- Meal Calories -->
         <TextView
             android:id="@+id/meal_calories"
             android:layout_width="wrap_content"

@@ -9,7 +9,6 @@
     android:background="@color/light_green"
     tools:context=".SplashFragment">
 
-    <!-- ImageView with a new marginEnd and a different vertical bias -->
     <ImageView
         android:id="@+id/logo"
         android:layout_width="120dp"
@@ -24,9 +23,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5" />
 
-    <!-- TextView for the main title. It is perfectly vertically centered on the logo. -->
-
-    <!-- Subtitle is correctly constrained to the title, so it moves with the group. -->
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"

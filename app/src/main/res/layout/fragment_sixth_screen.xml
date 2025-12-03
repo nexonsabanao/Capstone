@@ -8,7 +8,6 @@
     android:background="@android:color/transparent"
     tools:context=".onboarding.screens.SixthScreen">
 
-    <!-- top/bottom spacing handled by root padding + BaseFragment insets -->
 
     <ImageView
         android:id="@+id/backButton"
@@ -46,7 +45,6 @@
         app:layout_constraintTop_toTopOf="@+id/backButton"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <!-- Main Title -->
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="0dp"
@@ -62,7 +60,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Scrollable Options -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -88,7 +85,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Goal: Lose Weight -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/loseWeightCard"
                     android:layout_width="match_parent"
@@ -124,7 +120,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Goal: Build Muscle -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/buildMuscleCard"
                     android:layout_width="match_parent"
@@ -160,7 +155,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Goal: Keep Fit -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/keepFitCard"
                     android:layout_width="match_parent"
@@ -202,7 +196,6 @@
 
     </ScrollView>
 
-    <!-- Next Button -->
     <Button
         android:id="@+id/nextButton"
         style="@style/Widget.Material3.Button"

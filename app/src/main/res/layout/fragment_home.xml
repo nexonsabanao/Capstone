@@ -12,9 +12,6 @@
     android:fitsSystemWindows="true"
     tools:context=".HomeFragment">
 
-    <!-- top spacing handled by root padding + BaseFragment insets -->
-
-    <!-- FIXED HOME TITLE -->
     <TextView
         android:id="@+id/home_title"
         android:layout_width="wrap_content"
@@ -26,7 +23,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- SCROLLABLE CONTENT -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -44,7 +40,6 @@
             android:paddingHorizontal="20dp"
             android:paddingTop="12dp">
 
-            <!-- 7 DAYS WORKOUT BUTTON -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/seven_days_workout_card"
                 android:layout_width="match_parent"
@@ -65,7 +60,6 @@
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- WORKOUTS LABEL -->
             <TextView
                 android:id="@+id/workouts_label"
                 android:layout_width="wrap_content"
@@ -75,7 +69,6 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <!-- WORKOUTS RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/workouts_recycler_view"
                 android:layout_width="match_parent"
@@ -94,7 +87,6 @@
                 android:layout_marginTop="24dp"
                 android:background="#E0E0E0" />
 
-            <!-- MEAL PLAN BUTTON -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/meal_plan_card"
                 android:layout_width="match_parent"
@@ -114,7 +106,6 @@
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- MEALS LABEL -->
             <TextView
                 android:id="@+id/meals_label"
                 android:layout_width="wrap_content"
@@ -124,7 +115,6 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <!-- MEALS RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/meals_recycler_view"
                 android:layout_width="match_parent"
@@ -143,7 +133,6 @@
                 android:layout_marginTop="24dp"
                 android:background="#E0E0E0" />
 
-            <!-- ARTICLES LABEL -->
             <TextView
                 android:id="@+id/articles_label"
                 android:layout_width="wrap_content"
@@ -153,7 +142,6 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <!-- ARTICLES RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/articles_recycler_view"
                 android:layout_width="match_parent"
