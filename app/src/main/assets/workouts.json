@@ -6,7 +6,9 @@
       "description": "Master the fundamentals of bodyweight training.",
       "category": "Beginner",
       "targetMuscle": "Full Body",
-      "imageName": "workout_calisthenics"
+      "imageName": "workout_calisthenics",
+      "difficulty": "Beginner",
+      "duration": "30 min"
     },
     "exercises": [
       {
@@ -32,6 +34,82 @@
         "reps": "3 sets, hold for 30-60 seconds",
         "targetMuscle": "Core",
         "imageName": "exercise_plank"
+      }
+    ]
+  },
+  {
+    "workout": {
+      "id": 2,
+      "name": "HIIT Challenge",
+      "description": "A high-intensity interval training workout to boost your metabolism.",
+      "category": "Intermediate",
+      "targetMuscle": "Full Body",
+      "imageName": "workout_hiit",
+      "difficulty": "Intermediate",
+      "duration": "20 min"
+    },
+    "exercises": [
+      {
+        "workoutId": 2,
+        "name": "Burpees",
+        "description": "A full-body exercise that combines a squat, push-up, and jump.",
+        "reps": "3 sets of 10-12 reps",
+        "targetMuscle": "Full Body",
+        "imageName": "exercise_burpee"
+      },
+      {
+        "workoutId": 2,
+        "name": "High Knees",
+        "description": "A cardio-intensive exercise that involves running in place while bringing your knees up high.",
+        "reps": "3 sets of 30 seconds",
+        "targetMuscle": "Cardio, Legs",
+        "imageName": "exercise_high_knees"
+      },
+      {
+        "workoutId": 2,
+        "name": "Mountain Climbers",
+        "description": "A dynamic core exercise that simulates climbing.",
+        "reps": "3 sets of 30 seconds",
+        "targetMuscle": "Core, Cardio",
+        "imageName": "exercise_mountain_climber"
+      }
+    ]
+  },
+  {
+    "workout": {
+      "id": 3,
+      "name": "Strength Training",
+      "description": "Build muscle and increase your strength with this weightlifting workout.",
+      "category": "Advanced",
+      "targetMuscle": "Full Body",
+      "imageName": "workout_strength",
+      "difficulty": "Advanced",
+      "duration": "60 min"
+    },
+    "exercises": [
+      {
+        "workoutId": 3,
+        "name": "Deadlift",
+        "description": "A compound exercise that works the entire posterior chain.",
+        "reps": "4 sets of 5 reps",
+        "targetMuscle": "Back, Glutes, Hamstrings",
+        "imageName": "exercise_deadlift"
+      },
+      {
+        "workoutId": 3,
+        "name": "Bench Press",
+        "description": "A classic upper body exercise for building chest, shoulder, and tricep strength.",
+        "reps": "4 sets of 8 reps",
+        "targetMuscle": "Chest, Shoulders, Triceps",
+        "imageName": "exercise_bench_press"
+      },
+      {
+        "workoutId": 3,
+        "name": "Overhead Press",
+        "description": "A shoulder exercise that also engages the core.",
+        "reps": "4 sets of 8 reps",
+        "targetMuscle": "Shoulders, Triceps",
+        "imageName": "exercise_overhead_press"
       }
     ]
   }

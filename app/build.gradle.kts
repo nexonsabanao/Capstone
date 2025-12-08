@@ -77,6 +77,12 @@ dependencies {
     // Gson dependency
     implementation("com.google.code.gson:gson:2.10.1")
 
+    // Circular Progress Bar
+    implementation("com.mikhaellopez:circularprogressbar:3.1.0")
+
+    // MPAndroidChart (LineChart)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 
 
 }

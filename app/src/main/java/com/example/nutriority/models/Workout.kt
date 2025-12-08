@@ -15,7 +15,9 @@ data class Workout(
     val description: String,
     val category: String,
     val targetMuscle: String,
-    val imageName: String
+    val imageName: String,
+    val difficulty: String,
+    val duration: String
 ) {
     @Ignore
     var imageResId: Int = 0

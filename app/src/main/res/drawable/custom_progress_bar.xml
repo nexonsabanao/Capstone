@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layer-list is used to stack multiple drawables -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Define the background of the progress bar -->
+    <item android:id="@android:id/background">
+        <shape>
+            <!-- Use a rounded rectangle for the background shape -->
+            <corners android:radius="4dp" />
+            <!-- Set the background color to a light grey -->
+            <solid android:color="#F0F0F0" />
+        </shape>
+    </item>
+
+    <!-- Define the progress indicator -->
+    <item android:id="@android:id/progress">
+        <!-- Clip the progress drawable so it reveals from left to right -->
+        <clip>
+            <shape>
+                <!-- Use a rounded rectangle for the progress shape -->
+                <corners android:radius="4dp" />
+                <!-- Set the progress color to the green accent color -->
+                <solid android:color="#4CAF50" />
+            </shape>
+        </clip>
+    </item>
+
+</layer-list>

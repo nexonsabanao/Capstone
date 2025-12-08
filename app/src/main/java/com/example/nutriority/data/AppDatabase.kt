@@ -26,7 +26,7 @@ import java.io.BufferedReader
 
 @Database(
     entities = [Meal::class, Workout::class, Article::class, Exercise::class],
-    version = 8,
+    version = 9, // Incremented version to trigger an update
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -40,21 +40,6 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        private val MIGRATION_6_7 = object : Migration(6, 7) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                // Empty for now
-            }
-        }
-
-        // Migration 7 -> 8: Create an index on exercises(workoutId) to satisfy Room's
-        // recommendation and avoid full table scans when parent table changes.
-        private val MIGRATION_7_8 = object : Migration(7, 8) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                // Create the index safely if it doesn't exist
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_exercises_workoutId ON exercises(workoutId)")
-            }
-        }
-
         fun getDatabase(context: Context, appScope: CoroutineScope): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -62,7 +47,9 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "nutriority_database"
                 )
-                    .addMigrations(MIGRATION_6_7, MIGRATION_7_8)
+                    // This will destroy and re-create the database on a version change,
+                    // which is useful during development.
+                    .fallbackToDestructiveMigration()
                     .addCallback(AppDatabaseCallback(context, appScope))
                     .build()
                 INSTANCE = instance

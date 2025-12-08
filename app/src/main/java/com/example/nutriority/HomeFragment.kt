@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
 import com.example.nutriority.models.Adapters.ArticleAdapter
 import com.example.nutriority.models.Adapters.MealAdapter
 import com.example.nutriority.models.Adapters.WorkoutAdapter
@@ -57,9 +58,11 @@ class HomeFragment : BaseFragment() {
             adapter = mealAdapter
         }
 
+        val workoutSnapHelper = PagerSnapHelper()
         binding.workoutsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = workoutAdapter
+            workoutSnapHelper.attachToRecyclerView(this)
         }
 
         binding.articlesRecyclerView.apply {

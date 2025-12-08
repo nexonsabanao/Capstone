@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.models.Workout
-import com.example.nutriority.databinding.ItemWorkoutPreviewBinding
+import com.example.nutriority.databinding.ItemPreviewWorkoutBinding
 
 // 2. CHANGE RecyclerView.Adapter to ListAdapter.
 //    - It no longer needs the list in the constructor.
@@ -18,7 +18,7 @@ class WorkoutAdapter : ListAdapter<Workout, WorkoutAdapter.WorkoutViewHolder>(Wo
      * Inner class to hold the views for each item in the RecyclerView.
      * Uses ItemWorkoutBinding for type-safe view access.
      */
-    inner class WorkoutViewHolder(val binding: ItemWorkoutPreviewBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class WorkoutViewHolder(val binding: ItemPreviewWorkoutBinding) : RecyclerView.ViewHolder(binding.root)
 
     /**
      * Called by the RecyclerView to create a new ViewHolder.
@@ -26,7 +26,7 @@ class WorkoutAdapter : ListAdapter<Workout, WorkoutAdapter.WorkoutViewHolder>(Wo
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkoutViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = ItemWorkoutPreviewBinding.inflate(inflater, parent, false)
+        val binding = ItemPreviewWorkoutBinding.inflate(inflater, parent, false)
         return WorkoutViewHolder(binding)
     }
 
@@ -40,6 +40,8 @@ class WorkoutAdapter : ListAdapter<Workout, WorkoutAdapter.WorkoutViewHolder>(Wo
             // FIX: Separate the two lines of code.
             workoutName.text = currentWorkout.name
             workoutTarget.text = currentWorkout.targetMuscle
+            tvDifficulty.text = currentWorkout.difficulty
+            tvDuration.text = currentWorkout.duration
 
             val resId = if (currentWorkout.imageResId != 0) {
                 currentWorkout.imageResId

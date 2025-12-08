@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.models.Meal
-import com.example.nutriority.databinding.ItemMealPreviewBinding
+import com.example.nutriority.databinding.ItemPreviewMealCardBinding
 
 // 2. CHANGE RecyclerView.Adapter to ListAdapter
 //    - Remove the constructor parameter.
@@ -15,7 +15,7 @@ import com.example.nutriority.databinding.ItemMealPreviewBinding
 class MealAdapter : ListAdapter<Meal, MealAdapter.MealViewHolder>(MealDiffCallback()) {
 
     // The inner class stays the same.
-    inner class MealViewHolder(private val binding: ItemMealPreviewBinding) :
+    inner class MealViewHolder(private val binding: ItemPreviewMealCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(meal: Meal) {
@@ -33,7 +33,7 @@ class MealAdapter : ListAdapter<Meal, MealAdapter.MealViewHolder>(MealDiffCallba
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MealViewHolder {
-        val binding = ItemMealPreviewBinding.inflate(
+        val binding = ItemPreviewMealCardBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
