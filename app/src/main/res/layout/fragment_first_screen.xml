@@ -5,6 +5,7 @@
     android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/transparent"
     android:paddingTop="20dp"
     android:paddingBottom="24dp"
     tools:context=".onboarding.screens.FirstScreen">
@@ -70,7 +71,7 @@
         app:layout_constraintEnd_toStartOf="@+id/female_group"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/subtitle_select_gender">
+        app:layout_constraintTop_toBottomOf="@+id/subtitle_select_gender">
 
         <ImageView
             android:id="@+id/male_gender_image"
@@ -135,7 +136,7 @@
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/female_gender_image" />
+            app:layout_constraintTop_toBottomOf="@id/female_gender_image" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

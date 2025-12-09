@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="picker_item_width">70dp</dimen>
+    <dimen name="viewpager_margin">16dp</dimen>
 </resources>

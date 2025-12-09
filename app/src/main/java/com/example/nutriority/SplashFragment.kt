@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.nutriority.BaseFragment
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.nutriority.databinding.FragmentSplashBinding
@@ -14,7 +14,7 @@ import com.example.nutriority.ui.BottomNavigationActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class SplashFragment : BaseFragment() {
+class SplashFragment : Fragment() {
 
     private var _binding: FragmentSplashBinding? = null
     private val binding get() = _binding!!
@@ -30,8 +30,6 @@ class SplashFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Insets handled by BaseFragment
 
         viewLifecycleOwner.lifecycleScope.launch {
             // Wait for 3 seconds (3000 milliseconds).

@@ -1,14 +1,16 @@
 package com.example.nutriority.onboarding
 
+import android.graphics.Color
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.nutriority.BaseFragment
+import androidx.activity.OnBackPressedCallback
 import androidx.viewpager2.widget.ViewPager2
+import com.example.nutriority.BaseFragment
 import com.example.nutriority.databinding.FragmentViewPagerBinding
-import com.example.nutriority.onboarding.screens.*
+import kotlin.math.abs
 
 class ViewPagerFragment : BaseFragment() {
 
@@ -31,6 +33,17 @@ class ViewPagerFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         setupViewPager()
         setupNavigationListeners()
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.viewPager.currentItem > 0) {
+                    navigateToPreviousScreen()
+                } else {
+                    isEnabled = false
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     private fun setupViewPager() {
@@ -41,6 +54,16 @@ class ViewPagerFragment : BaseFragment() {
 
         binding.viewPager.adapter = adapter
         binding.viewPager.isUserInputEnabled = false
+
+        // This will create a fading animation between fragments
+        binding.viewPager.setPageTransformer(FadePageTransformer())
+        binding.viewPager.offscreenPageLimit = 9
+    }
+
+    private class FadePageTransformer : ViewPager2.PageTransformer {
+        override fun transformPage(view: View, position: Float) {
+            view.alpha = 1 - abs(position)
+        }
     }
 
     override fun onStart() {
@@ -55,6 +78,20 @@ class ViewPagerFragment : BaseFragment() {
                     childFragmentManager.setFragmentResult("pageSelected", Bundle().apply {
                         putInt("position", position)
                     })
+                }
+
+                override fun onPageScrollStateChanged(state: Int) {
+                    // Temporarily enable hardware acceleration when dragging/settling
+                    val layerType = if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                        View.LAYER_TYPE_NONE
+                    } else {
+                        View.LAYER_TYPE_HARDWARE
+                    }
+
+                    // ViewPager2 has one child, a RecyclerView. We want to accelerate its drawing cache.
+                    if (binding.viewPager.childCount > 0) {
+                        binding.viewPager.getChildAt(0).setLayerType(layerType, null)
+                    }
                 }
             }
             binding.viewPager.registerOnPageChangeCallback(pageChangeCallback!!)

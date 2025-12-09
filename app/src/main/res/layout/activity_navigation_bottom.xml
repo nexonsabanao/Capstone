@@ -1,42 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".ui.BottomNavigationActivity">
 
-    <!-- This will host your fragments (Home, Workout, etc.) -->
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/nav_host_fragment"
-        android:name="androidx.navigation.fragment.NavHostFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:defaultNavHost="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:navGraph="@navigation/main_nav" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/material_grey_300"
-        app:layout_anchor="@id/bottom_navigation_view" />
-
-
-    <!-- The Bottom Navigation View to show menu items -->
+    <!-- The Bottom Navigation View at the bottom -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:layout_height="65dp"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/white"
+        app:itemBackground="@drawable/custom_ripple"
         app:itemActiveIndicatorStyle="@style/NoActiveIndicator"
         app:itemIconTint="@color/bottom_nav_item_color_selector"
         app:itemTextColor="@color/bottom_nav_item_color_selector"
-        android:background="@android:color/white"
-        app:itemBackground="@drawable/custom_ripple"
+        app:itemIconPadding="0dp"
+        app:itemPaddingBottom="0dp"
+        app:itemPaddingTop="20dp"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <View
+        android:id="@+id/separator"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_above="@id/bottom_navigation_view"
+        android:background="@color/material_grey_300" />
+
+    <!-- The fragment container filling the space above the navigation -->
+    <FrameLayout
+        android:id="@+id/nav_host_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/separator" />
+
+</RelativeLayout>

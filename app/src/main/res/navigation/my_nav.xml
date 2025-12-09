@@ -14,7 +14,11 @@
             android:id="@+id/action_splashFragment_to_viewPagerFragment"
             app:destination="@id/viewPagerFragment"
             app:popUpTo="@id/splashFragment"
-            app:popUpToInclusive="true" />
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"/>
 
         <!-- The action to homeActivity has been removed -->
 

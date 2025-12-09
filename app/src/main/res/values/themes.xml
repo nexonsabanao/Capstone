@@ -109,5 +109,9 @@
             <item name="android:textColor">@android:color/holo_red_dark</item>
         </style>
 
+    <style name="BottomNav.Text" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">10sp</item>
+    </style>
+
 
 </resources>
