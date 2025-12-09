@@ -9,10 +9,6 @@ import androidx.core.content.ContextCompat
 import com.example.nutriority.BaseFragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSnapHelper
-import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentSecondScreenBinding
@@ -26,18 +22,11 @@ class SecondScreen : BaseFragment() {
 
     private val userViewModel: UserViewModel by activityViewModels()
 
-    private lateinit var heightAdapter: PickerAdapter
-    private lateinit var weightAdapter: PickerAdapter
+    private val heightCmRange = (100f..250f)
+    private val weightKgRange = (30f..150f)
+    private val heightInchesRange = (40f..98f)
+    private val weightLbsRange = (66f..330f)
 
-    private val heightSnapHelper = LinearSnapHelper()
-    private val weightSnapHelper = LinearSnapHelper()
-
-    private val heightCmRange = (120..220).toList()
-    private val weightKgRange = (30..200).toList()
-    private val heightInchesRange = (48..86).toList()
-    private val weightLbsRange = (66..440).toList()
-
-    private var isProgrammaticScroll = false
     private var isHeightImperial = false
     private var isWeightImperial = false
     private var currentHeightCm: Double = 170.0
@@ -54,7 +43,7 @@ class SecondScreen : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupPickers()
+        setupRulerViews()
         observeAndSetInitialValues()
     }
 
@@ -82,64 +71,16 @@ class SecondScreen : BaseFragment() {
         }
     }
 
-    private fun setupPickers() {
-        val itemWidth = resources.getDimensionPixelSize(R.dimen.picker_item_width)
-        val screenWidth = resources.displayMetrics.widthPixels
-        val padding = screenWidth / 2 - itemWidth / 2
-
-        heightAdapter = PickerAdapter(emptyList())
-        binding.heightPickerRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            adapter = heightAdapter
-            setPadding(padding, 0, padding, 0)
-            heightSnapHelper.attachToRecyclerView(this)
+    private fun setupRulerViews() {
+        binding.heightRulerView.onValueChangedListener = { value ->
+            updateHeight(value)
+            validateInputs()
         }
 
-        binding.heightPickerRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE && !isProgrammaticScroll) {
-                    val position = getSnapPosition(recyclerView, heightSnapHelper)
-                    if (position != RecyclerView.NO_POSITION) {
-                        currentHeightCm = if (isHeightImperial) {
-                            heightInchesRange[position] * 2.54
-                        } else {
-                            heightCmRange[position].toDouble()
-                        }
-                        validateInputs()
-                    }
-                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    isProgrammaticScroll = false
-                }
-            }
-        })
-
-        weightAdapter = PickerAdapter(emptyList())
-        binding.weightPickerRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            adapter = weightAdapter
-            setPadding(padding, 0, padding, 0)
-            weightSnapHelper.attachToRecyclerView(this)
+        binding.weightRulerView.onValueChangedListener = { value ->
+            updateWeight(value)
+            validateInputs()
         }
-
-        binding.weightPickerRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE && !isProgrammaticScroll) {
-                    val position = getSnapPosition(recyclerView, weightSnapHelper)
-                    if (position != RecyclerView.NO_POSITION) {
-                        currentWeightKg = if (isWeightImperial) {
-                            weightLbsRange[position] / 2.20462
-                        } else {
-                            weightKgRange[position].toDouble()
-                        }
-                        validateInputs()
-                    }
-                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    isProgrammaticScroll = false
-                }
-            }
-        })
     }
 
     private fun setupClickListeners() {
@@ -147,66 +88,35 @@ class SecondScreen : BaseFragment() {
             parentFragmentManager.setFragmentResult("navigationRequestPrevious", Bundle())
         }
         binding.nextButton.setOnClickListener {
-            // --- START OF APPLIED LOGIC ---
-
-            // If either height OR weight is set to imperial, we consider the whole system Imperial
-            // for the purpose of the final recap screen. This handles all mixed-unit cases gracefully.
-            val selectedUnitSystem = if (binding.heightUnitToggleGroup.checkedButtonId == R.id.btnFt || binding.weightUnitToggleGroup.checkedButtonId == R.id.btnLbs) {
-                "IMPERIAL"
-            } else {
-                "METRIC"
-            }
+            val selectedUnitSystem = if (isHeightImperial || isWeightImperial) "IMPERIAL" else "METRIC"
             userViewModel.updateOnboardingData { user ->
                 user.copy(
-                    // Your existing logic correctly keeps currentHeightCm and currentWeightKg updated in metric.
-                    // We just need to convert them to Float to match the User data class if it uses Float.
                     heightCm = currentHeightCm,
                     weightKg = currentWeightKg,
-                    unitSystem = selectedUnitSystem // Save the determined unit system
+                    unitSystem = selectedUnitSystem
                 )
             }
-
-            // --- END OF APPLIED LOGIC ---
-
-            // This part is correct and remains the same
             setFragmentResult("navigationRequestNext", Bundle())
         }
 
-        binding.btnCm.setOnClickListener {
-            if (isHeightImperial) {
-                isHeightImperial = false
-                changeHeightUnit(false)
-            }
-        }
-        binding.btnFt.setOnClickListener {
-            if (!isHeightImperial) {
-                isHeightImperial = true
-                changeHeightUnit(true)
+        binding.heightUnitToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                changeHeightUnit(checkedId == R.id.btnFt)
             }
         }
 
-        binding.btnKg.setOnClickListener {
-            if (isWeightImperial) {
-                isWeightImperial = false
-                changeWeightUnit(false)
-            }
-        }
-        binding.btnLbs.setOnClickListener {
-            if (!isWeightImperial) {
-                isWeightImperial = true
-                changeWeightUnit(true)
+        binding.weightUnitToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                changeWeightUnit(checkedId == R.id.btnLbs)
             }
         }
     }
 
     private fun clearClickListeners() {
         binding.backButton.setOnClickListener(null)
-        binding.skipButton.setOnClickListener(null)
         binding.nextButton.setOnClickListener(null)
-        binding.btnCm.setOnClickListener(null)
-        binding.btnFt.setOnClickListener(null)
-        binding.btnKg.setOnClickListener(null)
-        binding.btnLbs.setOnClickListener(null)
+        binding.heightUnitToggleGroup.clearOnButtonCheckedListeners()
+        binding.weightUnitToggleGroup.clearOnButtonCheckedListeners()
     }
 
     private fun setupInitialUnitState() {
@@ -218,60 +128,69 @@ class SecondScreen : BaseFragment() {
     }
 
     private fun changeHeightUnit(isImperial: Boolean) {
-        val newList = if (isImperial) {
-            heightInchesRange.map { inch ->
-                val feet = inch / 12
-                val inches = inch % 12
-                String.format("%d'%d\"", feet, inches)
-            }
+        isHeightImperial = isImperial
+        val ruler = binding.heightRulerView
+        if (isImperial) {
+            ruler.setMajorTickFactor(12)
+            ruler.labelFormatter = { value -> "${(value / 12).toInt()}'" }
+            ruler.setMinValue(heightInchesRange.start)
+            ruler.setMaxValue(heightInchesRange.endInclusive)
+            val inches = (currentHeightCm / 2.54).toFloat()
+            val coercedInches = inches.coerceIn(heightInchesRange.start, heightInchesRange.endInclusive)
+            ruler.setCurrentValue(coercedInches)
+            updateHeight(coercedInches)
         } else {
-            heightCmRange.map { it.toString() }
+            ruler.setMajorTickFactor(10)
+            ruler.labelFormatter = { value -> "${value.toInt()}" }
+            ruler.setMinValue(heightCmRange.start)
+            ruler.setMaxValue(heightCmRange.endInclusive)
+            val cm = currentHeightCm.toFloat()
+            val coercedCm = cm.coerceIn(heightCmRange.start, heightCmRange.endInclusive)
+            ruler.setCurrentValue(coercedCm)
+            updateHeight(coercedCm)
         }
-        heightAdapter.updateData(newList)
-
-        val position = if (isImperial) {
-            val inches = (currentHeightCm / 2.54).roundToInt()
-            heightInchesRange.indexOf(inches.coerceIn(heightInchesRange.first(), heightInchesRange.last()))
-        } else {
-            heightCmRange.indexOf(currentHeightCm.roundToInt().coerceIn(heightCmRange.first(), heightCmRange.last()))
-        }
-
-        scrollToPosition(binding.heightPickerRecyclerView, position)
         updateButtonTextColors(binding.heightUnitToggleGroup)
     }
 
     private fun changeWeightUnit(isImperial: Boolean) {
-        val newList = if (isImperial) {
-            weightLbsRange.map { it.toString() }
+        isWeightImperial = isImperial
+        val ruler = binding.weightRulerView
+        ruler.setMajorTickFactor(10)
+        ruler.labelFormatter = { value -> "${value.toInt()}" }
+        if (isImperial) {
+            ruler.setMinValue(weightLbsRange.start)
+            ruler.setMaxValue(weightLbsRange.endInclusive)
+            val lbs = (currentWeightKg * 2.20462).toFloat()
+            val coercedLbs = lbs.coerceIn(weightLbsRange.start, weightLbsRange.endInclusive)
+            ruler.setCurrentValue(coercedLbs)
+            updateWeight(coercedLbs)
         } else {
-            weightKgRange.map { it.toString() }
+            ruler.setMinValue(weightKgRange.start)
+            ruler.setMaxValue(weightKgRange.endInclusive)
+            val kg = currentWeightKg.toFloat()
+            val coercedKg = kg.coerceIn(weightKgRange.start, weightKgRange.endInclusive)
+            ruler.setCurrentValue(coercedKg)
+            updateWeight(coercedKg)
         }
-        weightAdapter.updateData(newList)
-
-        val position = if (isImperial) {
-            val lbs = (currentWeightKg * 2.20462).roundToInt()
-            weightLbsRange.indexOf(lbs.coerceIn(weightLbsRange.first(), weightLbsRange.last()))
-        } else {
-            weightKgRange.indexOf(currentWeightKg.roundToInt().coerceIn(weightKgRange.first(), weightKgRange.last()))
-        }
-
-        scrollToPosition(binding.weightPickerRecyclerView, position)
         updateButtonTextColors(binding.weightUnitToggleGroup)
     }
 
-    private fun scrollToPosition(recyclerView: RecyclerView, position: Int) {
-        if (position != -1) {
-            isProgrammaticScroll = true
-            recyclerView.post {
-                recyclerView.smoothScrollToPosition(position)
-            }
-        }
+    private fun updateHeight(value: Float) {
+        currentHeightCm = if (isHeightImperial) value * 2.54 else value.toDouble()
+        binding.heightValue.text = if (isHeightImperial) formatInchesToFeetAndInches(value) else value.roundToInt().toString()
+        binding.heightUnit.text = if (isHeightImperial) "ft" else "cm"
     }
 
-    private fun getSnapPosition(recyclerView: RecyclerView, snapHelper: LinearSnapHelper): Int {
-        val layoutManager = recyclerView.layoutManager as? LinearLayoutManager ?: return RecyclerView.NO_POSITION
-        val snapView = snapHelper.findSnapView(layoutManager) ?: return RecyclerView.NO_POSITION
-        return layoutManager.getPosition(snapView)
+    private fun updateWeight(value: Float) {
+        currentWeightKg = if (isWeightImperial) value / 2.20462 else value.toDouble()
+        binding.weightValue.text = String.format("%.1f", value)
+        binding.weightUnit.text = if (isWeightImperial) "lbs" else "kg"
+    }
+
+    private fun formatInchesToFeetAndInches(totalInches: Float): String {
+        val feet = (totalInches / 12).toInt()
+        val inches = (totalInches % 12).roundToInt()
+        return "$feet'$inches'"
     }
 
     private fun validateInputs() {

@@ -143,40 +143,49 @@
                         tools:ignore="TouchTargetSizeCheck" />
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/heightPickerRecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                <TextView
+                    android:id="@+id/heightValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:clipToPadding="false"
-                    android:orientation="horizontal"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toStartOf="@+id/heightUnit"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/heightUnitToggleGroup"
+                    tools:text="170" />
+
+                <TextView
+                    android:id="@+id/heightUnit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textSize="20sp"
+                    android:textColor="@color/dark_gray"
+                    app:layout_constraintBaseline_toBaselineOf="@id/heightValue"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/heightValue"
+                    tools:text="cm" />
+
+                <com.example.nutriority.customview.RulerView
+                    android:id="@+id/heightRulerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="-10dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/heightUnitToggleGroup"
-                    tools:itemCount="5"
-                    tools:listitem="@layout/item_picker_number" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/picker_fade_overlay"
-                    app:layout_constraintTop_toTopOf="@id/heightPickerRecyclerView"
-                    app:layout_constraintBottom_toBottomOf="@id/heightPickerRecyclerView"
-                    app:layout_constraintStart_toStartOf="@id/heightPickerRecyclerView"
-                    app:layout_constraintEnd_toEndOf="@id/heightPickerRecyclerView"
-                    />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="22dp"
-                    android:contentDescription="picker_indicator"
-                    android:src="@drawable/outline_arrow_drop_down"
-                    app:layout_constraintBottom_toBottomOf="@id/heightPickerRecyclerView"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:tint="@color/green" />
+                    app:layout_constraintTop_toBottomOf="@+id/heightValue"
+                    app:ruler_defaultValue="170"
+                    app:ruler_indicatorColor="@color/green"
+                    app:ruler_indicatorWidth="4dp"
+                    app:ruler_maxValue="250"
+                    app:ruler_minValue="100"
+                    app:ruler_textColor="@color/black"
+                    app:ruler_tickColor="@color/dark_gray"
+                    app:ruler_majorTickFactor="10"
+                    app:ruler_decimal_places="0" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -240,40 +249,49 @@
                         tools:ignore="TouchTargetSizeCheck" />
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/weightPickerRecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                <TextView
+                    android:id="@+id/weightValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:clipToPadding="false"
-                    android:orientation="horizontal"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toStartOf="@+id/weightUnit"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/weightUnitToggleGroup"
+                    tools:text="60" />
+
+                <TextView
+                    android:id="@+id/weightUnit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textSize="20sp"
+                    android:textColor="@color/dark_gray"
+                    app:layout_constraintBaseline_toBaselineOf="@id/weightValue"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/weightValue"
+                    tools:text="kg" />
+
+                <com.example.nutriority.customview.RulerView
+                    android:id="@+id/weightRulerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="-10dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/weightUnitToggleGroup"
-                    tools:itemCount="5"
-                    tools:listitem="@layout/item_picker_number" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/picker_fade_overlay"
-                    app:layout_constraintTop_toTopOf="@id/weightPickerRecyclerView"
-                    app:layout_constraintBottom_toBottomOf="@id/weightPickerRecyclerView"
-                    app:layout_constraintStart_toStartOf="@id/weightPickerRecyclerView"
-                    app:layout_constraintEnd_toEndOf="@id/weightPickerRecyclerView"
-                    />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="22dp"
-                    android:contentDescription="picker_indicator"
-                    android:src="@drawable/outline_arrow_drop_down"
-                    app:layout_constraintBottom_toBottomOf="@id/weightPickerRecyclerView"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:tint="@color/green" />
+                    app:layout_constraintTop_toBottomOf="@+id/weightValue"
+                    app:ruler_defaultValue="60"
+                    app:ruler_indicatorColor="@color/green"
+                    app:ruler_indicatorWidth="4dp"
+                    app:ruler_maxValue="150"
+                    app:ruler_minValue="30"
+                    app:ruler_textColor="@color/black"
+                    app:ruler_tickColor="@color/dark_gray"
+                    app:ruler_majorTickFactor="10"
+                    app:ruler_decimal_places="1" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>

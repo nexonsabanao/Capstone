@@ -75,7 +75,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     // Gson dependency
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.13.2")
 
     // Circular Progress Bar
     implementation("com.mikhaellopez:circularprogressbar:3.1.0")

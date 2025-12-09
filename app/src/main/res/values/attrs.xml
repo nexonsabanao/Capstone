@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RulerView">
+        <attr name="ruler_minValue" format="float" />
+        <attr name="ruler_maxValue" format="float" />
+        <attr name="ruler_defaultValue" format="float" />
+        <attr name="ruler_tickInterval" format="dimension" />
+        <attr name="ruler_tickColor" format="color" />
+        <attr name="ruler_textColor" format="color" />
+        <attr name="ruler_textSize" format="dimension" />
+        <attr name="ruler_indicatorColor" format="color" />
+        <attr name="ruler_indicatorWidth" format="dimension" />
+        <attr name="ruler_decimal_places" format="integer" />
+        <attr name="ruler_majorTickFactor" format="integer" />
+    </declare-styleable>
+</resources>
