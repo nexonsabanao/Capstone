@@ -26,25 +26,6 @@
         app:tint="@color/dark_gray"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <TextView
-        android:id="@+id/skipButton"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginEnd="24dp"
-        android:alpha="0.7"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:minWidth="48dp"
-        android:paddingHorizontal="8dp"
-        android:text="skip"
-        android:textColor="@color/dark_gray"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/backButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/backButton"
-        tools:ignore="TouchTargetSizeCheck" />
-
     <!-- Main Title -->
     <TextView
         android:id="@+id/titleTextView"

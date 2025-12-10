@@ -1,12 +1,12 @@
 package com.example.nutriority
 
 import android.os.Bundle
-import com.example.nutriority.BaseFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 
-class WorkoutFragment : BaseFragment() {
+class WorkoutFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -14,6 +14,4 @@ class WorkoutFragment : BaseFragment() {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_workout, container, false)
     }
-
-    // Insets handled by BaseFragment
 }

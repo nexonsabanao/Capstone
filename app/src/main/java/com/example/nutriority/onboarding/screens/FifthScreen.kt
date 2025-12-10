@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
-import com.example.nutriority.BaseFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
@@ -15,9 +15,8 @@ import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentFifthScreenBinding
 import com.google.android.material.chip.Chip
-import com.example.nutriority.utils.applySystemBarsInsets
 
-class FifthScreen : BaseFragment() {
+class FifthScreen : Fragment() {
 
     private var _binding: FragmentFifthScreenBinding? = null
     private val binding get() = _binding!!
@@ -75,7 +74,7 @@ class FifthScreen : BaseFragment() {
 
     private fun setupChipStyle() {
         val greenColor = ContextCompat.getColor(requireContext(), R.color.green)
-        val defaultBackgroundColor = ContextCompat.getColor(requireContext(), R.color.light_gray_background)
+        val defaultBackgroundColor = ContextCompat.getColor(requireContext(), R.color.white)
         val defaultTextColor = ContextCompat.getColor(requireContext(), R.color.dark_gray)
         val whiteColor = ContextCompat.getColor(requireContext(), android.R.color.white)
 
@@ -110,10 +109,6 @@ class FifthScreen : BaseFragment() {
             parentFragmentManager.setFragmentResult("navigationRequestPrevious", Bundle())
         }
 
-        binding.finishButton.setOnClickListener {
-            saveDataAndFinish()
-        }
-
         binding.nextButton.setOnClickListener {
             saveDataAndFinish()
         }
@@ -123,7 +118,6 @@ class FifthScreen : BaseFragment() {
     // A new function to nullify all listeners, preventing ghost clicks and memory leaks.
     private fun clearClickListeners() {
         binding.backButton.setOnClickListener(null)
-        binding.finishButton.setOnClickListener(null)
         binding.nextButton.setOnClickListener(null)
     }
 

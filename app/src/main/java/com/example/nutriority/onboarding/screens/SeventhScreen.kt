@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import androidx.core.content.ContextCompat
-import com.example.nutriority.BaseFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
@@ -21,14 +21,13 @@ import com.example.nutriority.data.User
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentSeventhScreenBinding
 import com.example.nutriority.ui.BottomNavigationActivity // 2. Add this import
-import com.example.nutriority.utils.applySystemBarsInsets
 import com.example.nutriority.planner.PlannerService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 import kotlin.math.pow
 
-class SeventhScreen : BaseFragment() {
+class SeventhScreen : Fragment() {
 
     private var _binding: FragmentSeventhScreenBinding? = null
     private val binding get() = _binding!!

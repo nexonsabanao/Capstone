@@ -8,25 +8,21 @@
     android:background="@android:color/transparent"
     tools:context=".onboarding.screens.FirstScreen">
 
-    <TextView
-        android:id="@+id/skipButton"
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/backButton"
+        android:layout_width="32dp"
         android:layout_height="32dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="24dp"
         android:alpha="0.7"
         android:clickable="true"
+        android:contentDescription="action_back"
         android:focusable="true"
-        android:gravity="center"
-        android:paddingHorizontal="8dp"
-        android:text="skip"
-        android:textColor="@color/dark_gray"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/title_select_gender"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:padding="4dp"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
+        app:tint="@color/dark_gray"
         tools:ignore="TouchTargetSizeCheck" />
 
     <TextView
@@ -56,20 +52,29 @@
         app:layout_constraintStart_toStartOf="@id/title_select_gender"
         app:layout_constraintTop_toBottomOf="@id/title_select_gender" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/male_group"
-        android:layout_width="100dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="8dp"
         android:alpha="0.5"
         android:background="@android:color/transparent"
         android:clickable="true"
         android:contentDescription="@string/male"
         android:focusable="true"
         app:layout_constraintBottom_toTopOf="@+id/next_button"
-        app:layout_constraintEnd_toStartOf="@+id/female_group"
-        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintEnd_toStartOf="@id/guideline_center"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/subtitle_select_gender">
+        app:layout_constraintTop_toBottomOf="@+id/subtitle_select_gender"
+        app:layout_constraintWidth_max="180dp">
 
         <ImageView
             android:id="@+id/male_gender_image"
@@ -90,7 +95,7 @@
             android:layout_marginTop="8dp"
             android:fontFamily="@font/barlow_bold"
             android:text="@string/male"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/male_gender_image" />
@@ -99,9 +104,10 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/female_group"
-        android:layout_width="87dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="24dp"
         android:alpha="0.5"
         android:background="@android:color/transparent"
         android:clickable="true"
@@ -109,8 +115,9 @@
         android:focusable="true"
         app:layout_constraintBottom_toBottomOf="@+id/male_group"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/male_group"
-        app:layout_constraintTop_toTopOf="@+id/male_group">
+        app:layout_constraintStart_toEndOf="@id/guideline_center"
+        app:layout_constraintTop_toTopOf="@+id/male_group"
+        app:layout_constraintWidth_max="180dp">
 
         <ImageView
             android:id="@+id/female_gender_image"
@@ -131,10 +138,10 @@
             android:layout_marginTop="8dp"
             android:fontFamily="@font/barlow_bold"
             android:text="@string/female"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/female_gender_image" />
+            app:layout_constraintTop_toBottomOf="@+id/female_gender_image" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -144,6 +151,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="24dp"
         android:alpha="0.4"
         android:backgroundTint="#00A78B"
         android:paddingVertical="16dp"

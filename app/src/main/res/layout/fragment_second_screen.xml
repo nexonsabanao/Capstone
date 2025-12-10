@@ -26,25 +26,6 @@
         tools:ignore="TouchTargetSizeCheck" />
 
     <TextView
-        android:id="@+id/skipButton"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginEnd="24dp"
-        android:alpha="0.7"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:minWidth="48dp"
-        android:paddingHorizontal="8dp"
-        android:text="skip"
-        android:textColor="@color/dark_gray"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/backButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/backButton"
-        tools:ignore="TouchTargetSizeCheck" />
-
-    <TextView
         android:id="@+id/titleTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -71,230 +52,236 @@
         app:layout_constraintStart_toStartOf="@id/titleTextView"
         app:layout_constraintTop_toBottomOf="@id/titleTextView" />
 
-    <LinearLayout
-        android:id="@+id/card_group"
+    <ScrollView
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginHorizontal="24dp"
-        android:orientation="vertical"
+        android:layout_marginVertical="16dp"
+        android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@id/nextButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/subtitleTextView"
-        app:layout_constraintVertical_bias="0.4">
+        app:layout_constraintTop_toBottomOf="@id/subtitleTextView">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/heightCard"
+        <LinearLayout
+            android:id="@+id/card_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="8dp">
+            android:orientation="vertical">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/heightCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="16dp">
+                app:cardBackgroundColor="@android:color/white"
+                app:cardCornerRadius="12dp"
+                app:strokeWidth="0dp">
 
-                <TextView
-                    android:id="@+id/heightLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:fontFamily="@font/barlow_semibold"
-                    android:text="Height"
-                    android:textColor="@color/dark_gray"
-                    android:textSize="18sp"
-                    app:layout_constraintBottom_toBottomOf="@id/heightUnitToggleGroup"
-                    app:layout_constraintEnd_toStartOf="@id/heightUnitToggleGroup"
-                    app:layout_constraintHorizontal_chainStyle="spread_inside"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/heightUnitToggleGroup" />
-
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/heightUnitToggleGroup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="24dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/heightLabel"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
-
-                    <Button
-                        android:id="@+id/btnCm"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:text="cm"
-                        app:backgroundTint="@color/toggle_button_background_color"
-                        tools:ignore="TouchTargetSizeCheck" />
-
-                    <Button
-                        android:id="@+id/btnFt"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:text="ft"
-                        app:backgroundTint="@color/toggle_button_background_color"
-                        tools:ignore="TouchTargetSizeCheck" />
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-
-                <TextView
-                    android:id="@+id/heightValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:textSize="40sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@+id/heightUnit"
-                    app:layout_constraintHorizontal_chainStyle="packed"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/heightUnitToggleGroup"
-                    tools:text="170" />
-
-                <TextView
-                    android:id="@+id/heightUnit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:textSize="20sp"
-                    android:textColor="@color/dark_gray"
-                    app:layout_constraintBaseline_toBaselineOf="@id/heightValue"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/heightValue"
-                    tools:text="cm" />
-
-                <com.example.nutriority.customview.RulerView
-                    android:id="@+id/heightRulerView"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:layout_marginTop="-10dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/heightValue"
-                    app:ruler_defaultValue="170"
-                    app:ruler_indicatorColor="@color/green"
-                    app:ruler_indicatorWidth="4dp"
-                    app:ruler_maxValue="250"
-                    app:ruler_minValue="100"
-                    app:ruler_textColor="@color/black"
-                    app:ruler_tickColor="@color/dark_gray"
-                    app:ruler_majorTickFactor="10"
-                    app:ruler_decimal_places="0" />
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="16dp">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
+                    <TextView
+                        android:id="@+id/heightLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="24dp"
+                        android:fontFamily="@font/barlow_semibold"
+                        android:text="Height"
+                        android:textColor="@color/dark_gray"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toBottomOf="@id/heightUnitToggleGroup"
+                        app:layout_constraintEnd_toStartOf="@id/heightUnitToggleGroup"
+                        app:layout_constraintHorizontal_chainStyle="spread_inside"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/heightUnitToggleGroup" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/weightCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="8dp">
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/heightUnitToggleGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="24dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/heightLabel"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+                        <Button
+                            android:id="@+id/btnCm"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:text="cm"
+                            app:backgroundTint="@color/toggle_button_background_color"
+                            tools:ignore="TouchTargetSizeCheck" />
+
+                        <Button
+                            android:id="@+id/btnFt"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:text="ft"
+                            app:backgroundTint="@color/toggle_button_background_color"
+                            tools:ignore="TouchTargetSizeCheck" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                    <TextView
+                        android:id="@+id/heightValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:textSize="40sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@+id/heightUnit"
+                        app:layout_constraintHorizontal_chainStyle="packed"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/heightUnitToggleGroup"
+                        tools:text="170" />
+
+                    <TextView
+                        android:id="@+id/heightUnit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="@color/dark_gray"
+                        android:textSize="20sp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/heightValue"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/heightValue"
+                        tools:text="cm" />
+
+                    <com.example.nutriority.customview.RulerView
+                        android:id="@+id/heightRulerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginTop="-10dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/heightValue"
+                        app:ruler_defaultValue="170"
+                        app:ruler_indicatorColor="@color/green"
+                        app:ruler_indicatorWidth="4dp"
+                        app:ruler_maxValue="250"
+                        app:ruler_minValue="100"
+                        app:ruler_textColor="@color/black"
+                        app:ruler_tickColor="@color/dark_gray"
+                        app:ruler_majorTickFactor="10"
+                        app:ruler_decimal_places="0" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/weightCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="16dp">
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@android:color/white"
+                app:cardCornerRadius="12dp"
+                app:strokeWidth="0dp">
 
-                <TextView
-                    android:id="@+id/weightLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:fontFamily="@font/barlow_semibold"
-                    android:text="Weight"
-                    android:textColor="@color/dark_gray"
-                    android:textSize="18sp"
-                    app:layout_constraintBottom_toBottomOf="@id/weightUnitToggleGroup"
-                    app:layout_constraintEnd_toStartOf="@id/weightUnitToggleGroup"
-                    app:layout_constraintHorizontal_chainStyle="spread_inside"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/weightUnitToggleGroup" />
-
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/weightUnitToggleGroup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="24dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/weightLabel"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
-
-                    <Button
-                        android:id="@+id/btnKg"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:text="kg"
-                        app:backgroundTint="@color/toggle_button_background_color"
-                        tools:ignore="TouchTargetSizeCheck" />
-
-                    <Button
-                        android:id="@+id/btnLbs"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:text="lbs"
-                        app:backgroundTint="@color/toggle_button_background_color"
-                        tools:ignore="TouchTargetSizeCheck" />
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-
-                <TextView
-                    android:id="@+id/weightValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:textSize="40sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@+id/weightUnit"
-                    app:layout_constraintHorizontal_chainStyle="packed"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/weightUnitToggleGroup"
-                    tools:text="60" />
-
-                <TextView
-                    android:id="@+id/weightUnit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:textSize="20sp"
-                    android:textColor="@color/dark_gray"
-                    app:layout_constraintBaseline_toBaselineOf="@id/weightValue"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/weightValue"
-                    tools:text="kg" />
-
-                <com.example.nutriority.customview.RulerView
-                    android:id="@+id/weightRulerView"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:layout_marginTop="-10dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/weightValue"
-                    app:ruler_defaultValue="60"
-                    app:ruler_indicatorColor="@color/green"
-                    app:ruler_indicatorWidth="4dp"
-                    app:ruler_maxValue="150"
-                    app:ruler_minValue="30"
-                    app:ruler_textColor="@color/black"
-                    app:ruler_tickColor="@color/dark_gray"
-                    app:ruler_majorTickFactor="10"
-                    app:ruler_decimal_places="1" />
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="16dp">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
+                    <TextView
+                        android:id="@+id/weightLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="24dp"
+                        android:fontFamily="@font/barlow_semibold"
+                        android:text="Weight"
+                        android:textColor="@color/dark_gray"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toBottomOf="@id/weightUnitToggleGroup"
+                        app:layout_constraintEnd_toStartOf="@id/weightUnitToggleGroup"
+                        app:layout_constraintHorizontal_chainStyle="spread_inside"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/weightUnitToggleGroup" />
 
-    </LinearLayout>
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/weightUnitToggleGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="24dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/weightLabel"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+
+                        <Button
+                            android:id="@+id/btnKg"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:text="kg"
+                            app:backgroundTint="@color/toggle_button_background_color"
+                            tools:ignore="TouchTargetSizeCheck" />
+
+                        <Button
+                            android:id="@+id/btnLbs"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:text="lbs"
+                            app:backgroundTint="@color/toggle_button_background_color"
+                            tools:ignore="TouchTargetSizeCheck" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                    <TextView
+                        android:id="@+id/weightValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:textSize="40sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@+id/weightUnit"
+                        app:layout_constraintHorizontal_chainStyle="packed"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/weightUnitToggleGroup"
+                        tools:text="60" />
+
+                    <TextView
+                        android:id="@+id/weightUnit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="@color/dark_gray"
+                        android:textSize="20sp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/weightValue"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/weightValue"
+                        tools:text="kg" />
+
+                    <com.example.nutriority.customview.RulerView
+                        android:id="@+id/weightRulerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginTop="-10dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/weightValue"
+                        app:ruler_defaultValue="60"
+                        app:ruler_indicatorColor="@color/green"
+                        app:ruler_indicatorWidth="4dp"
+                        app:ruler_maxValue="150"
+                        app:ruler_minValue="30"
+                        app:ruler_textColor="@color/black"
+                        app:ruler_tickColor="@color/dark_gray"
+                        app:ruler_majorTickFactor="10"
+                        app:ruler_decimal_places="1" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </ScrollView>
 
     <Button
         android:id="@+id/nextButton"
@@ -302,6 +289,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="24dp"
         android:alpha="0.5"
         android:backgroundTint="@color/green"
         android:enabled="false"

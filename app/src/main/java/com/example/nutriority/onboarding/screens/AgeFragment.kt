@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.nutriority.BaseFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentAgeBinding
 
-class AgeFragment : BaseFragment() {
+class AgeFragment : Fragment() {
     private var _binding: FragmentAgeBinding? = null
     private val binding get() = _binding!!
 
@@ -55,11 +55,6 @@ class AgeFragment : BaseFragment() {
             } else {
                 binding.ageInput.error = "Please enter a valid age"
             }
-        }
-
-        binding.skipButton.setOnClickListener {
-            // allow skipping age; just continue
-            setFragmentResult("navigationRequestNext", Bundle())
         }
     }
 

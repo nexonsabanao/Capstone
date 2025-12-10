@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.example.nutriority.BaseFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
@@ -17,7 +17,6 @@ import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentFourthScreenBinding
 import com.google.android.material.card.MaterialCardView
-import com.example.nutriority.utils.applySystemBarsInsets
 
 private sealed class DietType(val value: String) {
     object Balanced : DietType("Balanced")
@@ -25,7 +24,7 @@ private sealed class DietType(val value: String) {
     object Vegetarian : DietType("Vegetarian")
 }
 
-class FourthScreen : BaseFragment() {
+class FourthScreen : Fragment() {
 
     private var _binding: FragmentFourthScreenBinding? = null
     private val binding get() = _binding!!
@@ -128,7 +127,6 @@ class FourthScreen : BaseFragment() {
         binding.detailsVegetarian.setOnClickListener(null)
 
         binding.backButton.setOnClickListener(null)
-        binding.skipButton.setOnClickListener(null)
         binding.nextButton.setOnClickListener(null)
     }
 

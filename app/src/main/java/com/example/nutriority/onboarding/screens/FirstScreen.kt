@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.nutriority.BaseFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
@@ -18,7 +18,7 @@ private sealed class Gender(val value: String) {
     object Female : Gender("Female")
 }
 
-class FirstScreen : BaseFragment() {
+class FirstScreen : Fragment() {
 
     private var _binding: FragmentFirstScreenBinding? = null
     private val binding get() = _binding!!
@@ -42,8 +42,6 @@ class FirstScreen : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         // Set up the observer here. It's safe because it's tied to the viewLifecycleOwner.
         observeAndSetInitialState()
-
-        // Insets now applied by BaseFragment
     }
 
     // --- THE FIX: PART 1 ---
@@ -96,6 +94,10 @@ class FirstScreen : BaseFragment() {
             selectGender(Gender.Female)
         }
 
+        binding.backButton.setOnClickListener {
+            parentFragmentManager.setFragmentResult("navigationRequestPrevious", Bundle())
+        }
+
         binding.nextButton.setOnClickListener {
             // Only update the ViewModel if a gender has been selected.
             selectedGender?.let { gender ->
@@ -113,8 +115,8 @@ class FirstScreen : BaseFragment() {
     private fun clearClickListeners() {
         binding.maleGroup.setOnClickListener(null)
         binding.femaleGroup.setOnClickListener(null)
-        binding.skipButton.setOnClickListener(null)
         binding.nextButton.setOnClickListener(null)
+        binding.backButton.setOnClickListener(null)
     }
 
 
