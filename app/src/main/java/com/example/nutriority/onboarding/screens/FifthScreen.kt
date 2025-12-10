@@ -75,7 +75,7 @@ class FifthScreen : BaseFragment() {
 
     private fun setupChipStyle() {
         val greenColor = ContextCompat.getColor(requireContext(), R.color.green)
-        val defaultBackgroundColor = ContextCompat.getColor(requireContext(), R.color.light_gray_background)
+        val defaultBackgroundColor = ContextCompat.getColor(requireContext(), R.color.white)
         val defaultTextColor = ContextCompat.getColor(requireContext(), R.color.dark_gray)
         val whiteColor = ContextCompat.getColor(requireContext(), android.R.color.white)
 

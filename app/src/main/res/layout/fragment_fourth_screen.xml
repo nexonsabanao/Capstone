@@ -99,9 +99,8 @@
                 android:focusable="true"
                 app:cardBackgroundColor="@android:color/white"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                app:strokeColor="@color/card_border_color"
-                app:strokeWidth="2dp">
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -164,9 +163,8 @@
                 android:focusable="true"
                 app:cardBackgroundColor="@android:color/white"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                app:strokeColor="@color/card_border_color"
-                app:strokeWidth="2dp">
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -229,9 +227,8 @@
                 android:focusable="true"
                 app:cardBackgroundColor="@android:color/white"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                app:strokeColor="@color/card_border_color"
-                app:strokeWidth="2dp">
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
