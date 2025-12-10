@@ -23,6 +23,6 @@
     <color name="bmi_underweight">#3498DB</color> <!-- A calm blue -->
     <color name="bmi_overweight">#F39C12</color>  <!-- A warning orange -->
     <color name="bmi_obese">#E74C3C</color>       <!-- A stronger red/orange -->
-
+    <color name="app_background">#F5F5F5</color>
 
 </resources>

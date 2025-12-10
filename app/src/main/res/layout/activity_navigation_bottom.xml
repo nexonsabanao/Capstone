@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="65dp"
         android:layout_alignParentBottom="true"
-        android:background="@android:color/white"
+        android:background="@color/app_background"
         app:itemBackground="@drawable/custom_ripple"
         app:itemActiveIndicatorStyle="@style/NoActiveIndicator"
         app:itemIconTint="@color/bottom_nav_item_color_selector"
@@ -29,7 +29,7 @@
     <View
         android:id="@+id/separator"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:layout_above="@id/bottom_navigation_view"
         android:background="@color/material_grey_300" />
 
