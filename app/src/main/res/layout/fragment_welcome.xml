@@ -32,7 +32,7 @@
         android:layout_marginBottom="8dp"
         android:text="I agree to the"
         app:layout_constraintBottom_toTopOf="@id/accept_button"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="@id/accept_button" />
 
     <TextView
         android:id="@+id/terms_link"
@@ -44,17 +44,20 @@
         app:layout_constraintBottom_toBottomOf="@id/terms_checkbox"
         app:layout_constraintStart_toEndOf="@id/terms_checkbox"
         app:layout_constraintTop_toTopOf="@id/terms_checkbox" />
-
+    
     <Button
         android:id="@+id/accept_button"
         style="@style/Widget.Material3.Button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:alpha="0.4"
+        android:layout_marginHorizontal="24dp"
         android:backgroundTint="@color/green"
         android:paddingVertical="16dp"
         android:text="Continue"
         android:textSize="16sp"
+        android:textColor="@color/white"
+        android:enabled="false"
+        android:alpha="0.5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
