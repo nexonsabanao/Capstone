@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    tools:context=".onboarding.screens.SeventhScreen">
+    tools:context=".ui.onboarding.screens.SeventhScreen">
 
     <TextView
         android:id="@+id/user_data_recap_text"
@@ -30,7 +30,7 @@
         android:layout_height="110dp"
         android:layout_marginTop="32dp"
         android:indeterminate="true"
-        android:indeterminateTint="@color/green"
+        android:indeterminateTint="@color/primary_dark"
         app:layout_constraintBottom_toTopOf="@id/bmi_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -64,7 +64,7 @@
             android:fontFamily="@font/barlow_bold"
             android:textSize="48sp"
             tools:text="21.5"
-            tools:textColor="@color/green" />
+            tools:textColor="@color/primary_dark" />
 
         <TextView
             android:id="@+id/bmi_category_text"
@@ -74,7 +74,7 @@
             android:textAllCaps="true"
             android:textSize="16sp"
             tools:text="Normal"
-            tools:textColor="@color/green" />
+            tools:textColor="@color/primary_dark" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

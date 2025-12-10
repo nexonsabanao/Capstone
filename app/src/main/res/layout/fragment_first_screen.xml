@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    tools:context=".onboarding.screens.FirstScreen">
+    tools:context=".ui.onboarding.screens.FirstScreen">
 
     <ImageView
         android:id="@+id/backButton"
@@ -115,7 +115,7 @@
         android:focusable="true"
         app:layout_constraintBottom_toBottomOf="@+id/male_group"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/guideline_center"
+        app:layout_constraintStart_toEndOf="@+id/guideline_center"
         app:layout_constraintTop_toTopOf="@+id/male_group"
         app:layout_constraintWidth_max="180dp">
 
@@ -153,7 +153,7 @@
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="24dp"
         android:alpha="0.4"
-        android:backgroundTint="#00A78B"
+        android:backgroundTint="@color/primary_dark"
         android:paddingVertical="16dp"
         android:text="@string/action_next"
         android:textSize="16sp"

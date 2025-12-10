@@ -1,6 +1,6 @@
 package com.example.nutriority.planner
 
-import com.example.nutriority.data.User
+import com.example.nutriority.data.model.User
 
 /**
  * PlannerService ties together the nutrition and workout planners and exposes a single

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileFragment">
+    tools:context=".ui.profile.ProfileFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -57,7 +57,7 @@
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:src="@drawable/ic_workout_fl"
-                            app:tint="@color/green" />
+                            app:tint="@color/primary_dark" />
 
                         <TextView
                             android:id="@+id/stat_workouts"
@@ -87,7 +87,7 @@
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:src="@drawable/ic_meals_fl"
-                            app:tint="@color/green" />
+                            app:tint="@color/primary_dark" />
 
                         <TextView
                             android:id="@+id/stat_kcal"
@@ -117,7 +117,7 @@
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:src="@drawable/ic_time"
-                            app:tint="@color/green" />
+                            app:tint="@color/primary_dark" />
 
                         <TextView
                             android:id="@+id/stat_minutes"

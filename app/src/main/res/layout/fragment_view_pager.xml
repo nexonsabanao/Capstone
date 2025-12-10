@@ -6,8 +6,8 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:paddingBottom="5dp"
-    android:background="@android:color/transparent"
-    tools:context=".onboarding.ViewPagerFragment">
+    android:background="@color/app_background"
+    tools:context=".ui.onboarding.ViewPagerFragment">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"

@@ -7,25 +7,25 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.example.nutriority.HomeFragment"
+        android:name="com.example.nutriority.ui.home.HomeFragment"
         android:label="Home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/navigation_workout"
-        android:name="com.example.nutriority.WorkoutFragment"
+        android:name="com.example.nutriority.ui.workout.WorkoutFragment"
         android:label="Workout"
         tools:layout="@layout/fragment_workout" />
 
     <fragment
         android:id="@+id/navigation_meal"
-        android:name="com.example.nutriority.MealFragment"
+        android:name="com.example.nutriority.ui.meal.MealFragment"
         android:label="Meal"
         tools:layout="@layout/fragment_meal" />
 
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="com.example.nutriority.ProfileFragment"
+        android:name="com.example.nutriority.ui.profile.ProfileFragment"
         android:label="Me"
         tools:layout="@layout/fragment_profile" />
 

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    tools:context=".onboarding.screens.SecondScreen">
+    tools:context=".ui.onboarding.screens.SecondScreen">
 
     <ImageView
         android:id="@+id/backButton"
@@ -134,7 +134,7 @@
                         android:layout_marginTop="16dp"
                         android:textSize="40sp"
                         android:textStyle="bold"
-                        app:layout_constraintEnd_toStartOf="@+id/heightUnit"
+                        app:layout_constraintEnd_toStartOf="@id/heightUnit"
                         app:layout_constraintHorizontal_chainStyle="packed"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/heightUnitToggleGroup"
@@ -152,7 +152,7 @@
                         app:layout_constraintStart_toEndOf="@id/heightValue"
                         tools:text="cm" />
 
-                    <com.example.nutriority.customview.RulerView
+                    <com.example.nutriority.ui.custom.RulerView
                         android:id="@+id/heightRulerView"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
@@ -160,9 +160,9 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/heightValue"
+                        app:layout_constraintTop_toBottomOf="@id/heightValue"
                         app:ruler_defaultValue="170"
-                        app:ruler_indicatorColor="@color/green"
+                        app:ruler_indicatorColor="@color/primary_dark"
                         app:ruler_indicatorWidth="4dp"
                         app:ruler_maxValue="250"
                         app:ruler_minValue="100"
@@ -240,7 +240,7 @@
                         android:layout_marginTop="16dp"
                         android:textSize="40sp"
                         android:textStyle="bold"
-                        app:layout_constraintEnd_toStartOf="@+id/weightUnit"
+                        app:layout_constraintEnd_toStartOf="@id/weightUnit"
                         app:layout_constraintHorizontal_chainStyle="packed"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/weightUnitToggleGroup"
@@ -258,7 +258,7 @@
                         app:layout_constraintStart_toEndOf="@id/weightValue"
                         tools:text="kg" />
 
-                    <com.example.nutriority.customview.RulerView
+                    <com.example.nutriority.ui.custom.RulerView
                         android:id="@+id/weightRulerView"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
@@ -266,9 +266,9 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/weightValue"
+                        app:layout_constraintTop_toBottomOf="@id/weightValue"
                         app:ruler_defaultValue="60"
-                        app:ruler_indicatorColor="@color/green"
+                        app:ruler_indicatorColor="@color/primary_dark"
                         app:ruler_indicatorWidth="4dp"
                         app:ruler_maxValue="150"
                         app:ruler_minValue="30"
@@ -291,7 +291,7 @@
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="24dp"
         android:alpha="0.5"
-        android:backgroundTint="@color/green"
+        android:backgroundTint="@color/primary_dark"
         android:enabled="false"
         android:paddingVertical="16dp"
         android:text="@string/action_next"

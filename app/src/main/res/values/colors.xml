@@ -15,7 +15,7 @@
     <color name="soft_indicator">#2196F3</color>
 
     <!-- Add your new custom color here -->
-    <color name="green">#00A78B</color>  <!--  #4CAF50 This is an example blueish color -->
+    <color name="green">#00A78B</color>
     <color name="dark_gray">#2d1809</color>
     <color name="light_green">#fbffe2</color>
     <color name="background_gray">#94CF96</color>
@@ -24,5 +24,8 @@
     <color name="bmi_overweight">#F39C12</color>  <!-- A warning orange -->
     <color name="bmi_obese">#E74C3C</color>       <!-- A stronger red/orange -->
     <color name="app_background">#F5F5F5</color>
+
+    <color name="primary_dark">#2A2A2A</color>
+    <color name="secondary_blue">#00A4B9</color>
 
 </resources>

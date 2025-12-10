@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".customview.RulerView">
+    tools:context=".ui.custom.RulerView">
 
     <TextView
         android:id="@+id/tvSelectedValue"
@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="50" />
 
-    <com.example.nutriority.customview.RulerView
+    <com.example.nutriority.ui.custom.RulerView
         android:id="@+id/rulerView"
         android:layout_width="match_parent"
         android:layout_height="100dp"
@@ -27,7 +27,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvSelectedValue"
         app:ruler_defaultValue="50"
-        app:ruler_indicatorColor="@color/green"
+        app:ruler_indicatorColor="@color/secondary_blue"
         app:ruler_indicatorWidth="4dp"
         app:ruler_maxValue="150"
         app:ruler_minValue="1"

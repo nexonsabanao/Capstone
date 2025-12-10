@@ -1,8 +1,8 @@
 package com.example.nutriority.data.repository
 
 import androidx.lifecycle.LiveData
-import com.example.nutriority.data.User
-import com.example.nutriority.data.dao.UserDao
+import com.example.nutriority.data.model.User
+import com.example.nutriority.data.local.UserDao
 
 /**
  * The UserRepository provides a clean API for data access to the rest of the application.

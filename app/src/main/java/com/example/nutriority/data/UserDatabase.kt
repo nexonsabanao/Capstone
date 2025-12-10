@@ -5,7 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.nutriority.data.dao.UserDao
+import com.example.nutriority.data.local.Converters
+import com.example.nutriority.data.local.UserDao
+import com.example.nutriority.data.model.User
 
 @Database(entities = [User::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class) // Register converters at the database level

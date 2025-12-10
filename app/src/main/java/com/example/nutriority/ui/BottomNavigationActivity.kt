@@ -3,11 +3,11 @@ package com.example.nutriority.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.nutriority.HomeFragment
-import com.example.nutriority.MealFragment
-import com.example.nutriority.ProfileFragment
+import com.example.nutriority.ui.home.HomeFragment
+import com.example.nutriority.ui.meal.MealFragment
+import com.example.nutriority.ui.profile.ProfileFragment
 import com.example.nutriority.R
-import com.example.nutriority.WorkoutFragment
+import com.example.nutriority.ui.workout.WorkoutFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class BottomNavigationActivity : AppCompatActivity() {

@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/splashFragment"
-        android:name="com.example.nutriority.SplashFragment"
+        android:name="com.example.nutriority.ui.SplashFragment"
         android:label="fragment_splash"
         tools:layout="@layout/fragment_splash" >
 
@@ -22,7 +22,7 @@
 
     <fragment
         android:id="@+id/viewPagerFragment"
-        android:name="com.example.nutriority.onboarding.ViewPagerFragment"
+        android:name="com.example.nutriority.ui.onboarding.ViewPagerFragment"
         android:label="fragment_view_pager"
         tools:layout="@layout/fragment_view_pager" >
 

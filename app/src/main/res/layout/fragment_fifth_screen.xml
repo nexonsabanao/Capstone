@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    tools:context=".onboarding.screens.FifthScreen">
+    tools:context=".ui.onboarding.screens.FifthScreen">
 
     <ImageView
         android:id="@+id/backButton"
@@ -59,7 +59,7 @@
         android:fillViewport="true"
         android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/subtitleTextView"
-        app:layout_constraintBottom_toTopOf="@id/nextButton"
+        app:layout_constraintBottom_toTopOf="@+id/nextButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -242,7 +242,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
-        android:backgroundTint="@color/green"
+        android:backgroundTint="@color/primary_dark"
         android:paddingVertical="16dp"
         android:text="Next"
         android:textColor="@color/white"

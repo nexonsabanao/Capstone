@@ -1,6 +1,6 @@
 package com.example.nutriority.planner
 
-import com.example.nutriority.data.User
+import com.example.nutriority.data.model.User
 
 /**
  * Lightweight domain models for the planner system.

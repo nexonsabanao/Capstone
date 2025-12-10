@@ -1,7 +1,7 @@
 package com.example.nutriority.data.repository
 
-import com.example.nutriority.models.Article
-import com.example.nutriority.data.dao.ArticlesDao
+import com.example.nutriority.data.model.Article
+import com.example.nutriority.data.local.ArticlesDao
 import kotlinx.coroutines.flow.Flow
 
 /**

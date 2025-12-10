@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    tools:context=".onboarding.screens.AgeFragment">
+    tools:context=".ui.onboarding.screens.AgeFragment">
 
     <!-- top/bottom spacing handled by root padding + BaseFragment insets -->
 
@@ -66,7 +66,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
-        android:backgroundTint="@color/green"
+        android:backgroundTint="@color/primary_dark"
         android:paddingVertical="16dp"
         android:text="@string/action_next"
         android:textColor="@color/white"
