@@ -1,9 +1,12 @@
 package com.example.nutriority.ui.onboarding.screens
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
@@ -42,31 +45,50 @@ class AgeFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.backButton.setOnClickListener {
+            hideKeyboard()
             parentFragmentManager.setFragmentResult("navigationRequestPrevious", Bundle())
         }
 
         binding.nextButton.setOnClickListener {
-            val ageText = binding.ageInput.text.toString()
-            val age = ageText.toIntOrNull()
-            when {
-                age == null -> {
-                    binding.ageInputLayout.error = getString(R.string.age_error_invalid)
+            validateAndProceed()
+        }
+
+        binding.ageInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                validateAndProceed()
+                return@setOnEditorActionListener true
+            }
+            false
+        }
+    }
+
+    private fun validateAndProceed() {
+        val ageText = binding.ageInput.text.toString()
+        val age = ageText.toIntOrNull()
+        when {
+            age == null -> {
+                binding.ageInputLayout.error = getString(R.string.age_error_invalid)
+            }
+            age < 15 -> {
+                binding.ageInputLayout.error = getString(R.string.age_error_underage)
+            }
+            age > 80 -> {
+                binding.ageInputLayout.error = getString(R.string.age_error_over_limit)
+            }
+            else -> {
+                hideKeyboard()
+                binding.ageInputLayout.error = null
+                userViewModel.updateOnboardingData { currentUserState ->
+                    currentUserState.copy(age = age)
                 }
-                age < 15 -> {
-                    binding.ageInputLayout.error = getString(R.string.age_error_underage)
-                }
-                age > 80 -> {
-                    binding.ageInputLayout.error = getString(R.string.age_error_over_limit)
-                }
-                else -> {
-                    binding.ageInputLayout.error = null
-                    userViewModel.updateOnboardingData { currentUserState ->
-                        currentUserState.copy(age = age)
-                    }
-                    setFragmentResult("navigationRequestNext", Bundle())
-                }
+                setFragmentResult("navigationRequestNext", Bundle())
             }
         }
+    }
+
+    private fun hideKeyboard() {
+        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
     override fun onDestroyView() {
