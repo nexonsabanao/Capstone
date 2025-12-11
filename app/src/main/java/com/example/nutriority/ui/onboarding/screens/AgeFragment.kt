@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
+import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentAgeBinding
 
@@ -47,13 +48,23 @@ class AgeFragment : Fragment() {
         binding.nextButton.setOnClickListener {
             val ageText = binding.ageInput.text.toString()
             val age = ageText.toIntOrNull()
-            if (age != null && age > 0) {
-                userViewModel.updateOnboardingData { currentUserState ->
-                    currentUserState.copy(age = age)
+            when {
+                age == null -> {
+                    binding.ageInputLayout.error = getString(R.string.age_error_invalid)
                 }
-                setFragmentResult("navigationRequestNext", Bundle())
-            } else {
-                binding.ageInput.error = "Please enter a valid age"
+                age < 15 -> {
+                    binding.ageInputLayout.error = getString(R.string.age_error_underage)
+                }
+                age > 80 -> {
+                    binding.ageInputLayout.error = getString(R.string.age_error_over_limit)
+                }
+                else -> {
+                    binding.ageInputLayout.error = null
+                    userViewModel.updateOnboardingData { currentUserState ->
+                        currentUserState.copy(age = age)
+                    }
+                    setFragmentResult("navigationRequestNext", Bundle())
+                }
             }
         }
     }

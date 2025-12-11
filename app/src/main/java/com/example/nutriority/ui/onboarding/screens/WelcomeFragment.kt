@@ -1,11 +1,14 @@
 package com.example.nutriority.ui.onboarding.screens
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentWelcomeBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
@@ -58,11 +61,13 @@ class WelcomeFragment : Fragment() {
             Nutriority’s privacy policies explain how we treat your personal data and protect your privacy when you use our Services.
             """.trimIndent()
 
-        MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle("Terms and Services")
             .setMessage(termsAndServicesText)
             .setPositiveButton("OK", null)
             .show()
+
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_dark))
     }
 
     override fun onDestroyView() {

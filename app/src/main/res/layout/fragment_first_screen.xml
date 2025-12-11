@@ -155,6 +155,7 @@
         android:alpha="0.4"
         android:backgroundTint="@color/primary_dark"
         android:paddingVertical="16dp"
+        android:textColor="@color/white"
         android:text="@string/action_next"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"

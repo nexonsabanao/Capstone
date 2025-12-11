@@ -43,22 +43,36 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Age Input -->
-    <EditText
-        android:id="@+id/ageInput"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/ageInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="32dp"
-        android:background="@drawable/edit_text_bg"
-        android:gravity="center"
         android:hint="Enter your age"
-        android:inputType="number"
-        android:maxLength="3"
-        android:minHeight="48dp"
-        android:textSize="22sp"
+        android:textColorHint="@color/primary_dark"
+        app:boxStrokeColor="@color/text_input_layout_stroke_color"
+        app:cursorColor="@color/primary_dark"
+        app:cursorErrorColor="@color/primary_dark"
+        app:errorEnabled="true"
+        app:errorIconDrawable="@null"
+        app:hintTextColor="@color/primary_dark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titleTextView" />
+        app:layout_constraintTop_toBottomOf="@id/titleTextView">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/ageInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:inputType="number"
+            android:maxLength="2"
+            android:textColor="@color/primary_dark"
+            android:textSize="22sp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/nextButton"

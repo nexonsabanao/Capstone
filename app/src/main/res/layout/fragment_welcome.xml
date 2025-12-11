@@ -30,6 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
+        app:buttonTint="@color/checkbox_tint"
         android:text="I agree to the"
         app:layout_constraintBottom_toTopOf="@id/accept_button"
         app:layout_constraintStart_toStartOf="@id/accept_button" />
@@ -39,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=" Terms and Services"
-        android:textColor="?attr/colorPrimary"
+        android:textColor="@color/secondary_blue"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/terms_checkbox"
         app:layout_constraintStart_toEndOf="@id/terms_checkbox"

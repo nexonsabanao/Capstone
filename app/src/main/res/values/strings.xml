@@ -44,5 +44,8 @@
     <string name="no_age_available">Age not set</string>
     <string name="no_goal_available">Goal not set</string>
 
+    <string name="age_error_invalid">Please enter a valid age</string>
+    <string name="age_error_underage">You must be at least 15 years old</string>
+    <string name="age_error_over_limit">We don\'t recommend you to use the app</string>
 </resources>
     
