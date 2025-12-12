@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentSixthScreenBinding
+import dagger.hilt.android.AndroidEntryPoint
 
 private sealed class UserGoal(val value: String) {
     object LoseWeight : UserGoal("Lose Weight")
@@ -17,6 +18,7 @@ private sealed class UserGoal(val value: String) {
     object KeepFit : UserGoal("Keep Fit")
 }
 
+@AndroidEntryPoint
 class SixthScreen : Fragment() {
 
     private var _binding: FragmentSixthScreenBinding? = null

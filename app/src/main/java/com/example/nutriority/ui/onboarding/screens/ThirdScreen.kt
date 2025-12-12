@@ -17,6 +17,7 @@ import androidx.transition.TransitionSet
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentThirdScreenBinding
+import dagger.hilt.android.AndroidEntryPoint
 
 private sealed class ActivityLevel(val value: String) {
     object Sedentary : ActivityLevel("Sedentary")
@@ -24,6 +25,7 @@ private sealed class ActivityLevel(val value: String) {
     object Active : ActivityLevel("Active")
 }
 
+@AndroidEntryPoint
 class ThirdScreen : Fragment() {
 
     private var _binding: FragmentThirdScreenBinding? = null

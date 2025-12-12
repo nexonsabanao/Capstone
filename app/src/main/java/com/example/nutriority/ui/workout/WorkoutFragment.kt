@@ -11,8 +11,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.databinding.FragmentWorkoutBinding
 import com.example.nutriority.ui.adapter.WorkoutAdapter
 import com.example.nutriority.ui.home.HomeViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class WorkoutFragment : Fragment() {
 
     private var _binding: FragmentWorkoutBinding? = null

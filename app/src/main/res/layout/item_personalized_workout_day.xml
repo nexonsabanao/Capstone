@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="16dp"
+    android:paddingStart="40dp"
+    android:background="@drawable/bg_day_card_inactive"
+    tools:background="@drawable/bg_day_card_active">
+
+    <View
+        android:id="@+id/timeline_dot"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:background="@drawable/dot_inactive"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tv_day_title"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_day_details"
+        android:layout_marginStart="-32dp"
+        tools:background="@drawable/dot_active"/>
+
+    <TextView
+        android:id="@+id/tv_day_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Day 1"
+        tools:textColor="@android:color/white"/>
+
+    <TextView
+        android:id="@+id/tv_day_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="16sp"
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_day_title"
+        tools:text="5 min · 61.5 kcal"
+        tools:textColor="@android:color/white" />
+
+    <Button
+        android:id="@+id/btn_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp"
+        android:text="START"
+        android:visibility="gone"
+        android:textColor="#3DDC84"
+        android:background="@drawable/bg_start_button"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_day_details"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:visibility="visible"/>
+
+    <ImageView
+        android:id="@+id/iv_workout_image"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginEnd="16dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:src="@drawable/img_man_day1"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

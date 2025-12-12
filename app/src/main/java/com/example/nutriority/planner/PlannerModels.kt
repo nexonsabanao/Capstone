@@ -1,5 +1,6 @@
 package com.example.nutriority.planner
 
+import com.example.nutriority.data.model.Meal
 import com.example.nutriority.data.model.User
 
 /**
@@ -15,14 +16,6 @@ data class MacroTargets(
     val proteinGrams: Int,
     val carbsGrams: Int,
     val fatGrams: Int
-)
-
-data class Meal(
-    val name: String,
-    val calories: Int,
-    val description: String,
-    val ingredients: List<String>,
-    val imageName: String = ""
 )
 
 data class WorkoutPlan(

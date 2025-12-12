@@ -10,15 +10,14 @@ import com.example.nutriority.databinding.ItemPreviewMealCardBinding
 
 class MealAdapter : ListAdapter<Meal, MealAdapter.MealViewHolder>(MealDiffCallback()) {
 
-    // The ViewHolder no longer needs to be an 'inner' class.
     class MealViewHolder(private val binding: ItemPreviewMealCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(meal: Meal) {
             binding.mealName.text = meal.name
-            binding.mealCalories.text = meal.calories
+            // Format the integer calories into a user-friendly string
+            binding.mealCalories.text = "${meal.calories} kcal"
 
-            // The adapter now trusts that imageResId is pre-calculated for performance.
             if (meal.imageResId != 0) {
                 binding.mealImage.setImageResource(meal.imageResId)
             }

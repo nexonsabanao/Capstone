@@ -4,8 +4,9 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.content.Context
-import android.content.Intent // 1. Add this import
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,26 +16,31 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
-import androidx.core.os.bundleOf
 import com.example.nutriority.R
-import com.example.nutriority.data.model.User
 import com.example.nutriority.data.UserViewModel
+import com.example.nutriority.data.model.User
 import com.example.nutriority.databinding.FragmentSeventhScreenBinding
-import com.example.nutriority.ui.BottomNavigationActivity // 2. Add this import
 import com.example.nutriority.planner.PlannerService
+import com.example.nutriority.ui.BottomNavigationActivity
+import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.math.floor
 import kotlin.math.pow
 
+@AndroidEntryPoint
 class SeventhScreen : Fragment() {
+
+    @Inject
+    lateinit var plannerService: PlannerService
 
     private var _binding: FragmentSeventhScreenBinding? = null
     private val binding get() = _binding!!
 
     private val userViewModel: UserViewModel by activityViewModels()
 
-    // Ensure the recap animation only runs when the page becomes visible (not when preloaded).
     private var recapAnimationStarted = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -46,15 +52,13 @@ class SeventhScreen : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.bmiContainer.alpha = 0f
 
-        // 1) If the ViewPager is already on the final page, start immediately.
         val parentVp = parentFragment?.view?.findViewById<ViewPager2>(R.id.viewPager)
         if (parentVp?.currentItem == 8) {
             startRecapIfNeeded()
         }
 
-        // 2) Otherwise, wait for the ViewPager to signal which page is selected.
         parentFragmentManager.setFragmentResultListener("pageSelected", this) { _, bundle ->
-            val position = bundle?.getInt("position") ?: -1
+            val position = bundle.getInt("position", -1)
             if (position == 8) startRecapIfNeeded()
         }
     }
@@ -76,32 +80,25 @@ class SeventhScreen : Fragment() {
                 delay(if (text.contains("Finalizing")) 4000 else 1000)
             }
 
-            // --- THIS IS THE CORRECTED LOGIC ---
-
-            // 1. Generate a personalized plan and save a short summary so the app can display it later.
             try {
-                val generatedPlan = PlannerService.generatePlanForUser(user)
-                val summary = PlannerService.planSummary(generatedPlan)
-                requireActivity()
-                    .getSharedPreferences("onBoarding", Context.MODE_PRIVATE)
-                    .edit()
-                    .putString("personalized_plan_summary", summary)
-                    .apply()
+                val generatedPlan = plannerService.generatePlanForUser(user)
+                val planJson = Gson().toJson(generatedPlan)
+                val saveSuccess = userViewModel.savePersonalizedPlanAndAwait(planJson)
+
+                if (saveSuccess) {
+                    finishOnboarding()
+                    val intent = Intent(requireActivity(), BottomNavigationActivity::class.java)
+                    startActivity(intent)
+                    requireActivity().finish()
+                } else {
+                    Log.e("OnboardingError", "Failed to save the personalized plan to the database.")
+                    // Optionally, show an error message to the user
+                }
+
             } catch (e: Exception) {
-                // Keep going without blocking the flow if anything goes wrong
+                Log.e("OnboardingError", "An error occurred during plan generation or saving.", e)
+                // Optionally, show an error message to the user
             }
-
-            // 2. Mark onboarding as finished in SharedPreferences.
-            finishOnboarding()
-
-            // 2. Create an Intent to start HomeActivity.
-            val intent = Intent(requireActivity(), BottomNavigationActivity::class.java)
-            startActivity(intent)
-
-            // 3. Finish the current MainActivity so the user cannot go back to onboarding.
-            requireActivity().finish()
-
-            // --- END OF CORRECTED LOGIC ---
         }
     }
 
@@ -120,22 +117,19 @@ class SeventhScreen : Fragment() {
             .apply()
     }
 
-    // ... (rest of the file remains the same)
-
     private fun buildRecap(user: User): Pair<List<String>, List<String>> {
-
         val height = if (user.unitSystem == "IMPERIAL") {
             val totalIn = user.heightCm / 2.54
             val ft = floor(totalIn / 12).toInt()
             val inch = (totalIn % 12).toInt()
-            "Height: ${ft}' ${inch}\"  (${user.heightCm.toInt()} cm)"
+            "Height: ${ft}'${inch}\" (${user.heightCm.toInt()} cm)"
         } else {
             "Height: ${user.heightCm.toInt()} cm"
         }
 
         val weight = if (user.unitSystem == "IMPERIAL") {
             val lbs = (user.weightKg * 2.20462).toInt()
-            "Weight: $lbs lbs  (${user.weightKg.toInt()} kg)"
+            "Weight: $lbs lbs (${user.weightKg.toInt()} kg)"
         } else {
             "Weight: ${user.weightKg.toInt()} kg"
         }
@@ -183,10 +177,8 @@ class SeventhScreen : Fragment() {
         binding.bmiContainer.animate().alpha(1f).setDuration(400).start()
     }
 
-    // ---------- TEXT ANIMATION ----------
     private fun fadeText(newText: String) {
         val v = binding.userDataRecapText
-
         val fadeOut = ObjectAnimator.ofFloat(v, "alpha", 1f, 0f).apply {
             duration = 250
             interpolator = AccelerateInterpolator()

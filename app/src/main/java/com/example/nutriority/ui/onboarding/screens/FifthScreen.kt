@@ -15,7 +15,9 @@ import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentFifthScreenBinding
 import com.google.android.material.chip.Chip
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class FifthScreen : Fragment() {
 
     private var _binding: FragmentFifthScreenBinding? = null

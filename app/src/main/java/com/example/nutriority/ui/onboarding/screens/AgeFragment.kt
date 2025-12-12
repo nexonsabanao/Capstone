@@ -13,7 +13,9 @@ import androidx.fragment.app.setFragmentResult
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentAgeBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AgeFragment : Fragment() {
     private var _binding: FragmentAgeBinding? = null
     private val binding get() = _binding!!

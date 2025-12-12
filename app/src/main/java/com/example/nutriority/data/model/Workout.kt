@@ -6,7 +6,6 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "workouts")
 data class Workout(
-    // The @PrimaryKey annotation MUST be on its own line to be recognized.
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
@@ -16,8 +15,13 @@ data class Workout(
     val targetMuscle: String,
     val imageName: String,
     val difficulty: String,
-    val duration: String
+    val duration: String,
+    val tags: List<String> = emptyList()
 ) {
     @Ignore
     var imageResId: Int = 0
+    @Ignore
+    var warmup: List<Warmup> = emptyList()
+    @Ignore
+    var cooldown: List<Cooldown> = emptyList()
 }

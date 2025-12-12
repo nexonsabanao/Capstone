@@ -13,8 +13,10 @@ import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentSecondScreenBinding
 import com.google.android.material.button.MaterialButtonToggleGroup
+import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
 
+@AndroidEntryPoint
 class SecondScreen : Fragment() {
 
     private var _binding: FragmentSecondScreenBinding? = null

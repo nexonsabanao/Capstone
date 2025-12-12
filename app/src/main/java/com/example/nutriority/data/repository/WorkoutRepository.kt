@@ -5,6 +5,7 @@ import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.model.WorkoutWithExercises
 import com.example.nutriority.data.local.WorkoutDao
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 /**
  * Repository for managing Workout and Exercise data.
@@ -18,6 +19,14 @@ class WorkoutRepository(private val workoutDao: WorkoutDao) {
      * The UI can collect this Flow to reactively update when the data changes.
      */
     val allWorkouts: Flow<List<Workout>> = workoutDao.getAllWorkouts()
+
+    /**
+     * A suspend function that returns a simple list of all workouts with their exercises.
+     * This is useful for one-shot operations, like in the WorkoutPlanner.
+     */
+    suspend fun getAllWorkoutsList(): List<WorkoutWithExercises> {
+        return workoutDao.getAllWorkoutsWithExercises().first()
+    }
 
     /**
      * Retrieves a specific Workout along with its complete list of Exercises.

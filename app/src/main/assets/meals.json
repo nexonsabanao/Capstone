@@ -1,7 +1,8 @@
 [
   {
     "name": "Avocado Toast",
-    "calories": "350 kcal",
+    "description": "A simple and delicious breakfast.",
+    "calories": 350,
     "category": "Vegetarian",
     "time": "Breakfast",
     "ingredients": ["2 slices of whole-wheat bread", "1 ripe avocado", "1 pinch of salt", "1 pinch of red pepper flakes"],
@@ -9,7 +10,8 @@
   },
   {
     "name": "Chicken Salad",
-    "calories": "450 kcal",
+    "description": "A light and refreshing lunch option.",
+    "calories": 450,
     "category": "Low Carb",
     "time": "Lunch",
     "ingredients": ["150g grilled chicken breast", "50g mixed greens", "1/2 cucumber", "1/4 red onion", "2 tbsp vinaigrette"],
@@ -17,10 +19,20 @@
   },
   {
     "name": "Quinoa Bowl",
-    "calories": "400 kcal",
+    "description": "A hearty and nutritious dinner.",
+    "calories": 400,
     "category": "Balanced Diet",
     "time": "Dinner",
     "ingredients": ["1 cup cooked quinoa", "1/2 cup black beans", "1/2 cup corn", "1/4 avocado", "Salsa and lime to taste"],
     "imageName": "meal_quinoa_bowl"
+  },
+  {
+    "name": "Salmon with Asparagus",
+    "description": "A healthy and flavorful meal.",
+    "calories": 550,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["200g salmon fillet", "1 bunch of asparagus", "1 tbsp olive oil", "1/2 lemon", "Salt and pepper to taste"],
+    "imageName": "meal_salmon_asparagus"
   }
 ]
