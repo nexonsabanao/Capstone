@@ -1,6 +1,8 @@
 package com.example.nutriority.planner
 
+import com.example.nutriority.data.model.Meal
 import com.example.nutriority.data.model.User
+import com.google.gson.annotations.SerializedName
 
 /**
  * Lightweight domain models for the planner system.
@@ -17,14 +19,6 @@ data class MacroTargets(
     val fatGrams: Int
 )
 
-data class Meal(
-    val name: String,
-    val calories: Int,
-    val description: String,
-    val ingredients: List<String>,
-    val imageName: String = ""
-)
-
 data class WorkoutPlan(
     val weeklyCaloriesBurn: Int,
     val sessions: List<WorkoutSession>
@@ -34,7 +28,20 @@ data class WorkoutSession(
     val day: String,
     val durationMinutes: Int,
     val focus: String,
-    val description: String
+    val description: String,
+    @SerializedName("workout") val workoutDetails: WorkoutDetails? = null,
+    // This field is for backward compatibility with old JSON schemas.
+    private val workoutId: Int? = null
+) {
+    // This computed property provides a unified way to access the workout ID.
+    // It is not serialized and is safe from reflection issues with Gson.
+    val unifiedWorkoutId: Int?
+        get() = workoutDetails?.id ?: workoutId
+}
+
+
+data class WorkoutDetails(
+    val id: Int
 )
 
 // Simple holder for combined plan

@@ -1,14 +1,17 @@
 package com.example.nutriority.planner
 
 import com.example.nutriority.data.model.User
+import com.example.nutriority.data.model.Meal
+import javax.inject.Inject
+import javax.inject.Singleton
 
-/**
- * PlannerService ties together the nutrition and workout planners and exposes a single
- * method to generate a PersonalizedPlan from a given User.
- */
-object PlannerService {
+@Singleton
+class PlannerService @Inject constructor(
+    private val mealPlanner: MealPlanner,
+    private val workoutPlanner: WorkoutPlanner
+) {
 
-    fun generatePlanForUser(user: User): PersonalizedPlan {
+    suspend fun generatePlanForUser(user: User): PersonalizedPlan {
         val input = PlannerInput(user, user.age ?: 30)
 
         val dailyCalories = NutritionCalculator.calculateTdeeDailyCalories(
@@ -22,11 +25,12 @@ object PlannerService {
 
         val macros = NutritionCalculator.macronutrientTargets(dailyCalories)
 
-        val meals = MealPlanner.planMeals(dailyCalories, user.preferredDiet, user.excludedIngredients)
+        val meals: List<Meal> = mealPlanner.planMeals(dailyCalories, user.preferredDiet, user.excludedIngredients)
 
+        // The meals list is now in the correct format, so no mapping is needed.
         val nutritionPlan = NutritionPlan(dailyCalories, macros, meals)
 
-        val workoutPlan = WorkoutPlanner.planWorkouts(user.goal)
+        val workoutPlan = workoutPlanner.planWorkouts(user)
 
         val plan = PersonalizedPlan(user.id, nutritionPlan, workoutPlan)
 

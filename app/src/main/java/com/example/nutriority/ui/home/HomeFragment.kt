@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,10 +16,13 @@ import com.example.nutriority.databinding.FragmentHomeBinding
 import com.example.nutriority.ui.adapter.MealAdapter
 import com.example.nutriority.ui.adapter.WorkoutAdapter
 import com.example.nutriority.ui.adapter.ArticleAdapter
-import com.example.nutriority.ui.home.HomeViewModel
+import com.example.nutriority.ui.workout.PersonalizedWorkoutActivity
+import com.example.nutriority.ui.workout.WorkoutDetailActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import me.relex.circleindicator.CircleIndicator2
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
@@ -26,7 +30,6 @@ class HomeFragment : Fragment() {
 
     private val homeViewModel: HomeViewModel by viewModels()
 
-    // Declare adapters
     private lateinit var mealAdapter: MealAdapter
     private lateinit var workoutAdapter: WorkoutAdapter
     private lateinit var articleAdapter: ArticleAdapter
@@ -43,14 +46,25 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupClickListeners()
         setupRecyclerViews()
         observeViewModel()
     }
 
+    private fun setupClickListeners() {
+        binding.sevenDaysWorkoutCard.btnStart.setOnClickListener {
+            val intent = Intent(requireActivity(), PersonalizedWorkoutActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
     private fun setupRecyclerViews() {
-        // --- CHANGE 1: Initialize ListAdapters without any data ---
         mealAdapter = MealAdapter()
-        workoutAdapter = WorkoutAdapter()
+        workoutAdapter = WorkoutAdapter { workout ->
+            val intent = Intent(requireActivity(), WorkoutDetailActivity::class.java)
+            intent.putExtra("workout_id", workout.id)
+            startActivity(intent)
+        }
         articleAdapter = ArticleAdapter()
 
         binding.mealsRecyclerView.apply {
@@ -65,13 +79,10 @@ class HomeFragment : Fragment() {
             workoutSnapHelper.attachToRecyclerView(this)
         }
 
-        // Attach the indicator to the RecyclerView
         indicator = binding.workoutsIndicator
         indicator.attachToRecyclerView(binding.workoutsRecyclerView, workoutSnapHelper)
 
-        // Register the observer to be notified of data changes.
         workoutAdapter.registerAdapterDataObserver(indicator.adapterDataObserver)
-
 
         binding.articlesRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -84,14 +95,12 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     homeViewModel.allMeals.collect { meals ->
-                        // --- CHANGE 2: Use submitList() instead of updateData() ---
                         mealAdapter.submitList(meals)
                     }
                 }
 
                 launch {
                     homeViewModel.allWorkouts.collect { workouts ->
-                        // --- CHANGE 2: Use submitList() instead of updateData() ---
                         workoutAdapter.submitList(workouts)
                     }
                 }

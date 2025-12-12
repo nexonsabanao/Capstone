@@ -26,9 +26,10 @@ class UserRepository(private val userDao: UserDao) {
     /**
      * A suspend function to insert or update a user profile in the database.
      * This will be called from a ViewModel's coroutine scope.
+     * @return true if the operation was successful, false otherwise.
      */
-    suspend fun insertUser(user: User) {
-        userDao.insertUser(user)
+    suspend fun insertUser(user: User): Boolean {
+        return userDao.insertUser(user) > 0
     }
 
     /**

@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".NutriorityApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -10,6 +11,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Nutriority"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
 
         <!-- Launcher Activity -->
@@ -29,6 +31,21 @@
         <!-- Home Activity (MUST BE REGISTERED HERE) -->
         <activity
             android:name=".ui.BottomNavigationActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.workout.PersonalizedWorkoutActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.workout.WorkoutDetailActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.workout.ExerciseDetailActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 

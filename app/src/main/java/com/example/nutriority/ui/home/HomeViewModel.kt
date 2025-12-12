@@ -1,40 +1,34 @@
 package com.example.nutriority.ui.home
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nutriority.data.local.AppDatabase
 import com.example.nutriority.data.model.Article
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.repository.ArticleRepository
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.WorkoutRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val mealRepository: MealRepository
-    private val workoutRepository: WorkoutRepository
-    private val articleRepository: ArticleRepository
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    application: Application, // Keep Application for resource access
+    mealRepository: MealRepository,
+    workoutRepository: WorkoutRepository,
+    articleRepository: ArticleRepository
+) : ViewModel() {
 
     val allMeals: StateFlow<List<Meal>>
     val allWorkouts: StateFlow<List<Workout>>
     val allArticles: StateFlow<List<Article>>
 
     init {
-        val database = AppDatabase.getDatabase(application, viewModelScope)
-        val mealDao = database.mealDao()
-        val workoutDao = database.workoutDao()
-        val articlesDao = database.articlesDao()
-
-        mealRepository = MealRepository(mealDao)
-        workoutRepository = WorkoutRepository(workoutDao)
-        articleRepository = ArticleRepository(articlesDao)
-
         val resources = application.resources
         val packageName = application.packageName
 

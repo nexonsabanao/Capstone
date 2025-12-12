@@ -13,6 +13,7 @@ navigationFragmentKtx = "2.9.6"
 navigationUiKtx = "2.9.6"
 fragment = "1.8.9"
 viewpager2 = "1.1.0"
+hilt = "2.57.2"
 
 #i added
 splashscreen = "1.0.1"
@@ -32,6 +33,9 @@ androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navi
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 androidx-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
 androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+
 
 #i added
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0" }
@@ -45,6 +49,7 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 
 #i added
 google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

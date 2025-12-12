@@ -4,6 +4,7 @@ plugins {
 
     //i added
     alias(libs.plugins.google.devtools.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -85,6 +86,10 @@ dependencies {
 
     // Circle Indicator
     implementation("me.relex:circleindicator:2.1.6")
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 
 
 

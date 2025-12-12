@@ -10,10 +10,11 @@ import com.example.nutriority.ui.meal.MealFragment
 import com.example.nutriority.ui.profile.ProfileFragment
 import com.example.nutriority.ui.workout.WorkoutFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.ArrayDeque
 
+@AndroidEntryPoint
 class BottomNavigationActivity : AppCompatActivity() {
-
     private val fragmentMap = mutableMapOf<String, Fragment>()
     private lateinit var activeFragment: Fragment
     private val backStack = ArrayDeque<String>() // Use tags in backstack

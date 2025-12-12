@@ -18,5 +18,7 @@ data class User(
     val activityLevel: String = "",
     val goal: String = "",
     val preferredDiet: String = "",
-    val excludedIngredients: List<String> = emptyList()
+    val excludedIngredients: List<String> = emptyList(),
+    val personalizedPlanJson: String? = null,
+    val lastCompletedWorkoutDay: Int = 0 // Default to 0, meaning Day 1 is the first workout
 )

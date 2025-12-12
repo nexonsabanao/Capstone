@@ -9,9 +9,10 @@ data class Meal(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val name: String,
-    val calories: String,
+    val description: String,
+    val calories: Int,
     val category: String,
-    val ingredients: List<String>, // Your converter handles this perfectly.
+    val ingredients: List<String>,
     val time: String,
     val imageName: String
 ) {

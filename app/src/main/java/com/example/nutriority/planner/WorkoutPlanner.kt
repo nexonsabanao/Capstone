@@ -1,66 +1,108 @@
 package com.example.nutriority.planner
 
-/**
- * Workout planner - creates a weekly plan based on user goal.
- */
-object WorkoutPlanner {
+import com.example.nutriority.data.model.User
+import com.example.nutriority.data.model.WorkoutWithExercises
+import com.example.nutriority.data.repository.WorkoutRepository
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.math.pow
 
-    private val weekDays = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+@Singleton
+class WorkoutPlanner @Inject constructor(
+    private val workoutRepository: WorkoutRepository
+) {
 
-    fun planWorkouts(goal: String, preference: String? = null): WorkoutPlan {
-        // We don't need the second tuple value here (focus) — keep signature concise and avoid unused-variable warnings
-        val (sessionsPerWeek, _) = when (goal.lowercase()) {
-            "lose weight" -> 5 to "Cardio & Conditioning"
-            "build muscle" -> 4 to "Strength"
-            "keep fit" -> 3 to "Mixed"
-            else -> 3 to "Mixed"
+    suspend fun planWorkouts(user: User): WorkoutPlan {
+        val allWorkouts = workoutRepository.getAllWorkoutsList().associateBy { it.workout.targetMuscle }
+        val bmi = calculateBmi(user.weightKg, user.heightCm)
+
+        val sessions = when (user.goal.lowercase()) {
+            "build muscle" -> createBuildMusclePlan(allWorkouts, bmi)
+            "lose weight" -> createLoseWeightPlan(allWorkouts)
+            "keep fit" -> createKeepFitPlan(allWorkouts)
+            else -> createKeepFitPlan(allWorkouts)
         }
 
-        val sessionDays = selectEvenlySpacedDays(sessionsPerWeek)
-
-        val sessions = sessionDays.mapIndexed { idx, day ->
-            val duration = when (goal.lowercase()) {
-                "lose weight" -> if (idx % 2 == 0) 40 else 30
-                "build muscle" -> 45
-                else -> 30
-            }
-
-            val sessionFocus = if (preference.isNullOrBlank()) {
-                if (goal.lowercase() == "build muscle") "Strength" else "Mixed Cardio"
-            } else {
-                when (preference.lowercase()) {
-                    "home" -> if (goal.lowercase() == "build muscle") "Bodyweight Strength" else "Cardio Circuit"
-                    "gym" -> if (goal.lowercase() == "build muscle") "Weight Training" else "Treadmill/Rowing/Cardio"
-                    else -> if (goal.lowercase() == "build muscle") "Strength" else "Mixed Cardio"
-                }
-            }
-
-            WorkoutSession(
-                day = day,
-                durationMinutes = duration,
-                focus = sessionFocus,
-                description = "${sessionFocus} for ${duration} minutes: a mix of exercises tailored for ${goal.lowercase()}"
-            )
-        }
-
-        // Estimate weekly calories burned roughly: 6-10 kcal per minute depending on intensity, use 8 as average
         val weeklyCaloriesBurn = sessions.sumOf { it.durationMinutes } * 8
-
         return WorkoutPlan(weeklyCaloriesBurn, sessions)
     }
 
-    private fun selectEvenlySpacedDays(count: Int): List<String> {
-        if (count <= 0) return emptyList()
-        if (count >= 7) return weekDays
+    private fun calculateBmi(weightKg: Double, heightCm: Double): Double {
+        if (heightCm <= 0) return 0.0
+        return weightKg / (heightCm / 100).pow(2)
+    }
 
-        val spacing = 7.0 / count
-        val result = mutableListOf<String>()
-        var i = 0.0
-        for (n in 0 until count) {
-            val idx = (i).toInt() % 7
-            result.add(weekDays[idx])
-            i += spacing
+    private fun createBuildMusclePlan(workouts: Map<String, WorkoutWithExercises>, bmi: Double): List<WorkoutSession> {
+        val plan = if (bmi < 25) {
+            // Standard Push, Pull, Legs for foundational strength
+            listOf(
+                workouts["Chest"],     // Push
+                workouts["Back"],      // Pull
+                workouts["Legs"],      // Legs
+                null,                  // Rest
+                workouts["Shoulders"], // Push
+                workouts["Arms"],      // Pull/Accessory
+                null                   // Rest
+            )
+        } else {
+            // Higher volume for more advanced users or those with higher BMI
+            listOf(
+                workouts["Chest"],     // Push
+                workouts["Back"],      // Pull
+                workouts["Legs"],      // Legs
+                workouts["Shoulders"], // Push
+                workouts["Arms"],      // Pull/Accessory
+                workouts["Abs"],
+                null                   // Rest
+            )
         }
-        return result
+        return createSessionsFromPlan(plan)
+    }
+
+    private fun createLoseWeightPlan(workouts: Map<String, WorkoutWithExercises>): List<WorkoutSession> {
+        val plan = listOf(
+            workouts["Full Body"],
+            workouts["Abs"],
+            workouts["Full Body"],
+            null, 
+            workouts["Full Body"],
+            workouts["Abs"],
+            null 
+        )
+        return createSessionsFromPlan(plan)
+    }
+
+    private fun createKeepFitPlan(workouts: Map<String, WorkoutWithExercises>): List<WorkoutSession> {
+        val plan = listOf(
+            workouts["Upper Body"],
+            workouts["Legs"],
+            null,
+            workouts["Upper Body"],
+            null,
+            workouts["Full Body"],
+            null
+        )
+        return createSessionsFromPlan(plan)
+    }
+
+    private fun createSessionsFromPlan(plan: List<WorkoutWithExercises?>): List<WorkoutSession> {
+        return plan.mapIndexed { index, workoutData ->
+            if (workoutData != null) {
+                WorkoutSession(
+                    day = "Day ${index + 1}",
+                    focus = workoutData.workout.name,
+                    durationMinutes = workoutData.workout.duration.filter { it.isDigit() }.toIntOrNull() ?: 45,
+                    description = workoutData.workout.description,
+                    workoutDetails = WorkoutDetails(id = workoutData.workout.id)
+                )
+            } else {
+                WorkoutSession(
+                    day = "Day ${index + 1}",
+                    focus = "Rest Day",
+                    durationMinutes = 0,
+                    description = "A day to recover and let your muscles rebuild."
+                )
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.workout
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,8 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.databinding.FragmentWorkoutBinding
 import com.example.nutriority.ui.adapter.WorkoutAdapter
 import com.example.nutriority.ui.home.HomeViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class WorkoutFragment : Fragment() {
 
     private var _binding: FragmentWorkoutBinding? = null
@@ -38,7 +41,11 @@ class WorkoutFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        workoutAdapter = WorkoutAdapter()
+        workoutAdapter = WorkoutAdapter { workout ->
+            val intent = Intent(requireActivity(), WorkoutDetailActivity::class.java)
+            intent.putExtra("workout_id", workout.id)
+            startActivity(intent)
+        }
         binding.bodyFocusRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = workoutAdapter

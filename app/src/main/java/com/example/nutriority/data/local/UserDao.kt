@@ -13,8 +13,8 @@ interface UserDao {
      * Inserts a user profile. If a profile already exists, it will be replaced.
      * This ensures you only ever have one user profile saved.
      */
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
-    suspend fun insertUser(user: User)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUser(user: User): Long
 
     /**
      * Retrieves the single user profile from the table for continuous observation.

@@ -13,6 +13,7 @@ import androidx.fragment.app.setFragmentResult
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentFourthScreenBinding
+import dagger.hilt.android.AndroidEntryPoint
 
 private sealed class DietType(val value: String) {
     object Balanced : DietType("Balanced")
@@ -20,6 +21,7 @@ private sealed class DietType(val value: String) {
     object Vegetarian : DietType("Vegetarian")
 }
 
+@AndroidEntryPoint
 class FourthScreen : Fragment() {
 
     private var _binding: FragmentFourthScreenBinding? = null

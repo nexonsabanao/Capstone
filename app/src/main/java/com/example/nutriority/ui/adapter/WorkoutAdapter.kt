@@ -8,9 +8,23 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.data.model.Workout
 import com.example.nutriority.databinding.ItemPreviewWorkoutBinding
 
-class WorkoutAdapter : ListAdapter<Workout, WorkoutAdapter.WorkoutViewHolder>(WorkoutDiffCallback()) {
+class WorkoutAdapter(
+    private val onItemClick: (Workout) -> Unit
+) : ListAdapter<Workout, WorkoutAdapter.WorkoutViewHolder>(WorkoutDiffCallback()) {
 
-    class WorkoutViewHolder(val binding: ItemPreviewWorkoutBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class WorkoutViewHolder(
+        val binding: ItemPreviewWorkoutBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.root.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemClick(getItem(position))
+                }
+            }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkoutViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -20,13 +34,12 @@ class WorkoutAdapter : ListAdapter<Workout, WorkoutAdapter.WorkoutViewHolder>(Wo
 
     override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int) {
         val currentWorkout = getItem(position)
-        holder.binding.apply {
+        with(holder.binding) {
             workoutName.text = currentWorkout.name
             workoutTarget.text = currentWorkout.targetMuscle
             tvDifficulty.text = currentWorkout.difficulty
             tvDuration.text = currentWorkout.duration
 
-            // The adapter now relies on imageResId being pre-calculated for better performance.
             if (currentWorkout.imageResId != 0) {
                 workoutImage.setImageResource(currentWorkout.imageResId)
             }

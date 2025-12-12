@@ -1,0 +1,53 @@
+package com.example.nutriority.ui.adapter
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.example.nutriority.data.model.Exercise
+import com.example.nutriority.databinding.ItemExerciseBinding
+
+class ExerciseAdapter(private val onItemClick: (Exercise) -> Unit) : ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder>(ExerciseDiffCallback()) {
+
+    inner class ExerciseViewHolder(val binding: ItemExerciseBinding) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.root.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemClick(getItem(position))
+                }
+            }
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExerciseViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = ItemExerciseBinding.inflate(inflater, parent, false)
+        return ExerciseViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ExerciseViewHolder, position: Int) {
+        val currentExercise = getItem(position)
+        holder.binding.apply {
+            exerciseName.text = currentExercise.name
+            exerciseSets.text = "${currentExercise.sets} sets"
+            exerciseReps.text = "${currentExercise.reps} reps"
+            exerciseRest.text = "${currentExercise.rest} rest"
+
+            if (currentExercise.imageResId != 0) {
+                exerciseImage.setImageResource(currentExercise.imageResId)
+            }
+        }
+    }
+
+    class ExerciseDiffCallback : DiffUtil.ItemCallback<Exercise>() {
+        override fun areItemsTheSame(oldItem: Exercise, newItem: Exercise): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Exercise, newItem: Exercise): Boolean {
+            return oldItem == newItem
+        }
+    }
+}

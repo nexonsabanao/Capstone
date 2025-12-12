@@ -54,6 +54,18 @@ interface WorkoutDao {
     fun getAllWorkouts(): Flow<List<Workout>>
 
     /**
+     * Gets a specific Workout by its ID.
+     */
+    @Query("SELECT * FROM workouts WHERE id = :workoutId")
+    suspend fun getWorkoutById(workoutId: Int): Workout?
+
+    /**
+     * Gets a specific Exercise by its ID.
+     */
+    @Query("SELECT * FROM exercises WHERE id = :exerciseId")
+    suspend fun getExerciseById(exerciseId: Int): Exercise?
+
+    /**
      * Gets a specific Workout with all its associated Exercises.
      * @Transaction ensures this is done as a single atomic operation.
      */
