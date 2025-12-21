@@ -24,6 +24,7 @@
     <color name="bmi_overweight">#F39C12</color>  <!-- A warning orange -->
     <color name="bmi_obese">#E74C3C</color>       <!-- A stronger red/orange -->
     <color name="app_background">#F5F5F5</color>
+    <color name="ic_launcher_background">#FDFDFD</color>
 
     <color name="primary_dark">#2A2A2A</color>
     <color name="secondary_blue">#00A4B9</color>
