@@ -1,6 +1,5 @@
 package com.example.nutriority.ui.adapter
 
-import android.content.Context
 import android.content.res.ColorStateList
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,7 +20,6 @@ enum class DayStatus {
 }
 
 class PersonalizedWorkoutAdapter(
-    private val context: Context,
     private val workoutSessions: List<WorkoutSession>,
     private val lastCompletedDay: Int, // The index of the last completed day (e.g., 0 for Day 1)
     private val onStartWorkoutClicked: (dayIndex: Int) -> Unit,
@@ -103,6 +101,7 @@ class PersonalizedWorkoutAdapter(
         }
 
         fun bind(session: WorkoutSession, status: DayStatus) {
+            val context = binding.root.context
             binding.tvDayTitle.text = session.day
             binding.tvDayDetails.text = if (session.focus != "Rest Day") {
                 "${session.durationMinutes} min · ${session.durationMinutes * 8} kcal"

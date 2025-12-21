@@ -62,6 +62,7 @@ class WorkoutFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.bodyFocusRecyclerView.adapter = null
         _binding = null
     }
 }

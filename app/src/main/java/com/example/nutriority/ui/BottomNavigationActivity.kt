@@ -5,11 +5,11 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.nutriority.R
+import com.example.nutriority.databinding.ActivityNavigationBottomBinding
 import com.example.nutriority.ui.home.HomeFragment
 import com.example.nutriority.ui.meal.MealFragment
 import com.example.nutriority.ui.profile.ProfileFragment
 import com.example.nutriority.ui.workout.WorkoutFragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.ArrayDeque
 
@@ -18,12 +18,12 @@ class BottomNavigationActivity : AppCompatActivity() {
     private val fragmentMap = mutableMapOf<String, Fragment>()
     private lateinit var activeFragment: Fragment
     private val backStack = ArrayDeque<String>() // Use tags in backstack
+    private lateinit var binding: ActivityNavigationBottomBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_navigation_bottom)
-
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation_view)
+        binding = ActivityNavigationBottomBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         if (savedInstanceState == null) {
             // First time creation
@@ -62,7 +62,7 @@ class BottomNavigationActivity : AppCompatActivity() {
             activeFragment = fragmentMap[activeTag]!!
         }
 
-        bottomNavigationView.setOnItemSelectedListener { item ->
+        binding.bottomNavigationView.setOnItemSelectedListener { item ->
             val tag = getTagForMenuItem(item.itemId)
             val fragment = fragmentMap[tag]
 
@@ -80,7 +80,7 @@ class BottomNavigationActivity : AppCompatActivity() {
                 val previousTag = backStack.peek()!!
                 val previousFragment = fragmentMap[previousTag]!!
                 showFragment(previousFragment)
-                bottomNavigationView.selectedItemId = getMenuItemForTag(previousTag)
+                binding.bottomNavigationView.selectedItemId = getMenuItemForTag(previousTag)
             } else {
                 finish()
             }

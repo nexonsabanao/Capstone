@@ -60,7 +60,6 @@ class PersonalizedWorkoutFragment : Fragment() {
 
     private fun setupRecyclerView(plan: PersonalizedPlan, lastCompletedDay: Int) {
         val adapter = PersonalizedWorkoutAdapter(
-            requireContext(),
             plan.workoutPlan.sessions,
             lastCompletedDay,
             onStartWorkoutClicked = { dayIndex ->
@@ -95,6 +94,7 @@ class PersonalizedWorkoutFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.rvWorkoutPlan.adapter = null
         _binding = null
     }
 }

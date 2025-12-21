@@ -116,6 +116,9 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.mealsRecyclerView.adapter = null
+        binding.workoutsRecyclerView.adapter = null
+        binding.articlesRecyclerView.adapter = null
         workoutAdapter.unregisterAdapterDataObserver(indicator.adapterDataObserver)
         _binding = null
     }

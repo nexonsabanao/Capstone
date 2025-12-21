@@ -141,6 +141,7 @@ class ViewPagerFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         pageChangeCallback?.let { binding.viewPager.unregisterOnPageChangeCallback(it) }
+        binding.viewPager.adapter = null
         pageChangeCallback = null
         _binding = null
     }

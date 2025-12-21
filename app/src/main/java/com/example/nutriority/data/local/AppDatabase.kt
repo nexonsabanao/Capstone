@@ -44,7 +44,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "nutriority_database"
                 )
                     .fallbackToDestructiveMigration(true)
-                    .addCallback(AppDatabaseCallback(context, appScope))
+                    .addCallback(AppDatabaseCallback(context.applicationContext, appScope))
                     .build()
                 INSTANCE = instance
                 instance
