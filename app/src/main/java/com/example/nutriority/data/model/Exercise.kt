@@ -26,6 +26,7 @@ data class Exercise(
     val sets: Int = 0,
     val reps: Int = 0,
     val rest: String = "",
+    val duration: String = "",
     val description: String = "",
     val imageName: String = "",
 

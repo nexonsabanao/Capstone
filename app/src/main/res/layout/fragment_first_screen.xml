@@ -70,10 +70,10 @@
         android:clickable="true"
         android:contentDescription="@string/male"
         android:focusable="true"
-        app:layout_constraintBottom_toTopOf="@+id/next_button"
+        app:layout_constraintBottom_toTopOf="@id/next_button"
         app:layout_constraintEnd_toStartOf="@id/guideline_center"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/subtitle_select_gender"
+        app:layout_constraintTop_toBottomOf="@id/subtitle_select_gender"
         app:layout_constraintWidth_max="180dp">
 
         <ImageView
@@ -98,7 +98,7 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/male_gender_image" />
+            app:layout_constraintTop_toBottomOf="@id/male_gender_image" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -113,10 +113,10 @@
         android:clickable="true"
         android:contentDescription="@string/female"
         android:focusable="true"
-        app:layout_constraintBottom_toBottomOf="@+id/male_group"
+        app:layout_constraintBottom_toBottomOf="@id/male_group"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/guideline_center"
-        app:layout_constraintTop_toTopOf="@+id/male_group"
+        app:layout_constraintStart_toEndOf="@id/guideline_center"
+        app:layout_constraintTop_toTopOf="@id/male_group"
         app:layout_constraintWidth_max="180dp">
 
         <ImageView
@@ -141,7 +141,7 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/female_gender_image" />
+            app:layout_constraintTop_toBottomOf="@id/female_gender_image" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -151,7 +151,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="24dp"
         android:alpha="0.4"
         android:backgroundTint="@color/primary_dark"
         android:paddingVertical="16dp"

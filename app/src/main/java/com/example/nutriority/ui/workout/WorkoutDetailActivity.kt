@@ -1,6 +1,7 @@
 package com.example.nutriority.ui.workout
 
 import android.content.Intent
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -25,6 +26,8 @@ class WorkoutDetailActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
 
         val workoutId = intent.getIntExtra("workout_id", -1)
         if (workoutId != -1) {
@@ -51,7 +54,11 @@ class WorkoutDetailActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.workout.collect { workoutWithExercises ->
                 workoutWithExercises?.let {
-                    supportActionBar?.title = it.workout.name
+                    binding.collapsingToolbar.title = it.workout.name
+                    supportActionBar?.title = ""
+                    binding.workoutTitle.text = it.workout.name
+                    binding.workoutDuration.text = it.workout.duration
+                    binding.workoutExerciseCount.text = it.exercises.size.toString()
                     exerciseAdapter.submitList(it.exercises)
                 }
             }

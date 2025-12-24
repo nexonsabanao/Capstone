@@ -165,6 +165,9 @@ class FourthScreen : Fragment() {
     }
 
     private fun showDetailsDialog(title: String, message: Spanned) {
+        if (parentFragmentManager.findFragmentByTag("DietDetailsDialog")?.isAdded == true) {
+            return
+        }
         val dialog = DietDetailsDialogFragment.newInstance(title, message)
         dialog.show(parentFragmentManager, "DietDetailsDialog")
     }

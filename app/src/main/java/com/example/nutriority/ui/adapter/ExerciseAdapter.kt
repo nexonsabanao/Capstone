@@ -31,9 +31,12 @@ class ExerciseAdapter(private val onItemClick: (Exercise) -> Unit) : ListAdapter
         val currentExercise = getItem(position)
         holder.binding.apply {
             exerciseName.text = currentExercise.name
-            exerciseSets.text = "${currentExercise.sets} sets"
-            exerciseReps.text = "${currentExercise.reps} reps"
-            exerciseRest.text = "${currentExercise.rest} rest"
+
+            if (currentExercise.duration.isNotBlank()) {
+                exerciseDuration.text = currentExercise.duration
+            } else {
+                exerciseDuration.text = "x${currentExercise.reps}"
+            }
 
             if (currentExercise.imageResId != 0) {
                 exerciseImage.setImageResource(currentExercise.imageResId)
