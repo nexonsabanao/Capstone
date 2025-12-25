@@ -78,4 +78,8 @@ class WorkoutRepository(private val workoutDao: WorkoutDao) {
     suspend fun insertExercise(exercise: Exercise) {
         workoutDao.insertExercise(exercise)
     }
+
+    suspend fun updateExercises(exercises: List<Exercise>) {
+        workoutDao.updateExercises(exercises)
+    }
 }

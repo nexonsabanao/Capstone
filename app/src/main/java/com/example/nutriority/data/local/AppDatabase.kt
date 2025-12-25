@@ -22,7 +22,7 @@ import java.io.BufferedReader
 
 @Database(
     entities = [Meal::class, Workout::class, Article::class, Exercise::class],
-    version = 11, // Incremented version to trigger recreation
+    version = 13, // Incremented version to trigger recreation
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -110,9 +110,10 @@ abstract class AppDatabase : RoomDatabase() {
                     workoutData.forEach { workoutJsonItem ->
                         val workoutId = db.workoutDao().insertWorkout(workoutJsonItem.workout)
 
-                        workoutJsonItem.exercises.forEach { exercise ->
+                        workoutJsonItem.exercises.forEachIndexed { index, exercise ->
                             exercise.imageResId = getSafeImageResId(exercise.imageName)
                             exercise.workoutId = workoutId.toInt()
+                            exercise.order = index
                         }
 
                         db.workoutDao().insertAllExercises(workoutJsonItem.exercises)

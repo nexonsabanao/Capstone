@@ -7,8 +7,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.databinding.ItemExerciseBinding
+import com.example.nutriority.ui.workout.ItemMoveCallbackListener
+import java.util.Collections
 
-class ExerciseAdapter(private val onItemClick: (Exercise) -> Unit) : ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder>(ExerciseDiffCallback()) {
+class ExerciseAdapter(
+    private val onItemClick: (Exercise) -> Unit,
+    private val onListUpdated: (List<Exercise>) -> Unit
+    ) : ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder>(ExerciseDiffCallback()), ItemMoveCallbackListener {
 
     inner class ExerciseViewHolder(val binding: ItemExerciseBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
@@ -43,6 +48,19 @@ class ExerciseAdapter(private val onItemClick: (Exercise) -> Unit) : ListAdapter
             }
         }
     }
+
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {
+        val mutableList = currentList.toMutableList()
+        val fromExercise = mutableList[fromPosition]
+        val toExercise = mutableList[toPosition]
+        val fromOrder = fromExercise.order
+        fromExercise.order = toExercise.order
+        toExercise.order = fromOrder
+        Collections.swap(mutableList, fromPosition, toPosition)
+        onListUpdated(mutableList)
+        submitList(mutableList)
+    }
+
 
     class ExerciseDiffCallback : DiffUtil.ItemCallback<Exercise>() {
         override fun areItemsTheSame(oldItem: Exercise, newItem: Exercise): Boolean {

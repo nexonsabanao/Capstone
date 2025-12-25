@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.model.WorkoutWithExercises
@@ -79,4 +80,7 @@ interface WorkoutDao {
     @Transaction
     @Query("SELECT * FROM workouts")
     fun getAllWorkoutsWithExercises(): Flow<List<WorkoutWithExercises>>
+
+    @Update
+    suspend fun updateExercises(exercises: List<Exercise>)
 }

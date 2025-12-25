@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.databinding.ActivityWorkoutDetailBinding
 import com.example.nutriority.ui.adapter.ExerciseAdapter
@@ -39,15 +40,24 @@ class WorkoutDetailActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        exerciseAdapter = ExerciseAdapter { exercise ->
-            val intent = Intent(this, ExerciseDetailActivity::class.java)
-            intent.putExtra("exercise_id", exercise.id)
-            startActivity(intent)
-        }
+        exerciseAdapter = ExerciseAdapter(
+            onItemClick = { exercise ->
+                val intent = Intent(this, ExerciseDetailActivity::class.java)
+                intent.putExtra("exercise_id", exercise.id)
+                startActivity(intent)
+            },
+            onListUpdated = { exercises ->
+                viewModel.updateExercises(exercises)
+            }
+        )
         binding.exercisesRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@WorkoutDetailActivity)
             adapter = exerciseAdapter
         }
+
+        val callback = SimpleItemTouchHelperCallback(exerciseAdapter)
+        val itemTouchHelper = ItemTouchHelper(callback)
+        itemTouchHelper.attachToRecyclerView(binding.exercisesRecyclerView)
     }
 
     private fun observeViewModel() {
@@ -59,7 +69,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
                     binding.workoutTitle.text = it.workout.name
                     binding.workoutDuration.text = it.workout.duration
                     binding.workoutExerciseCount.text = it.exercises.size.toString()
-                    exerciseAdapter.submitList(it.exercises)
+                    exerciseAdapter.submitList(it.exercises.sortedBy { it.order })
                 }
             }
         }

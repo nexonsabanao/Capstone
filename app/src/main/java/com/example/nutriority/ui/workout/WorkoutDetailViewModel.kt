@@ -2,6 +2,7 @@ package com.example.nutriority.ui.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.WorkoutWithExercises
 import com.example.nutriority.data.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +25,12 @@ class WorkoutDetailViewModel @Inject constructor(
             workoutRepository.getWorkoutWithExercises(workoutId).collect {
                 _workout.value = it
             }
+        }
+    }
+
+    fun updateExercises(exercises: List<Exercise>) {
+        viewModelScope.launch {
+            workoutRepository.updateExercises(exercises)
         }
     }
 }

@@ -22,6 +22,7 @@ data class Exercise(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
+    var order: Int = 0,
     val name: String = "",
     val sets: Int = 0,
     val reps: Int = 0,
