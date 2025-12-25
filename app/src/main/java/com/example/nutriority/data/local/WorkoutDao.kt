@@ -20,21 +20,21 @@ interface WorkoutDao {
      * Inserts a single workout and returns its new auto-generated ID.
      * This is crucial for linking exercises during pre-population.
      */
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWorkout(workout: Workout): Long
 
     /**
      * Inserts a single exercise.
      * Note: For pre-population, insertAllExercises is more efficient.
      */
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExercise(exercise: Exercise)
 
     /**
      * Inserts a list of exercises.
      * Used in AppDatabase to efficiently insert all children after linking them to a parent workout.
      */
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllExercises(exercises: List<Exercise>)
 
 
