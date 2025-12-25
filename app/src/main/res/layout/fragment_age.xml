@@ -23,7 +23,7 @@
         app:layout_constraintBottom_toTopOf="@+id/titleTextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/dark_gray"
+        app:tint="@color/primary_dark"
         tools:ignore="TouchTargetSizeCheck" />
 
     <!-- Main Title -->

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="@color/white"
     tools:context=".ui.workout.WorkoutDetailActivity">
 
@@ -144,10 +145,22 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
                     android:text="Exercises"
                     android:textAppearance="?attr/textAppearanceHeadline6"
-                    android:textStyle="bold"
-                    android:layout_centerVertical="true"/>
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/add_exercise_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/add_exercise_underlined"
+                    android:textColor="@color/secondary_blue"/>
+
             </RelativeLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -156,8 +169,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:nestedScrollingEnabled="false"
-                tools:listitem="@layout/item_exercise"
-                tools:itemCount="4"/>
+                tools:itemCount="4"
+                tools:listitem="@layout/item_exercise" />
 
         </LinearLayout>
 
@@ -165,11 +178,12 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/start_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:layout_width="140dp"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom|end"
         android:text="Start"
         android:backgroundTint="@color/primary_dark"
-        android:layout_margin="16dp"/>
+        android:layout_margin="16dp"
+        app:cornerRadius="12dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
