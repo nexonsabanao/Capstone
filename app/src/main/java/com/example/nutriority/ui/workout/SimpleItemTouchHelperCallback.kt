@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.workout
 
+import android.graphics.Color
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
@@ -25,5 +26,21 @@ class SimpleItemTouchHelperCallback(private val listener: ItemMoveCallbackListen
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         // No swipe action needed
+    }
+
+    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        super.onSelectedChanged(viewHolder, actionState)
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+            viewHolder?.itemView?.apply {
+                setBackgroundColor(Color.LTGRAY)
+            }
+        }
+    }
+
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        viewHolder.itemView.apply {
+            setBackgroundColor(Color.TRANSPARENT)
+        }
     }
 }

@@ -63,13 +63,13 @@ class WorkoutDetailActivity : AppCompatActivity() {
     private fun observeViewModel() {
         lifecycleScope.launch {
             viewModel.workout.collect { workoutWithExercises ->
-                workoutWithExercises?.let {
-                    binding.collapsingToolbar.title = it.workout.name
+                workoutWithExercises?.let { workout ->
+                    binding.collapsingToolbar.title = workout.workout.name
                     supportActionBar?.title = ""
-                    binding.workoutTitle.text = it.workout.name
-                    binding.workoutDuration.text = it.workout.duration
-                    binding.workoutExerciseCount.text = it.exercises.size.toString()
-                    exerciseAdapter.submitList(it.exercises.sortedBy { it.order })
+                    binding.workoutTitle.text = workout.workout.name
+                    binding.workoutDuration.text = workout.workout.duration
+                    binding.workoutExerciseCount.text = workout.exercises.size.toString()
+                    exerciseAdapter.submitList(workout.exercises.sortedBy { exercise -> exercise.order })
                 }
             }
         }
