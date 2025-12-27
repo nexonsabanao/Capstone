@@ -22,7 +22,7 @@ import java.io.BufferedReader
 
 @Database(
     entities = [Meal::class, Workout::class, Article::class, Exercise::class],
-    version = 13, // Incremented version to trigger recreation
+    version = 14, // Incremented version to trigger recreation
     exportSchema = false
 )
 @TypeConverters(Converters::class)

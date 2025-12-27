@@ -1,26 +1,31 @@
 package com.example.nutriority.data.local
 
 import androidx.room.TypeConverter
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class Converters {
     /**
-     * Converts a comma-separated String from the database into a List of Strings.
+     * Converts a JSON String from the database into a List of Strings.
      */
     @TypeConverter
-    fun fromString(value: String): List<String> {
-        // If the stored string is empty, return an empty list to avoid issues.
-        return if (value.isEmpty()) {
-            emptyList()
-        } else {
-            value.split(",").map { it.trim() }
+    fun fromString(value: String?): List<String> {
+        if (value == null) {
+            return emptyList()
         }
+        val listType = object : TypeToken<List<String>>() {}.type
+        return Gson().fromJson(value, listType)
     }
 
     /**
-     * Converts a List of Strings into a single comma-separated String to store in the database.
+     * Converts a List of Strings into a single JSON String to store in the database.
      */
     @TypeConverter
-    fun fromList(list: List<String>): String {
-        return list.joinToString(",")
+    fun fromList(list: List<String>?): String {
+        if (list == null) {
+            return "[]"
+        }
+        val gson = Gson()
+        return gson.toJson(list)
     }
 }
