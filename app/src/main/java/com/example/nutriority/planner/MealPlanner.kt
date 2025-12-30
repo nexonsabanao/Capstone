@@ -45,11 +45,11 @@ class MealPlanner @Inject constructor(
         val plannedMeals = mutableListOf<Meal>()
 
         mealTimes.zip(targetCalories).forEach { (time, targetCal) ->
-            // Find the 5 best meals for the time slot and pick one randomly
+            // Find the 20 best meals for the time slot and pick one randomly
             val bestMealsForTime = availableMeals
                 .filter { it.time.equals(time, ignoreCase = true) }
                 .sortedBy { abs(it.calories.toDouble() - targetCal.toDouble()) } // Sort by calorie difference
-                .take(5) // Take the top 5 candidates
+                .take(20) // Take the top 20 candidates
 
             if (bestMealsForTime.isNotEmpty()) {
                 val chosenMeal = bestMealsForTime.random() // Pick one randomly
