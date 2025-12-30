@@ -40,11 +40,22 @@ class MealPlanner @Inject constructor(
             }
         }
 
-        // For each meal slot (breakfast, lunch, dinner), find the best-matching meal from the filtered list.
-        // If no suitable meal is found for a slot (e.g., filtered list is empty), mapNotNull will safely discard it.
-        val plannedMeals = targetCalories.mapNotNull { targetCal ->
-            val bestMeal = filteredMeals.minByOrNull { abs(it.calories.toDouble() - targetCal.toDouble()) }
-            bestMeal?.copy(calories = targetCal)
+        val mealTimes = listOf("Breakfast", "Lunch", "Dinner")
+        val availableMeals = filteredMeals.toMutableList()
+        val plannedMeals = mutableListOf<Meal>()
+
+        mealTimes.zip(targetCalories).forEach { (time, targetCal) ->
+            // Find the 5 best meals for the time slot and pick one randomly
+            val bestMealsForTime = availableMeals
+                .filter { it.time.equals(time, ignoreCase = true) }
+                .sortedBy { abs(it.calories.toDouble() - targetCal.toDouble()) } // Sort by calorie difference
+                .take(5) // Take the top 5 candidates
+
+            if (bestMealsForTime.isNotEmpty()) {
+                val chosenMeal = bestMealsForTime.random() // Pick one randomly
+                plannedMeals.add(chosenMeal.copy(calories = targetCal))
+                availableMeals.remove(chosenMeal) // This ensures the meal is not picked again for this day
+            }
         }
 
         // Log a warning if a full 3-meal plan could not be generated.
