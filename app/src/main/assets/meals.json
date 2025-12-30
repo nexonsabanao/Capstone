@@ -1,38 +1,877 @@
+
 [
   {
-    "name": "Avocado Toast",
-    "description": "A simple and delicious breakfast.",
-    "calories": 350,
+    "name": "Taho",
+    "description": "A classic Filipino breakfast.",
+    "calories": 150,
     "category": "Vegetarian",
     "time": "Breakfast",
-    "ingredients": ["2 slices of whole-wheat bread", "1 ripe avocado", "1 pinch of salt", "1 pinch of red pepper flakes"],
-    "imageName": "meal_avocado_toast"
+    "ingredients": ["1 cup silken tofu", "1/4 cup arnibal (brown sugar syrup)", "2 tbsp sago pearls"],
+    "imageName": "meal_taho"
   },
   {
-    "name": "Chicken Salad",
-    "description": "A light and refreshing lunch option.",
+    "name": "Champorado with Tuyo",
+    "description": "A chocolate rice porridge with dried fish.",
+    "calories": 400,
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["1/2 cup glutinous rice", "1/4 cup cocoa powder", "1/4 cup sugar", "3-4 pieces of tuyo (dried fish)"],
+    "imageName": "meal_champorado"
+  },
+  {
+    "name": "Tosilog",
+    "description": "A Filipino breakfast classic.",
+    "calories": 600,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["100g tocino (sweet cured pork)", "1 cup sinangag (garlic fried rice)", "1 fried egg"],
+    "imageName": "meal_tosilog"
+  },
+  {
+    "name": "Longsilog",
+    "description": "Another Filipino breakfast favorite.",
+    "calories": 650,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["2 pieces longganisa (Filipino sausage)", "1 cup sinangag (garlic fried rice)", "1 fried egg"],
+    "imageName": "meal_longsilog"
+  },
+  {
+    "name": "Arroz Caldo",
+    "description": "A comforting Filipino chicken and rice porridge.",
     "calories": 450,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["1/2 cup rice", "100g chicken breast", "4 cups chicken broth", "1 tbsp ginger", "1 hard-boiled egg"],
+    "imageName": "meal_arroz_caldo"
+  },
+  {
+    "name": "Pandesal with Keso",
+    "description": "A simple and satisfying breakfast.",
+    "calories": 300,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["2 pieces pandesal (Filipino bread roll)", "2 slices of kesong puti (white cheese)"],
+    "imageName": "meal_pandesal_keso"
+  },
+  {
+    "name": "Ginataang Langka",
+    "description": "A Filipino vegetable stew.",
+    "calories": 350,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["2 cups unripe jackfruit", "1 cup coconut milk", "1 onion", "2 cloves garlic"],
+    "imageName": "meal_ginataang_langka"
+  },
+  {
+    "name": "Adobong Kangkong",
+    "description": "A simple and savory vegetable dish.",
+    "calories": 200,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["1 bunch kangkong (water spinach)", "1/4 cup soy sauce", "1/4 cup vinegar", "2 cloves garlic"],
+    "imageName": "meal_adobong_kangkong"
+  },
+  {
+    "name": "Sinigang na Baboy",
+    "description": "A sour and savory Filipino soup.",
+    "calories": 500,
     "category": "Low Carb",
     "time": "Lunch",
-    "ingredients": ["150g grilled chicken breast", "50g mixed greens", "1/2 cucumber", "1/4 red onion", "2 tbsp vinaigrette"],
-    "imageName": "meal_chicken_salad"
+    "ingredients": ["150g pork belly", "1 bunch kangkong (water spinach)", "1 radish", "2 tomatoes", "1 packet sinigang mix"],
+    "imageName": "meal_sinigang_baboy"
   },
   {
-    "name": "Quinoa Bowl",
-    "description": "A hearty and nutritious dinner.",
+    "name": "Inihaw na Liempo",
+    "description": "A classic Filipino grilled pork belly.",
+    "calories": 700,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["200g pork belly", "1/4 cup soy sauce", "1/4 cup vinegar", "4 cloves garlic"],
+    "imageName": "meal_inihaw_liempo"
+  },
+  {
+    "name": "Chicken Tinola",
+    "description": "A comforting Filipino chicken soup.",
+    "calories": 400,
+    "category": "Balanced Diet",
+    "time": "Lunch",
+    "ingredients": ["150g chicken", "1/2 green papaya", "1 bunch chili leaves", "4 cups chicken broth", "1 onion"],
+    "imageName": "meal_chicken_tinola"
+  },
+  {
+    "name": "Beef Caldereta",
+    "description": "A hearty Filipino beef stew.",
+    "calories": 600,
+    "category": "Balanced Diet",
+    "time": "Lunch",
+    "ingredients": ["150g beef brisket", "1/2 cup tomato sauce", "1 potato", "1 carrot", "1 bell pepper"],
+    "imageName": "meal_beef_caldereta"
+  },
+  {
+    "name": "Pinakbet",
+    "description": "A Filipino vegetable stew.",
+    "calories": 300,
+    "category": "Vegetarian",
+    "time": "Dinner",
+    "ingredients": ["1 cup squash", "1 bitter melon", "1 eggplant", "1 bunch string beans", "2 tbsp bagoong (shrimp paste)"],
+    "imageName": "meal_pinakbet"
+  },
+  {
+    "name": "Ginisang Monggo",
+    "description": "A savory Filipino mung bean soup.",
+    "calories": 350,
+    "category": "Vegetarian",
+    "time": "Dinner",
+    "ingredients": ["1 cup mung beans", "1 onion", "2 cloves garlic", "1 bunch chili leaves"],
+    "imageName": "meal_ginisang_monggo"
+  },
+  {
+    "name": "Chicken Adobo",
+    "description": "The quintessential Filipino dish.",
+    "calories": 500,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["150g chicken", "1/4 cup soy sauce", "1/4 cup vinegar", "2 cloves garlic", "1 bay leaf"],
+    "imageName": "meal_chicken_adobo"
+  },
+  {
+    "name": "Beef Kare-Kare",
+    "description": "A rich and savory Filipino stew.",
+    "calories": 650,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["150g oxtail", "1/2 cup peanut butter", "1 bunch string beans", "1 eggplant", "2 tbsp bagoong (shrimp paste)"],
+    "imageName": "meal_beef_karekare"
+  },
+  {
+    "name": "Sinigang na Hipon",
+    "description": "A sour and savory shrimp soup.",
     "calories": 400,
     "category": "Balanced Diet",
     "time": "Dinner",
-    "ingredients": ["1 cup cooked quinoa", "1/2 cup black beans", "1/2 cup corn", "1/4 avocado", "Salsa and lime to taste"],
-    "imageName": "meal_quinoa_bowl"
+    "ingredients": ["150g shrimp", "1 bunch kangkong (water spinach)", "1 radish", "2 tomatoes", "1 packet sinigang mix"],
+    "imageName": "meal_sinigang_hipon"
   },
   {
-    "name": "Salmon with Asparagus",
-    "description": "A healthy and flavorful meal.",
-    "calories": 550,
+    "name": "Lechon Kawali",
+    "description": "A crispy and savory fried pork belly.",
+    "calories": 800,
+    "category": "Balanced Diet",
+    "time": "Dinner",
+    "ingredients": ["200g pork belly", "2 cups water", "1 bay leaf", "4 cloves garlic", "Salt and pepper to taste"],
+    "imageName": "meal_lechon_kawali"
+  },
+  {
+    "name": "Tofu Scramble with Malunggay",
+    "description": "A healthy, protein-packed vegetarian breakfast.",
+    "calories": 250,
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["200g firm tofu", "1/2 cup malunggay leaves", "1 small onion", "2 cloves garlic", "1 tomato"],
+    "imageName": "meal_tofu_scramble"
+  },
+  {
+    "name": "Oatmeal with Mango",
+    "description": "A simple and filling breakfast with a tropical twist.",
+    "calories": 300,
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["1/2 cup rolled oats", "1 cup water or milk", "1/2 ripe mango, diced", "1 tbsp chia seeds"],
+    "imageName": "meal_oatmeal_mango"
+  },
+  {
+    "name": "Steamed Fish with Tomatoes",
+    "description": "A light and savory low-carb breakfast.",
+    "calories": 280,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["150g white fish fillet (e.g., tilapia)", "2 ripe tomatoes, sliced", "1 thumb ginger, julienned", "1 tbsp soy sauce"],
+    "imageName": "meal_steamed_fish"
+  },
+  {
+    "name": "Egg White Omelette with Spinach",
+    "description": "A low-calorie, high-protein start to your day.",
+    "calories": 200,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["3 egg whites", "1 cup fresh spinach", "1/4 onion, chopped", "Salt and pepper to taste"],
+    "imageName": "meal_egg_white_omelette"
+  },
+  {
+    "name": "Bangus Belly Sinangag",
+    "description": "A lighter version of a Filipino classic with more fish and less rice.",
+    "calories": 380,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["100g boneless bangus (milkfish) belly", "1/2 cup sinangag (garlic fried rice)", "1 sliced tomato"],
+    "imageName": "meal_bangus_sinangag"
+  },
+  {
+    "name": "Boiled Saba Banana",
+    "description": "A simple, energy-boosting, and fiber-rich breakfast.",
+    "calories": 220,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["3 pieces saba banana, boiled"],
+    "imageName": "meal_boiled_saba"
+  },
+  {
+    "name": "Ensaladang Talong",
+    "description": "A refreshing grilled eggplant salad.",
+    "calories": 180,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["2 medium eggplants, grilled and peeled", "1 large tomato, diced", "1 small red onion, diced", "1/4 cup vinegar"],
+    "imageName": "meal_ensaladang_talong"
+  },
+  {
+    "name": "Lumpiang Sariwa",
+    "description": "Fresh spring roll with vegetables and a light peanut sauce.",
+    "calories": 250,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["1 cup mixed vegetables (carrots, sweet potato, green beans)", "1/4 cup tofu, minced", "1 fresh lumpia wrapper", "Light peanut sauce"],
+    "imageName": "meal_lumpiang_sariwa"
+  },
+  {
+    "name": "Chicken Breast Inasal",
+    "description": "A healthy grilled chicken dish marinated in calamansi and lemongrass.",
+    "calories": 350,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["150g skinless chicken breast", "2 tbsp soy sauce", "2 tbsp vinegar", "1 stalk lemongrass", "1 calamansi"],
+    "imageName": "meal_chicken_inasal"
+  },
+  {
+    "name": "Grilled Tuna Belly",
+    "description": "A simple and delicious grilled tuna belly.",
+    "calories": 400,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["200g tuna belly", "1 tbsp soy sauce", "1 calamansi", "Salt and pepper to taste"],
+    "imageName": "meal_grilled_tuna"
+  },
+  {
+    "name": "Nilagang Baka (Lean)",
+    "description": "A clear beef soup with vegetables, using lean beef.",
+    "calories": 380,
+    "category": "Balanced Diet",
+    "time": "Lunch",
+    "ingredients": ["100g lean beef sirloin, cubed", "1 potato", "1/4 cabbage", "1 cup beef broth"],
+    "imageName": "meal_nilagang_baka"
+  },
+  {
+    "name": "Monggo Guisado with Shrimp",
+    "description": "Mung bean stew with shrimp and vegetables.",
+    "calories": 320,
+    "category": "Balanced Diet",
+    "time": "Lunch",
+    "ingredients": ["1/2 cup mung beans", "50g shrimp", "1 cup malunggay leaves", "1 small tomato", "1 small onion"],
+    "imageName": "meal_monggo_shrimp"
+  },
+  {
+    "name": "Laing",
+    "description": "Taro leaves cooked in coconut milk.",
+    "calories": 280,
+    "category": "Vegetarian",
+    "time": "Dinner",
+    "ingredients": ["1 cup dried taro leaves", "1 cup light coconut milk", "1 thumb ginger", "2 cloves garlic", "1 small chili"],
+    "imageName": "meal_laing"
+  },
+  {
+    "name": "Ginataang Kalabasa at Sitaw",
+    "description": "Squash and string beans in coconut milk.",
+    "calories": 300,
+    "category": "Vegetarian",
+    "time": "Dinner",
+    "ingredients": ["1 cup squash, cubed", "1 cup string beans", "1 cup light coconut milk", "1 onion", "2 cloves garlic"],
+    "imageName": "meal_ginataang_kalabasa"
+  },
+  {
+    "name": "Paksiw na Isda",
+    "description": "Fish simmered in vinegar and ginger.",
+    "calories": 250,
     "category": "Low Carb",
     "time": "Dinner",
-    "ingredients": ["200g salmon fillet", "1 bunch of asparagus", "1 tbsp olive oil", "1/2 lemon", "Salt and pepper to taste"],
-    "imageName": "meal_salmon_asparagus"
+    "ingredients": ["150g fish (e.g., galunggong)", "1/2 cup vinegar", "1 thumb ginger", "2 cloves garlic", "1 small bitter melon"],
+    "imageName": "meal_paksiw_isda"
+  },
+  {
+    "name": "Grilled Squid",
+    "description": "A low-fat, high-protein seafood dinner.",
+    "calories": 220,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["200g squid, cleaned", "1 tomato, chopped", "1 onion, chopped", "1 tbsp soy sauce"],
+    "imageName": "meal_grilled_squid"
+  },
+  {
+    "name": "Chicken Binakol",
+    "description": "A healthy chicken soup with coconut water and lemongrass.",
+    "calories": 350,
+    "category": "Balanced Diet",
+    "time": "Dinner",
+    "ingredients": ["150g chicken breast", "2 cups coconut water", "1/2 cup young coconut meat", "1 stalk lemongrass"],
+    "imageName": "meal_chicken_binakol"
+  },
+  {
+    "name": "Fish Sinigang sa Miso",
+    "description": "A light and savory sour soup with fish and miso.",
+    "calories": 300,
+    "category": "Balanced Diet",
+    "time": "Dinner",
+    "ingredients": ["150g fish fillet", "1 bunch mustasa (mustard greens)", "1 radish", "2 tbsp miso paste", "1 tomato"],
+    "imageName": "meal_fish_sinigang_miso"
+  },
+  {
+    "name": "Kamote Cue",
+    "description": "A healthier version of a favorite Filipino snack.",
+    "calories": 250,
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["2 medium sweet potatoes", "1 tbsp brown sugar", "1 tsp cinnamon"],
+    "imageName": "meal_kamote_cue"
+  },
+  {
+    "name": "Lugaw with Egg",
+    "description": "A simple rice porridge, a Filipino comfort food.",
+    "calories": 300,
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["1/2 cup rice", "4 cups water", "1 hard-boiled egg", "1 tbsp fried garlic"],
+    "imageName": "meal_lugaw_egg"
+  },
+  {
+    "name": "Tortang Talong with Giniling",
+    "description": "Eggplant omelette with ground chicken.",
+    "calories": 350,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["1 large eggplant", "100g ground chicken", "1 egg", "1 small onion"],
+    "imageName": "meal_tortang_talong_giniling"
+  },
+  {
+    "name": "Sizzling Tofu",
+    "description": "Stir-fried tofu in a savory sauce.",
+    "calories": 300,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["200g firm tofu", "1 tbsp soy sauce", "1/2 bell pepper", "1 small onion"],
+    "imageName": "meal_sizzling_tofu"
+  },
+  {
+    "name": "Chicken Sopas",
+    "description": "A creamy and comforting chicken noodle soup.",
+    "calories": 350,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["100g chicken breast", "1/2 cup elbow macaroni", "1/4 cup evaporated milk", "1 carrot, diced"],
+    "imageName": "meal_chicken_sopas"
+  },
+  {
+    "name": "Puto Maya with Sikwate",
+    "description": "Steamed sticky rice with hot chocolate.",
+    "calories": 400,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["1/2 cup glutinous rice", "1/2 cup coconut milk", "2 tbsp tablea (cocoa tablets)"],
+    "imageName": "meal_puto_maya_sikwate"
+  },
+  {
+    "name": "Corned Beef Guisado",
+    "description": "Sautéed corned beef with potatoes and onions.",
+    "calories": 400,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["100g corned beef", "1 small potato, diced", "1 small onion"],
+    "imageName": "meal_corned_beef_guisado"
+  },
+  {
+    "name": "Ensaladang Mangga",
+    "description": "A refreshing green mango salad.",
+    "calories": 150,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["1 large green mango, sliced", "1 small red onion", "1 tomato", "2 tbsp bagoong (shrimp paste)"],
+    "imageName": "meal_ensaladang_mangga"
+  },
+  {
+    "name": "Ginisang Sayote",
+    "description": "Sautéed chayote with shrimp.",
+    "calories": 200,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["1 medium chayote", "50g shrimp", "1 small onion", "2 cloves garlic"],
+    "imageName": "meal_ginisang_sayote"
+  },
+  {
+    "name": "Pork Adobo sa Puti",
+    "description": "A version of adobo without soy sauce, cooked in vinegar and garlic.",
+    "calories": 450,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["150g pork belly", "1/2 cup vinegar", "6 cloves garlic", "1 tsp peppercorns"],
+    "imageName": "meal_adobo_sa_puti"
+  },
+  {
+    "name": "Beef Broccoli",
+    "description": "A classic stir-fry dish with tender beef and crisp broccoli.",
+    "calories": 400,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["150g beef sirloin", "1 cup broccoli florets", "2 tbsp oyster sauce", "1 tbsp soy sauce"],
+    "imageName": "meal_beef_broccoli"
+  },
+  {
+    "name": "Kilawing Puso ng Saging",
+    "description": "A Filipino-style ceviche using banana blossoms.",
+    "calories": 250,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["1 banana blossom", "1/2 cup vinegar", "1 onion", "1 thumb ginger"],
+    "imageName": "meal_kilawing_puso_saging"
+  },
+  {
+    "name": "Pochero",
+    "description": "A hearty stew with chicken, plantains, and vegetables.",
+    "calories": 500,
+    "category": "Balanced Diet",
+    "time": "Lunch",
+    "ingredients": ["150g chicken", "1 saba banana", "1 potato", "1/4 cabbage"],
+    "imageName": "meal_pochero"
+  },
+  {
+    "name": "Bistek Tagalog",
+    "description": "Filipino beef steak marinated in soy sauce and calamansi.",
+    "calories": 450,
+    "category": "Balanced Diet",
+    "time": "Lunch",
+    "ingredients": ["150g beef sirloin", "1/4 cup soy sauce", "4 calamansi", "1 large onion"],
+    "imageName": "meal_bistek_tagalog"
+  },
+  {
+    "name": "Bulanglang",
+    "description": "A simple boiled vegetable soup with fish sauce.",
+    "calories": 150,
+    "category": "Vegetarian",
+    "time": "Dinner",
+    "ingredients": ["1 cup squash", "1/2 cup string beans", "1/2 cup okra", "1 tbsp fish sauce"],
+    "imageName": "meal_bulanglang"
+  },
+  {
+    "name": "Ginisang Ampalaya with Egg",
+    "description": "Sautéed bitter melon with egg.",
+    "calories": 200,
+    "category": "Vegetarian",
+    "time": "Dinner",
+    "ingredients": ["1 bitter melon", "1 egg", "1 tomato", "1 onion"],
+    "imageName": "meal_ginisang_ampalaya_egg"
+  },
+  {
+    "name": "Rellenong Manok",
+    "description": "Stuffed deboned chicken with a low-carb filling.",
+    "calories": 500,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["200g deboned chicken", "100g ground pork", "1 carrot", "1/4 cup raisins"],
+    "imageName": "meal_rellenong_manok"
+  },
+  {
+    "name": "Cardillong Isda",
+    "description": "A comforting fish and egg drop soup.",
+    "calories": 300,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["150g fish fillet", "1 egg", "2 tomatoes", "1 onion"],
+    "imageName": "meal_cardillong_isda"
+  },
+  {
+    "name": "Tinolang Tahong",
+    "description": "A light and flavorful mussel soup with ginger.",
+    "calories": 250,
+    "category": "Balanced Diet",
+    "time": "Dinner",
+    "ingredients": ["250g mussels", "1 thumb ginger", "1 cup spinach", "1 onion"],
+    "imageName": "meal_tinolang_tahong"
+  },
+  {
+    "name": "Sinampalukang Manok",
+    "description": "A sour and savory chicken soup with tamarind leaves.",
+    "calories": 400,
+    "category": "Balanced Diet",
+    "time": "Dinner",
+    "ingredients": ["150g chicken", "1 cup tamarind leaves", "1 bunch string beans", "1 radish"],
+    "imageName": "meal_sinampalukang_manok"
+  },
+
+  {
+    "name": "Vegetable Omelette Pinoy Style",
+    "description": "Egg omelette loaded with local vegetables.",
+    "calories": 280,
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["2 eggs", "1 tomato", "1/4 cup onion", "1/4 cup bell pepper"],
+    "imageName": "meal_veg_omelette"
+  },
+  {
+    "name": "Banana Peanut Oatmeal",
+    "description": "Creamy oatmeal with banana and peanut butter.",
+    "calories": 320,
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["1/2 cup oats", "1 banana", "1 tbsp peanut butter"],
+    "imageName": "meal_banana_oatmeal"
+  },
+  {
+    "name": "Kamote Hash",
+    "description": "Sautéed sweet potato with onions and garlic.",
+    "calories": 300,
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["1 cup kamote", "1 onion", "2 cloves garlic"],
+    "imageName": "meal_kamote_hash"
+  },
+  {
+    "name": "Vegetarian Pancit Canton",
+    "description": "Stir-fried noodles with mixed vegetables.",
+    "calories": 350,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["pancit noodles", "cabbage", "carrot", "soy sauce"],
+    "imageName": "meal_veg_pancit"
+  },
+  {
+    "name": "Ginataang Sitaw",
+    "description": "String beans cooked in coconut milk.",
+    "calories": 280,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["string beans", "coconut milk", "onion", "garlic"],
+    "imageName": "meal_ginataang_sitaw"
+  },
+  {
+    "name": "Tofu Sisig",
+    "description": "Crispy tofu tossed in sisig-style seasoning.",
+    "calories": 320,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["firm tofu", "onion", "soy sauce", "calamansi"],
+    "imageName": "meal_tofu_sisig"
+  },
+  {
+    "name": "Mushroom Adobo",
+    "description": "Adobo-style mushrooms in vinegar and garlic.",
+    "calories": 250,
+    "category": "Vegetarian",
+    "time": "Dinner",
+    "ingredients": ["mushrooms", "vinegar", "garlic", "bay leaf"],
+    "imageName": "meal_mushroom_adobo"
+  },
+  {
+    "name": "Tofu Kare-Kare",
+    "description": "Vegetarian kare-kare using tofu and vegetables.",
+    "calories": 380,
+    "category": "Vegetarian",
+    "time": "Dinner",
+    "ingredients": ["tofu", "peanut butter", "eggplant", "string beans"],
+    "imageName": "meal_tofu_karekare"
+  },
+  {
+    "name": "Garlic Eggs with Spinach",
+    "description": "Eggs sautéed with garlic and spinach.",
+    "calories": 220,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["2 eggs", "spinach", "garlic"],
+    "imageName": "meal_garlic_eggs_spinach"
+  },
+  {
+    "name": "Tuna Omelette",
+    "description": "Protein-rich omelette with tuna.",
+    "calories": 250,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["2 eggs", "canned tuna", "onion"],
+    "imageName": "meal_tuna_omelette"
+  },
+  {
+    "name": "Chicken Longganisa (Homemade)",
+    "description": "Low-carb chicken longganisa without sugar.",
+    "calories": 300,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["ground chicken", "garlic", "paprika"],
+    "imageName": "meal_chicken_longganisa"
+  },
+  {
+    "name": "Grilled Pork Chop",
+    "description": "Juicy grilled pork chop with calamansi.",
+    "calories": 450,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["pork chop", "calamansi", "salt"],
+    "imageName": "meal_grilled_pork_chop"
+  },
+  {
+    "name": "Chicken Adobo Flakes",
+    "description": "Shredded adobo chicken lightly fried.",
+    "calories": 380,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["chicken", "vinegar", "garlic"],
+    "imageName": "meal_chicken_adobo_flakes"
+  },
+  {
+    "name": "Bangus Belly Inasal",
+    "description": "Grilled bangus belly marinated in calamansi.",
+    "calories": 420,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["bangus belly", "calamansi", "garlic"],
+    "imageName": "meal_bangus_inasal"
+  },
+  {
+    "name": "Butter Garlic Shrimp",
+    "description": "Shrimp sautéed in butter and garlic.",
+    "calories": 320,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["shrimp", "butter", "garlic"],
+    "imageName": "meal_butter_garlic_shrimp"
+  },
+  {
+    "name": "Beef Salpicao",
+    "description": "Quick-seared beef with garlic and olive oil.",
+    "calories": 400,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["beef cubes", "garlic", "olive oil"],
+    "imageName": "meal_beef_salpicao"
+  },
+  {
+    "name": "Grilled Squid with Ensalada",
+    "description": "Grilled squid served with fresh tomato salad.",
+    "calories": 260,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["squid", "tomato", "onion"],
+    "imageName": "meal_grilled_squid_ensalada"
+  },
+  {
+    "name": "Boiled Eggs with Tomato Salad",
+    "description": "Simple protein-packed breakfast.",
+    "calories": 300,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["2 boiled eggs", "tomatoes"],
+    "imageName": "meal_boiled_eggs_tomato"
+  },
+  {
+    "name": "Bangus Paksiw with Rice",
+    "description": "Milkfish simmered in vinegar served with rice.",
+    "calories": 420,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["bangus", "vinegar", "garlic", "1/2 cup rice"],
+    "imageName": "meal_bangus_paksiw"
+  },
+  {
+    "name": "Chicken Afritada",
+    "description": "Chicken stewed in tomato sauce with vegetables.",
+    "calories": 480,
+    "category": "Balanced Diet",
+    "time": "Lunch",
+    "ingredients": ["chicken", "tomato sauce", "potato", "carrot"],
+    "imageName": "meal_chicken_afritada"
+  },
+  {
+    "name": "Pork Menudo (Lean)",
+    "description": "Lean pork menudo with vegetables.",
+    "calories": 450,
+    "category": "Balanced Diet",
+    "time": "Lunch",
+    "ingredients": ["lean pork", "potato", "carrot", "tomato sauce"],
+    "imageName": "meal_pork_menudo"
+  },
+  {
+    "name": "Fish Escabeche",
+    "description": "Sweet and sour fish with vegetables.",
+    "calories": 420,
+    "category": "Balanced Diet",
+    "time": "Dinner",
+    "ingredients": ["fish", "vinegar", "bell pepper", "carrot"],
+    "imageName": "meal_fish_escabeche"
+  },
+  {
+    "name": "Grilled Chicken with Ensalada",
+    "description": "Grilled chicken served with fresh vegetable salad.",
+    "calories": 400,
+    "category": "Balanced Diet",
+    "time": "Dinner",
+    "ingredients": ["chicken breast", "lettuce", "tomato", "cucumber"],
+    "imageName": "meal_grilled_chicken_ensalada"
+  },
+  {
+    "name": "Malunggay Pandesal with Peanut Butter",
+    "description": "Fiber-rich pandesal paired with natural peanut butter.",
+    "calories": 290,
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["2 malunggay pandesal", "2 tbsp peanut butter"],
+    "imageName": "meal_malunggay_pandesal_pb"
+  },
+  {
+    "name": "Apple Cinnamon Oatmeal",
+    "description": "Warm oatmeal with apples and cinnamon.",
+    "calories": 310,
+    "category": "Vegetarian",
+    "time": "Breakfast",
+    "ingredients": ["rolled oats", "apple", "cinnamon"],
+    "imageName": "meal_apple_oatmeal"
+  },
+  {
+    "name": "Vegetable Fried Rice",
+    "description": "Garlic rice loaded with vegetables.",
+    "calories": 360,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["rice", "carrot", "peas", "garlic"],
+    "imageName": "meal_veg_fried_rice"
+  },
+  {
+    "name": "Ginisang Upo",
+    "description": "Bottle gourd sautéed with garlic and onion.",
+    "calories": 220,
+    "category": "Vegetarian",
+    "time": "Lunch",
+    "ingredients": ["upo", "onion", "garlic"],
+    "imageName": "meal_ginisang_upo"
+  },
+  {
+    "name": "Vegetarian Sinigang",
+    "description": "Sour vegetable soup without meat.",
+    "calories": 200,
+    "category": "Vegetarian",
+    "time": "Dinner",
+    "ingredients": ["kangkong", "radish", "tomato", "sinigang mix"],
+    "imageName": "meal_veg_sinigang"
+  },
+  {
+    "name": "Tokwa't Gulay",
+    "description": "Tofu and vegetables in a light soy-vinegar sauce.",
+    "calories": 270,
+    "category": "Vegetarian",
+    "time": "Dinner",
+    "ingredients": ["tofu", "pechay", "soy sauce", "vinegar"],
+    "imageName": "meal_tokwat_gulay"
+  },
+  {
+    "name": "Egg Muffins with Vegetables",
+    "description": "Baked egg cups with mixed vegetables.",
+    "calories": 230,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["eggs", "spinach", "bell pepper"],
+    "imageName": "meal_egg_muffins"
+  },
+  {
+    "name": "Bangus Belly with Tomatoes",
+    "description": "Pan-seared bangus belly with fresh tomatoes.",
+    "calories": 390,
+    "category": "Low Carb",
+    "time": "Breakfast",
+    "ingredients": ["bangus belly", "tomato", "onion"],
+    "imageName": "meal_bangus_tomato"
+  },
+  {
+    "name": "Pork Giniling Lettuce Wraps",
+    "description": "Seasoned ground pork wrapped in lettuce.",
+    "calories": 350,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["ground pork", "lettuce", "garlic"],
+    "imageName": "meal_pork_lettuce_wrap"
+  },
+  {
+    "name": "Chicken Tinapa Salad",
+    "description": "Smoked chicken salad with calamansi dressing.",
+    "calories": 340,
+    "category": "Low Carb",
+    "time": "Lunch",
+    "ingredients": ["smoked chicken", "lettuce", "calamansi"],
+    "imageName": "meal_chicken_tinapa_salad"
+  },
+  {
+    "name": "Garlic Butter Fish Fillet",
+    "description": "Pan-fried fish fillet in garlic butter.",
+    "calories": 310,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["fish fillet", "butter", "garlic"],
+    "imageName": "meal_garlic_butter_fish"
+  },
+  {
+    "name": "Chicken BBQ (No Sugar)",
+    "description": "Filipino-style grilled chicken without sugar.",
+    "calories": 380,
+    "category": "Low Carb",
+    "time": "Dinner",
+    "ingredients": ["chicken", "soy sauce", "calamansi"],
+    "imageName": "meal_chicken_bbq_lowcarb"
+  },
+  {
+    "name": "Fruit Bowl with Yogurt",
+    "description": "Mixed tropical fruits with yogurt.",
+    "calories": 320,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["banana", "papaya", "yogurt"],
+    "imageName": "meal_fruit_yogurt"
+  },
+  {
+    "name": "Scrambled Eggs with Rice",
+    "description": "Classic scrambled eggs served with rice.",
+    "calories": 410,
+    "category": "Balanced Diet",
+    "time": "Breakfast",
+    "ingredients": ["eggs", "rice", "butter"],
+    "imageName": "meal_scrambled_eggs_rice"
+  },
+  {
+    "name": "Chicken Picadillo",
+    "description": "Ground chicken sautéed with potatoes and peas.",
+    "calories": 440,
+    "category": "Balanced Diet",
+    "time": "Lunch",
+    "ingredients": ["ground chicken", "potato", "peas"],
+    "imageName": "meal_chicken_picadillo"
+  },
+  {
+    "name": "Fish Tinola",
+    "description": "Light fish soup with ginger and vegetables.",
+    "calories": 330,
+    "category": "Balanced Diet",
+    "time": "Lunch",
+    "ingredients": ["fish", "ginger", "pechay"],
+    "imageName": "meal_fish_tinola"
+  },
+  {
+    "name": "Chicken Teriyaki (Light Sauce)",
+    "description": "Grilled chicken with light teriyaki glaze.",
+    "calories": 420,
+    "category": "Balanced Diet",
+    "time": "Dinner",
+    "ingredients": ["chicken", "teriyaki sauce", "sesame seeds"],
+    "imageName": "meal_chicken_teriyaki"
+  },
+  {
+    "name": "Shrimp Stir-Fry with Vegetables",
+    "description": "Shrimp sautéed with mixed vegetables.",
+    "calories": 360,
+    "category": "Balanced Diet",
+    "time": "Dinner",
+    "ingredients": ["shrimp", "broccoli", "carrot"],
+    "imageName": "meal_shrimp_stirfry"
   }
 ]
