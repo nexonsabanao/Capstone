@@ -7,7 +7,8 @@ import androidx.recyclerview.widget.RecyclerView
 class SimpleItemTouchHelperCallback(private val listener: ItemMoveCallbackListener) : ItemTouchHelper.Callback() {
 
     override fun isLongPressDragEnabled(): Boolean {
-        return true
+        // Disable default long-press drag, we will start it manually from the handle.
+        return false
     }
 
     override fun isItemViewSwipeEnabled(): Boolean {

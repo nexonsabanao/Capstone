@@ -36,23 +36,20 @@ class HomeViewModel @Inject constructor(
     val calorieGoal: StateFlow<String>
 
     init {
-        val resources = application.resources
-        val packageName = application.packageName
+        allMeals = mealRepository.allMeals.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
-        allMeals = mealRepository.allMeals.map { meals ->
-            meals.map {
-                it.apply {
-                    imageResId = resources.getIdentifier(it.imageName, "drawable", packageName)
-                }
-            }
-        }.stateIn(
+        allArticles = articleRepository.allArticles.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
         val recommendedWorkouts = combine(workoutRepository.allWorkouts, userRepository.getUser.asFlow()) { workouts, user ->
-            val desiredDifficulties = when (user?.activityLevel) {
+            val desiredDifficulties = when (user.activityLevel) {
                 "Sedentary" -> listOf("Beginner")
                 "Lightly active" -> listOf("Beginner", "Intermediate")
                 else -> listOf("Intermediate", "Advanced")
@@ -63,11 +60,7 @@ class HomeViewModel @Inject constructor(
             if (filteredWorkouts.isEmpty()) {
                 emptyList()
             } else {
-                filteredWorkouts.groupBy { it.targetMuscle }.map { it.value.random() }.map {
-                    it.apply {
-                        imageResId = resources.getIdentifier(it.imageName, "drawable", packageName)
-                    }
-                }
+                filteredWorkouts.groupBy { it.targetMuscle }.map { it.value.random() }
             }
         }.stateIn(
             scope = viewModelScope,
@@ -76,18 +69,6 @@ class HomeViewModel @Inject constructor(
         )
 
         allWorkouts = recommendedWorkouts
-
-        allArticles = articleRepository.allArticles.map { articles ->
-            articles.map {
-                it.apply {
-                    imageResId = resources.getIdentifier(it.imageName, "drawable", packageName)
-                }
-            }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
 
         isDataReady = combine(allMeals, allWorkouts) { meals, workouts ->
             meals.isNotEmpty() && workouts.isNotEmpty()
@@ -98,22 +79,18 @@ class HomeViewModel @Inject constructor(
         )
 
         calorieGoal = userRepository.getUser.asFlow().map { user ->
-            if (user != null) {
-                NutritionCalculator.getCalorieRangeForDisplay(
-                    user.weightKg,
-                    user.heightCm,
-                    user.age ?: 30,
-                    user.gender,
-                    user.activityLevel,
-                    user.goal
-                )
-            } else {
-                "1800-2200 kcal / day" // A sensible default
-            }
+            NutritionCalculator.getCalorieRangeForDisplay(
+                user.weightKg,
+                user.heightCm,
+                user.age ?: 30,
+                user.gender,
+                user.activityLevel,
+                user.goal
+            )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ""
+            initialValue = "1800-2200 kcal / day"
         )
     }
 }

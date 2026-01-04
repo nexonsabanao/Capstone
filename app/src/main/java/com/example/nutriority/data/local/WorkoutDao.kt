@@ -55,6 +55,18 @@ interface WorkoutDao {
     fun getAllWorkouts(): Flow<List<Workout>>
 
     /**
+     * Gets all unique exercises for the library, grouped by name.
+     */
+    @Query("SELECT * FROM exercises GROUP BY name ORDER BY name ASC")
+    fun getAllExercises(): Flow<List<Exercise>>
+
+    /**
+     * Gets all unique target muscles from the exercises table.
+     */
+    @Query("SELECT DISTINCT targetMuscle FROM exercises")
+    fun getUniqueTargetMuscles(): Flow<List<String>>
+
+    /**
      * Gets a specific Workout by its ID.
      */
     @Query("SELECT * FROM workouts WHERE id = :workoutId")

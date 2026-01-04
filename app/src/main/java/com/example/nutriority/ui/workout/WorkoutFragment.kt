@@ -21,7 +21,6 @@ class WorkoutFragment : Fragment() {
     private var _binding: FragmentWorkoutBinding? = null
     private val binding get() = _binding!!
 
-    // Use the same HomeViewModel to access the workout data
     private val homeViewModel: HomeViewModel by viewModels()
     private lateinit var workoutAdapter: WorkoutAdapter
 
@@ -38,6 +37,16 @@ class WorkoutFragment : Fragment() {
 
         binding.starterPlanCard.setOnClickListener {
             val intent = Intent(requireActivity(), PersonalizedWorkoutActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.exercisesLibraryCard.setOnClickListener {
+            val intent = Intent(requireActivity(), ExerciseLibraryActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.showAllButton.setOnClickListener {
+            val intent = Intent(requireActivity(), AllWorkoutsActivity::class.java)
             startActivity(intent)
         }
 

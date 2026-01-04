@@ -98,5 +98,9 @@
         <item name="android:textColor">@android:color/transparent</item>
     </style>
 
+    <style name="FilterChip" parent="Widget.MaterialComponents.Chip.Filter">
+        <item name="chipBackgroundColor">@color/chip_background_color</item>
+        <item name="android:textColor">@color/chip_text_color</item>
+    </style>
 
 </resources>

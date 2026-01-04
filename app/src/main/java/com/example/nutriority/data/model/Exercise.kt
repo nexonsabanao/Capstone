@@ -30,6 +30,8 @@ data class Exercise(
     val duration: String = "",
     val description: String = "",
     val imageName: String = "",
+    val targetMuscle: String = "",
+    var category: String = "Exercise", // Changed to var to allow reassignment
 
     var workoutId: Int = 0
 ) {

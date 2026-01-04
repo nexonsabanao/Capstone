@@ -1,6 +1,8 @@
 package com.example.nutriority.ui.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -12,8 +14,9 @@ import java.util.Collections
 
 class ExerciseAdapter(
     private val onItemClick: (Exercise) -> Unit,
-    private val onListUpdated: (List<Exercise>) -> Unit
-    ) : ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder>(ExerciseDiffCallback()), ItemMoveCallbackListener {
+    private val onListUpdated: (List<Exercise>) -> Unit,
+    private val onDragStart: (RecyclerView.ViewHolder) -> Unit
+) : ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder>(ExerciseDiffCallback()), ItemMoveCallbackListener {
 
     inner class ExerciseViewHolder(val binding: ItemExerciseBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
@@ -32,6 +35,7 @@ class ExerciseAdapter(
         return ExerciseViewHolder(binding)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: ExerciseViewHolder, position: Int) {
         val currentExercise = getItem(position)
         holder.binding.apply {
@@ -45,6 +49,13 @@ class ExerciseAdapter(
 
             if (currentExercise.imageResId != 0) {
                 exerciseImage.setImageResource(currentExercise.imageResId)
+            }
+
+            dragHandle.setOnTouchListener { _, event ->
+                if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                    onDragStart(holder)
+                }
+                false
             }
         }
     }

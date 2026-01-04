@@ -25,7 +25,11 @@
         android:id="@+id/navigation_workout"
         android:name="com.example.nutriority.ui.workout.WorkoutFragment"
         android:label="Workout"
-        tools:layout="@layout/fragment_workout" />
+        tools:layout="@layout/fragment_workout" >
+        <action
+            android:id="@+id/action_workoutFragment_to_allWorkoutsFragment"
+            app:destination="@id/allWorkoutsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"
@@ -37,5 +41,11 @@
         android:name="com.example.nutriority.ui.workout.PersonalizedWorkoutFragment"
         android:label="fragment_personalized_workout"
         tools:layout="@layout/fragment_personalized_workout" />
+
+    <fragment
+        android:id="@+id/allWorkoutsFragment"
+        android:name="com.example.nutriority.ui.workout.AllWorkoutsFragment"
+        android:label="All Workouts"
+        tools:layout="@layout/fragment_all_workouts" />
 
 </navigation>

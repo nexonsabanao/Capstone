@@ -70,8 +70,8 @@ object AppModule {
     }
 
     @Provides
-    fun provideMealRepository(mealDao: MealDao): MealRepository {
-        return MealRepository(mealDao)
+    fun provideMealRepository(mealDao: MealDao, application: Application): MealRepository {
+        return MealRepository(mealDao, application)
     }
 
     @Provides
@@ -80,8 +80,8 @@ object AppModule {
     }
 
     @Provides
-    fun provideWorkoutRepository(workoutDao: WorkoutDao): WorkoutRepository {
-        return WorkoutRepository(workoutDao)
+    fun provideWorkoutRepository(workoutDao: WorkoutDao, application: Application): WorkoutRepository {
+        return WorkoutRepository(workoutDao, application)
     }
 
     @Provides
@@ -90,8 +90,8 @@ object AppModule {
     }
 
     @Provides
-    fun provideArticleRepository(articleDao: ArticlesDao): ArticleRepository {
-        return ArticleRepository(articleDao)
+    fun provideArticleRepository(articleDao: ArticlesDao, application: Application): ArticleRepository {
+        return ArticleRepository(articleDao, application)
     }
 
     @Provides

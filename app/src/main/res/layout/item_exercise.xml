@@ -17,6 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
+            android:paddingHorizontal="8dp"
             android:src="@drawable/ic_drag_handle" />
 
         <ImageView
@@ -48,13 +49,6 @@
                 tools:text="00:30" />
 
         </LinearLayout>
-
-        <ImageView
-            android:id="@+id/swap_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_swap_horiz" />
-
     </LinearLayout>
 
     <View
