@@ -36,7 +36,7 @@
         through this App remains the property of Nutriority or its licensors.\n\n"
         "Please read these terms carefully. This is a placeholder text."
     </string>
-    <string name="add_exercise_underlined">+ <u>Add Exercise</u></string>
+    <string name="add_exercise_underlined"><u>Edit</u></string>
     <string name="height_format">%.1f cm</string>
     <string name="weight_format">%.1f kg</string>
     <string name="no_plan_available">No personalized plan available — complete onboarding to create one.</string>
