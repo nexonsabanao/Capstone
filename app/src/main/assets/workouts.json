@@ -559,85 +559,23 @@
     "workout": {
       "id": 21,
       "name": "Full Body Stretch",
-      "description": "A gentle, relaxing full-body stretch session to improve flexibility and aid recovery.",
+      "description": "A relaxing full-body stretch session.",
       "category": "Recovery",
       "targetMuscle": "Full Body",
       "imageName": "workout_full_stretch",
       "difficulty": "Beginner",
       "duration": "20 min",
-      "tags": ["recovery", "flexibility", "mobility"]
+      "tags": ["recovery", "flexibility"]
     },
     "warmup": [
-      {
-        "name": "Light Marching",
-        "duration": "60s",
-        "targetMuscle": "Legs, Cardio"
-      },
-      {
-        "name": "Arm Circles",
-        "duration": "45s",
-        "targetMuscle": "Shoulders"
-      }
+      { "name": "Light Marching", "duration": "60s", "targetMuscle": "Legs, Cardio" }
     ],
     "exercises": [
-      {
-        "name": "Neck Side Stretch",
-        "description": "Gently stretch the neck muscles to release tension.",
-        "sets": 1,
-        "duration": "30s",
-        "rest": "15s",
-        "targetMuscle": "Neck",
-        "imageName": "exercise_neck_side_stretch"
-      },
-      {
-        "name": "Chest Opener Stretch",
-        "description": "Open the chest and stretch the shoulders.",
-        "sets": 2,
-        "duration": "45s",
-        "rest": "20s",
-        "targetMuscle": "Chest, Shoulders",
-        "imageName": "exercise_chest_opener"
-      },
-      {
-        "name": "Standing Forward Fold",
-        "description": "Stretch the hamstrings and lower back while relaxing the spine.",
-        "sets": 2,
-        "duration": "60s",
-        "rest": "30s",
-        "targetMuscle": "Hamstrings, Lower Back",
-        "imageName": "exercise_forward_fold"
-      },
-      {
-        "name": "Cat Cow Stretch",
-        "description": "Gently mobilize the spine through flexion and extension.",
-        "sets": 2,
-        "duration": "60s",
-        "rest": "30s",
-        "targetMuscle": "Spine, Core",
-        "imageName": "exercise_cat_cow"
-      },
-      {
-        "name": "Seated Spinal Twist",
-        "description": "Improve spinal mobility and stretch the back muscles.",
-        "sets": 2,
-        "duration": "45s",
-        "rest": "20s",
-        "targetMuscle": "Back, Obliques",
-        "imageName": "exercise_seated_twist"
-      },
-      {
-        "name": "Standing Quad Stretch",
-        "description": "Stretch the front of the thighs and hips.",
-        "sets": 2,
-        "duration": "40s",
-        "rest": "20s",
-        "targetMuscle": "Quadriceps, Hip Flexors",
-        "imageName": "exercise_quad_stretch"
-      }
+      { "name": "Standing Forward Fold", "description": "Stretch the posterior chain.", "sets": 2, "duration": "60s", "rest": "30s", "targetMuscle": "Hamstrings, Back", "imageName": "exercise_forward_fold" },
+      { "name": "Chest Opener Stretch", "description": "Open the chest and shoulders.", "sets": 2, "duration": "45s", "rest": "30s", "targetMuscle": "Chest, Shoulders", "imageName": "exercise_chest_opener" }
     ],
     "cooldown": [
-      {"name": "Deep Breathing", "duration": "90s", "targetMuscle": "Relaxation"},
-      {"name": "Lying Full Body Stretch", "duration": "60s", "targetMuscle": "Full Body"}
+      { "name": "Deep Breathing", "duration": "90s", "targetMuscle": "Relaxation" }
     ]
   },
 
