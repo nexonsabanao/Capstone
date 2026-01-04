@@ -91,11 +91,14 @@
 
     <style name="CollapsedAppBar" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">28sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="ExpandedAppBar" parent="@android:style/TextAppearance.Large">
         <item name="android:textColor">@android:color/transparent</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="FilterChip" parent="Widget.MaterialComponents.Chip.Filter">
