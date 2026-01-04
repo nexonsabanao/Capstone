@@ -10,9 +10,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentHomeBinding
+import com.example.nutriority.ui.BottomNavigationActivity
 import com.example.nutriority.ui.adapter.MealAdapter
 import com.example.nutriority.ui.adapter.WorkoutAdapter
 import com.example.nutriority.ui.adapter.ArticleAdapter
@@ -55,6 +58,10 @@ class HomeFragment : Fragment() {
         binding.sevenDaysWorkoutCard.btnStart.setOnClickListener {
             val intent = Intent(requireActivity(), PersonalizedWorkoutActivity::class.java)
             startActivity(intent)
+        }
+
+        binding.mealPlanCard.btnViewPlan.setOnClickListener {
+            (activity as? BottomNavigationActivity)?.navigateToTab(R.id.navigation_meal)
         }
     }
 
@@ -108,6 +115,12 @@ class HomeFragment : Fragment() {
                 launch {
                     homeViewModel.allArticles.collect { articles ->
                         articleAdapter.submitList(articles)
+                    }
+                }
+
+                launch {
+                    homeViewModel.calorieGoal.collect { calorieGoal ->
+                        binding.mealPlanCard.tvCalories.text = calorieGoal
                     }
                 }
             }

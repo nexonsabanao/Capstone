@@ -34,9 +34,9 @@
     },
     "warmup": [{ "name": "Torso Twists", "duration": "60s" }, { "name": "Cat-Cow Stretch", "duration": "60s" }],
     "exercises": [
-      {"name": "Crunches", "description": "A fundamental core exercise that targets the upper abdominals.", "sets": 3, "reps": "20", "rest": "45s", "targetMuscle": "Abs", "imageName": "exercise_crunches"},
-      {"name": "Leg Raises", "description": "An effective exercise for targeting the lower abdominal muscles.", "sets": 3, "reps": "20", "rest": "45s", "targetMuscle": "Lower Abs", "imageName": "exercise_leg_raises"},
-      {"name": "Russian Twists", "description": "A core exercise that strengthens the obliques. Aim for 20 reps per side.", "sets": 3, "reps": "20", "rest": "45s", "targetMuscle": "Obliques, Core", "imageName": "exercise_russian_twist"},
+      {"name": "Crunches", "description": "A fundamental core exercise that targets the upper abdominals.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Abs", "imageName": "exercise_crunches"},
+      {"name": "Leg Raises", "description": "An effective exercise for targeting the lower abdominal muscles.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Lower Abs", "imageName": "exercise_leg_raises"},
+      {"name": "Russian Twists", "description": "A core exercise that strengthens the obliques. Aim for 20 reps per side.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Obliques, Core", "imageName": "exercise_russian_twist"},
       {"name": "Plank", "description": "A simple but effective exercise for building core strength and stability.", "sets": 3, "duration": "60s", "rest": "60s", "targetMuscle": "Core, Abs", "imageName": "exercise_plank"}
     ],
     "cooldown": [{ "name": "Cobra Stretch", "duration": "30s" }, { "name": "Child's Pose", "duration": "60s" }]
@@ -119,10 +119,10 @@
     },
     "warmup": [{ "name": "Cat-Cow Stretch", "duration": "60s" }, { "name": "Torso Twists", "duration": "60s" }],
     "exercises": [
-      {"name": "Supermans", "description": "An excellent exercise for strengthening the lower back and glutes.", "sets": 3, "reps": "15", "rest": "45s", "targetMuscle": "Lower Back, Glutes", "imageName": "exercise_superman"},
-      {"name": "Reverse Snow Angels", "description": "A great move for improving posture and strengthening the upper back muscles.", "sets": 3, "reps": "15", "rest": "45s", "targetMuscle": "Upper Back, Shoulders", "imageName": "exercise_reverse_snow_angel"},
-      {"name": "Bird-Dog", "description": "A core and back stability exercise that improves coordination and balance.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Core, Back, Glutes", "imageName": "exercise_bird_dog"},
-      {"name": "Aquaman", "description": "An alternating superman exercise that challenges your coordination and back strength.", "sets": 3, "reps": "20", "rest": "45s", "targetMuscle": "Lower Back, Glutes", "imageName": "exercise_aquaman"}
+      {"name": "Supermans", "description": "An excellent exercise for strengthening the lower back and glutes.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Lower Back, Glutes", "imageName": "exercise_superman"},
+      {"name": "Reverse Snow Angels", "description": "A great move for improving posture and strengthening the upper back muscles.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Upper Back, Shoulders", "imageName": "exercise_reverse_snow_angel"},
+      {"name": "Bird-Dog", "description": "A core and back stability exercise that improves coordination and balance.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Core, Back, Glutes", "imageName": "exercise_bird_dog"},
+      {"name": "Aquaman", "description": "An alternating superman exercise that challenges your coordination and back strength.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Lower Back, Glutes", "imageName": "exercise_aquaman"}
     ],
     "cooldown": [{ "name": "Child's Pose", "duration": "60s" }, { "name": "Knees-to-Chest Stretch", "duration": "60s" }]
   },
@@ -184,8 +184,8 @@
     "warmup": [{ "name": "Marching in Place", "duration": "60s" }, { "name": "Arm Circles", "duration": "60s" }],
     "exercises": [
       {"name": "Wall Push-ups", "description": "A modified push-up for beginners to build upper body strength.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Chest, Shoulders", "imageName": "exercise_wall_pushup"},
-      {"name": "Bodyweight Squats", "description": "Master the fundamental squat movement.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Quads, Glutes", "imageName": "exercise_squat"},
-      {"name": "Glute Bridges", "description": "Activate and strengthen your glutes and hamstrings.", "sets": 3, "reps": "15", "rest": "45s", "targetMuscle": "Glutes, Hamstrings", "imageName": "exercise_glute_bridge"},
+      {"name": "Bodyweight Squats", "description": "Master the fundamental squat movement.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Quads, Glutes", "imageName": "exercise_squat"},
+      {"name": "Glute Bridges", "description": "Activate and strengthen your glutes and hamstrings.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Glutes, Hamstrings", "imageName": "exercise_glute_bridge"},
       {"name": "Plank", "description": "Build core stability with this essential exercise.", "sets": 3, "duration": "30s", "rest": "60s", "targetMuscle": "Core, Abs", "imageName": "exercise_plank"}
     ],
     "cooldown": [{ "name": "Lying Hamstring Stretch", "duration": "30s per leg" }, { "name": "Child's Pose", "duration": "60s" }]
@@ -204,10 +204,10 @@
     },
     "warmup": [{ "name": "Bodyweight Squats", "duration": "60s" }, { "name": "Leg Swings", "duration": "30s per leg" }],
     "exercises": [
-      {"name": "Bodyweight Squats", "description": "The king of leg exercises, targeting quads, hamstrings, and glutes.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Quads, Hamstrings, Glutes", "imageName": "exercise_squat"},
+      {"name": "Bodyweight Squats", "description": "The king of leg exercises, targeting quads, hamstrings, and glutes.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Quads, Hamstrings, Glutes", "imageName": "exercise_squat"},
       {"name": "Static Lunges", "description": "A beginner-friendly lunge variation to build single-leg strength.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Quads, Glutes", "imageName": "exercise_static_lunge"},
-      {"name": "Glute Bridges", "description": "Activate and strengthen your glutes and hamstrings with this floor exercise.", "sets": 3, "reps": "20", "rest": "45s", "targetMuscle": "Glutes, Hamstrings", "imageName": "exercise_glute_bridge"},
-      {"name": "Calf Raises", "description": "A simple yet effective exercise for strengthening your calf muscles.", "sets": 4, "reps": "20", "rest": "30s", "targetMuscle": "Calves", "imageName": "exercise_calf_raise"}
+      {"name": "Glute Bridges", "description": "Activate and strengthen your glutes and hamstrings with this floor exercise.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Glutes, Hamstrings", "imageName": "exercise_glute_bridge"},
+      {"name": "Calf Raises", "description": "A simple yet effective exercise for strengthening your calf muscles.", "sets": 4, "reps": "12", "rest": "30s", "targetMuscle": "Calves", "imageName": "exercise_calf_raise"}
     ],
     "cooldown": [{ "name": "Standing Quad Stretch", "duration": "30s per leg" }, { "name": "Seated Hamstring Stretch", "duration": "30s per leg" }]
   },
@@ -309,8 +309,8 @@
     },
     "warmup": [{ "name": "Arm Circles", "duration": "60s" }, { "name": "Arm Swings", "duration": "60s" }],
     "exercises": [
-      {"name": "Wall Push-ups", "description": "A modified push-up for beginners to build upper body strength.", "sets": 3, "reps": "15", "rest": "45s", "targetMuscle": "Chest, Shoulders", "imageName": "exercise_wall_pushup"},
-      {"name": "Tricep Dips on Chair", "description": "Use a chair or bench to effectively target your triceps.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Triceps", "imageName": "exercise_tricep_dip_chair"},
+      {"name": "Wall Push-ups", "description": "A modified push-up for beginners to build upper body strength.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Chest, Shoulders", "imageName": "exercise_wall_pushup"},
+      {"name": "Tricep Dips on Chair", "description": "Use a chair or bench to effectively target your triceps.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Triceps", "imageName": "exercise_tricep_dip_chair"},
       {"name": "Inchworms", "description": "A dynamic exercise that warms up the entire body.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Full Body", "imageName": "exercise_inchworm"}
     ],
     "cooldown": [{ "name": "Overhead Tricep Stretch", "duration": "30s per arm" }, { "name": "Biceps Stretch", "duration": "30s per arm" }]
@@ -369,9 +369,9 @@
     },
     "warmup": [{ "name": "Arm Swings", "duration": "60s" }, { "name": "Dynamic Chest Stretch", "duration": "60s" }],
     "exercises": [
-      {"name": "Incline Push-ups", "description": "A great starting point for building chest strength.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Chest, Shoulders", "imageName": "exercise_incline_pushup"},
-      {"name": "Knee Push-ups", "description": "A modified push-up to build strength before progressing to full push-ups.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Chest, Triceps", "imageName": "exercise_knee_pushup"},
-      {"name": "Wide-Grip Push-ups (on knees)", "description": "A variation to focus more on the chest muscles.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Chest", "imageName": "exercise_wide_pushup_knee"}
+      {"name": "Incline Push-ups", "description": "A great starting point for building chest strength.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Chest, Shoulders", "imageName": "exercise_incline_pushup"},
+      {"name": "Knee Push-ups", "description": "A modified push-up to build strength before progressing to full push-ups.", "sets": 3, "reps": "8", "rest": "60s", "targetMuscle": "Chest, Triceps", "imageName": "exercise_knee_pushup"},
+      {"name": "Wide-Grip Push-ups (on knees)", "description": "A variation to focus more on the chest muscles.", "sets": 3, "reps": "7", "rest": "60s", "targetMuscle": "Chest", "imageName": "exercise_wide_pushup_knee"}
     ],
     "cooldown": [{ "name": "Doorway Chest Stretch", "duration": "30s per side" }, { "name": "Child's Pose", "duration": "60s" }]
   },
@@ -410,8 +410,8 @@
     "warmup": [{ "name": "Arm Circles", "duration": "60s" }, { "name": "Shoulder Rolls", "duration": "60s" }],
     "exercises": [
       {"name": "Wall Handstand Hold", "description": "A safe way to begin building shoulder stability and strength.", "sets": 3, "duration": "30s", "rest": "60s", "targetMuscle": "Shoulders, Core", "imageName": "exercise_wall_handstand_hold"},
-      {"name": "Arm Circles", "description": "A great warm-up and mobility exercise for the shoulder joints.", "sets": 3, "reps": "20", "rest": "30s", "targetMuscle": "Shoulders", "imageName": "exercise_arm_circles"},
-      {"name": "Pike Push-ups (on knees)", "description": "A modified pike push-up to build shoulder strength.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Shoulders, Triceps", "imageName": "exercise_pike_pushup_knee"}
+      {"name": "Arm Circles", "description": "A great warm-up and mobility exercise for the shoulder joints.", "sets": 3, "reps": "12", "rest": "30s", "targetMuscle": "Shoulders", "imageName": "exercise_arm_circles"},
+      {"name": "Pike Push-ups (on knees)", "description": "A modified pike push-up to build shoulder strength.", "sets": 3, "reps": "7", "rest": "60s", "targetMuscle": "Shoulders, Triceps", "imageName": "exercise_pike_pushup_knee"}
     ],
     "cooldown": [{ "name": "Cross-Body Shoulder Stretch", "duration": "30s per arm" }, { "name": "Child's Pose", "duration": "60s" }]
   },
@@ -469,9 +469,9 @@
     },
     "warmup": [{ "name": "Arm Swings", "duration": "60s" }, { "name": "Torso Twists", "duration": "60s" }],
     "exercises": [
-      {"name": "Wall Push-ups", "description": "A great starting point for building chest and shoulder strength.", "sets": 3, "reps": "15", "rest": "45s", "targetMuscle": "Chest, Shoulders", "imageName": "exercise_wall_pushup"},
-      {"name": "Tricep Dips on Chair", "description": "Use a chair or bench to safely target your triceps.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Triceps", "imageName": "exercise_tricep_dip_chair"},
-      {"name": "Supermans", "description": "A simple exercise to strengthen your lower back.", "sets": 3, "reps": "15", "rest": "45s", "targetMuscle": "Lower Back", "imageName": "exercise_superman"}
+      {"name": "Wall Push-ups", "description": "A great starting point for building chest and shoulder strength.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Chest, Shoulders", "imageName": "exercise_wall_pushup"},
+      {"name": "Tricep Dips on Chair", "description": "Use a chair or bench to safely target your triceps.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Triceps", "imageName": "exercise_tricep_dip_chair"},
+      {"name": "Supermans", "description": "A simple exercise to strengthen your lower back.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Lower Back", "imageName": "exercise_superman"}
     ],
     "cooldown": [{ "name": "Doorway Chest Stretch", "duration": "30s per side" }, { "name": "Child's Pose", "duration": "60s" }]
   },

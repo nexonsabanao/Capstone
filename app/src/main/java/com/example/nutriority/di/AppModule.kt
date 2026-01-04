@@ -2,6 +2,7 @@ package com.example.nutriority.di
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.example.nutriority.data.UserDatabase
 import com.example.nutriority.data.local.AppDatabase
@@ -15,6 +16,7 @@ import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.planner.MealPlanner
 import com.example.nutriority.planner.WorkoutPlanner
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -102,5 +104,17 @@ object AppModule {
     @Singleton
     fun provideWorkoutPlanner(workoutRepository: WorkoutRepository): WorkoutPlanner {
         return WorkoutPlanner(workoutRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("MealPlanPrefs", Context.MODE_PRIVATE)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson {
+        return Gson()
     }
 }

@@ -36,6 +36,11 @@ class WorkoutFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.starterPlanCard.setOnClickListener {
+            val intent = Intent(requireActivity(), PersonalizedWorkoutActivity::class.java)
+            startActivity(intent)
+        }
+
         setupRecyclerView()
         observeViewModel()
     }

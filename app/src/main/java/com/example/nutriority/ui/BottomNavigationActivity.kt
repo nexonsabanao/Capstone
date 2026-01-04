@@ -2,6 +2,7 @@ package com.example.nutriority.ui
 
 import android.os.Bundle
 import androidx.activity.addCallback
+import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.nutriority.R
@@ -91,6 +92,10 @@ class BottomNavigationActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         outState.putStringArrayList("backStack", ArrayList(backStack))
         outState.putString("activeFragmentTag", activeFragment.tag)
+    }
+
+    fun navigateToTab(@IdRes menuItemId: Int) {
+        binding.bottomNavigationView.selectedItemId = menuItemId
     }
 
     private fun showFragment(fragment: Fragment) {

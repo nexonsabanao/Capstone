@@ -34,6 +34,18 @@ object NutritionCalculator {
         return tdee.roundToInt()
     }
 
+    fun getCalorieRangeForDisplay(weightKg: Double, heightCm: Double, age: Int, gender: String, activityLevel: String, goal: String): String {
+        val dailyCalories = calculateTdeeDailyCalories(weightKg, heightCm, age, gender, activityLevel, goal)
+        val lowerBound = (dailyCalories * 0.9)
+        val upperBound = (dailyCalories * 1.1)
+
+        // Round to the nearest 100
+        val roundedLower = (lowerBound / 100.0).roundToInt() * 100
+        val roundedUpper = (upperBound / 100.0).roundToInt() * 100
+
+        return "$roundedLower-$roundedUpper kcal / day"
+    }
+
     fun macronutrientTargets(dailyCalories: Int, proteinPercent: Double = 0.25, carbPercent: Double = 0.45, fatPercent: Double = 0.30): MacroTargets {
         // Protein: 4 kcal/g, Carbs: 4 kcal/g, Fat: 9 kcal/g
         val proteinGrams = ((dailyCalories * proteinPercent) / 4.0).roundToInt()
