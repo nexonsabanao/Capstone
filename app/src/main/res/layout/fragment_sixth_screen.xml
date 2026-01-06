@@ -30,11 +30,11 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="80dp"
-        android:fontFamily="@font/barlow_bold"
+        android:fontFamily="sans-serif-black"
         android:gravity="center_horizontal"
         android:text="What is your goal?"
         android:textColor="@color/dark_gray"
-        android:textSize="28sp"
+        android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -47,7 +47,7 @@
         android:fillViewport="true"
         android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/titleTextView"
-        app:layout_constraintBottom_toTopOf="@id/nextButton"
+        app:layout_constraintBottom_toTopOf="@+id/nextButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -91,9 +91,9 @@
                             android:background="@null"
                             android:button="@null"
                             android:clickable="false"
-                            android:fontFamily="@font/barlow_semibold"
+                            android:fontFamily="sans-serif-medium"
                             android:text="📉   Lose Weight"
-                            android:textSize="18sp" />
+                            android:textSize="20sp" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -125,9 +125,9 @@
                             android:background="@null"
                             android:button="@null"
                             android:clickable="false"
-                            android:fontFamily="@font/barlow_semibold"
+                            android:fontFamily="sans-serif-medium"
                             android:text="💪   Build Muscle"
-                            android:textSize="18sp" />
+                            android:textSize="20sp" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -159,9 +159,9 @@
                             android:background="@null"
                             android:button="@null"
                             android:clickable="false"
-                            android:fontFamily="@font/barlow_semibold"
+                            android:fontFamily="sans-serif-medium"
                             android:text="🧘   Keep Fit"
-                            android:textSize="18sp" />
+                            android:textSize="20sp" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -177,7 +177,8 @@
         style="@style/Widget.Material3.Button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
+        android:layout_marginHorizontal="40dp"
+        android:fontFamily="sans-serif-medium"
         android:backgroundTint="@color/primary_dark"
         android:paddingVertical="16dp"
         android:text="@string/action_next"

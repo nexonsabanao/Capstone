@@ -50,7 +50,7 @@
                 android:id="@+id/tvMealTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/barlow_bold"
+                android:fontFamily="sans-serif-medium"
                 android:shadowColor="#000000"
                 android:shadowDy="2"
                 android:shadowRadius="4"
@@ -62,7 +62,7 @@
                 android:id="@+id/tvMealDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/barlow_regular"
+                android:fontFamily="sans-serif"
                 android:shadowColor="#000000"
                 android:shadowDy="1"
                 android:shadowRadius="3"
@@ -111,8 +111,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
-                        android:fontFamily="@font/barlow_semibold"
+                        android:fontFamily="sans-serif-medium"
                         android:text="1500-1800 kcal / day"
+                        android:textAllCaps="true"
                         android:textColor="@color/white"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -136,8 +137,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
-                        android:fontFamily="@font/barlow_semibold"
+                        android:fontFamily="sans-serif-medium"
                         android:text="7 DAYS"
+                        android:textAllCaps="true"
                         android:textColor="@color/white"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -151,10 +153,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:fontFamily="@font/barlow_bold"
+                android:fontFamily="sans-serif-medium"
                 android:minWidth="0dp"
                 android:paddingVertical="10dp"
                 android:text="View Plan"
+                android:textSize="16sp"
                 android:textColor="#FF6F00"
                 app:backgroundTint="@android:color/white"
                 app:cornerRadius="12dp" />

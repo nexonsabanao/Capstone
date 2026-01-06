@@ -28,8 +28,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:fontFamily="sans-serif-black"
         android:textSize="24sp"
-        android:textStyle="bold"
         android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -41,6 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:fontFamily="sans-serif"
         android:textSize="16sp"
         android:textColor="@android:color/darker_gray"
         app:layout_constraintStart_toStartOf="parent"
@@ -54,6 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp"
+        android:fontFamily="sans-serif-medium"
         android:text="START"
         android:visibility="gone"
         android:textColor="#3DDC84"
@@ -76,6 +78,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:src="@drawable/img_man_day1"/>
+        tools:src="@drawable/metric_card"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

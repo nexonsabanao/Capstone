@@ -16,10 +16,10 @@
             android:id="@+id/text_history_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-semibold"
             android:text="History"
             android:textColor="@android:color/black"
             android:textSize="20sp"
-            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -27,6 +27,7 @@
             android:id="@+id/text_all_records"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
             android:text="Records"
             android:textColor="@color/secondary_blue"
             android:textSize="14sp"
@@ -51,23 +52,23 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp">
 
-                <TextView style="@style/DayLabel" android:text="S" />
-                <TextView style="@style/DayLabel" android:text="M" />
-                <TextView style="@style/DayLabel" android:text="T" />
-                <TextView style="@style/DayLabel" android:text="W" />
-                <TextView style="@style/DayLabel" android:text="T" />
-                <TextView style="@style/DayLabel" android:text="F" />
-                <TextView style="@style/DayLabel" android:text="S" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="S" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="M" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="T" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="W" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="T" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="F" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="S" />
             </TableRow>
 
             <TableRow android:layout_width="match_parent" android:layout_height="wrap_content">
-                <TextView style="@style/CalendarDate.Faded" android:text="30" />
-                <TextView style="@style/CalendarDate" android:text="1" />
-                <TextView style="@style/CalendarDate" android:text="2" />
-                <TextView style="@style/CalendarDate.Selected" android:text="3" />
-                <TextView style="@style/CalendarDate" android:text="4" />
-                <TextView style="@style/CalendarDate" android:text="5" />
-                <TextView style="@style/CalendarDate.Faded" android:text="6" />
+                <TextView style="@style/CalendarDate.Faded" android:fontFamily="sans-serif" android:text="30" />
+                <TextView style="@style/CalendarDate" android:fontFamily="sans-serif" android:text="1" />
+                <TextView style="@style/CalendarDate" android:fontFamily="sans-serif" android:text="2" />
+                <TextView style="@style/CalendarDate.Selected" android:fontFamily="sans-serif" android:text="3" />
+                <TextView style="@style/CalendarDate" android:fontFamily="sans-serif" android:text="4" />
+                <TextView style="@style/CalendarDate" android:fontFamily="sans-serif" android:text="5" />
+                <TextView style="@style/CalendarDate.Faded" android:fontFamily="sans-serif" android:text="6" />
             </TableRow>
 
 
@@ -78,6 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif"
             android:text="Day Streak"
             android:textColor="@android:color/darker_gray"
             android:textSize="14sp"
@@ -102,10 +104,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="0"
                 android:textColor="@android:color/holo_red_dark"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="16sp" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

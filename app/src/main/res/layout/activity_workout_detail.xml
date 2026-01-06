@@ -59,8 +59,8 @@
                 android:id="@+id/workout_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?attr/textAppearanceHeadline5"
                 android:textStyle="bold"
+                android:textSize="24sp"
                 tools:text="Arm Beginner" />
 
             <LinearLayout
@@ -90,15 +90,16 @@
                             android:id="@+id/workout_duration"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceSubtitle1"
-                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
+                            android:textSize="20sp"
                             tools:text="16 mins" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
                             android:text="Duration"
-                            android:textAppearance="?attr/textAppearanceCaption" />
+                            android:textSize="14sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -123,15 +124,16 @@
                             android:id="@+id/workout_exercise_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceSubtitle1"
-                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
+                            android:textSize="20sp"
                             tools:text="19" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
                             android:text="Exercises"
-                            android:textAppearance="?attr/textAppearanceCaption" />
+                            android:textSize="14sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -145,9 +147,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
+                    android:fontFamily="sans-serif-medium"
                     android:text="Exercises"
-                    android:textAppearance="?attr/textAppearanceHeadline6"
-                    android:textStyle="bold" />
+                    android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/add_exercise_button"
@@ -156,9 +158,12 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:drawablePadding="8dp"
+                    android:fontFamily="sans-serif-medium"
                     android:gravity="center_vertical"
+                    android:textAllCaps="true"
                     android:text="@string/add_exercise_underlined"
-                    android:textColor="@color/secondary_blue"/>
+                    android:textColor="@color/secondary_blue"
+                    android:textSize="12sp" />
 
             </RelativeLayout>
 
@@ -180,6 +185,7 @@
         android:layout_width="140dp"
         android:layout_height="72dp"
         android:layout_gravity="bottom|end"
+        android:fontFamily="sans-serif-medium"
         android:text="Start"
         android:backgroundTint="@color/primary_dark"
         android:layout_margin="16dp"

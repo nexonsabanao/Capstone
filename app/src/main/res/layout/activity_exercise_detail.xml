@@ -38,6 +38,9 @@
         android:text="ABOUT EXERCISE >"
         android:textColor="@android:color/white"
         android:layout_marginTop="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:textAllCaps="true"
+        android:textSize="12sp"
         app:layout_constraintTop_toBottomOf="@id/exercise_video"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -56,6 +59,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Auto Log: OFF"
+            android:fontFamily="sans-serif-medium"
+            android:textAllCaps="true"
+            android:textSize="12sp"
             app:chipBackgroundColor="#424242"/>
 
         <com.google.android.material.chip.Chip
@@ -63,6 +69,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Rest: ON"
+            android:fontFamily="sans-serif-medium"
+            android:textAllCaps="true"
+            android:textSize="12sp"
             app:chipBackgroundColor="#424242"/>
     </com.google.android.material.chip.ChipGroup>
 
@@ -84,6 +93,8 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:text="Log set 1"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

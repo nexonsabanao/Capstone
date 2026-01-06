@@ -18,10 +18,10 @@
             android:id="@+id/text_weight_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
             android:text="Weight"
             android:textColor="@android:color/black"
             android:textSize="20sp"
-            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -29,6 +29,7 @@
             android:id="@+id/text_view_all"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
             android:text="Log"
             android:textColor="@color/secondary_blue"
             android:textSize="14sp"
@@ -40,6 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:fontFamily="sans-serif-medium"
             android:text="Current"
             android:textColor="@android:color/darker_gray"
             android:textSize="12sp"
@@ -50,10 +52,10 @@
             android:id="@+id/text_current_weight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
             android:text="61 kg"
             android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/text_current_label" />
 
@@ -88,6 +90,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
                     android:text="Heaviest"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="12sp" />
@@ -96,10 +99,10 @@
                     android:id="@+id/text_heaviest_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
                     android:text="61"
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
-                    android:textStyle="bold"
                     tools:text="70 kg" />
             </LinearLayout>
 
@@ -113,6 +116,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
                     android:text="Lightest"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="12sp" />
@@ -121,10 +125,10 @@
                     android:id="@+id/text_lightest_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
                     android:text="54"
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
-                    android:textStyle="bold"
                     tools:text="60 kg" />
             </LinearLayout>
         </LinearLayout>

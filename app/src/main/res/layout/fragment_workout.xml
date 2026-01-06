@@ -16,7 +16,7 @@
         android:layout_marginStart="20dp"
         android:text="Workout"
         android:textColor="#212121"
-        android:textSize="28sp"
+        android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -54,10 +54,12 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
+                    android:fontFamily="sans-serif-medium"
                     android:text="TRAINER"
+                    android:textAllCaps="true"
+                    android:textSize="12sp"
                     android:textColor="@android:color/white"
-                    android:background="@drawable/rounded_chip_selected_dark"
-                    android:textStyle="bold" />
+                    android:background="@drawable/rounded_chip_selected_dark" />
 
                 <TextView
                     android:id="@+id/tabCustom"
@@ -65,19 +67,21 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
+                    android:fontFamily="sans-serif-medium"
                     android:text="CUSTOM"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textStyle="bold" />
+                    android:textAllCaps="true"
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorPrimary" />
             </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="Library"
                 android:textColor="#212121"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="20sp" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/exercises_library_card"
@@ -99,16 +103,19 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
                         android:text="EXERCISES LIBRARY"
+                        android:textAllCaps="true"
                         android:textColor="@android:color/white"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:textSize="20sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
+                        android:fontFamily="sans-serif-medium"
                         android:text="Click to see all exercises"
+                        android:textAllCaps="true"
                         android:textColor="@android:color/white"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -125,10 +132,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
                     android:text="Your Plan"
                     android:textColor="#212121"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textSize="20sp" />
             </LinearLayout>
 
             <com.google.android.material.card.MaterialCardView
@@ -157,16 +164,19 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
                             android:text="STARTER PLAN"
+                            android:textAllCaps="true"
                             android:textColor="@android:color/white"
-                            android:textSize="20sp"
-                            android:textStyle="bold" />
+                            android:textSize="20sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
+                            android:fontFamily="sans-serif-medium"
                             android:text="7 Days"
+                            android:textAllCaps="true"
                             android:textColor="@android:color/white"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -191,19 +201,20 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
                     android:text="Body Focus"
                     android:textColor="#212121"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/show_all_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
                     android:text="SHOW ALL"
+                    android:textAllCaps="true"
                     android:textColor="@color/secondary_blue"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView

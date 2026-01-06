@@ -16,7 +16,7 @@
         android:layout_marginStart="20dp"
         android:text="Home"
         android:textColor="#212121"
-        android:textSize="28sp"
+        android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -50,10 +50,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:layout_marginStart="20dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="Body Focus"
                 android:textColor="#212121"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="20sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/workouts_recycler_view"
@@ -98,10 +98,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:layout_marginStart="20dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="Meals"
                 android:textColor="#212121"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="20sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/meals_recycler_view"
@@ -129,10 +129,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:layout_marginStart="20dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="Articles"
                 android:textColor="#212121"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="20sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/articles_recycler_view"
