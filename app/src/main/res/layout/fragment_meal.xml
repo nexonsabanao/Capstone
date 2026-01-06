@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginTop="4dp"
+        android:fontFamily="sans-serif"
         android:text="Meal"
         android:textColor="#212121"
         android:textSize="28sp"
@@ -25,6 +26,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:fontFamily="sans-serif"
         android:text="We'll create a meal plan for the week. Just click the generate button to get started."
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -44,15 +46,16 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:background="@drawable/date_selector_background"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:layout_marginEnd="8dp">
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
                 android:text="Start"
                 android:textSize="14sp" />
 
@@ -60,6 +63,7 @@
                 android:id="@+id/start_day_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
                 android:text="Today"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
@@ -69,6 +73,7 @@
                 android:id="@+id/start_date_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
                 android:text="Dec 26"
                 android:textSize="14sp" />
 
@@ -77,15 +82,16 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:background="@drawable/date_selector_background"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:layout_marginStart="8dp">
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
                 android:text="End"
                 android:textSize="14sp" />
 
@@ -93,6 +99,7 @@
                 android:id="@+id/end_day_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
                 android:text="Friday"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
@@ -102,6 +109,7 @@
                 android:id="@+id/end_date_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
                 android:text="Jan 02"
                 android:textSize="14sp" />
 
@@ -115,15 +123,18 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="24dp"
         android:backgroundTint="@color/primary_dark"
-        android:paddingVertical="16dp"
+        android:fontFamily="sans-serif"
         android:paddingHorizontal="16dp"
+        android:paddingVertical="16dp"
         android:text="Generate"
         android:textColor="@color/white"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="DuplicateClickableBoundsCheck" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/initial_view"
@@ -136,9 +147,10 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:visibility="gone"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/doneButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title"
@@ -153,6 +165,26 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <Button
+        android:id="@+id/doneButton"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="@color/primary_dark"
+        android:fontFamily="sans-serif"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="16dp"
+        android:text="Done"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

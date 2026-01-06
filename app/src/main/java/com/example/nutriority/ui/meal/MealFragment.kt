@@ -10,8 +10,8 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.databinding.FragmentMealBinding
 import dagger.hilt.android.AndroidEntryPoint
-import java.text.SimpleDateFormat
-import java.util.Calendar
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @AndroidEntryPoint
@@ -21,6 +21,7 @@ class MealFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val mealViewModel: MealViewModel by viewModels()
+    private val mealAdapter = GeneratedMealPlanAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,71 +34,80 @@ class MealFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupRecyclerView()
         updateDateViews()
+        setupClickListeners()
+        observeViewModel()
+    }
 
-        binding.generatedMealPlanRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+    private fun setupRecyclerView() {
+        binding.generatedMealPlanRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = mealAdapter
+        }
+    }
 
+    private fun setupClickListeners() {
         binding.nextButton.setOnClickListener {
             mealViewModel.generateMealPlan()
         }
 
+        binding.doneButton.setOnClickListener {
+            mealViewModel.completeMealPlan()
+        }
+    }
+
+    private fun observeViewModel() {
         mealViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.loadingProgressBar.isVisible = isLoading
-            // When loading starts, hide both the initial view and the results
             if (isLoading) {
+                // Hide everything when loading
                 binding.initialView.isVisible = false
                 binding.generatedMealPlanRecyclerView.isVisible = false
+                binding.doneButton.isVisible = false
             }
         }
 
         mealViewModel.mealPlan.observe(viewLifecycleOwner) { weeklyPlan ->
-            // This observer runs after the data is loaded/generated and isLoading is false.
-            // The progress bar is already hidden by the isLoading observer.
-            val hasPlan = weeklyPlan?.any { it.isNotEmpty() } == true
+            val hasPlan = weeklyPlan.any { it.isNotEmpty() }
+
+            binding.initialView.isVisible = !hasPlan && mealViewModel.isLoading.value == false
+            binding.generatedMealPlanRecyclerView.isVisible = hasPlan
 
             if (hasPlan) {
-                binding.initialView.isVisible = false
-                binding.generatedMealPlanRecyclerView.isVisible = true
+                val mealListItems = weeklyPlan.mapIndexed { index, dailyMeals ->
+                    val dayLabel = mealViewModel.getDayLabel(index)
+                    val isToday = dayLabel.startsWith("Today")
 
-                val mealData = mutableListOf<Any>()
-                val sdf = SimpleDateFormat("MMM d", Locale.getDefault())
-                val weekdaySdf = SimpleDateFormat("EEEE, MMM d", Locale.getDefault())
-                val calendar = Calendar.getInstance()
-
-                weeklyPlan.forEachIndexed { index, dailyMeals ->
-                    // Reset calendar to today and add the offset for the current day
-                    val dayCalendar = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, index) }
-                    val dateHeader = when (index) {
-                        0 -> "Today, ${sdf.format(dayCalendar.time)}"
-                        1 -> "Tomorrow, ${sdf.format(dayCalendar.time)}"
-                        else -> weekdaySdf.format(dayCalendar.time)
+                    listOf(MealListItem.HeaderItem(dayLabel)) + dailyMeals.map { meal ->
+                        MealListItem.MealItem(meal, isToday)
                     }
-                    mealData.add(dateHeader)
-                    mealData.addAll(dailyMeals)
-                }
-
-                val adapter = GeneratedMealPlanAdapter(mealData)
-                binding.generatedMealPlanRecyclerView.adapter = adapter
+                }.flatten()
+                mealAdapter.submitList(mealListItems)
             } else {
-                binding.initialView.isVisible = true
-                binding.generatedMealPlanRecyclerView.isVisible = false
+                // Clear the adapter when there is no plan
+                mealAdapter.submitList(emptyList())
             }
+        }
+
+        mealViewModel.isPlanExpired.observe(viewLifecycleOwner) { isExpired ->
+            val hasPlan = mealViewModel.mealPlan.value?.any { it.isNotEmpty() } == true
+            binding.doneButton.isVisible = hasPlan && isExpired
+            // Hide the generate button if a plan exists and is not expired
+            binding.nextButton.isVisible = !hasPlan || isExpired
         }
     }
 
     private fun updateDateViews() {
-        val sdfMonthDay = SimpleDateFormat("MMM d", Locale.getDefault())
-        val sdfDayName = SimpleDateFormat("EEEE", Locale.getDefault())
+        val today = LocalDate.now()
+        val endDate = today.plusDays(6)
 
-        // Set start date
-        val startCalendar = Calendar.getInstance()
-        binding.startDateText.text = sdfMonthDay.format(startCalendar.time)
+        val monthDayFormatter = DateTimeFormatter.ofPattern("MMM d", Locale.getDefault())
+        val dayNameFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())
 
-        // Set end date
-        val endCalendar = startCalendar.clone() as Calendar
-        endCalendar.add(Calendar.DAY_OF_YEAR, 6)
-        binding.endDayName.text = sdfDayName.format(endCalendar.time)
-        binding.endDateText.text = sdfMonthDay.format(endCalendar.time)
+        binding.startDateText.text = today.format(monthDayFormatter)
+        binding.endDayName.text = endDate.format(dayNameFormatter)
+        binding.endDateText.text = endDate.format(monthDayFormatter)
     }
 
     override fun onDestroyView() {
