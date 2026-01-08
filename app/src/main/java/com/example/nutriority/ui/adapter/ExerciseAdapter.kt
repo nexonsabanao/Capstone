@@ -41,11 +41,7 @@ class ExerciseAdapter(
         holder.binding.apply {
             exerciseName.text = currentExercise.name
 
-            if (currentExercise.duration.isNotBlank()) {
-                exerciseDuration.text = currentExercise.duration
-            } else {
-                exerciseDuration.text = "x${currentExercise.reps}"
-            }
+            exerciseDuration.text = "${currentExercise.sets} sets"
 
             if (currentExercise.imageResId != 0) {
                 exerciseImage.setImageResource(currentExercise.imageResId)
@@ -62,14 +58,15 @@ class ExerciseAdapter(
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         val mutableList = currentList.toMutableList()
-        val fromExercise = mutableList[fromPosition]
-        val toExercise = mutableList[toPosition]
-        val fromOrder = fromExercise.order
-        fromExercise.order = toExercise.order
-        toExercise.order = fromOrder
         Collections.swap(mutableList, fromPosition, toPosition)
-        onListUpdated(mutableList)
-        submitList(mutableList)
+
+        // Create a new list with updated order values
+        val updatedList = mutableList.mapIndexed { index, exercise ->
+            exercise.copy(order = index)
+        }
+
+        onListUpdated(updatedList)
+        submitList(updatedList)
     }
 
 

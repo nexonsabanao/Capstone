@@ -1,0 +1,27 @@
+[
+  {
+    "goal": "build muscle",
+    "schedule": {
+      "default": ["Chest", "Back", "Legs", null, "Shoulders", "Arms", null],
+      "bmi_high": ["Chest", "Back", "Abs", null, "Shoulders", "Legs", "Full Body"]
+    },
+    "sets": 3,
+    "reps": "8-12"
+  },
+  {
+    "goal": "lose weight",
+    "schedule": {
+      "default": ["Full Body", "Abs", "Full Body", null, "Full Body", "Abs", "Full Body"]
+    },
+    "sets": 4,
+    "reps": "12-15"
+  },
+  {
+    "goal": "keep fit",
+    "schedule": {
+      "default": ["Chest", "Legs", null, "Back", "Abs", "Full Body", null]
+    },
+    "sets": 3,
+    "reps": "10-15"
+  }
+]

@@ -12,7 +12,6 @@ import com.example.nutriority.databinding.ItemPersonalizedWorkoutDayBinding
 import com.example.nutriority.databinding.ItemRestartWorkoutBinding
 import com.example.nutriority.planner.WorkoutSession
 
-// Enum to represent the state of a workout day
 enum class DayStatus {
     LOCKED,
     ACTIVE,
@@ -21,11 +20,11 @@ enum class DayStatus {
 
 class PersonalizedWorkoutAdapter(
     private val workoutSessions: List<WorkoutSession>,
-    private val lastCompletedDay: Int, // The index of the last completed day (e.g., 0 for Day 1)
+    private val lastCompletedDay: Int,
     private val onStartWorkoutClicked: (dayIndex: Int) -> Unit,
-    private val onRestartWorkoutClicked: () -> Unit, // New callback
+    private val onRestartWorkoutClicked: () -> Unit,
     private val onWorkoutClicked: (workoutId: Int) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() { // Changed to RecyclerView.ViewHolder
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val VIEW_TYPE_WORKOUT = 0
@@ -90,11 +89,8 @@ class PersonalizedWorkoutAdapter(
                 if (position != RecyclerView.NO_POSITION) {
                     val session = workoutSessions[position]
                     val id = session.unifiedWorkoutId
-                    Log.d("WorkoutClick", "Clicked on day: ${session.day}. unifiedWorkoutId: $id. Session details: $session")
                     if (id != null && id > 0) {
                         onWorkoutClicked(id)
-                    } else {
-                        Log.w("WorkoutClick", "Navigation skipped: workoutId is invalid ($id).")
                     }
                 }
             }
@@ -103,13 +99,14 @@ class PersonalizedWorkoutAdapter(
         fun bind(session: WorkoutSession, status: DayStatus) {
             val context = binding.root.context
             binding.tvDayTitle.text = session.day
+            
+            // UI Update: Using the genius calorie calculation
             binding.tvDayDetails.text = if (session.focus != "Rest Day") {
-                "${session.durationMinutes} min · ${session.durationMinutes * 8} kcal"
+                "${session.durationMinutes} min · ${session.caloriesBurned} kcal"
             } else {
                 session.description
             }
 
-            // Default state
             binding.btnStart.text = "Start"
 
             when (status) {
@@ -126,7 +123,7 @@ class PersonalizedWorkoutAdapter(
 
                     if (session.focus == "Rest Day") {
                         binding.btnStart.text = "Complete Day"
-                        binding.ivWorkoutImage.visibility = View.GONE // No image for rest day
+                        binding.ivWorkoutImage.visibility = View.GONE
                     }
                 }
                 DayStatus.COMPLETED -> {
@@ -151,7 +148,6 @@ class PersonalizedWorkoutAdapter(
                 }
             }
 
-            // Hide image for rest days unless they are completed
             if (session.focus == "Rest Day" && status != DayStatus.COMPLETED) {
                 binding.ivWorkoutImage.visibility = View.GONE
             }

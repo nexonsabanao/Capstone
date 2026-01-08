@@ -3,17 +3,16 @@ package com.example.nutriority.ui.workout
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MotionEvent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.databinding.ActivityWorkoutDetailBinding
 import com.example.nutriority.ui.adapter.ExerciseAdapter
-import com.example.nutriority.ui.workout.SimpleItemTouchHelperCallback
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -23,7 +22,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityWorkoutDetailBinding
     private val viewModel: WorkoutDetailViewModel by viewModels()
     private lateinit var exerciseAdapter: ExerciseAdapter
-    private lateinit var itemTouchHelper: ItemTouchHlper
+    private lateinit var itemTouchHelper: ItemTouchHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,10 +47,11 @@ class WorkoutDetailActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
             onItemClick = { exercise, position, totalCount ->
-                val intent = Intent(this, ExerciseDetailActivity::class.java)
-                intent.putExtra("exercise_id", exercise.id)
-                intent.putExtra("exercise_position", position + 1)
-                intent.putExtra("total_exercises", totalCount)
+                val intent = Intent(this, ExerciseDetailActivity::class.java).apply {
+                    putExtra("exercise_id", exercise.id)
+                    putExtra("exercise_position", position + 1)
+                    putExtra("total_exercises", totalCount)
+                }
                 startActivity(intent)
             },
             onListUpdated = { exercises ->
@@ -81,7 +81,8 @@ class WorkoutDetailActivity : AppCompatActivity() {
                     binding.workoutTitle.text = workout.workout.name
                     binding.workoutDuration.text = workout.workout.duration
                     val filteredExercises = workout.exercises.filter {
-                        !it.category.equals("Warm-up", ignoreCase = true) && !it.category.equals("Cool-down", ignoreCase = true)
+                        !it.category.equals("Warm-up", ignoreCase = true) &&
+                                !it.category.equals("Cool-down", ignoreCase = true)
                     }
                     binding.workoutExerciseCount.text = filteredExercises.size.toString()
                     exerciseAdapter.submitList(filteredExercises.sortedBy { exercise -> exercise.order })

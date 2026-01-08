@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nutriority.data.model.User
 import com.example.nutriority.data.repository.UserRepository
+import com.example.nutriority.planner.WorkoutPlanner
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,7 +16,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val repository: UserRepository
+    private val repository: UserRepository,
+    private val workoutPlanner: WorkoutPlanner, // Injected the planner
+    private val gson: Gson
 ) : ViewModel() {
 
     private val _user = MutableLiveData<User>()
@@ -63,7 +67,15 @@ class UserViewModel @Inject constructor(
     suspend fun restartWorkoutPlan() {
         withContext(Dispatchers.IO) {
             _user.value?.let { currentUser ->
-                val updatedUser = currentUser.copy(lastCompletedWorkoutDay = 0)
+                // 1. Generate a new plan using the genius planner
+                val newPlan = workoutPlanner.planWorkouts(currentUser)
+                val newPlanJson = gson.toJson(newPlan)
+
+                // 2. Save the new plan and reset the completion day
+                val updatedUser = currentUser.copy(
+                    personalizedPlanJson = newPlanJson,
+                    lastCompletedWorkoutDay = 0
+                )
                 _user.postValue(updatedUser)
                 repository.insertUser(updatedUser)
             }

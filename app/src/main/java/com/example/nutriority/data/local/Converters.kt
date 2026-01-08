@@ -3,6 +3,7 @@ package com.example.nutriority.data.local
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.util.Date
 
 class Converters {
     /**
@@ -27,5 +28,21 @@ class Converters {
         }
         val gson = Gson()
         return gson.toJson(list)
+    }
+
+    /**
+     * Converts a Long timestamp from the database into a Date object.
+     */
+    @TypeConverter
+    fun fromTimestamp(value: Long?): Date? {
+        return value?.let { Date(it) }
+    }
+
+    /**
+     * Converts a Date object into a Long timestamp to store in the database.
+     */
+    @TypeConverter
+    fun dateToTimestamp(date: Date?): Long? {
+        return date?.time
     }
 }

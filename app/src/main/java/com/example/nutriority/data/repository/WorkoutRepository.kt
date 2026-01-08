@@ -2,14 +2,20 @@ package com.example.nutriority.data.repository
 
 import android.app.Application
 import com.example.nutriority.data.local.WorkoutDao
+import com.example.nutriority.data.local.WorkoutLogDao
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.Workout
+import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.data.model.WorkoutWithExercises
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class WorkoutRepository(private val workoutDao: WorkoutDao, private val application: Application) {
+class WorkoutRepository(
+    private val workoutDao: WorkoutDao,
+    private val workoutLogDao: WorkoutLogDao,
+    private val application: Application
+) {
 
     val allWorkouts: Flow<List<Workout>> = workoutDao.getAllWorkouts().map { workouts ->
         workouts.map {
@@ -47,8 +53,24 @@ class WorkoutRepository(private val workoutDao: WorkoutDao, private val applicat
         workoutDao.insertExercise(exercise)
     }
 
+    suspend fun updateExercise(exercise: Exercise) {
+        workoutDao.updateExercise(exercise)
+    }
+
     suspend fun updateExercises(exercises: List<Exercise>) {
         workoutDao.updateExercises(exercises)
+    }
+
+    suspend fun insertWorkoutLog(log: WorkoutLog) {
+        workoutLogDao.insertLog(log)
+    }
+
+    fun getLogsForWorkout(workoutId: Int): Flow<List<WorkoutLog>> {
+        return workoutLogDao.getLogsForWorkout(workoutId)
+    }
+
+    fun getWorkoutLogs(): Flow<List<WorkoutLog>> {
+        return workoutLogDao.getWorkoutLogs()
     }
 
     fun getAllExercises(): Flow<List<Exercise>> {

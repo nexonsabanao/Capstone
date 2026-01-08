@@ -12,7 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentPersonalizedWorkoutBinding
-import com.example.nutriority.planner.PersonalizedPlan
+import com.example.nutriority.planner.WorkoutPlan
 import com.example.nutriority.ui.adapter.PersonalizedWorkoutAdapter
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
@@ -42,12 +42,13 @@ class PersonalizedWorkoutFragment : Fragment() {
             user?.personalizedPlanJson?.let { jsonString ->
                 Log.d("WorkoutDebug", "Attempting to parse JSON: $jsonString")
                 try {
-                    val plan = Gson().fromJson(jsonString, PersonalizedPlan::class.java)
-                    if (plan?.workoutPlan?.sessions != null) {
-                        Log.d("WorkoutDebug", "Parse successful. Found ${plan.workoutPlan.sessions.size} sessions.")
-                        setupRecyclerView(plan, user.lastCompletedWorkoutDay)
+                    // Corrected: Parse as WorkoutPlan directly
+                    val workoutPlan = Gson().fromJson(jsonString, WorkoutPlan::class.java)
+                    if (workoutPlan?.sessions != null) {
+                        Log.d("WorkoutDebug", "Parse successful. Found ${workoutPlan.sessions.size} sessions.")
+                        setupRecyclerView(workoutPlan, user.lastCompletedWorkoutDay)
                     } else {
-                        Log.e("WorkoutDebug", "Parsing failed or workout sessions are null.")
+                        Log.e("WorkoutDebug", "Parsing failed: workoutPlan or sessions are null.")
                     }
                 } catch (e: JsonSyntaxException) {
                     Log.e("WorkoutDebug", "JSON Syntax Error. Check if the JSON is well-formed.", e)
@@ -58,9 +59,9 @@ class PersonalizedWorkoutFragment : Fragment() {
         }
     }
 
-    private fun setupRecyclerView(plan: PersonalizedPlan, lastCompletedDay: Int) {
+    private fun setupRecyclerView(plan: WorkoutPlan, lastCompletedDay: Int) {
         val adapter = PersonalizedWorkoutAdapter(
-            plan.workoutPlan.sessions,
+            plan.sessions,
             lastCompletedDay,
             onStartWorkoutClicked = { dayIndex ->
                 handleWorkoutStarted(dayIndex)
@@ -79,8 +80,6 @@ class PersonalizedWorkoutFragment : Fragment() {
     }
 
     private fun handleWorkoutStarted(dayIndex: Int) {
-        // The user has started or completed the workout for the given day.
-        // We now need to save this progress.
         lifecycleScope.launch {
             userViewModel.completeWorkoutDay(dayIndex)
         }

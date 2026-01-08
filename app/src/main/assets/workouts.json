@@ -2,657 +2,1418 @@
   {
     "workout": {
       "id": 1,
-      "name": "Arm Workout",
-      "description": "Focus on building and toning your biceps and triceps for stronger arms using only your bodyweight.",
+      "name": "Beginner Arm Workout",
+      "description": "A beginner-friendly arm routine to safely strengthen biceps, triceps, and shoulders using only bodyweight. Focuses on proper form and controlled movement.",
       "category": "Strength",
-      "targetMuscle": "Arms",
-      "imageName": "workout_arms",
-      "difficulty": "Intermediate",
-      "duration": "40 min",
-      "tags": ["build muscle", "strength", "bodyweight"]
+      "targetMuscle": "Chest, Triceps, Biceps, Arms",
+      "imageName": "workout_arms_beginner",
+      "difficulty": "Beginner",
+      "duration": "25 min",
+      "tags": ["arms", "strength", "beginner", "bodyweight", "no-equipment"]
     },
     "warmup": [
-      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" },
-      { "name": "Arm Circles", "duration": "30s", "targetMuscle": "Shoulders" }
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Arms" },
+      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" }
     ],
     "exercises": [
-      {"name": "Diamond Push-ups", "description": "A challenging push-up variation that emphasizes the triceps.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Triceps, Chest", "imageName": "exercise_diamond_pushup"},
-      {"name": "Tricep Dips on Floor", "description": "Use the floor to effectively target your triceps without equipment.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Triceps", "imageName": "exercise_tricep_dip"},
-      {"name": "Close-Grip Push-ups", "description": "A push-up variation with hands close together to focus on the triceps.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Triceps, Chest", "imageName": "exercise_close_grip_pushup"},
-      {"name": "Bodyweight Bicep Curls", "description": "An exercise using your own body's resistance to target the biceps.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Biceps", "imageName": "exercise_bodyweight_bicep_curl"}
+      {
+        "name": "Wall Push-ups",
+        "description": "Stand facing a wall, hands shoulder-width apart. Slowly bend your elbows and bring your chest toward the wall, keeping your body straight. Push back to the starting position. Focus on controlled movement.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Chest, Triceps, Shoulders",
+        "tips": "Keep your body straight from head to heels. Avoid arching your back. Move slowly to feel the muscles working.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_wall_pushup"
+      },
+      {
+        "name": "Knee Push-ups",
+        "description": "Start in a plank position with knees on the floor. Lower your chest toward the floor by bending elbows. Push back up. Focus on engaging your chest and triceps.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Chest, Triceps, Shoulders",
+        "tips": "Keep your core tight and avoid letting your hips sag. Move in a slow, controlled manner.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_knee_pushup"
+      },
+      {
+        "name": "Isometric Bicep Hold",
+        "description": "Stand with elbows bent at 90 degrees, palms facing up. Squeeze your biceps and hold for 10 seconds. Relax and repeat.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Biceps",
+        "tips": "Keep elbows close to your body. Focus on contracting your biceps fully during the hold.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_isometric_bicep_hold"
+      },
+      {
+        "name": "Tricep Dips on Floor",
+        "description": "Sit on the floor, knees bent, feet flat. Place hands behind you with fingers pointing forward. Lift your hips slightly and bend elbows to lower your body toward the floor, then push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Triceps",
+        "tips": "Keep your fingers pointing forward and elbows close to your body. Move slowly to feel the triceps working.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_tricep_dip_floor"
+      }
     ],
     "cooldown": [
       { "name": "Overhead Tricep Stretch", "duration": "30s per arm", "targetMuscle": "Triceps" },
-      { "name": "Biceps Stretch", "duration": "30s per arm", "targetMuscle": "Biceps" }
+      { "name": "Biceps Wall Stretch", "duration": "30s per arm", "targetMuscle": "Biceps, Chest" }
     ]
   },
-
   {
     "workout": {
       "id": 2,
-      "name": "Abs Workout",
-      "description": "A core-focused routine to build abdominal strength and definition.",
-      "category": "Core",
-      "targetMuscle": "Abs",
-      "imageName": "workout_abs",
-      "difficulty": "Beginner",
-      "duration": "30 min",
-      "tags": ["keep fit", "lose weight", "bodyweight"]
+      "name": "Intermediate Arm Workout",
+      "description": "An intermediate arm routine for those who can handle more challenging bodyweight exercises. Focuses on building strength and endurance in biceps, triceps, and shoulders.",
+      "category": "Strength",
+      "targetMuscle": "Chest, Triceps, Shoulders, Arms",
+      "imageName": "workout_arms_intermediate_no_equipment",
+      "difficulty": "Intermediate",
+      "duration": "35 min",
+      "tags": ["arms", "strength", "intermediate", "bodyweight", "no-equipment"]
     },
     "warmup": [
-      { "name": "Torso Twists", "duration": "60s", "targetMuscle": "Core, Obliques" },
-      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Spine, Back" }
+      { "name": "Arm Swings", "duration": "60s", "targetMuscle": "Shoulders, Arms" },
+      { "name": "High Knees", "duration": "60s", "targetMuscle": "Full Body, Cardio" }
     ],
     "exercises": [
-      {"name": "Crunches", "description": "A fundamental core exercise that targets the upper abdominals.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Abs", "imageName": "exercise_crunches"},
-      {"name": "Leg Raises", "description": "An effective exercise for targeting the lower abdominal muscles.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Lower Abs", "imageName": "exercise_leg_raises"},
-      {"name": "Russian Twists", "description": "A core exercise that strengthens the obliques. Aim for 20 reps per side.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Obliques, Core", "imageName": "exercise_russian_twist"},
-      {"name": "Plank", "description": "A simple but effective exercise for building core strength and stability.", "sets": 3, "duration": "60s", "rest": "60s", "targetMuscle": "Core, Abs", "imageName": "exercise_plank"}
+      {
+        "name": "Regular Push-ups",
+        "description": "Start in a plank position with hands shoulder-width apart. Lower your chest to the floor while keeping your body straight, then push back up. Engage chest, shoulders, and triceps throughout.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Chest, Triceps, Shoulders",
+        "tips": "Keep your core tight and spine neutral. Avoid letting your hips sag. Move in a slow, controlled manner.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_regular_pushup"
+      },
+      {
+        "name": "Close-grip Push-ups",
+        "description": "Place your hands closer than shoulder-width, under your chest. Lower your body while keeping elbows tucked close to your sides, then push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Triceps, Chest, Shoulders",
+        "tips": "Keep elbows tight against your body to maximize tricep activation. Move slowly to avoid strain.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_close_grip_pushup"
+      },
+      {
+        "name": "Diamond Knee Push-ups",
+        "description": "Kneeling push-up with hands forming a diamond shape under your chest. Lower slowly and push back up, focusing on triceps.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Triceps, Chest",
+        "tips": "Keep your core engaged and wrists aligned. Avoid collapsing elbows outward.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_diamond_knee_pushup"
+      },
+      {
+        "name": "Plank to Shoulder Tap",
+        "description": "Start in a plank position. Lift one hand to tap the opposite shoulder while keeping your hips stable. Alternate sides.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Shoulders, Core, Triceps",
+        "tips": "Keep hips as still as possible to activate core. Move slowly to maintain balance.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_plank_shoulder_tap"
+      },
+      {
+        "name": "Reverse Plank Hold",
+        "description": "Sit with legs extended and hands behind you, fingers pointing forward. Lift hips to form a straight line from head to heels. Hold the position.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Triceps, Shoulders, Core",
+        "tips": "Squeeze glutes and press hands into the floor. Keep neck neutral and shoulders down.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_reverse_plank_hold"
+      }
     ],
     "cooldown": [
-      { "name": "Cobra Stretch", "duration": "30s", "targetMuscle": "Abs, Lower Back" },
-      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" }
+      { "name": "Overhead Tricep Stretch", "duration": "30s per arm", "targetMuscle": "Triceps" },
+      { "name": "Biceps Wall Stretch", "duration": "30s per arm", "targetMuscle": "Biceps, Chest" }
     ]
   },
-
   {
     "workout": {
       "id": 3,
-      "name": "Chest Workout",
-      "description": "Build a powerful and defined chest with these essential bodyweight exercises.",
+      "name": "Advanced Arm Workout",
+      "description": "An advanced arm routine for those experienced with bodyweight training. Focuses on maximizing strength, endurance, and muscle definition using challenging movements.",
       "category": "Strength",
-      "targetMuscle": "Chest",
-      "imageName": "workout_chest",
-      "difficulty": "Intermediate",
-      "duration": "45 min",
-      "tags": ["build muscle", "strength", "bodyweight"]
+      "targetMuscle": "Shoulders, Triceps, Core, Arms",
+      "imageName": "workout_arms_advanced_no_equipment",
+      "difficulty": "Advanced",
+      "duration": "40 min",
+      "tags": ["arms", "strength", "advanced", "bodyweight", "no-equipment"]
     },
     "warmup": [
-      { "name": "Arm Swings", "duration": "60s", "targetMuscle": "Shoulders, Chest" },
-      { "name": "Dynamic Chest Stretch", "duration": "60s", "targetMuscle": "Chest" }
+      { "name": "Arm Circles Large", "duration": "60s", "targetMuscle": "Shoulders, Arms" },
+      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" }
     ],
     "exercises": [
-      {"name": "Push-ups", "description": "The classic bodyweight exercise for building upper body and chest strength.", "sets": 4, "reps": "15", "rest": "60s", "targetMuscle": "Chest, Shoulders, Triceps", "imageName": "exercise_pushup"},
-      {"name": "Wide Push-ups", "description": "A push-up variation that places more emphasis on the chest muscles.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Chest", "imageName": "exercise_wide_pushup"},
-      {"name": "Incline Push-ups", "description": "A push-up variation that puts more emphasis on the upper chest.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Upper Chest, Shoulders", "imageName": "exercise_incline_pushup"},
-      {"name": "Decline Push-ups", "description": "Elevate your feet to increase the difficulty and target the lower chest.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Lower Chest, Shoulders", "imageName": "exercise_decline_pushup"}
+      {
+        "name": "Diamond Push-ups",
+        "description": "Start in a plank position with hands forming a diamond shape under your chest. Lower your chest slowly toward your hands, keeping elbows tucked, then push back up explosively.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Triceps, Chest, Shoulders",
+        "tips": "Engage your core and glutes to maintain a straight line. Keep wrists aligned and elbows tight. Move slowly on the way down for maximum tension.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_diamond_pushup"
+      },
+      {
+        "name": "Archer Push-ups",
+        "description": "Start in a wide push-up position. Shift your weight to one arm while the other arm extends straight to the side. Lower chest toward the weighted arm and push back up, alternating sides.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Chest, Triceps, Shoulders",
+        "tips": "Keep your body straight and avoid sagging hips. Perform controlled movements to avoid shoulder strain.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_archer_pushup"
+      },
+      {
+        "name": "Pike Push-ups",
+        "description": "Start in a downward dog position. Bend elbows to lower your head toward the floor, then push back up, targeting shoulders and triceps.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Shoulders, Triceps",
+        "tips": "Keep legs straight and core engaged. Move in a slow, controlled motion to maximize shoulder activation.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_pike_pushup"
+      },
+      {
+        "name": "Plank to Push-up",
+        "description": "Begin in a forearm plank. Press up one arm at a time to a full push-up position, then return to forearm plank. Alternate leading arms.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Shoulders, Triceps, Core",
+        "tips": "Avoid rotating hips; keep your body straight. Engage your core for stability throughout.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_plank_to_pushup"
+      },
+      {
+        "name": "Bodyweight Tricep Dips",
+        "description": "Sit on the floor with knees bent and hands behind hips, fingers pointing forward. Lift hips slightly and bend elbows to lower your body toward the floor, then push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Triceps, Shoulders, Core",
+        "tips": "Keep elbows close to your body. Engage your core to avoid sagging hips. Move slowly to increase tension on triceps.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_floor_tricep_dip"
+      }
     ],
     "cooldown": [
-      { "name": "Doorway Chest Stretch", "duration": "30s per side", "targetMuscle": "Chest" },
-      { "name": "Behind-the-Back Stretch", "duration": "30s", "targetMuscle": "Chest, Shoulders" }
+      { "name": "Overhead Tricep Stretch", "duration": "30s per arm", "targetMuscle": "Triceps" },
+      { "name": "Biceps Wall Stretch", "duration": "30s per arm", "targetMuscle": "Biceps, Chest" },
+      { "name": "Child’s Pose Arm Stretch", "duration": "30s", "targetMuscle": "Shoulders, Triceps" }
     ]
   },
-
   {
     "workout": {
       "id": 4,
-      "name": "Leg Workout",
-      "description": "A complete lower body workout to build strength and muscle in your legs using only bodyweight.",
+      "name": "Beginner Leg Workout",
+      "description": "A simple leg routine for beginners to build strength and endurance in the lower body using only bodyweight exercises.",
       "category": "Strength",
-      "targetMuscle": "Legs",
-      "imageName": "workout_legs",
-      "difficulty": "Intermediate",
-      "duration": "50 min",
-      "tags": ["build muscle", "strength", "bodyweight", "lose weight"]
+      "targetMuscle": "Quads, Glutes, Hamstrings, Lower Back, Legs",
+      "imageName": "workout_legs_beginner_no_equipment",
+      "difficulty": "Beginner",
+      "duration": "25 min",
+      "tags": ["legs", "strength", "beginner", "bodyweight", "no-equipment"]
     },
     "warmup": [
-      { "name": "Bodyweight Squats", "duration": "60s", "targetMuscle": "Quads, Glutes" },
-      { "name": "Leg Swings", "duration": "30s per leg", "targetMuscle": "Hips, Hamstrings" }
+      { "name": "March in Place", "duration": "60s", "targetMuscle": "Legs, Cardio" },
+      { "name": "Hip Circles", "duration": "60s", "targetMuscle": "Hips, Lower Back" }
     ],
     "exercises": [
-      {"name": "Bodyweight Squats", "description": "The king of all leg exercises, targeting quads, hamstrings, and glutes.", "sets": 4, "reps": "20", "rest": "60s", "targetMuscle": "Quads, Hamstrings, Glutes", "imageName": "exercise_squat"},
-      {"name": "Lunges", "description": "A great exercise for improving balance and single-leg strength.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Quads, Glutes", "imageName": "exercise_lunges"},
-      {"name": "Glute Bridges", "description": "Activate and strengthen your glutes and hamstrings with this floor exercise.", "sets": 3, "reps": "20", "rest": "45s", "targetMuscle": "Glutes, Hamstrings", "imageName": "exercise_glute_bridge"},
-      {"name": "Jump Squats", "description": "An explosive variation of the squat that builds power and burns calories.", "sets": 3, "reps": "12", "rest": "75s", "targetMuscle": "Quads, Glutes, Calves", "imageName": "exercise_jump_squat"},
-      {"name": "Calf Raises", "description": "A simple yet effective exercise for strengthening your calf muscles.", "sets": 4, "reps": "25", "rest": "30s", "targetMuscle": "Calves", "imageName": "exercise_calf_raise"}
+      {
+        "name": "Bodyweight Squats",
+        "description": "Stand with feet shoulder-width apart. Lower your hips back and down as if sitting on a chair, keeping knees aligned with toes. Push through heels to return to standing.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Quads, Glutes, Hamstrings",
+        "tips": "Keep chest upright and core engaged. Don’t let knees collapse inward. Move in a controlled manner to avoid injury.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_bodyweight_squat"
+      },
+      {
+        "name": "Glute Bridges",
+        "description": "Lie on your back with knees bent and feet flat on the floor. Lift hips toward the ceiling, squeezing glutes at the top, then lower back down.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Glutes, Hamstrings, Lower Back",
+        "tips": "Avoid arching your lower back. Engage glutes and core at the top for maximum benefit.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_glute_bridge"
+      },
+      {
+        "name": "Standing Calf Raises",
+        "description": "Stand tall with feet hip-width apart. Push through the balls of your feet to lift your heels, pause at the top, then slowly lower back down.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Calves",
+        "tips": "Keep movements slow and controlled. Avoid bouncing. Engage core for balance.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_calf_raise"
+      }
     ],
     "cooldown": [
-      { "name": "Standing Quad Stretch", "duration": "30s per leg", "targetMuscle": "Quads" },
-      { "name": "Seated Hamstring Stretch", "duration": "30s per leg", "targetMuscle": "Hamstrings" }
+      { "name": "Quad Stretch", "duration": "30s per leg", "targetMuscle": "Quads" },
+      { "name": "Seated Hamstring Stretch", "duration": "30s per leg", "targetMuscle": "Hamstrings" },
+      { "name": "Standing Calf Stretch", "duration": "30s per leg", "targetMuscle": "Calves" }
     ]
   },
-
   {
     "workout": {
       "id": 5,
-      "name": "Shoulder Workout",
-      "description": "Develop strong, broad shoulders with this targeted bodyweight routine.",
+      "name": "Intermediate Leg Workout",
+      "description": "A moderate leg routine designed to build strength, endurance, and mobility using bodyweight exercises. Suitable for those who have mastered basic squats and lunges.",
       "category": "Strength",
-      "targetMuscle": "Shoulders",
-      "imageName": "workout_shoulders",
-      "difficulty": "Advanced",
-      "duration": "45 min",
-      "tags": ["build muscle", "strength", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders" },
-      { "name": "Shoulder Rolls", "duration": "30s", "targetMuscle": "Shoulders, Traps" }
-    ],
-    "exercises": [
-      {"name": "Pike Push-ups", "description": "A key bodyweight exercise for building shoulder mass and strength.", "sets": 4, "reps": "12", "rest": "75s", "targetMuscle": "Shoulders, Triceps", "imageName": "exercise_pike_pushup"},
-      {"name": "Decline Pike Push-ups", "description": "Increase the challenge of a pike push-up by elevating your feet.", "sets": 3, "reps": "10", "rest": "75s", "targetMuscle": "Shoulders, Triceps", "imageName": "exercise_decline_pike_pushup"},
-      {"name": "Hindu Push-ups", "description": "A dynamic exercise that improves shoulder strength and mobility.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Shoulders, Chest, Triceps", "imageName": "exercise_hindu_pushup"},
-      {"name": "Plank to Downward Dog", "description": "A dynamic movement that builds shoulder stability and core strength.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Shoulders, Core", "imageName": "exercise_plank_to_downward_dog"}
-    ],
-    "cooldown": [
-      { "name": "Cross-Body Shoulder Stretch", "duration": "30s per arm", "targetMuscle": "Shoulders" },
-      { "name": "Cow Face Pose Arms", "duration": "30s per side", "targetMuscle": "Shoulders, Triceps" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 6,
-      "name": "Back Workout",
-      "description": "Build a strong and healthy back with these fundamental bodyweight exercises.",
-      "category": "Strength",
-      "targetMuscle": "Back",
-      "imageName": "workout_back",
-      "difficulty": "Beginner",
-      "duration": "35 min",
-      "tags": ["build muscle", "strength", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Spine, Back" },
-      { "name": "Torso Twists", "duration": "60s", "targetMuscle": "Core, Obliques" }
-    ],
-    "exercises": [
-      {"name": "Supermans", "description": "An excellent exercise for strengthening the lower back and glutes.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Lower Back, Glutes", "imageName": "exercise_superman"},
-      {"name": "Reverse Snow Angels", "description": "A great move for improving posture and strengthening the upper back muscles.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Upper Back, Shoulders", "imageName": "exercise_reverse_snow_angel"},
-      {"name": "Bird-Dog", "description": "A core and back stability exercise that improves coordination and balance.", "sets": 3, "reps": "10", "rest": "60s", "targetMuscle": "Core, Back, Glutes", "imageName": "exercise_bird_dog"},
-      {"name": "Aquaman", "description": "An alternating superman exercise that challenges your coordination and back strength.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Lower Back, Glutes", "imageName": "exercise_aquaman"}
-    ],
-    "cooldown": [
-      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" },
-      { "name": "Knees-to-Chest Stretch", "duration": "60s", "targetMuscle": "Lower Back, Glutes" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 7,
-      "name": "Upper Body Power",
-      "description": "A bodyweight workout hitting all major upper body muscle groups.",
-      "category": "Strength",
-      "targetMuscle": "Upper Body",
-      "imageName": "workout_upper_body",
-      "difficulty": "Advanced",
-      "duration": "45 min",
-      "tags": ["keep fit", "strength", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" },
-      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders" }
-    ],
-    "exercises": [
-      {"name": "Clapping Push-ups", "description": "An explosive push-up variation that builds power in the chest and triceps.", "sets": 3, "reps": "10", "rest": "75s", "targetMuscle": "Chest, Shoulders, Triceps", "imageName": "exercise_clapping_pushup"},
-      {"name": "Pike Push-ups", "description": "A key bodyweight exercise for building shoulder mass and strength.", "sets": 3, "reps": "12", "rest": "75s", "targetMuscle": "Shoulders, Triceps", "imageName": "exercise_pike_pushup"},
-      {"name": "Reverse Snow Angels", "description": "A great move for improving posture and strengthening the upper back muscles.", "sets": 3, "reps": "15", "rest": "45s", "targetMuscle": "Upper Back, Shoulders", "imageName": "exercise_reverse_snow_angel"},
-      {"name": "Tricep Dips on Floor", "description": "Use the floor to effectively target your triceps without equipment.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Triceps", "imageName": "exercise_tricep_dip"}
-    ],
-    "cooldown": [
-      { "name": "Doorway Chest Stretch", "duration": "30s per side", "targetMuscle": "Chest" },
-      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Shoulders" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 8,
-      "name": "Full Body Strength",
-      "description": "A balanced bodyweight workout targeting all major muscle groups.",
-      "category": "Strength",
-      "targetMuscle": "Full Body",
-      "imageName": "workout_full_body",
+      "targetMuscle": "Quads, Glutes, Hamstrings, Legs",
+      "imageName": "workout_legs_intermediate",
       "difficulty": "Intermediate",
-      "duration": "50 min",
-      "tags": ["lose weight", "keep fit", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" },
-      { "name": "Bodyweight Squats", "duration": "60s", "targetMuscle": "Quads, Glutes" }
-    ],
-    "exercises": [
-      {"name": "Burpees", "description": "A high-intensity, full-body exercise that builds strength and cardiovascular fitness.", "sets": 3, "reps": "10", "rest": "75s", "targetMuscle": "Full Body", "imageName": "exercise_burpees"},
-      {"name": "Bodyweight Squats", "description": "The king of leg exercises, targeting quads, hamstrings, and glutes.", "sets": 3, "reps": "20", "rest": "60s", "targetMuscle": "Quads, Hamstrings, Glutes", "imageName": "exercise_squat"},
-      {"name": "Push-ups", "description": "The classic bodyweight exercise for building upper body and chest strength.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Chest, Shoulders, Triceps", "imageName": "exercise_pushup"},
-      {"name": "Supermans", "description": "An excellent exercise for strengthening the lower back and glutes.", "sets": 3, "reps": "15", "rest": "45s", "targetMuscle": "Lower Back, Glutes", "imageName": "exercise_superman"},
-      {"name": "Plank", "description": "A simple but effective exercise for building core strength and stability.", "sets": 3, "duration": "60s", "rest": "60s", "targetMuscle": "Core, Abs", "imageName": "exercise_plank"}
-    ],
-    "cooldown": [
-      { "name": "Standing Quad Stretch", "duration": "30s per leg", "targetMuscle": "Quads" },
-      { "name": "Knees-to-Chest Stretch", "duration": "60s", "targetMuscle": "Lower Back, Glutes" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 9,
-      "name": "Foundation Full Body",
-      "description": "A beginner-friendly routine to build a solid fitness foundation.",
-      "category": "Strength",
-      "targetMuscle": "Full Body",
-      "imageName": "workout_full_body_beginner",
-      "difficulty": "Beginner",
       "duration": "30 min",
-      "tags": ["keep fit", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Marching in Place", "duration": "60s", "targetMuscle": "Legs, Cardio" },
-      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders" }
-    ],
-    "exercises": [
-      {"name": "Wall Push-ups", "description": "A modified push-up for beginners to build upper body strength.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Chest, Shoulders", "imageName": "exercise_wall_pushup"},
-      {"name": "Bodyweight Squats", "description": "Master the fundamental squat movement.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Quads, Glutes", "imageName": "exercise_squat"},
-      {"name": "Glute Bridges", "description": "Activate and strengthen your glutes and hamstrings.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Glutes, Hamstrings", "imageName": "exercise_glute_bridge"},
-      {"name": "Plank", "description": "Build core stability with this essential exercise.", "sets": 3, "duration": "30s", "rest": "60s", "targetMuscle": "Core, Abs", "imageName": "exercise_plank"}
-    ],
-    "cooldown": [
-      { "name": "Lying Hamstring Stretch", "duration": "30s per leg", "targetMuscle": "Hamstrings" },
-      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 10,
-      "name": "Beginner Leg Day",
-      "description": "A simple and effective leg workout for beginners.",
-      "category": "Strength",
-      "targetMuscle": "Legs",
-      "imageName": "workout_legs_beginner",
-      "difficulty": "Beginner",
-      "duration": "35 min",
-      "tags": ["build muscle", "lose weight", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Bodyweight Squats", "duration": "60s", "targetMuscle": "Quads, Glutes" },
-      { "name": "Leg Swings", "duration": "30s per leg", "targetMuscle": "Hips, Hamstrings" }
-    ],
-    "exercises": [
-      {"name": "Bodyweight Squats", "description": "The king of leg exercises, targeting quads, hamstrings, and glutes.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Quads, Hamstrings, Glutes", "imageName": "exercise_squat"},
-      {"name": "Static Lunges", "description": "A beginner-friendly lunge variation to build single-leg strength.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Quads, Glutes", "imageName": "exercise_static_lunge"},
-      {"name": "Glute Bridges", "description": "Activate and strengthen your glutes and hamstrings with this floor exercise.", "sets": 3, "reps": "12", "rest": "45s", "targetMuscle": "Glutes, Hamstrings", "imageName": "exercise_glute_bridge"},
-      {"name": "Calf Raises", "description": "A simple yet effective exercise for strengthening your calf muscles.", "sets": 4, "reps": "12", "rest": "30s", "targetMuscle": "Calves", "imageName": "exercise_calf_raise"}
-    ],
-    "cooldown": [
-      { "name": "Standing Quad Stretch", "duration": "30s per leg", "targetMuscle": "Quads" },
-      { "name": "Seated Hamstring Stretch", "duration": "30s per leg", "targetMuscle": "Hamstrings" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 11,
-      "name": "Core Crusher",
-      "description": "An intermediate core workout to challenge your abs and obliques.",
-      "category": "Core",
-      "targetMuscle": "Abs",
-      "imageName": "workout_abs_intermediate",
-      "difficulty": "Intermediate",
-      "duration": "35 min",
-      "tags": ["keep fit", "lose weight", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Torso Twists", "duration": "60s", "targetMuscle": "Core, Obliques" },
-      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Spine, Back" }
-    ],
-    "exercises": [
-      {"name": "V-Ups", "description": "A challenging core exercise that targets both upper and lower abs.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Abs, Core", "imageName": "exercise_v_ups"},
-      {"name": "Bicycle Crunches", "description": "A dynamic core exercise that targets the obliques and rectus abdominis.", "sets": 3, "reps": "20", "rest": "45s", "targetMuscle": "Obliques, Abs", "imageName": "exercise_bicycle_crunches"},
-      {"name": "Flutter Kicks", "description": "An exercise that targets the lower abs and improves core stability.", "sets": 3, "reps": "30", "rest": "45s", "targetMuscle": "Lower Abs", "imageName": "exercise_flutter_kicks"},
-      {"name": "Side Plank", "description": "Strengthen your obliques and improve core stability with this isometric hold.", "sets": 3, "duration": "45s", "rest": "60s", "targetMuscle": "Obliques, Core", "imageName": "exercise_side_plank"}
-    ],
-    "cooldown": [
-      { "name": "Cobra Stretch", "duration": "30s", "targetMuscle": "Abs, Lower Back" },
-      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 12,
-      "name": "Back Builder",
-      "description": "An intermediate back workout to improve posture and strength.",
-      "category": "Strength",
-      "targetMuscle": "Back",
-      "imageName": "workout_back_intermediate",
-      "difficulty": "Intermediate",
-      "duration": "40 min",
-      "tags": ["build muscle", "strength", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Spine, Back" },
-      { "name": "Torso Twists", "duration": "60s", "targetMuscle": "Core, Obliques" }
-    ],
-    "exercises": [
-      {"name": "Supermans", "description": "An excellent exercise for strengthening the lower back and glutes.", "sets": 3, "reps": "20", "rest": "45s", "targetMuscle": "Lower Back, Glutes", "imageName": "exercise_superman"},
-      {"name": "Reverse Snow Angels", "description": "A great move for improving posture and strengthening the upper back muscles.", "sets": 3, "reps": "20", "rest": "45s", "targetMuscle": "Upper Back, Shoulders", "imageName": "exercise_reverse_snow_angel"},
-      {"name": "Glute Bridge March", "description": "A dynamic glute bridge variation that challenges your core and back stability.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Core, Back, Glutes", "imageName": "exercise_glute_bridge_march"},
-      {"name": "Tabletop In-and-Outs", "description": "A challenging core exercise that also engages the back muscles.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Core, Back", "imageName": "exercise_tabletop_in_outs"}
-    ],
-    "cooldown": [
-      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" },
-      { "name": "Knees-to-Chest Stretch", "duration": "60s", "targetMuscle": "Lower Back, Glutes" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 13,
-      "name": "Total Body HIIT",
-      "description": "A high-intensity interval training workout to maximize calorie burn and improve fitness.",
-      "category": "Cardio",
-      "targetMuscle": "Full Body",
-      "imageName": "workout_full_body_advanced",
-      "difficulty": "Advanced",
-      "duration": "40 min",
-      "tags": ["lose weight", "keep fit", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" },
-      { "name": "High Knees", "duration": "60s", "targetMuscle": "Legs, Cardio" }
-    ],
-    "exercises": [
-      {"name": "Burpees with Push-up", "description": "The ultimate full-body exercise for strength and cardio.", "sets": 4, "reps": "12", "rest": "75s", "targetMuscle": "Full Body", "imageName": "exercise_burpees_pushup"},
-      {"name": "Jump Squats", "description": "An explosive variation of the squat that builds power and burns calories.", "sets": 4, "reps": "15", "rest": "75s", "targetMuscle": "Quads, Glutes, Calves", "imageName": "exercise_jump_squat"},
-      {"name": "Clapping Push-ups", "description": "An explosive push-up variation that builds power in the chest and triceps.", "sets": 3, "reps": "12", "rest": "75s", "targetMuscle": "Chest, Shoulders, Triceps", "imageName": "exercise_clapping_pushup"},
-      {"name": "Mountain Climbers", "description": "A high-intensity exercise that builds cardio fitness and core strength.", "sets": 4, "duration": "45s", "rest": "60s", "targetMuscle": "Core, Abs, Cardio", "imageName": "exercise_mountain_climbers"}
-    ],
-    "cooldown": [
-      { "name": "Standing Quad Stretch", "duration": "30s per leg", "targetMuscle": "Quads" },
-      { "name": "Knees-to-Chest Stretch", "duration": "60s", "targetMuscle": "Lower Back, Glutes" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 14,
-      "name": "Leg Power",
-      "description": "An advanced leg workout to build explosive power and strength.",
-      "category": "Strength",
-      "targetMuscle": "Legs",
-      "imageName": "workout_legs_advanced",
-      "difficulty": "Advanced",
-      "duration": "50 min",
-      "tags": ["build muscle", "strength", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Jump Squats", "duration": "60s", "targetMuscle": "Quads, Glutes" },
-      { "name": "Leg Swings", "duration": "30s per leg", "targetMuscle": "Hips, Hamstrings" }
-    ],
-    "exercises": [
-      {"name": "Pistol Squats (assisted)", "description": "The ultimate single-leg exercise. Use support as needed.", "sets": 3, "reps": "8", "rest": "75s", "targetMuscle": "Quads, Glutes, Balance", "imageName": "exercise_pistol_squat"},
-      {"name": "Jump Lunges", "description": "An explosive lunge variation for building power and stability.", "sets": 3, "reps": "12", "rest": "75s", "targetMuscle": "Quads, Glutes", "imageName": "exercise_jump_lunge"},
-      {"name": "Single-Leg Glute Bridges", "description": "A challenging glute bridge variation to isolate and strengthen each glute.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Glutes, Hamstrings", "imageName": "exercise_single_leg_glute_bridge"},
-      {"name": "Nordic Hamstring Curls (assisted)", "description": "A powerful exercise for building hamstring strength.", "sets": 3, "reps": "8", "rest": "75s", "targetMuscle": "Hamstrings", "imageName": "exercise_nordic_hamstring_curl"}
-    ],
-    "cooldown": [
-      { "name": "Deep Squat Hold", "duration": "60s", "targetMuscle": "Hips, Quads" },
-      { "name": "Pigeon Pose", "duration": "60s per side", "targetMuscle": "Glutes, Hips" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 15,
-      "name": "Beginner Cardio Burn",
-      "description": "A low-impact cardio workout designed for beginners to improve endurance.",
-      "category": "Cardio",
-      "targetMuscle": "Full Body",
-      "imageName": "workout_cardio_beginner",
-      "difficulty": "Beginner",
-      "duration": "30 min",
-      "tags": ["lose weight", "keep fit"]
-    },
-    "warmup": [
-      { "name": "Marching in Place", "duration": "60s", "targetMuscle": "Legs, Cardio" },
-      { "name": "Arm Swings", "duration": "60s", "targetMuscle": "Shoulders, Chest" }
-    ],
-    "exercises": [
-      { "name": "Step Jacks", "description": "A low-impact jumping jack alternative.", "sets": 3, "duration": "45s", "rest": "45s", "targetMuscle": "Full Body, Cardio", "imageName": "exercise_step_jacks" },
-      { "name": "High Knees (Low Impact)", "description": "A beginner-friendly cardio move.", "sets": 3, "duration": "45s", "rest": "45s", "targetMuscle": "Legs, Core, Cardio", "imageName": "exercise_high_knees" },
-      { "name": "Bodyweight Squats", "description": "Build lower body strength while keeping the heart rate up.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Quads, Glutes", "imageName": "exercise_squat" }
-    ],
-    "cooldown": [
-      { "name": "Standing Quad Stretch", "duration": "30s per leg", "targetMuscle": "Quads" },
-      { "name": "Shoulder Stretch", "duration": "30s per arm", "targetMuscle": "Shoulders" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 16,
-      "name": "Mobility & Recovery",
-      "description": "A gentle workout focused on mobility, flexibility, and recovery.",
-      "category": "Recovery",
-      "targetMuscle": "Full Body",
-      "imageName": "workout_mobility",
-      "difficulty": "Beginner",
-      "duration": "25 min",
-      "tags": ["recovery", "flexibility"]
-    },
-    "warmup": [
-      { "name": "Neck Rolls", "duration": "60s", "targetMuscle": "Neck" },
-      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders" }
-    ],
-    "exercises": [
-      { "name": "World’s Greatest Stretch", "description": "A full-body mobility drill.", "sets": 2, "reps": "6", "rest": "45s", "targetMuscle": "Hips, Spine, Shoulders", "imageName": "exercise_worlds_greatest_stretch" },
-      { "name": "Hip Flexor Stretch", "description": "Improve hip mobility and reduce tightness.", "sets": 2, "duration": "45s", "rest": "30s", "targetMuscle": "Hip Flexors", "imageName": "exercise_hip_flexor_stretch" },
-      { "name": "Thoracic Rotations", "description": "Increase upper-back mobility.", "sets": 2, "reps": "10", "rest": "45s", "targetMuscle": "Upper Back, Spine", "imageName": "exercise_thoracic_rotation" }
-    ],
-    "cooldown": [
-      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" },
-      { "name": "Deep Breathing", "duration": "60s", "targetMuscle": "Respiratory, Relaxation" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 17,
-      "name": "Upper Body Endurance",
-      "description": "Improve muscular endurance in the upper body.",
-      "category": "Strength",
-      "targetMuscle": "Upper Body",
-      "imageName": "workout_upper_endurance",
-      "difficulty": "Intermediate",
-      "duration": "40 min",
-      "tags": ["strength", "keep fit"]
-    },
-    "warmup": [
-      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" },
-      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders" }
-    ],
-    "exercises": [
-      { "name": "Push-ups", "description": "Build chest and arm endurance.", "sets": 4, "reps": "15", "rest": "60s", "targetMuscle": "Chest, Triceps", "imageName": "exercise_pushup" },
-      { "name": "Plank Shoulder Taps", "description": "Challenge shoulder stability and core strength.", "sets": 3, "reps": "20", "rest": "60s", "targetMuscle": "Shoulders, Core", "imageName": "exercise_plank_shoulder_tap" },
-      { "name": "Reverse Snow Angels", "description": "Improve posture and upper-back endurance.", "sets": 3, "reps": "20", "rest": "45s", "targetMuscle": "Upper Back, Shoulders", "imageName": "exercise_reverse_snow_angel" }
-    ],
-    "cooldown": [
-      { "name": "Cross-Body Shoulder Stretch", "duration": "30s per arm", "targetMuscle": "Shoulders" },
-      { "name": "Triceps Stretch", "duration": "30s per arm", "targetMuscle": "Triceps" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 18,
-      "name": "Lower Body Endurance",
-      "description": "Increase endurance and stamina in the lower body.",
-      "category": "Strength",
-      "targetMuscle": "Legs",
-      "imageName": "workout_legs_endurance",
-      "difficulty": "Intermediate",
-      "duration": "45 min",
-      "tags": ["strength", "bodyweight"]
-    },
-    "warmup": [
-      { "name": "Bodyweight Squats", "duration": "60s", "targetMuscle": "Quads, Glutes" },
-      { "name": "Leg Swings", "duration": "30s per leg", "targetMuscle": "Hips, Hamstrings" }
-    ],
-    "exercises": [
-      { "name": "Walking Lunges", "description": "Build leg endurance and coordination.", "sets": 4, "reps": "20", "rest": "60s", "targetMuscle": "Quads, Glutes", "imageName": "exercise_walking_lunge" },
-      { "name": "Wall Sit", "description": "Isometric leg endurance exercise.", "sets": 3, "duration": "60s", "rest": "60s", "targetMuscle": "Quads", "imageName": "exercise_wall_sit" },
-      { "name": "Calf Raises", "description": "Strengthen and condition the calves.", "sets": 4, "reps": "25", "rest": "30s", "targetMuscle": "Calves", "imageName": "exercise_calf_raise" }
-    ],
-    "cooldown": [
-      { "name": "Standing Quad Stretch", "duration": "30s per leg", "targetMuscle": "Quads" },
-      { "name": "Calf Stretch", "duration": "30s per leg", "targetMuscle": "Calves" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 19,
-      "name": "Core Stability",
-      "description": "Improve core stability and control.",
-      "category": "Core",
-      "targetMuscle": "Core",
-      "imageName": "workout_core_stability",
-      "difficulty": "Beginner",
-      "duration": "30 min",
-      "tags": ["core", "stability"]
-    },
-    "warmup": [
-      { "name": "Pelvic Tilts", "duration": "60s", "targetMuscle": "Core, Lower Back" },
-      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Spine, Back" }
-    ],
-    "exercises": [
-      { "name": "Dead Bug", "description": "A controlled core stability exercise.", "sets": 3, "reps": "10", "rest": "45s", "targetMuscle": "Core, Abs", "imageName": "exercise_dead_bug" },
-      { "name": "Bird-Dog Hold", "description": "Improve balance and spinal stability.", "sets": 3, "duration": "30s", "rest": "45s", "targetMuscle": "Core, Back", "imageName": "exercise_bird_dog_hold" },
-      { "name": "Side Plank (Knees)", "description": "Beginner-friendly oblique exercise.", "sets": 2, "duration": "30s", "rest": "45s", "targetMuscle": "Obliques, Core", "imageName": "exercise_side_plank_knees" }
-    ],
-    "cooldown": [
-      { "name": "Supine Twist Stretch", "duration": "60s", "targetMuscle": "Lower Back, Obliques" },
-      { "name": "Deep Breathing", "duration": "60s", "targetMuscle": "Relaxation" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 20,
-      "name": "Advanced Core Challenge",
-      "description": "A high-level core workout for strength and control.",
-      "category": "Core",
-      "targetMuscle": "Abs",
-      "imageName": "workout_core_advanced",
-      "difficulty": "Advanced",
-      "duration": "40 min",
-      "tags": ["core", "strength"]
-    },
-    "warmup": [
-      { "name": "Torso Twists", "duration": "60s", "targetMuscle": "Core, Obliques" },
-      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" }
-    ],
-    "exercises": [
-      { "name": "Hanging Knee Raises (floor)", "description": "Advanced lower-ab exercise.", "sets": 4, "reps": "15", "rest": "60s", "targetMuscle": "Lower Abs", "imageName": "exercise_knee_raises" },
-      { "name": "Plank Variations", "description": "Increase plank difficulty with variations.", "sets": 3, "duration": "75s", "rest": "60s", "targetMuscle": "Core, Abs", "imageName": "exercise_plank_variations" },
-      { "name": "Russian Twists", "description": "Challenge rotational core strength.", "sets": 3, "reps": "30", "rest": "45s", "targetMuscle": "Obliques, Core", "imageName": "exercise_russian_twist" }
-    ],
-    "cooldown": [
-      { "name": "Cobra Stretch", "duration": "30s", "targetMuscle": "Abs, Lower Back" },
-      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 21,
-      "name": "Full Body Stretch",
-      "description": "A relaxing full-body stretch session.",
-      "category": "Recovery",
-      "targetMuscle": "Full Body",
-      "imageName": "workout_full_stretch",
-      "difficulty": "Beginner",
-      "duration": "20 min",
-      "tags": ["recovery", "flexibility"]
-    },
-    "warmup": [
-      { "name": "Light Marching", "duration": "60s", "targetMuscle": "Legs, Cardio" }
-    ],
-    "exercises": [
-      { "name": "Standing Forward Fold", "description": "Stretch the posterior chain.", "sets": 2, "duration": "60s", "rest": "30s", "targetMuscle": "Hamstrings, Back", "imageName": "exercise_forward_fold" },
-      { "name": "Chest Opener Stretch", "description": "Open the chest and shoulders.", "sets": 2, "duration": "45s", "rest": "30s", "targetMuscle": "Chest, Shoulders", "imageName": "exercise_chest_opener" }
-    ],
-    "cooldown": [
-      { "name": "Deep Breathing", "duration": "90s", "targetMuscle": "Relaxation" }
-    ]
-  },
-
-  {
-    "workout": {
-      "id": 22,
-      "name": "Athletic Conditioning",
-      "description": "Conditioning workout to improve athletic performance.",
-      "category": "Conditioning",
-      "targetMuscle": "Full Body",
-      "imageName": "workout_conditioning",
-      "difficulty": "Advanced",
-      "duration": "45 min",
-      "tags": ["athletic", "performance"]
+      "tags": ["legs", "strength", "intermediate", "bodyweight"]
     },
     "warmup": [
       { "name": "High Knees", "duration": "60s", "targetMuscle": "Legs, Cardio" },
+      { "name": "Hip Circles", "duration": "60s", "targetMuscle": "Hips, Lower Back" }
+    ],
+    "exercises": [
+      {
+        "name": "Jump Squats",
+        "description": "Stand with feet shoulder-width apart. Lower into a squat, then explode upward into a jump. Land softly and go directly into the next squat.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Quads, Glutes, Hamstrings",
+        "tips": "Land softly to protect knees. Keep chest up and core tight. Avoid collapsing hips inward during the jump.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_jump_squat"
+      },
+      {
+        "name": "Walking Lunges",
+        "description": "Step forward with one leg and lower your body until both knees are at 90-degree angles. Push through the front heel to step forward with the other leg.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Quads, Glutes, Hamstrings",
+        "tips": "Keep your torso upright and core engaged. Avoid letting the front knee go past the toes.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_walking_lunge"
+      },
+      {
+        "name": "Single-Leg Glute Bridges",
+        "description": "Lie on your back with one knee bent and the other leg extended. Lift your hips using the bent leg while keeping the extended leg straight. Lower and repeat.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Glutes, Hamstrings, Core",
+        "tips": "Keep hips level and controlled. Squeeze glutes at the top for maximum activation.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_single_leg_glute_bridge"
+      }
+    ],
+    "cooldown": [
+      { "name": "Quad Stretch", "duration": "30s per leg", "targetMuscle": "Quads" },
+      { "name": "Seated Hamstring Stretch", "duration": "30s per leg", "targetMuscle": "Hamstrings" },
+      { "name": "Standing Calf Stretch", "duration": "30s per leg", "targetMuscle": "Calves" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 6,
+      "name": "Advanced Leg Workout",
+      "description": "A challenging leg routine for those with solid lower body strength. Focuses on explosive power, balance, and endurance using only bodyweight movements.",
+      "category": "Strength",
+      "targetMuscle": "Quads, Glutes, Hamstrings, Core, Legs",
+      "imageName": "workout_legs_advanced",
+      "difficulty": "Advanced",
+      "duration": "35 min",
+      "tags": ["legs", "strength", "advanced", "bodyweight"]
+    },
+    "warmup": [
+      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" },
+      { "name": "Leg Swings", "duration": "60s per leg", "targetMuscle": "Hip Flexors, Hamstrings" }
+    ],
+    "exercises": [
+      {
+        "name": "Pistol Squats",
+        "description": "Stand on one leg with the other leg extended forward. Lower yourself slowly into a squat on the standing leg, keeping balance and control, then push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Quads, Glutes, Hamstrings, Core",
+        "tips": "Use a chair or wall for balance if needed. Keep your chest up and core tight. Move slowly to avoid knee strain.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_pistol_squat"
+      },
+      {
+        "name": "Jumping Lunges",
+        "description": "Start in a lunge position. Jump explosively and switch legs in mid-air, landing softly into the next lunge.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Quads, Glutes, Hamstrings, Calves",
+        "tips": "Keep your torso upright and land softly to protect knees. Use arms for momentum and balance.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_jumping_lunge"
+      },
+      {
+        "name": "Bulgarian Split Squats",
+        "description": "Place one foot behind you on a raised surface. Lower your body until the front knee is at 90 degrees, then push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Quads, Glutes, Hamstrings",
+        "tips": "Keep chest upright, core tight, and front knee aligned over toes. Go slow and controlled for maximum engagement.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_bulgarian_split_squat"
+      }
+    ],
+    "cooldown": [
+      { "name": "Pigeon Pose", "duration": "30s per leg", "targetMuscle": "Glutes, Hips" },
+      { "name": "Seated Hamstring Stretch", "duration": "30s per leg", "targetMuscle": "Hamstrings" },
+      { "name": "Standing Calf Stretch", "duration": "30s per leg", "targetMuscle": "Calves" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 7,
+      "name": "Beginner Abs Workout",
+      "description": "A simple core workout to help beginners strengthen the abdominal muscles and improve stability.",
+      "category": "Core, Upper Abs, Lower Abs",
+      "targetMuscle": "Abs",
+      "difficulty": "Beginner",
+      "imageName": "workout_abs_beginner",
+      "duration": "15 min",
+      "tags": ["abs", "core", "beginner", "bodyweight"]
+    },
+    "warmup": [
+      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Spine, Core" },
+      { "name": "Torso Twists", "duration": "60s", "targetMuscle": "Obliques, Core" }
+    ],
+    "exercises": [
+      {
+        "name": "Crunches",
+        "description": "Lie on your back with knees bent and feet flat. Place hands behind your head and lift your shoulders off the floor using your abs, then slowly lower.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Upper Abs",
+        "tips": "Do not pull your neck. Focus on contracting your abs for every rep.",
+        "difficulty": "Beginner"
+      },
+      {
+        "name": "Reverse Crunches",
+        "description": "Lie on your back with legs lifted at 90°. Curl your hips towards your chest, then slowly lower them back.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Lower Abs",
+        "tips": "Move slowly and avoid using momentum. Keep your lower back pressed against the floor.",
+        "difficulty": "Beginner"
+      },
+      {
+        "name": "Plank",
+        "description": "Hold a push-up position with your forearms on the floor, keeping a straight line from head to heels.",
+        "sets": 3,
+        "duration": "30s",
+        "rest": "60s",
+        "targetMuscle": "Core",
+        "tips": "Engage your abs and glutes. Avoid letting your hips sag or rise.",
+        "difficulty": "Beginner"
+      }
+    ],
+    "cooldown": [
+      { "name": "Cobra Stretch", "duration": "30s", "targetMuscle": "Abs" },
+      { "name": "Child’s Pose", "duration": "30s", "targetMuscle": "Core" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 8,
+      "name": "Intermediate Abs Workout",
+      "description": "A slightly more challenging core routine to increase abdominal strength, endurance, and stability.",
+      "category": "Core",
+      "targetMuscle": "Abs, Obliques, Upper Abs",
+      "imageName": "workout_abs_intermediate",
+      "difficulty": "Intermediate",
+      "duration": "20 min",
+      "tags": ["abs", "core", "intermediate", "bodyweight"]
+    },
+    "warmup": [
+      { "name": "Standing Side Bends", "duration": "60s", "targetMuscle": "Obliques" },
+      { "name": "Hip Circles", "duration": "60s", "targetMuscle": "Core, Hips" }
+    ],
+    "exercises": [
+      {
+        "name": "Bicycle Crunches",
+        "description": "Lie on your back with hands behind your head. Bring opposite elbow to knee in a cycling motion, alternating sides.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Obliques, Upper Abs",
+        "tips": "Keep your lower back on the floor. Twist from your torso, not your neck.",
+        "difficulty": "Intermediate"
+      },
+      {
+        "name": "Leg Raises",
+        "description": "Lie flat on your back with legs straight. Lift legs up until perpendicular to the floor, then slowly lower them.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Lower Abs",
+        "tips": "Avoid arching your back. Engage your core the entire time.",
+        "difficulty": "Intermediate"
+      },
+      {
+        "name": "Side Plank",
+        "description": "Lie on your side and lift your body on one forearm, keeping a straight line from head to feet. Hold the position.",
+        "sets": 3,
+        "duration": "30s",
+        "rest": "60s",
+        "targetMuscle": "Obliques, Core",
+        "tips": "Keep hips lifted and body straight. Do not let your lower side sag.",
+        "difficulty": "Intermediate"
+      }
+    ],
+    "cooldown": [
+      { "name": "Seated Forward Fold", "duration": "30s", "targetMuscle": "Core, Spine" },
+      { "name": "Torso Twist Stretch", "duration": "30s", "targetMuscle": "Obliques" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 9,
+      "name": "Advanced Abs Workout",
+      "description": "A challenging core routine designed to build strong, defined abs and improve overall core stability using advanced bodyweight exercises.",
+      "category": "Core",
+      "targetMuscle": "Abs, Lower Abs, Upper Abs, Hip Flexors",
+      "imageName": "workout_abs_advanced",
+      "difficulty": "Advanced",
+      "duration": "25 min",
+      "tags": ["abs", "core", "advanced", "bodyweight"]
+    },
+    "warmup": [
+      { "name": "High Knees", "duration": "60s", "targetMuscle": "Core, Hip Flexors" },
+      { "name": "Torso Rotations", "duration": "60s", "targetMuscle": "Obliques" }
+    ],
+    "exercises": [
+      {
+        "name": "Hanging Knee Tucks (or Lying Knee Tucks if no equipment)",
+        "description": "Hang from a bar or lie on the floor. Bring knees toward your chest in a controlled motion and slowly extend back.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Lower Abs, Hip Flexors",
+        "tips": "Keep movements slow and controlled. Avoid swinging your body.",
+        "difficulty": "Advanced"
+      },
+      {
+        "name": "V-Ups",
+        "description": "Lie flat and simultaneously lift your upper body and legs to meet in a 'V' shape, reaching hands toward feet.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Upper Abs, Lower Abs",
+        "tips": "Engage your core fully and avoid using momentum. Keep legs straight for full benefit.",
+        "difficulty": "Advanced"
+      },
+      {
+        "name": "Plank with Shoulder Tap",
+        "description": "Hold a high plank position and tap your opposite shoulder with one hand, alternating sides while keeping your hips stable.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Core, Shoulders, Obliques",
+        "tips": "Keep hips still; avoid rotating your body. Maintain a straight line from head to heels.",
+        "difficulty": "Advanced"
+      }
+    ],
+    "cooldown": [
+      { "name": "Cobra Stretch", "duration": "30s", "targetMuscle": "Abs, Spine" },
+      { "name": "Seated Side Stretch", "duration": "30s", "targetMuscle": "Obliques" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 10,
+      "name": "Beginner Back Workout",
+      "description": "A gentle back-focused routine to build foundational strength and improve posture using only bodyweight exercises.",
+      "category": "Back",
+      "targetMuscle": "Back, Lower Back, Core, Shoulders",
+      "imageName": "workout_back_beginner",
+      "difficulty": "Beginner",
+      "duration": "15 min",
+      "tags": ["back", "posture", "beginner", "bodyweight"]
+    },
+    "warmup": [
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" },
+      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Spine, Back" }
+    ],
+    "exercises": [
+      {
+        "name": "Superman Hold",
+        "description": "Lie face down with arms extended forward. Lift your arms, chest, and legs off the floor, holding the position.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "45s",
+        "targetMuscle": "Lower Back, Glutes",
+        "tips": "Lift slowly and avoid jerking. Focus on squeezing the lower back and glutes.",
+        "difficulty": "Beginner"
+      },
+      {
+        "name": "Bird Dog",
+        "description": "From a tabletop position, extend opposite arm and leg straight, then return. Alternate sides.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "45s",
+        "targetMuscle": "Lower Back, Core, Shoulders",
+        "tips": "Keep your spine neutral. Avoid dipping the hips.",
+        "difficulty": "Beginner"
+      },
+      {
+        "name": "Reverse Snow Angels",
+        "description": "Lie face down, lift chest slightly off the ground, and sweep arms in a 'snow angel' motion backward.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "45s",
+        "targetMuscle": "Upper Back, Rear Delts",
+        "tips": "Keep chest lifted but avoid straining the neck. Move arms slowly and controlled.",
+        "difficulty": "Beginner"
+      }
+    ],
+    "cooldown": [
+      { "name": "Child's Pose", "duration": "30s", "targetMuscle": "Lower Back, Spine" },
+      { "name": "Thread the Needle Stretch", "duration": "30s", "targetMuscle": "Upper Back, Shoulders" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 11,
+      "name": "Intermediate Back Workout",
+      "description": "A bodyweight back routine to strengthen upper, mid, and lower back, improve posture, and increase core stability for intermediate fitness levels.",
+      "category": "Strength",
+      "targetMuscle": "Back, Upper Back, Shoulders, Lower Back, Glutes",
+      "imageName": "workout_back_intermediate",
+      "difficulty": "Intermediate",
+      "duration": "35 min",
+      "tags": ["strength", "bodyweight", "posture"]
+    },
+    "warmup": [
+      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Spine, Back" },
+      { "name": "Torso Twists", "duration": "60s", "targetMuscle": "Core, Obliques" }
+    ],
+    "exercises": [
+      {
+        "name": "Supermans",
+        "description": "Lie face down with arms extended in front of you. Lift your chest, arms, and legs simultaneously while squeezing your glutes and back muscles, then lower slowly.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "45s",
+        "targetMuscle": "Lower Back, Glutes",
+        "tips": "Keep your neck neutral, avoid jerking your body, and focus on controlled lifts to engage the back fully.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_superman"
+      },
+      {
+        "name": "Reverse Snow Angels",
+        "description": "Lie face down with arms by your sides. Lift arms and chest slightly off the ground and sweep your arms overhead and back down in a controlled snow angel motion.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "45s",
+        "targetMuscle": "Upper Back, Shoulders",
+        "tips": "Avoid shrugging your shoulders and move slowly to maximize upper back activation.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_reverse_snow_angels"
+      },
+      {
+        "name": "Prone Y-T Raises",
+        "description": "Lie face down, arms extended in a Y shape. Lift arms and chest slightly off the floor, hold briefly, then move arms into a T shape and lift again.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "45s",
+        "targetMuscle": "Mid Back, Shoulders",
+        "tips": "Focus on slow, controlled movements and squeezing the shoulder blades together. Avoid arching your lower back excessively.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_prone_y_t_raises"
+      }
+    ],
+    "cooldown": [
+      { "name": "Child’s Pose", "duration": "60s", "targetMuscle": "Back, Shoulders" },
+      { "name": "Seated Forward Bend", "duration": "60s", "targetMuscle": "Lower Back, Hamstrings" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 12,
+      "name": "Advanced Back Workout",
+      "description": "An advanced bodyweight back routine targeting upper, mid, and lower back muscles, improving strength, stability, and posture for experienced trainees.",
+      "category": "Strength",
+      "targetMuscle": "Back, Lower Back, Glutes, Shoulders",
+      "imageName": "workout_back_advanced",
+      "difficulty": "Advanced",
+      "duration": "40 min",
+      "tags": ["strength", "bodyweight", "posture"]
+    },
+    "warmup": [
+      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Spine, Back" },
+      { "name": "Torso Twists", "duration": "60s", "targetMuscle": "Core, Obliques" },
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" }
+    ],
+    "exercises": [
+      {
+        "name": "Arch Hold with Arm Pulses",
+        "description": "Lie face down and lift your chest, arms, and legs off the floor into a strong arch. Pulse your arms up and down while keeping the chest lifted.",
+        "sets": 4,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Lower Back, Glutes, Shoulders",
+        "tips": "Keep movements controlled. Engage the glutes and lower back without overextending the spine.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_arch_hold_arm_pulses"
+      },
+      {
+        "name": "Dive Bomber Push-Ups",
+        "description": "Start in a downward dog position, swoop your chest toward the ground, and then press up into an upward dog position, flowing smoothly back and forth.",
+        "sets": 4,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Upper Back, Shoulders, Core",
+        "tips": "Keep movements fluid and controlled. Engage the core to protect the lower back. Avoid locking elbows.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_dive_bomber_pushups"
+      },
+      {
+        "name": "Plank to Dolphin",
+        "description": "Start in a forearm plank. Push hips up toward the ceiling into a dolphin position, then return to plank.",
+        "sets": 4,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Upper Back, Shoulders, Core",
+        "tips": "Focus on controlled breathing. Avoid sagging hips and maintain tight core engagement throughout.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_plank_to_dolphin"
+      }
+    ],
+    "cooldown": [
+      { "name": "Child’s Pose", "duration": "60s", "targetMuscle": "Back, Shoulders" },
+      { "name": "Seated Forward Bend", "duration": "60s", "targetMuscle": "Lower Back, Hamstrings" },
+      { "name": "Thread the Needle", "duration": "60s", "targetMuscle": "Mid Back, Shoulders" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 13,
+      "name": "Beginner Chest Workout",
+      "description": "A beginner chest routine using bodyweight exercises to strengthen the chest, shoulders, and triceps while improving upper body stability and posture.",
+      "category": "Strength",
+      "targetMuscle": "Chest, Shoulders, Triceps",
+      "imageName": "workout_chest_beginner",
+      "difficulty": "Beginner",
+      "duration": "25 min",
+      "tags": ["strength", "bodyweight", "chest"]
+    },
+    "warmup": [
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Chest" },
+      { "name": "Wall Push-Up Stretch", "duration": "60s", "targetMuscle": "Chest, Arms" },
+      { "name": "Chest Openers", "duration": "60s", "targetMuscle": "Chest, Shoulders" }
+    ],
+    "exercises": [
+      {
+        "name": "Knee Push-Ups",
+        "description": "Start in a modified plank with knees on the floor. Lower your chest toward the ground while keeping elbows at a 45-degree angle, then push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Chest, Shoulders, Triceps",
+        "tips": "Keep your core tight and avoid sagging hips. Lower slowly to feel the chest muscles working.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_knee_pushups"
+      },
+      {
+        "name": "Incline Push-Ups (Hands on Table or Chair)",
+        "description": "Place your hands on a stable elevated surface. Lower your chest toward the edge, then push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Upper Chest, Shoulders, Triceps",
+        "tips": "Keep your body in a straight line from head to knees. Avoid arching the back.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_incline_pushups"
+      },
+      {
+        "name": "Chest Squeeze Push-Ups",
+        "description": "Perform a standard push-up but focus on squeezing the chest muscles together at the top of the movement.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Chest, Shoulders",
+        "tips": "Pause for 1-2 seconds at the top while squeezing your chest. Move slowly to maximize muscle activation.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_chest_squeeze_pushups"
+      }
+    ],
+    "cooldown": [
+      { "name": "Chest Stretch on Wall", "duration": "60s", "targetMuscle": "Chest, Shoulders" },
+      { "name": "Child’s Pose", "duration": "60s", "targetMuscle": "Back, Chest" },
+      { "name": "Shoulder Rolls", "duration": "60s", "targetMuscle": "Shoulders, Chest" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 14,
+      "name": "Intermediate Chest Workout",
+      "description": "A chest routine for intermediate level using bodyweight exercises to increase strength, stability, and muscle endurance in the chest and shoulders.",
+      "category": "Strength",
+      "targetMuscle": "Chest, Shoulders, Triceps",
+      "imageName": "workout_chest_intermediate",
+      "difficulty": "Intermediate",
+      "duration": "30 min",
+      "tags": ["strength", "bodyweight", "chest"]
+    },
+    "warmup": [
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Chest" },
+      { "name": "Wall Push-Up Stretch", "duration": "60s", "targetMuscle": "Chest, Arms" },
+      { "name": "Chest Openers", "duration": "60s", "targetMuscle": "Chest, Shoulders" }
+    ],
+    "exercises": [
+      {
+        "name": "Standard Push-Ups",
+        "description": "Start in a plank with hands shoulder-width apart. Lower your chest to the floor keeping elbows at ~45 degrees, then push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Chest, Shoulders, Triceps",
+        "tips": "Keep a straight line from head to heels. Engage your core and squeeze chest at the top.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_standard_pushups"
+      },
+      {
+        "name": "Decline Push-Ups (Feet Elevated)",
+        "description": "Place your feet on a stable surface higher than your hands. Lower chest to the floor and push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Upper Chest, Shoulders",
+        "tips": "Maintain a straight body line. Avoid sagging hips or flaring elbows out too much.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_decline_pushups"
+      },
+      {
+        "name": "Wide Push-Ups",
+        "description": "Start in a plank with hands wider than shoulder-width. Lower chest to the floor and push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Chest, Shoulders",
+        "tips": "Hands wider increases chest activation but keep core tight to prevent sagging.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_wide_pushups"
+      }
+    ],
+    "cooldown": [
+      { "name": "Chest Stretch on Wall", "duration": "60s", "targetMuscle": "Chest, Shoulders" },
+      { "name": "Child’s Pose", "duration": "60s", "targetMuscle": "Back, Chest" },
+      { "name": "Shoulder Rolls", "duration": "60s", "targetMuscle": "Shoulders, Chest" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 15,
+      "name": "Advanced Chest Workout",
+      "description": "An advanced bodyweight chest routine designed to build maximum strength, stability, and hypertrophy. Focus on controlled movements and proper form.",
+      "category": "Strength",
+      "targetMuscle": "Chest, Shoulders, Triceps, Core",
+      "imageName": "workout_chest_advanced",
+      "difficulty": "Advanced",
+      "duration": "35 min",
+      "tags": ["strength", "bodyweight", "chest"]
+    },
+    "warmup": [
+      { "name": "Dynamic Arm Swings", "duration": "60s", "targetMuscle": "Chest, Shoulders" },
+      { "name": "Push-Up Shoulder Taps", "duration": "60s", "targetMuscle": "Chest, Core" },
+      { "name": "Scapular Push-Ups", "duration": "60s", "targetMuscle": "Chest, Shoulders" }
+    ],
+    "exercises": [
+      {
+        "name": "Clap Push-Ups",
+        "description": "Perform a push-up explosively so that your hands leave the ground and clap before landing back in push-up position.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Chest, Shoulders, Triceps, Core",
+        "tips": "Engage core to maintain body alignment. Land softly to protect wrists and shoulders.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_clap_pushups"
+      },
+      {
+        "name": "Archer Push-Ups",
+        "description": "Start in a wide push-up position, bend one elbow while keeping the other arm straight. Alternate sides for each rep.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Chest, Shoulders, Triceps",
+        "tips": "Keep torso straight and avoid twisting. Control the movement to maximize chest engagement.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_archer_pushups"
+      },
+      {
+        "name": "Pseudo Planche Push-Ups",
+        "description": "Lean forward during a push-up with hands closer to your hips, placing more weight on the shoulders and upper chest.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Chest, Shoulders, Triceps, Core",
+        "tips": "Keep elbows slightly tucked. Engage core to prevent sagging and maintain balance.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_pseudo_planche_pushups"
+      }
+    ],
+    "cooldown": [
+      { "name": "Doorway Chest Stretch", "duration": "60s", "targetMuscle": "Chest, Shoulders" },
+      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Chest, Back" },
+      { "name": "Shoulder Circles", "duration": "60s", "targetMuscle": "Shoulders, Chest" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 16,
+      "name": "Full Body Beginner",
+      "description": "A beginner full body bodyweight workout designed to target all major muscle groups with simple, safe movements. Focus on controlled form and steady breathing.",
+      "category": "Strength",
+      "targetMuscle": "Full Body",
+      "imageName": "workout_fullbody_beginner",
+      "difficulty": "Beginner",
+      "duration": "25 min",
+      "tags": ["full body", "bodyweight", "beginner"]
+    },
+    "warmup": [
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Arms" },
+      { "name": "Hip Circles", "duration": "60s", "targetMuscle": "Hips, Lower Back" },
+      { "name": "Bodyweight March", "duration": "60s", "targetMuscle": "Legs, Core" }
+    ],
+    "exercises": [
+      {
+        "name": "Bodyweight Squat",
+        "description": "Stand with feet shoulder-width apart. Push hips back and bend knees to lower down as if sitting in a chair. Keep weight on heels and chest upright. Push through heels to return to standing.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "60s",
+        "targetMuscle": "Quadriceps, Glutes, Hamstrings, Core",
+        "tips": "Keep chest up, back straight, knees in line with toes. Go as low as comfortable without rounding your back.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_bodyweight_squat"
+      },
+      {
+        "name": "Incline Push-Up",
+        "description": "Place hands on a stable elevated surface (like a bench). Lower chest toward the surface, keeping elbows at ~45 degrees. Push back up to starting position.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Chest, Shoulders, Triceps, Core",
+        "tips": "Keep body straight from head to knees. Engage core and avoid sagging hips.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_incline_pushup"
+      },
+      {
+        "name": "Glute Bridge",
+        "description": "Lie on your back, knees bent, feet flat. Push through heels to lift hips until knees, hips, and shoulders form a straight line. Lower slowly.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "60s",
+        "targetMuscle": "Glutes, Hamstrings, Core",
+        "tips": "Squeeze glutes at the top, keep knees in line with hips, avoid arching lower back.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_glute_bridge"
+      }
+    ],
+    "cooldown": [
+      { "name": "Standing Forward Bend", "duration": "60s", "targetMuscle": "Hamstrings, Lower Back" },
+      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" },
+      { "name": "Chest Opener Stretch", "duration": "60s", "targetMuscle": "Chest, Shoulders" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 17,
+      "name": "Full Body Intermediate",
+      "description": "An intermediate full body workout using bodyweight exercises to increase strength, stability, and endurance. Focus on controlled movements and proper technique.",
+      "category": "Strength",
+      "targetMuscle": "Full Body",
+      "imageName": "workout_fullbody_intermediate",
+      "difficulty": "Intermediate",
+      "duration": "30 min",
+      "tags": ["full body", "bodyweight", "intermediate"]
+    },
+    "warmup": [
+      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" },
+      { "name": "Hip Openers", "duration": "60s", "targetMuscle": "Hips, Lower Back" },
       { "name": "Arm Swings", "duration": "60s", "targetMuscle": "Shoulders, Chest" }
     ],
     "exercises": [
-      { "name": "Sprint in Place", "description": "Explosive cardio conditioning.", "sets": 5, "duration": "30s", "rest": "45s", "targetMuscle": "Legs, Cardio", "imageName": "exercise_sprint_in_place" },
-      { "name": "Broad Jumps", "description": "Develop lower-body power.", "sets": 4, "reps": "8", "rest": "75s", "targetMuscle": "Glutes, Quads", "imageName": "exercise_broad_jump" },
-      { "name": "Push-up to T-Rotation", "description": "Strength and stability movement.", "sets": 3, "reps": "12", "rest": "60s", "targetMuscle": "Chest, Core, Shoulders", "imageName": "exercise_pushup_t_rotation" }
+      {
+        "name": "Push-Up",
+        "description": "Start in plank position, lower chest to the floor keeping elbows at ~45 degrees, then push back up. Keep your body in a straight line from head to heels.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "60s",
+        "targetMuscle": "Chest, Shoulders, Triceps, Core",
+        "tips": "Engage core, avoid sagging hips, and control the movement.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_pushup"
+      },
+      {
+        "name": "Walking Lunge",
+        "description": "Step forward with one leg, lowering hips until both knees are bent at ~90 degrees. Push through the front heel to step forward with the opposite leg.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "60s",
+        "targetMuscle": "Quadriceps, Glutes, Hamstrings, Core",
+        "tips": "Keep torso upright, knees aligned with toes, and step far enough to feel the stretch in glutes.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_walking_lunge"
+      },
+      {
+        "name": "Plank with Shoulder Tap",
+        "description": "In a high plank position, lift one hand to tap the opposite shoulder while keeping hips stable. Alternate sides.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "60s",
+        "targetMuscle": "Core, Shoulders, Chest",
+        "tips": "Minimize hip rotation, engage abs, and maintain a straight line from head to heels.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_plank_shoulder_tap"
+      }
     ],
     "cooldown": [
-      { "name": "Standing Quad Stretch", "duration": "30s per leg", "targetMuscle": "Quads" },
-      { "name": "Shoulder Stretch", "duration": "30s per arm", "targetMuscle": "Shoulders" }
+      { "name": "Seated Forward Fold", "duration": "60s", "targetMuscle": "Hamstrings, Lower Back" },
+      { "name": "Cobra Stretch", "duration": "60s", "targetMuscle": "Chest, Core" },
+      { "name": "Cat-Cow Stretch", "duration": "60s", "targetMuscle": "Back, Shoulders" }
     ]
   },
-
+  {
+    "workout": {
+      "id": 18,
+      "name": "Full Body Advanced",
+      "description": "An advanced bodyweight full body workout aimed at building strength, endurance, and coordination. Focus on slow, controlled movements and full range of motion.",
+      "category": "Strength",
+      "targetMuscle": "Full Body",
+      "imageName": "workout_fullbody_advanced",
+      "difficulty": "Advanced",
+      "duration": "40 min",
+      "tags": ["full body", "bodyweight", "advanced"]
+    },
+    "warmup": [
+      { "name": "High Knees", "duration": "60s", "targetMuscle": "Legs, Core, Cardio" },
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Chest" },
+      { "name": "Bodyweight Squats", "duration": "60s", "targetMuscle": "Legs, Glutes" }
+    ],
+    "exercises": [
+      {
+        "name": "Plyometric Push-Ups",
+        "description": "Lower into a push-up and explode off the ground, lifting hands into the air before landing softly back in push-up position. Engage core throughout.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Chest, Shoulders, Triceps, Core",
+        "tips": "Land softly, control your descent, and keep elbows slightly tucked.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_plyometric_pushups"
+      },
+      {
+        "name": "Jumping Lunges",
+        "description": "Start in a lunge position, jump explosively, and switch legs in mid-air to land in a lunge on the opposite side. Keep torso upright and core engaged.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "90s",
+        "targetMuscle": "Quadriceps, Glutes, Hamstrings, Core",
+        "tips": "Land softly, maintain balance, and avoid letting front knee go past toes.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_jumping_lunges"
+      },
+      {
+        "name": "Plank to Push-Up",
+        "description": "Start in a forearm plank, push up one arm at a time to a high plank, then lower back to forearms. Alternate leading arms each set.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "90s",
+        "targetMuscle": "Core, Shoulders, Chest, Triceps",
+        "tips": "Keep hips stable, avoid rotating, and engage abs throughout the movement.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_plank_to_pushup"
+      }
+    ],
+    "cooldown": [
+      { "name": "Standing Forward Fold", "duration": "60s", "targetMuscle": "Hamstrings, Lower Back" },
+      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" },
+      { "name": "Chest Opener Stretch", "duration": "60s", "targetMuscle": "Chest, Shoulders" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 19,
+      "name": "Full Body HIIT Beginner",
+      "description": "A beginner-friendly high-intensity interval training (HIIT) workout that targets the entire body, improves cardiovascular endurance, and burns calories efficiently. Focus on controlled movements and maintaining good form.",
+      "category": "Cardio / HIIT",
+      "targetMuscle": "Full Body",
+      "imageName": "workout_fullbody_hiit_beginner",
+      "difficulty": "Beginner",
+      "duration": "20 min",
+      "tags": ["full body", "HIIT", "cardio", "beginner"]
+    },
+    "warmup": [
+      { "name": "March in Place", "duration": "60s", "targetMuscle": "Legs, Core" },
+      { "name": "Shoulder Rolls", "duration": "60s", "targetMuscle": "Shoulders" },
+      { "name": "Side-to-Side Step Touch", "duration": "60s", "targetMuscle": "Legs, Hips" }
+    ],
+    "exercises": [
+      {
+        "name": "Squat to Knee Raise",
+        "description": "Perform a bodyweight squat, then rise and lift one knee up toward your chest. Alternate legs each rep.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Legs, Glutes, Core",
+        "tips": "Keep chest up, core tight, and land softly after each knee raise.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_squat_knee_raise"
+      },
+      {
+        "name": "Modified Jumping Jacks",
+        "description": "Step out to the side instead of jumping, swinging arms overhead and returning to starting position.",
+        "sets": 3,
+        "reps": 12,
+        "rest": "60s",
+        "targetMuscle": "Full Body, Cardio",
+        "tips": "Move at a steady pace, avoid locking elbows, and keep a soft bend in knees.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_modified_jumping_jacks"
+      },
+      {
+        "name": "Incline Push-Ups on Wall or Table",
+        "description": "Place hands on a wall or table and perform push-ups, keeping body straight and core engaged.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Chest, Shoulders, Triceps, Core",
+        "tips": "Avoid sagging hips, keep elbows slightly tucked, and control the descent.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_incline_pushups"
+      }
+    ],
+    "cooldown": [
+      { "name": "Standing Quad Stretch", "duration": "60s", "targetMuscle": "Quadriceps, Hips" },
+      { "name": "Arm Across Chest Stretch", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" },
+      { "name": "Neck Side Stretch", "duration": "60s", "targetMuscle": "Neck, Shoulders" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 20,
+      "name": "Lower Body Strength Beginner",
+      "description": "A beginner-friendly lower body workout to build strength, stability, and mobility in the legs and glutes. Focus on controlled movements and proper alignment.",
+      "category": "Strength",
+      "targetMuscle": "Legs, Glutes",
+      "imageName": "workout_lowerbody_beginner",
+      "difficulty": "Beginner",
+      "duration": "25 min",
+      "tags": ["legs", "glutes", "strength", "bodyweight", "beginner"]
+    },
+    "warmup": [
+      { "name": "Leg Swings Forward & Side", "duration": "60s", "targetMuscle": "Hips, Hamstrings" },
+      { "name": "Bodyweight Squats Slow", "duration": "60s", "targetMuscle": "Quads, Glutes" },
+      { "name": "Hip Circles", "duration": "60s", "targetMuscle": "Hips, Lower Back" }
+    ],
+    "exercises": [
+      {
+        "name": "Bodyweight Squats",
+        "description": "Stand with feet shoulder-width apart, push hips back, bend knees, lower until thighs are parallel to the ground, then return to standing.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Quads, Glutes, Hamstrings",
+        "tips": "Keep chest up, knees aligned with toes, and engage core to protect your lower back.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_bodyweight_squats"
+      },
+      {
+        "name": "Glute Bridges",
+        "description": "Lie on your back with knees bent, feet flat on the floor. Lift hips toward the ceiling, squeeze glutes at the top, and lower slowly.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Glutes, Hamstrings, Core",
+        "tips": "Do not overarch your lower back. Focus on glute contraction and controlled movement.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_glute_bridges"
+      },
+      {
+        "name": "Reverse Lunges",
+        "description": "Step one foot back, lowering your back knee toward the floor while keeping the front knee above the ankle. Push through the front heel to return.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Quads, Glutes, Hamstrings",
+        "tips": "Keep torso upright, engage core, and avoid letting the front knee go past toes.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_reverse_lunges"
+      }
+    ],
+    "cooldown": [
+      { "name": "Seated Hamstring Stretch", "duration": "60s", "targetMuscle": "Hamstrings" },
+      { "name": "Figure 4 Glute Stretch", "duration": "60s", "targetMuscle": "Glutes, Hips" },
+      { "name": "Calf Stretch Against Wall", "duration": "60s", "targetMuscle": "Calves, Ankles" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 21,
+      "name": "Lower Body Strength Intermediate",
+      "description": "An intermediate lower body routine to build strength, endurance, and balance in the legs and glutes. Focus on controlled movements, proper form, and engaging stabilizing muscles.",
+      "category": "Strength",
+      "targetMuscle": "Legs, Glutes",
+      "imageName": "workout_lowerbody_intermediate",
+      "difficulty": "Intermediate",
+      "duration": "30 min",
+      "tags": ["legs", "glutes", "strength", "bodyweight", "intermediate"]
+    },
+    "warmup": [
+      { "name": "Walking Lunges", "duration": "60s", "targetMuscle": "Quads, Glutes" },
+      { "name": "Hip Openers", "duration": "60s", "targetMuscle": "Hips, Lower Back" },
+      { "name": "High Knee March", "duration": "60s", "targetMuscle": "Quads, Hip Flexors" }
+    ],
+    "exercises": [
+      {
+        "name": "Bulgarian Split Squats",
+        "description": "Place your back foot on a raised surface, front foot flat. Lower your back knee toward the ground and push through the front heel to return.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "75s",
+        "targetMuscle": "Quads, Glutes, Hamstrings",
+        "tips": "Keep chest upright, engage core, and avoid letting front knee go past toes.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_bulgarian_split_squats"
+      },
+      {
+        "name": "Single-Leg Glute Bridges",
+        "description": "Lie on your back, extend one leg, lift hips toward ceiling using the other leg, squeeze glutes at the top, and lower slowly.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "75s",
+        "targetMuscle": "Glutes, Hamstrings, Core",
+        "tips": "Keep hips level, avoid twisting, and focus on glute activation.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_single_leg_glute_bridges"
+      },
+      {
+        "name": "Curtsy Lunges",
+        "description": "Step one leg diagonally behind the other into a curtsy position, lower your back knee toward the floor, then return to standing.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "75s",
+        "targetMuscle": "Glutes, Quads, Inner Thighs",
+        "tips": "Keep torso upright, engage core, and maintain control to avoid knee strain.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_curtsy_lunges"
+      }
+    ],
+    "cooldown": [
+      { "name": "Standing Quad Stretch", "duration": "60s", "targetMuscle": "Quads" },
+      { "name": "Seated Figure 4 Stretch", "duration": "60s", "targetMuscle": "Glutes, Hips" },
+      { "name": "Calf Stretch with Bent Knee", "duration": "60s", "targetMuscle": "Calves, Ankles" }
+    ]
+  },
   {
     "workout": {
       "id": 23,
-      "name": "Evening Wind Down",
-      "description": "A calming routine to relax the body before bed.",
-      "category": "Recovery",
-      "targetMuscle": "Full Body",
-      "imageName": "workout_evening",
+      "name": "Shoulder Workout Beginner",
+      "description": "A beginner-friendly shoulder workout using only bodyweight exercises to build basic strength, stability, and mobility. Focus on controlled movements and proper form.",
+      "category": "Strength",
+      "targetMuscle": "Shoulders, Upper Back, Core",
+      "imageName": "workout_shoulder_beginner",
       "difficulty": "Beginner",
-      "duration": "20 min",
-      "tags": ["relaxation", "recovery"]
+      "duration": "25 min",
+      "tags": ["shoulders", "strength", "bodyweight", "beginner"]
     },
     "warmup": [
-      { "name": "Gentle Neck Rolls", "duration": "60s", "targetMuscle": "Neck" }
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" },
+      { "name": "Shoulder Shrugs", "duration": "60s", "targetMuscle": "Traps, Shoulders" },
+      { "name": "Wall Angels", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" }
     ],
     "exercises": [
-      { "name": "Seated Forward Bend", "description": "Release tension in the back and hamstrings.", "sets": 2, "duration": "60s", "rest": "30s", "targetMuscle": "Hamstrings, Back", "imageName": "exercise_seated_forward_bend" },
-      { "name": "Supine Spinal Twist", "description": "Relax the spine and core.", "sets": 2, "duration": "60s", "rest": "30s", "targetMuscle": "Spine, Core", "imageName": "exercise_supine_twist" }
+      {
+        "name": "Wall Push-Ups",
+        "description": "Stand facing a wall, place hands on the wall at shoulder height, lower your chest toward the wall, then push back.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Shoulders, Chest, Triceps",
+        "tips": "Keep body straight and core engaged. Move slowly to feel the shoulder muscles working.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_wall_pushups"
+      },
+      {
+        "name": "Shoulder Taps",
+        "description": "In a push-up position, tap your left shoulder with your right hand, then right shoulder with your left hand while keeping hips stable.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Shoulders, Core, Chest",
+        "tips": "Avoid rotating your hips. Keep core tight and control the movement.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_shoulder_taps"
+      },
+      {
+        "name": "Arm Raises Front and Side",
+        "description": "Raise arms straight in front of you to shoulder height, then lower. Repeat to the sides. Alternate movements.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "60s",
+        "targetMuscle": "Shoulders, Upper Back",
+        "tips": "Move slowly and maintain control. Avoid shrugging shoulders excessively.",
+        "difficulty": "Beginner",
+        "imageName": "exercise_arm_raises"
+      }
     ],
     "cooldown": [
-      { "name": "Deep Breathing", "duration": "90s", "targetMuscle": "Relaxation" }
+      { "name": "Cross-Body Shoulder Stretch", "duration": "60s", "targetMuscle": "Shoulders" },
+      { "name": "Chest-Opener Stretch", "duration": "60s", "targetMuscle": "Chest, Shoulders" },
+      { "name": "Neck Side Stretch", "duration": "60s", "targetMuscle": "Neck, Upper Traps" }
     ]
   },
-
   {
     "workout": {
       "id": 24,
-      "name": "Quick Full Body",
-      "description": "A fast and effective full-body workout.",
+      "name": "Shoulder Workout Intermediate",
+      "description": "An intermediate shoulder workout focusing on building strength, endurance, and mobility using bodyweight exercises. Ensure controlled movement and proper form for maximum shoulder engagement.",
       "category": "Strength",
-      "targetMuscle": "Full Body",
-      "imageName": "workout_quick_full_body",
+      "targetMuscle": "Shoulders, Upper Back, Core",
+      "imageName": "workout_shoulder_intermediate",
       "difficulty": "Intermediate",
-      "duration": "25 min",
-      "tags": ["keep fit", "bodyweight"]
+      "duration": "30 min",
+      "tags": ["shoulders", "strength", "bodyweight", "intermediate"]
     },
     "warmup": [
-      { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" }
+      { "name": "Arm Circles Forward and Backward", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" },
+      { "name": "Scapular Push-Ups", "duration": "60s", "targetMuscle": "Shoulders, Upper Back, Core" },
+      { "name": "Shoulder Rolls", "duration": "60s", "targetMuscle": "Traps, Shoulders" }
     ],
     "exercises": [
-      { "name": "Push-ups", "description": "Upper-body strength staple.", "sets": 3, "reps": "15", "rest": "60s", "targetMuscle": "Chest, Triceps", "imageName": "exercise_pushup" },
-      { "name": "Bodyweight Squats", "description": "Lower-body strength movement.", "sets": 3, "reps": "20", "rest": "60s", "targetMuscle": "Quads, Glutes", "imageName": "exercise_squat" },
-      { "name": "Plank", "description": "Core stability exercise.", "sets": 3, "duration": "45s", "rest": "60s", "targetMuscle": "Core, Abs", "imageName": "exercise_plank" }
+      {
+        "name": "Pike Push-Ups",
+        "description": "Start in a downward dog position, bend elbows to lower head toward the floor, then push back up.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Shoulders, Triceps, Core",
+        "tips": "Keep legs and arms straight. Focus on shoulder engagement and avoid arching the back.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_pike_pushups"
+      },
+      {
+        "name": "Plank to Downward Dog",
+        "description": "Start in plank, push hips up and back into downward dog, then return to plank.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Shoulders, Core, Upper Back",
+        "tips": "Move smoothly, engage core, and avoid collapsing shoulders.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_plank_dog"
+      },
+      {
+        "name": "Y-T Raises on Floor",
+        "description": "Lie face down, lift arms in a Y-shape, then in a T-shape, squeezing shoulder blades together.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Shoulders, Upper Back, Traps",
+        "tips": "Keep neck neutral. Focus on controlled lifts and slow descent.",
+        "difficulty": "Intermediate",
+        "imageName": "exercise_y_t_raises"
+      }
     ],
     "cooldown": [
-      { "name": "Standing Forward Fold", "duration": "60s", "targetMuscle": "Hamstrings, Back" },
-      { "name": "Shoulder Stretch", "duration": "30s per arm", "targetMuscle": "Shoulders" }
+      { "name": "Cross-Body Shoulder Stretch", "duration": "60s", "targetMuscle": "Shoulders" },
+      { "name": "Wall Chest Stretch", "duration": "60s", "targetMuscle": "Chest, Shoulders" },
+      { "name": "Neck Side Stretch", "duration": "60s", "targetMuscle": "Neck, Upper Traps" }
+    ]
+  },
+  {
+    "workout": {
+      "id": 25,
+      "name": "Shoulder Workout Advanced",
+      "description": "An advanced shoulder routine to maximize strength, stability, and endurance. Focus on controlled explosive movements and proper form to prevent injury and fully engage the shoulder muscles.",
+      "category": "Strength",
+      "targetMuscle": "Shoulders, Upper Back, Core",
+      "imageName": "workout_shoulder_advanced",
+      "difficulty": "Advanced",
+      "duration": "35 min",
+      "tags": ["shoulders", "strength", "bodyweight", "advanced"]
+    },
+    "warmup": [
+      { "name": "Arm Circles Large", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" },
+      { "name": "Scapular Push-Ups", "duration": "60s", "targetMuscle": "Shoulders, Upper Back, Core" },
+      { "name": "Shoulder Dislocates with Towel", "duration": "60s", "targetMuscle": "Shoulders, Chest, Back" }
+    ],
+    "exercises": [
+      {
+        "name": "Handstand Push-Ups Against Wall",
+        "description": "Kick into a wall-supported handstand, bend elbows to lower your head, then push back up explosively.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "120s",
+        "targetMuscle": "Shoulders, Triceps, Upper Back, Core",
+        "tips": "Keep core tight and body straight. Move slowly to avoid neck or wrist strain.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_handstand_pushups"
+      },
+      {
+        "name": "Elevated Pike Push-Ups",
+        "description": "Place feet on a bench or elevated surface, perform pike push-ups to increase shoulder load.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Shoulders, Triceps, Core",
+        "tips": "Keep head moving straight down between hands. Avoid collapsing the lower back.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_elevated_pike"
+      },
+      {
+        "name": "Shoulder Tap Plank to Pike",
+        "description": "Start in plank, tap each shoulder alternating hands, then push hips up into pike, return to plank.",
+        "sets": 3,
+        "reps": 10,
+        "rest": "90s",
+        "targetMuscle": "Shoulders, Core, Upper Back",
+        "tips": "Engage core to prevent rotation. Move controlled and focus on shoulder stability.",
+        "difficulty": "Advanced",
+        "imageName": "exercise_shoulder_tap_pike"
+      }
+    ],
+    "cooldown": [
+      { "name": "Cross-Body Shoulder Stretch", "duration": "60s", "targetMuscle": "Shoulders" },
+      { "name": "Doorway Chest Stretch", "duration": "60s", "targetMuscle": "Chest, Shoulders" },
+      { "name": "Neck Side Stretch", "duration": "60s", "targetMuscle": "Neck, Upper Traps" }
     ]
   }
 ]

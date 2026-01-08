@@ -16,25 +16,27 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["workoutId"])]
+    indices = [Index("workoutId")]
 )
+
 data class Exercise(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-
+    var id: Int = 0,
+    var workoutId: Int = 0,
+    var name: String = "",
+    var description: String = "",
+    var imageName: String = "",
+    var duration: String = "",
+    var category: String = "",
+    var targetMuscle: String = "",
+    var equipment: String = "",
+    var sets: Int = 0,
+    var reps: String = "",
+    var rest: String = "",
+    var tips: String = "",
     var order: Int = 0,
-    val name: String = "",
-    val sets: Int = 0,
-    val reps: Int = 0,
-    val rest: String = "",
-    val duration: String = "",
-    val description: String = "",
-    val imageName: String = "",
-    val targetMuscle: String = "",
-    var category: String = "Exercise", // Changed to var to allow reassignment
+    var difficulty: String = "", // Added for individual exercise difficulty
 
-    var workoutId: Int = 0
-) {
     @Ignore
     var imageResId: Int = 0
-}
+)

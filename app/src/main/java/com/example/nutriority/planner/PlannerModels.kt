@@ -29,9 +29,12 @@ data class WorkoutSession(
     val durationMinutes: Int,
     val focus: String,
     val description: String,
+    val caloriesBurned: Int = 0, // Added for daily calorie calculation
     @SerializedName("workout") val workoutDetails: WorkoutDetails? = null,
     // This field is for backward compatibility with old JSON schemas.
-    private val workoutId: Int? = null
+    private val workoutId: Int? = null,
+    val sets: Int? = null, 
+    val reps: String? = null 
 ) {
     // This computed property provides a unified way to access the workout ID.
     // It is not serialized and is safe from reflection issues with Gson.
@@ -41,7 +44,9 @@ data class WorkoutSession(
 
 
 data class WorkoutDetails(
-    val id: Int
+    val id: Int,
+    val sets: Int? = null, 
+    val reps: String? = null 
 )
 
 // Simple holder for combined plan

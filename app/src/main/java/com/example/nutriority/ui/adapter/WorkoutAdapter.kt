@@ -36,7 +36,10 @@ class WorkoutAdapter(
         val currentWorkout = getItem(position)
         with(holder.binding) {
             workoutName.text = currentWorkout.name
-            workoutTarget.text = currentWorkout.targetMuscle
+            
+            // Fixed Logic: Use both Name and Target Muscles to determine the primary group
+            workoutTarget.text = simplifyTargetMuscle(currentWorkout.name, currentWorkout.targetMuscle)
+            
             tvDifficulty.text = currentWorkout.difficulty
             tvDuration.text = currentWorkout.duration
 
@@ -44,6 +47,37 @@ class WorkoutAdapter(
                 workoutImage.setImageResource(currentWorkout.imageResId)
             }
         }
+    }
+
+    private fun simplifyTargetMuscle(workoutName: String, targetMuscles: String): String {
+        val categories = listOf("Full Body", "Leg", "Abs", "Arm", "Back", "Chest", "Shoulder")
+        val nameLower = workoutName.lowercase()
+        val targetLower = targetMuscles.lowercase()
+
+        // 1. First priority: Check if the category is explicitly in the workout name
+        for (category in categories) {
+            if (nameLower.contains(category.lowercase())) {
+                return if (category == "Leg") "Legs" else if (category == "Arm") "Arms" else category
+            }
+        }
+
+        // 2. Second priority: Check the target muscle string with better ordering
+        // We look for specific primary keywords first to avoid "Shoulder" stealing focus
+        val priorityOrder = listOf("Full Body", "Abs", "Legs", "Leg", "Back", "Chest", "Shoulder", "Arms", "Arm")
+        
+        for (category in priorityOrder) {
+            // Use word boundary check or specific substring check to avoid "Back" matching "Lower Back" incorrectly
+            if (targetLower.contains(category.lowercase())) {
+                return when(category) {
+                    "Leg", "Legs" -> "Legs"
+                    "Arm", "Arms" -> "Arms"
+                    else -> category
+                }
+            }
+        }
+
+        // Fallback: Show the first part of the detailed string
+        return targetMuscles.split(",").firstOrNull()?.trim() ?: targetMuscles
     }
 
     class WorkoutDiffCallback : DiffUtil.ItemCallback<Workout>() {

@@ -81,9 +81,13 @@ class SeventhScreen : Fragment() {
             }
 
             try {
-                val generatedPlan = plannerService.generatePlanForUser(user)
-                val planJson = Gson().toJson(generatedPlan)
-                val saveSuccess = userViewModel.savePersonalizedPlanAndAwait(planJson)
+                // Generate the full personalized plan
+                val generatedPersonalizedPlan = plannerService.generatePlanForUser(user)
+                
+                // Only save the workoutPlan portion to the workout JSON field
+                val workoutPlanJson = Gson().toJson(generatedPersonalizedPlan.workoutPlan)
+                
+                val saveSuccess = userViewModel.savePersonalizedPlanAndAwait(workoutPlanJson)
 
                 if (saveSuccess) {
                     finishOnboarding()
@@ -91,13 +95,11 @@ class SeventhScreen : Fragment() {
                     startActivity(intent)
                     requireActivity().finish()
                 } else {
-                    Log.e("OnboardingError", "Failed to save the personalized plan to the database.")
-                    // Optionally, show an error message to the user
+                    Log.e("OnboardingError", "Failed to save the personalized workout plan.")
                 }
 
             } catch (e: Exception) {
                 Log.e("OnboardingError", "An error occurred during plan generation or saving.", e)
-                // Optionally, show an error message to the user
             }
         }
     }

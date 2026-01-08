@@ -36,8 +36,8 @@ class ThirdScreen : Fragment() {
     private var selectedActivityLevel: ActivityLevel? = null
     private var initialValueRestored = false
 
-    private val defaultTextSize = 18f
-    private val selectedTextSize = 22f
+    private val defaultTextSize = 20f // Fixed: Matches XML original size
+    private val selectedTextSize = 24f // Adjusted for better emphasis
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,18 +50,13 @@ class ThirdScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeAndSetInitialState()
-        // Listeners are no longer set up here
     }
 
-    // --- THE FIX: PART 1 ---
-    // Listeners are set up when the fragment is fully visible and interactive.
     override fun onResume() {
         super.onResume()
         setupClickListeners()
     }
 
-    // --- THE FIX: PART 2 ---
-    // Listeners are detached when the fragment is paused, preventing ghost clicks.
     override fun onPause() {
         super.onPause()
         clearClickListeners()
@@ -112,8 +107,6 @@ class ThirdScreen : Fragment() {
         }
     }
 
-    // --- THE FIX: PART 3 ---
-    // A new function to nullify all click listeners.
     private fun clearClickListeners() {
         binding.sedentaryCard.setOnClickListener(null)
         binding.lightlyActiveCard.setOnClickListener(null)

@@ -10,6 +10,7 @@ import com.example.nutriority.data.local.ArticlesDao
 import com.example.nutriority.data.local.MealDao
 import com.example.nutriority.data.local.UserDao
 import com.example.nutriority.data.local.WorkoutDao
+import com.example.nutriority.data.local.WorkoutLogDao
 import com.example.nutriority.data.repository.ArticleRepository
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
@@ -80,8 +81,13 @@ object AppModule {
     }
 
     @Provides
-    fun provideWorkoutRepository(workoutDao: WorkoutDao, application: Application): WorkoutRepository {
-        return WorkoutRepository(workoutDao, application)
+    fun provideWorkoutLogDao(database: AppDatabase): WorkoutLogDao {
+        return database.workoutLogDao()
+    }
+
+    @Provides
+    fun provideWorkoutRepository(workoutDao: WorkoutDao, workoutLogDao: WorkoutLogDao, application: Application): WorkoutRepository {
+        return WorkoutRepository(workoutDao, workoutLogDao, application)
     }
 
     @Provides
@@ -102,8 +108,12 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideWorkoutPlanner(workoutRepository: WorkoutRepository): WorkoutPlanner {
-        return WorkoutPlanner(workoutRepository)
+    fun provideWorkoutPlanner(
+        workoutRepository: WorkoutRepository,
+        application: Application,
+        gson: Gson
+    ): WorkoutPlanner {
+        return WorkoutPlanner(workoutRepository, application, gson)
     }
 
     @Provides

@@ -94,5 +94,8 @@ interface WorkoutDao {
     fun getAllWorkoutsWithExercises(): Flow<List<WorkoutWithExercises>>
 
     @Update
+    suspend fun updateExercise(exercise: Exercise)
+
+    @Update
     suspend fun updateExercises(exercises: List<Exercise>)
 }
