@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.data.model.ExerciseSet
 import com.example.nutriority.databinding.ActivityExerciseDetailBinding
@@ -18,6 +19,8 @@ class ExerciseDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityExerciseDetailBinding
     private val viewModel: ExerciseDetailViewModel by viewModels()
     private lateinit var exerciseSetAdapter: ExerciseSetAdapter
+    private lateinit var addSetAdapter: AddSetAdapter
+    private var currentSets = listOf<ExerciseSet>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,12 +50,26 @@ class ExerciseDetailActivity : AppCompatActivity() {
                 // Handle editing reps for the set at this position
             },
             onDeleteClick = { position ->
-                // Handle deleting the set at this position
+                val mutableList = currentSets.toMutableList()
+                if (mutableList.size > 1) {
+                    mutableList.removeAt(position)
+                    updateAndSubmitList(mutableList)
+                }
             }
         )
+
+        addSetAdapter = AddSetAdapter {
+            val mutableList = currentSets.toMutableList()
+            val newSet = ExerciseSet(reps = 8) // Default reps, you can change this
+            mutableList.add(newSet)
+            updateAndSubmitList(mutableList)
+        }
+
+        val concatAdapter = ConcatAdapter(exerciseSetAdapter, addSetAdapter)
+
         binding.setsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@ExerciseDetailActivity)
-            adapter = exerciseSetAdapter
+            adapter = concatAdapter
         }
     }
 
@@ -65,17 +82,24 @@ class ExerciseDetailActivity : AppCompatActivity() {
                     // Glide.with(this@ExerciseDetailActivity).load(it.image).into(binding.imgExercise)
 
                     // Create a list of ExerciseSet objects
-                    val setsList = (1..it.sets).map { _ ->
-                        ExerciseSet(reps = it.reps, isActive = false)
+                    val initialSets = (1..it.sets).map { _ ->
+                        ExerciseSet(reps = it.reps)
                     }
-                    // Set the first set to be active
-                    if (setsList.isNotEmpty()) {
-                        setsList.first().isActive = true
-                    }
-                    exerciseSetAdapter.submitList(setsList)
+                    updateAndSubmitList(initialSets)
                 }
             }
         }
+    }
+
+    private fun updateAndSubmitList(updatedSets: List<ExerciseSet>) {
+        // Create a new list with updated set numbers and active state
+        currentSets = updatedSets.mapIndexed { index, set ->
+            set.copy(
+                setNumber = index + 1,
+                isActive = index == 0 // Always make the first set active
+            )
+        }
+        exerciseSetAdapter.submitList(currentSets)
     }
 
     private fun setupClickListeners() {

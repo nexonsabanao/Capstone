@@ -23,35 +23,41 @@ class ExerciseSetAdapter(
 
     override fun onBindViewHolder(holder: ExerciseSetViewHolder, position: Int) {
         val set = getItem(position)
-        holder.bind(set, position, onRepClick, onDeleteClick)
+        holder.bind(set, onRepClick, onDeleteClick, itemCount)
     }
 
-    class ExerciseSetViewHolder(private val binding: ItemExerciseSetBinding) :
+    inner class ExerciseSetViewHolder(private val binding: ItemExerciseSetBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(set: ExerciseSet, position: Int, onRepClick: (Int) -> Unit, onDeleteClick: (Int) -> Unit) {
-            binding.setNumber.text = (position + 1).toString()
+        fun bind(set: ExerciseSet, onRepClick: (Int) -> Unit, onDeleteClick: (Int) -> Unit, itemCount: Int) {
+            binding.setNumber.text = set.setNumber.toString()
             binding.repsCount.text = set.reps.toString()
 
             val context = itemView.context
+            val isDeletable = itemCount > 1
+
+            // This logic is now correct: enabled state depends only on the number of items.
+            binding.deleteButton.isEnabled = isDeletable
+            binding.deleteButton.alpha = if (isDeletable) 1.0f else 0.5f
+
             if (set.isActive) {
                 // Active state styling
                 binding.setNumber.background = ContextCompat.getDrawable(context, R.drawable.bg_set_number_active)
                 binding.repsCount.setTextColor(Color.BLACK)
-                binding.deleteButton.alpha = 1.0f
             } else {
                 // Inactive state styling
                 binding.setNumber.background = ContextCompat.getDrawable(context, R.drawable.bg_set_number_inactive)
                 binding.repsCount.setTextColor(Color.parseColor("#BDBDBD"))
-                binding.deleteButton.alpha = 0.5f
             }
 
             binding.repsContainer.setOnClickListener {
-                onRepClick(position)
+                onRepClick(absoluteAdapterPosition)
             }
 
             binding.deleteButton.setOnClickListener {
-                onDeleteClick(position)
+                if (isDeletable) {
+                    onDeleteClick(absoluteAdapterPosition)
+                }
             }
         }
     }
@@ -59,7 +65,7 @@ class ExerciseSetAdapter(
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<ExerciseSet>() {
             override fun areItemsTheSame(oldItem: ExerciseSet, newItem: ExerciseSet): Boolean {
-                return oldItem == newItem
+                return oldItem.id == newItem.id
             }
 
             override fun areContentsTheSame(oldItem: ExerciseSet, newItem: ExerciseSet): Boolean {
