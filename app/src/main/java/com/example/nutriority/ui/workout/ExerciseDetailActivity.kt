@@ -102,6 +102,12 @@ class ExerciseDetailActivity : AppCompatActivity() {
         exerciseSetAdapter.submitList(currentSets)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clear the adapter to help prevent memory leaks
+        binding.setsRecyclerView.adapter = null
+    }
+
     private fun setupClickListeners() {
         binding.backButton.setOnClickListener {
             finish()

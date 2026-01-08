@@ -23,7 +23,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityWorkoutDetailBinding
     private val viewModel: WorkoutDetailViewModel by viewModels()
     private lateinit var exerciseAdapter: ExerciseAdapter
-    private lateinit var itemTouchHelper: ItemTouchHelper
+    private lateinit var itemTouchHelper: ItemTouchHlper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +88,12 @@ class WorkoutDetailActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clear the adapter to help prevent memory leaks
+        binding.exercisesRecyclerView.adapter = null
     }
 
     override fun onSupportNavigateUp(): Boolean {
