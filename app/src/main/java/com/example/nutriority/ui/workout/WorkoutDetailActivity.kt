@@ -47,9 +47,11 @@ class WorkoutDetailActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
-            onItemClick = { exercise ->
+            onItemClick = { exercise, position, totalCount ->
                 val intent = Intent(this, ExerciseDetailActivity::class.java)
                 intent.putExtra("exercise_id", exercise.id)
+                intent.putExtra("exercise_position", position + 1)
+                intent.putExtra("total_exercises", totalCount)
                 startActivity(intent)
             },
             onListUpdated = { exercises ->

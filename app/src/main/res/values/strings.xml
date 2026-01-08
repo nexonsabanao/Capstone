@@ -46,5 +46,6 @@
     <string name="age_error_invalid">Please enter a valid age</string>
     <string name="age_error_underage">You must be at least 15 years old</string>
     <string name="age_error_over_limit">We don\'t recommend you to use the app</string>
+    <string name="check_button_content_description">Check button</string>
 </resources>
     

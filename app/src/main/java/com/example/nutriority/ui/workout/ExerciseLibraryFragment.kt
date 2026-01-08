@@ -62,9 +62,11 @@ class ExerciseLibraryFragment : Fragment() {
 
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
-            onItemClick = {
+            onItemClick = { exercise, position, totalCount ->
                 val intent = Intent(requireActivity(), ExerciseDetailActivity::class.java)
-                intent.putExtra("exercise_id", it.id)
+                intent.putExtra("exercise_id", exercise.id)
+                intent.putExtra("exercise_position", position + 1)
+                intent.putExtra("total_exercises", totalCount)
                 startActivity(intent)
             },
             onListUpdated = {},

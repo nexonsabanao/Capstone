@@ -13,7 +13,7 @@ import com.example.nutriority.ui.workout.ItemMoveCallbackListener
 import java.util.Collections
 
 class ExerciseAdapter(
-    private val onItemClick: (Exercise) -> Unit,
+    private val onItemClick: (Exercise, Int, Int) -> Unit,
     private val onListUpdated: (List<Exercise>) -> Unit,
     private val onDragStart: (RecyclerView.ViewHolder) -> Unit
 ) : ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder>(ExerciseDiffCallback()), ItemMoveCallbackListener {
@@ -23,7 +23,7 @@ class ExerciseAdapter(
             binding.root.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    onItemClick(getItem(position))
+                    onItemClick(getItem(position), position, itemCount)
                 }
             }
         }

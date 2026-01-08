@@ -4,99 +4,205 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
-    tools:context=".ui.workout.ExerciseDetailActivity">
+    android:background="#F5F5F5">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_layout"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/back_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#121212"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/ic_arrow_back"
-            app:title="Wide Grip Incline Push Up"
-            app:titleTextColor="@android:color/white" />
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <VideoView
-        android:id="@+id/exercise_video"
-        android:layout_width="0dp"
-        android:layout_height="200dp"
-        app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="Back"
+        android:src="@drawable/ic_arrow_back"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/about_exercise_text"
+        android:id="@+id/exercise_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ABOUT EXERCISE >"
-        android:textColor="@android:color/white"
-        android:layout_marginTop="16dp"
-        android:fontFamily="sans-serif-medium"
-        android:textAllCaps="true"
-        android:textSize="12sp"
-        app:layout_constraintTop_toBottomOf="@id/exercise_video"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_marginStart="16dp"
+        android:fontFamily="sans-serif"
+        android:text="Breast Stroke"
+        android:textColor="#212121"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/back_button"
+        app:layout_constraintStart_toEndOf="@+id/back_button"
+        app:layout_constraintTop_toTopOf="@+id/back_button" />
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chip_group"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/visual_container"
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:layout_marginTop="16dp"
+        android:background="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/back_button">
+
+        <TextView
+            android:id="@+id/exercise_count_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="#F0F0F0"
+            android:fontFamily="sans-serif-medium"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:text="1/8"
+            android:textAllCaps="true"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/img_exercise"
+            android:layout_width="200dp"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"
+            android:src="@android:drawable/ic_menu_gallery"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#999999" />
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:alpha="0.3"
+            android:src="@android:drawable/ic_media_play"
+            app:layout_constraintBottom_toBottomOf="@id/img_exercise"
+            app:layout_constraintEnd_toEndOf="@id/img_exercise"
+            app:layout_constraintStart_toStartOf="@id/img_exercise"
+            app:layout_constraintTop_toTopOf="@id/img_exercise"
+            app:tint="#000000" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="ABOUT EXERCISE >"
+            android:textAllCaps="true"
+            android:textColor="#555555"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/settings_row"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/about_exercise_text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:background="#FFFFFF"
+        android:gravity="center"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        app:layout_constraintTop_toBottomOf="@id/visual_container">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/auto_log_chip"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_auto_log"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Auto Log: OFF"
-            android:fontFamily="sans-serif-medium"
-            android:textAllCaps="true"
-            android:textSize="12sp"
-            app:chipBackgroundColor="#424242"/>
+            android:layout_height="48dp"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Auto Log : OFF"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            app:cornerRadius="8dp"
+            app:icon="@android:drawable/ic_popup_sync"
+            app:iconTint="#000000"
+            app:strokeColor="#E0E0E0" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/rest_chip"
+        <Space
+            android:layout_width="12dp"
+            android:layout_height="wrap_content" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_rest"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rest: ON"
-            android:fontFamily="sans-serif-medium"
-            android:textAllCaps="true"
-            android:textSize="12sp"
-            app:chipBackgroundColor="#424242"/>
-    </com.google.android.material.chip.ChipGroup>
+            android:layout_height="48dp"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Rest : ON"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            app:cornerRadius="8dp"
+            app:icon="@android:drawable/stat_sys_warning"
+            app:iconTint="#000000"
+            app:strokeColor="#E0E0E0" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider_settings"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        app:layout_constraintTop_toBottomOf="@id/settings_row" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/sets_recycler_view"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/chip_group"
-        app:layout_constraintBottom_toTopOf="@+id/log_set_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/divider_settings"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_bar"
+        tools:listitem="@layout/item_exercise_set" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/log_set_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:text="Log set 1"
-        android:fontFamily="sans-serif-medium"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="#FFFFFF"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_check"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:contentDescription="Next set"
+            app:backgroundTint="#FFFFFF"
+            app:cornerRadius="8dp"
+            app:icon="@android:drawable/ic_media_next"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconTint="#000000"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_log_set"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="16dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Log set 1"
+            android:textSize="16sp"
+            app:backgroundTint="#121212"
+            app:cornerRadius="8dp"
+            app:icon="@android:drawable/ic_input_get"
+            app:iconGravity="textStart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_check"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
