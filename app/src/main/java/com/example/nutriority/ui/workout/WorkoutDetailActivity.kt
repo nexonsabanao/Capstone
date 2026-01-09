@@ -97,9 +97,13 @@ class WorkoutDetailActivity : AppCompatActivity() {
     }
 
     private fun showEditWorkoutDialog() {
-        val dialog = Dialog(this, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen)
+        // Changed to use a non-fullscreen theme that respects system insets
+        val dialog = Dialog(this, android.R.style.Theme_Material_Light_NoActionBar)
         val dialogBinding = DialogEditWorkoutBinding.inflate(LayoutInflater.from(this))
         dialog.setContentView(dialogBinding.root)
+        
+        // Ensure dialog takes up the full width/height while respecting insets
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         val selectableAdapter = SelectableExerciseAdapter { _, _ -> }
 
@@ -122,13 +126,11 @@ class WorkoutDetailActivity : AppCompatActivity() {
             
             // CONFIGURE UI
             if (isSystemWorkout) {
-                dialogBinding.tvSystemWorkoutName.text = workoutName
-                dialogBinding.tvSystemWorkoutName.visibility = View.VISIBLE
+                // System workout: hide name entry but SHOW reset button
                 dialogBinding.workoutNameLayout.visibility = View.GONE
                 dialogBinding.btnReset.visibility = View.VISIBLE
             } else {
                 dialogBinding.etWorkoutName.setText(workoutName)
-                dialogBinding.tvSystemWorkoutName.visibility = View.GONE
                 dialogBinding.workoutNameLayout.visibility = View.VISIBLE
                 dialogBinding.btnReset.visibility = View.GONE
             }
@@ -167,7 +169,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
                 dialog.dismiss()
             }
 
-            dialogBinding.toolbar.setNavigationOnClickListener { dialog.dismiss() }
+            dialogBinding.btnBack.setOnClickListener { dialog.dismiss() }
 
             // GENIUS FIX: DATA IS LOADED, REVEAL CONTENT AND HIDE PROGRESS
             dialogBinding.loadingProgress.visibility = View.GONE

@@ -130,7 +130,7 @@
                     android:orientation="horizontal"
                     android:visibility="gone"
                     tools:visibility="visible"
-                    tools:itemCount="3"
+                    tools:itemCount="1"
                     tools:listitem="@layout/item_preview_meal_card" />
 
                 <ProgressBar

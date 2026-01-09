@@ -32,7 +32,9 @@ sealed class MealListItem {
 private const val TYPE_HEADER = 0
 private const val TYPE_MEAL = 1
 
-class GeneratedMealPlanAdapter : ListAdapter<MealListItem, RecyclerView.ViewHolder>(MealDiffCallback()) {
+class GeneratedMealPlanAdapter(
+    private val onMealClick: (Meal) -> Unit
+) : ListAdapter<MealListItem, RecyclerView.ViewHolder>(MealDiffCallback()) {
 
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
@@ -49,7 +51,7 @@ class GeneratedMealPlanAdapter : ListAdapter<MealListItem, RecyclerView.ViewHold
             }
             TYPE_MEAL -> {
                 val view = LayoutInflater.from(parent.context).inflate(R.layout.item_meal_details, parent, false)
-                MealViewHolder(view)
+                MealViewHolder(view, onMealClick)
             }
             else -> throw IllegalArgumentException("Invalid view type")
         }
@@ -70,7 +72,7 @@ class GeneratedMealPlanAdapter : ListAdapter<MealListItem, RecyclerView.ViewHold
         }
     }
 
-    class MealViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class MealViewHolder(itemView: View, private val onMealClick: (Meal) -> Unit) : RecyclerView.ViewHolder(itemView) {
         private val mealImage: ImageView = itemView.findViewById(R.id.meal_image)
         private val mealTime: TextView = itemView.findViewById(R.id.meal_time)
         private val mealName: TextView = itemView.findViewById(R.id.meal_name)
@@ -96,6 +98,10 @@ class GeneratedMealPlanAdapter : ListAdapter<MealListItem, RecyclerView.ViewHold
 
                 drawable.setColor(color) // Vibrant color for today
                 mealName.setTextColor(ContextCompat.getColor(itemView.context, R.color.primary_dark))
+            }
+
+            itemView.setOnClickListener {
+                onMealClick(meal)
             }
         }
     }

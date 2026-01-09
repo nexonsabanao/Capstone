@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.data.model.Article
 import com.example.nutriority.databinding.ItemArticlePreviewBinding
 
-class ArticleAdapter : ListAdapter<Article, ArticleAdapter.ArticleViewHolder>(ArticleDiffCallback()) {
+class ArticleAdapter(
+    private val onArticleClick: (Article) -> Unit
+) : ListAdapter<Article, ArticleAdapter.ArticleViewHolder>(ArticleDiffCallback()) {
 
     class ArticleViewHolder(val binding: ItemArticlePreviewBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -27,21 +29,22 @@ class ArticleAdapter : ListAdapter<Article, ArticleAdapter.ArticleViewHolder>(Ar
             articleReadingTime.text = currentArticle.readingTime
             articleCategory.text = currentArticle.category
 
-            // The adapter now relies on imageResId being pre-calculated.
             if (currentArticle.imageResId != 0) {
                 articleImage.setImageResource(currentArticle.imageResId)
+            }
+
+            root.setOnClickListener {
+                onArticleClick(currentArticle)
             }
         }
     }
 
     class ArticleDiffCallback : DiffUtil.ItemCallback<Article>() {
         override fun areItemsTheSame(oldItem: Article, newItem: Article): Boolean {
-            // Use the stable, unique ID for comparison.
             return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: Article, newItem: Article): Boolean {
-            // The data class '==' implementation checks all properties, which is perfect.
             return oldItem == newItem
         }
     }

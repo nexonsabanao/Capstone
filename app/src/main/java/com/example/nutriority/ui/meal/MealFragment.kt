@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.meal
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.databinding.FragmentMealBinding
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -21,7 +23,7 @@ class MealFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val mealViewModel: MealViewModel by viewModels()
-    private val mealAdapter = GeneratedMealPlanAdapter()
+    private lateinit var mealAdapter: GeneratedMealPlanAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,6 +43,12 @@ class MealFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        mealAdapter = GeneratedMealPlanAdapter { meal ->
+            val intent = Intent(requireContext(), MealDetailActivity::class.java)
+            intent.putExtra("meal_json", Gson().toJson(meal))
+            startActivity(intent)
+        }
+        
         binding.generatedMealPlanRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = mealAdapter

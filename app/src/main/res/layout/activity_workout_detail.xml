@@ -49,14 +49,16 @@
         android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:behavior_overlapTop="24dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:id="@+id/content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_top_rounded_white"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="24dp">
 
             <TextView
                 android:id="@+id/workout_title"
@@ -184,7 +186,8 @@
                 android:layout_marginBottom="80dp"
                 android:fontFamily="sans-serif-medium"
                 android:text="Include Warm-up &amp; Cool-down"
-                android:textSize="16sp"
+                android:textSize="20sp"
+                android:textColor="#48444D"
                 android:checked="true"
                 app:thumbTint="@color/white"
                 app:trackTint="@color/switch_track_selector" />

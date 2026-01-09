@@ -4,52 +4,54 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    android:fitsSystemWindows="true">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/white"
+    <ImageView
+        android:id="@+id/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_arrow_back"
-        app:title="Edit Workout" />
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:fontFamily="sans-serif"
+        android:text="Edit Workout"
+        android:textColor="#212121"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_back"
+        app:layout_constraintStart_toEndOf="@+id/btn_back"
+        app:layout_constraintTop_toTopOf="@+id/btn_back" />
 
     <!-- LOADING STATE -->
     <ProgressBar
         android:id="@+id/loading_progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:indeterminateTint="@color/primary_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- MAIN CONTENT CONTAINER (Initially Hidden) -->
+    <!-- MAIN CONTENT CONTAINER -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintTop_toBottomOf="@id/tv_title"
         tools:visibility="visible">
-
-        <!-- System Workout Name Area -->
-        <TextView
-            android:id="@+id/tv_system_workout_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
-            android:fontFamily="sans-serif-black"
-            android:textColor="@color/black"
-            android:textSize="32sp"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Beginner Abs"
-            tools:visibility="visible" />
 
         <!-- Editable Workout Name Layout -->
         <com.google.android.material.textfield.TextInputLayout
@@ -67,9 +69,10 @@
                 android:id="@+id/et_workout_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-black"
+                android:fontFamily="sans-serif-medium"
                 android:inputType="textCapWords"
-                android:textSize="24sp"
+                android:textColor="#212121"
+                android:textSize="32sp"
                 tools:ignore="SpeakableTextPresentCheck" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -78,7 +81,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="tv_system_workout_name,workout_name_layout" />
+            app:constraint_referenced_ids="workout_name_layout" />
 
         <HorizontalScrollView
             android:id="@+id/chip_scroll_view"

@@ -18,8 +18,10 @@ import com.example.nutriority.ui.BottomNavigationActivity
 import com.example.nutriority.ui.adapter.MealAdapter
 import com.example.nutriority.ui.adapter.WorkoutAdapter
 import com.example.nutriority.ui.adapter.ArticleAdapter
+import com.example.nutriority.ui.meal.MealDetailActivity
 import com.example.nutriority.ui.workout.PersonalizedWorkoutActivity
 import com.example.nutriority.ui.workout.WorkoutDetailActivity
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import me.relex.circleindicator.CircleIndicator2
@@ -65,13 +67,23 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerViews() {
-        mealAdapter = MealAdapter()
+        mealAdapter = MealAdapter { meal ->
+            val intent = Intent(requireContext(), MealDetailActivity::class.java)
+            intent.putExtra("meal_json", Gson().toJson(meal))
+            startActivity(intent)
+        }
+        
         workoutAdapter = WorkoutAdapter { workout ->
             val intent = Intent(requireActivity(), WorkoutDetailActivity::class.java)
             intent.putExtra("workout_id", workout.id)
             startActivity(intent)
         }
-        articleAdapter = ArticleAdapter()
+        
+        articleAdapter = ArticleAdapter { article ->
+            val intent = Intent(requireContext(), ArticleDetailActivity::class.java)
+            intent.putExtra("article_json", Gson().toJson(article))
+            startActivity(intent)
+        }
 
         binding.mealsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)

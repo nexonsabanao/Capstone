@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Home Activity (MUST BE REGISTERED HERE) -->
+        <!-- Home Activity -->
         <activity
             android:name=".ui.BottomNavigationActivity"
             android:exported="false"
@@ -56,6 +56,16 @@
 
         <activity
             android:name=".ui.workout.AllWorkoutsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.meal.MealDetailActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.home.ArticleDetailActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
