@@ -1,7 +1,9 @@
 package com.example.nutriority.ui.workout
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.viewModels
@@ -14,7 +16,6 @@ import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.databinding.ActivityExerciseDetailBinding
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
-import com.bumptech.glide.Glide
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -64,8 +65,21 @@ class ExerciseDetailActivity : AppCompatActivity() {
         )
 
         addSetAdapter = AddSetAdapter {
+            val lastSet = currentSets.lastOrNull()
+            val exercise = viewModel.exercise.value
+            
+            // GENIUS FIX: Correctly determine if the NEW set should be duration-based
+            val isDuration = if (exercise != null) {
+                exercise.category.contains("Warm-up", ignoreCase = true) || 
+                exercise.category.contains("Cool-down", ignoreCase = true) ||
+                (exercise.duration.isNotBlank() && (exercise.duration.contains("s") || exercise.duration.contains(":")))
+            } else {
+                lastSet?.isDuration ?: false
+            }
+
+            val newValue = lastSet?.value ?: if (isDuration) 30 else 8
             val mutableList = currentSets.toMutableList()
-            val newSet = ExerciseSet(reps = currentSets.lastOrNull()?.reps ?: 8)
+            val newSet = ExerciseSet(value = newValue, isDuration = isDuration)
             mutableList.add(newSet)
             updateAndSubmitList(mutableList)
         }
@@ -88,13 +102,13 @@ class ExerciseDetailActivity : AppCompatActivity() {
             .setView(dialogView)
             .create()
 
-        repsInput.setText(currentSets[position].reps.toString())
+        repsInput.setText(currentSets[position].value.toString())
 
         btnOk.setOnClickListener {
-            val newReps = repsInput.text.toString().toIntOrNull()
-            if (newReps != null) {
+            val newValue = repsInput.text.toString().toIntOrNull()
+            if (newValue != null) {
                 val mutableList = currentSets.toMutableList()
-                val updatedSet = mutableList[position].copy(reps = newReps)
+                val updatedSet = mutableList[position].copy(value = newValue)
                 mutableList[position] = updatedSet
                 updateAndSubmitList(mutableList)
             }
@@ -113,19 +127,42 @@ class ExerciseDetailActivity : AppCompatActivity() {
             viewModel.exercise.collect { exercise ->
                 exercise?.let { ex ->
                     binding.exerciseTitle.text = ex.name
-                    // Load the image using Glide
-                    // Glide.with(this@ExerciseDetailActivity).load(it.image).into(binding.imgExercise)
 
-                    // Correctly parse reps string or fall back to sets count
-                    val repsList = ex.reps.split(",").mapNotNull { it.trim().toIntOrNull() }
-                    val initialSets = if (repsList.size == ex.sets) {
-                        // The saved data is consistent, use it directly
-                        repsList.map { ExerciseSet(reps = it) }
+                    // GENIUS DETECTION: Warm-up/Cool-down are ALWAYS duration based
+                    val isWarmupCooldown = ex.category.contains("Warm-up", ignoreCase = true) || 
+                                         ex.category.contains("Cool-down", ignoreCase = true)
+                    
+                    val durationStr = "${ex.duration} ${ex.reps}".lowercase()
+                    val isDuration = isWarmupCooldown || durationStr.contains("s") || durationStr.contains(":")
+                    
+                    // Parse fallback value: 30s for warm-up or extracted number
+                    val parsedValue = if (isDuration) {
+                        val sourceStr = if (ex.duration.any { it.isDigit() }) ex.duration else ex.reps
+                        if (sourceStr.contains(":")) {
+                            val parts = sourceStr.split(":")
+                            val mins = parts.getOrNull(0)?.toIntOrNull() ?: 0
+                            val secs = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                            (mins * 60) + secs
+                        } else {
+                            sourceStr.filter { it.isDigit() }.toIntOrNull() ?: 30
+                        }
                     } else {
-                        // Data is from pre-population or inconsistent, create sets from scratch
-                        val defaultRep = repsList.firstOrNull() ?: 8
-                        List(ex.sets) { ExerciseSet(reps = defaultRep) }
+                        ex.reps.split(",").firstOrNull()?.trim()?.filter { it.isDigit() }?.toIntOrNull() ?: 8
                     }
+
+                    // Parse existing values from the reps string
+                    val savedValues = ex.reps.split(",").mapNotNull { it.trim().filter { c -> c.isDigit() }.toIntOrNull() }
+                    
+                    // Ensure at least 1 set for warm-up/cool-down if sets is 0
+                    val setsCount = if (isWarmupCooldown && ex.sets <= 0) 1 else ex.sets
+
+                    val initialSets = if (savedValues.size == setsCount && savedValues.isNotEmpty()) {
+                        savedValues.map { ExerciseSet(value = it, isDuration = isDuration) }
+                    } else {
+                        List(setsCount) { ExerciseSet(value = parsedValue, isDuration = isDuration) }
+                    }
+                    
+                    Log.d("ExerciseDetail", "Loaded ${ex.name}: category=${ex.category}, isDuration=$isDuration, sets=${initialSets.size}")
                     updateAndSubmitList(initialSets)
                 }
             }
@@ -133,21 +170,22 @@ class ExerciseDetailActivity : AppCompatActivity() {
     }
 
     private fun updateAndSubmitList(updatedSets: List<ExerciseSet>) {
-        // Create a new list with updated set numbers and active state
         currentSets = updatedSets.mapIndexed { index, set ->
-            set.copy(
-                setNumber = index + 1,
-                isActive = index == 0 // Always make the first set active
-            )
+            set.copy(setNumber = index + 1)
         }
+        
+        val hasActive = currentSets.any { it.isActive }
+        if (!hasActive && currentSets.isNotEmpty()) {
+            currentSets[0].isActive = true
+        }
+        
         exerciseSetAdapter.submitList(currentSets)
 
-        // Save the changes to the database
         viewModel.exercise.value?.let { currentExercise ->
-            val updatedRepsString = currentSets.joinToString(", ") { it.reps.toString() }
+            val updatedValueString = currentSets.joinToString(", ") { it.value.toString() }
             val updatedExercise = currentExercise.copy(
-                sets = currentSets.size, // Correctly update the sets count
-                reps = updatedRepsString // And the reps string
+                sets = currentSets.size,
+                reps = updatedValueString
             )
             viewModel.updateExercise(updatedExercise)
         }
@@ -155,19 +193,7 @@ class ExerciseDetailActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Clear the adapter to help prevent memory leaks
         binding.setsRecyclerView.adapter = null
-        
-        // Log the workout
-        viewModel.exercise.value?.let { exercise ->
-            val repsString = currentSets.joinToString(", ") { it.reps.toString() }
-            val log = WorkoutLog(
-                workoutId = exercise.workoutId,
-                date = Date(),
-                reps = repsString
-            )
-            viewModel.logWorkout(log)
-        }
     }
 
     private fun setupClickListeners() {
@@ -176,27 +202,41 @@ class ExerciseDetailActivity : AppCompatActivity() {
         }
 
         binding.btnCheck.setOnClickListener {
-            // Handle moving to the next set
+            val activeIndex = currentSets.indexOfFirst { it.isActive }
+            if (activeIndex != -1 && activeIndex < currentSets.size - 1) {
+                val mutableList = currentSets.toMutableList()
+                mutableList[activeIndex] = mutableList[activeIndex].copy(isActive = false)
+                mutableList[activeIndex + 1] = mutableList[activeIndex + 1].copy(isActive = true)
+                currentSets = mutableList
+                exerciseSetAdapter.submitList(currentSets)
+                binding.btnLogSet.text = "Log set ${activeIndex + 2}"
+            } else {
+                Toast.makeText(this, "All sets complete! Tap Log to finish.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.btnAutoLog.setOnClickListener {
-            if (binding.btnAutoLog.text.toString().contains("OFF")) {
-                binding.btnAutoLog.text = "Auto Log : ON"
-            } else {
-                binding.btnAutoLog.text = "Auto Log : OFF"
-            }
+            val isOff = binding.btnAutoLog.text.toString().contains("OFF")
+            binding.btnAutoLog.text = if (isOff) "Auto Log : ON" else "Auto Log : OFF"
         }
 
         binding.btnRest.setOnClickListener {
-            if (binding.btnRest.text.toString().contains("ON")) {
-                binding.btnRest.text = "Rest : OFF"
-            } else {
-                binding.btnRest.text = "Rest : ON"
-            }
+            val isOn = binding.btnRest.text.toString().contains("ON")
+            binding.btnRest.text = if (isOn) "Rest : OFF" else "Rest : ON"
         }
 
         binding.btnLogSet.setOnClickListener {
-            // Handle logging the set
+            viewModel.exercise.value?.let { exercise ->
+                val valueString = currentSets.joinToString(", ") { it.value.toString() }
+                val log = WorkoutLog(
+                    workoutId = exercise.workoutId ?: 0,
+                    date = Date(),
+                    reps = valueString
+                )
+                viewModel.logWorkout(log)
+                Toast.makeText(this, "Workout logged successfully!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
     }
 }

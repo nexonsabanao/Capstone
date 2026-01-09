@@ -17,7 +17,7 @@
     ],
     "exercises": [
       {
-        "name": "Wall Push-ups",
+        "name": "Wall Push-Ups",
         "description": "Stand facing a wall, hands shoulder-width apart. Slowly bend your elbows and bring your chest toward the wall, keeping your body straight. Push back to the starting position. Focus on controlled movement.",
         "sets": 3,
         "reps": 10,
@@ -84,7 +84,7 @@
     ],
     "exercises": [
       {
-        "name": "Regular Push-ups",
+        "name": "Push-up",
         "description": "Start in a plank position with hands shoulder-width apart. Lower your chest to the floor while keeping your body straight, then push back up. Engage chest, shoulders, and triceps throughout.",
         "sets": 3,
         "reps": 10,
@@ -92,7 +92,7 @@
         "targetMuscle": "Chest, Triceps, Shoulders",
         "tips": "Keep your core tight and spine neutral. Avoid letting your hips sag. Move in a slow, controlled manner.",
         "difficulty": "Intermediate",
-        "imageName": "exercise_regular_pushup"
+        "imageName": "exercise_pushup"
       },
       {
         "name": "Close-grip Push-ups",
@@ -157,7 +157,7 @@
       "tags": ["arms", "strength", "advanced", "bodyweight", "no-equipment"]
     },
     "warmup": [
-      { "name": "Arm Circles Large", "duration": "60s", "targetMuscle": "Shoulders, Arms" },
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Arms" },
       { "name": "Jumping Jacks", "duration": "60s", "targetMuscle": "Full Body, Cardio" }
     ],
     "exercises": [
@@ -173,7 +173,7 @@
         "imageName": "exercise_diamond_pushup"
       },
       {
-        "name": "Archer Push-ups",
+        "name": "Archer Push-Ups",
         "description": "Start in a wide push-up position. Shift your weight to one arm while the other arm extends straight to the side. Lower chest toward the weighted arm and push back up, alternating sides.",
         "sets": 3,
         "reps": 10,
@@ -184,7 +184,7 @@
         "imageName": "exercise_archer_pushup"
       },
       {
-        "name": "Pike Push-ups",
+        "name": "Pike Push-Ups",
         "description": "Start in a downward dog position. Bend elbows to lower your head toward the floor, then push back up, targeting shoulders and triceps.",
         "sets": 3,
         "reps": 10,
@@ -220,7 +220,7 @@
     "cooldown": [
       { "name": "Overhead Tricep Stretch", "duration": "30s per arm", "targetMuscle": "Triceps" },
       { "name": "Biceps Wall Stretch", "duration": "30s per arm", "targetMuscle": "Biceps, Chest" },
-      { "name": "Child’s Pose Arm Stretch", "duration": "30s", "targetMuscle": "Shoulders, Triceps" }
+      { "name": "Child's Pose", "duration": "30s", "targetMuscle": "Shoulders, Triceps, Lower Back" }
     ]
   },
   {
@@ -444,7 +444,7 @@
     ],
     "cooldown": [
       { "name": "Cobra Stretch", "duration": "30s", "targetMuscle": "Abs" },
-      { "name": "Child’s Pose", "duration": "30s", "targetMuscle": "Core" }
+      { "name": "Child's Pose", "duration": "30s", "targetMuscle": "Shoulders, Triceps, Lower Back" }
     ]
   },
   {
@@ -518,7 +518,7 @@
     ],
     "exercises": [
       {
-        "name": "Hanging Knee Tucks (or Lying Knee Tucks if no equipment)",
+        "name": "Lying Knee Tucks",
         "description": "Hang from a bar or lie on the floor. Bring knees toward your chest in a controlled motion and slowly extend back.",
         "sets": 3,
         "reps": 10,
@@ -602,8 +602,8 @@
       }
     ],
     "cooldown": [
-      { "name": "Child's Pose", "duration": "30s", "targetMuscle": "Lower Back, Spine" },
-      { "name": "Thread the Needle Stretch", "duration": "30s", "targetMuscle": "Upper Back, Shoulders" }
+      { "name": "Child's Pose", "duration": "30s", "targetMuscle": "Shoulders, Triceps, Lower Back" },
+      { "name": "Thread the Needle", "duration": "30s", "targetMuscle": "Upper Back, Shoulders" }
     ]
   },
   {
@@ -658,7 +658,7 @@
       }
     ],
     "cooldown": [
-      { "name": "Child’s Pose", "duration": "60s", "targetMuscle": "Back, Shoulders" },
+      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Shoulders, Triceps, Lower Back" },
       { "name": "Seated Forward Bend", "duration": "60s", "targetMuscle": "Lower Back, Hamstrings" }
     ]
   },
@@ -715,7 +715,7 @@
       }
     ],
     "cooldown": [
-      { "name": "Child’s Pose", "duration": "60s", "targetMuscle": "Back, Shoulders" },
+      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Shoulders, Triceps, Lower Back" },
       { "name": "Seated Forward Bend", "duration": "60s", "targetMuscle": "Lower Back, Hamstrings" },
       { "name": "Thread the Needle", "duration": "60s", "targetMuscle": "Mid Back, Shoulders" }
     ]
@@ -734,7 +734,6 @@
     },
     "warmup": [
       { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Chest" },
-      { "name": "Wall Push-Up Stretch", "duration": "60s", "targetMuscle": "Chest, Arms" },
       { "name": "Chest Openers", "duration": "60s", "targetMuscle": "Chest, Shoulders" }
     ],
     "exercises": [
@@ -750,7 +749,7 @@
         "imageName": "exercise_knee_pushups"
       },
       {
-        "name": "Incline Push-Ups (Hands on Table or Chair)",
+        "name": "Incline Push-Ups",
         "description": "Place your hands on a stable elevated surface. Lower your chest toward the edge, then push back up.",
         "sets": 3,
         "reps": 10,
@@ -774,7 +773,7 @@
     ],
     "cooldown": [
       { "name": "Chest Stretch on Wall", "duration": "60s", "targetMuscle": "Chest, Shoulders" },
-      { "name": "Child’s Pose", "duration": "60s", "targetMuscle": "Back, Chest" },
+      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Shoulders, Triceps, Lower Back" },
       { "name": "Shoulder Rolls", "duration": "60s", "targetMuscle": "Shoulders, Chest" }
     ]
   },
@@ -797,7 +796,7 @@
     ],
     "exercises": [
       {
-        "name": "Standard Push-Ups",
+        "name": "Push-Ups",
         "description": "Start in a plank with hands shoulder-width apart. Lower your chest to the floor keeping elbows at ~45 degrees, then push back up.",
         "sets": 3,
         "reps": 10,
@@ -805,10 +804,10 @@
         "targetMuscle": "Chest, Shoulders, Triceps",
         "tips": "Keep a straight line from head to heels. Engage your core and squeeze chest at the top.",
         "difficulty": "Intermediate",
-        "imageName": "exercise_standard_pushups"
+        "imageName": "exercise_pushup"
       },
       {
-        "name": "Decline Push-Ups (Feet Elevated)",
+        "name": "Decline Push-Ups",
         "description": "Place your feet on a stable surface higher than your hands. Lower chest to the floor and push back up.",
         "sets": 3,
         "reps": 10,
@@ -832,7 +831,7 @@
     ],
     "cooldown": [
       { "name": "Chest Stretch on Wall", "duration": "60s", "targetMuscle": "Chest, Shoulders" },
-      { "name": "Child’s Pose", "duration": "60s", "targetMuscle": "Back, Chest" },
+      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Shoulders, Triceps, Lower Back" },
       { "name": "Shoulder Rolls", "duration": "60s", "targetMuscle": "Shoulders, Chest" }
     ]
   },
@@ -913,7 +912,7 @@
     ],
     "exercises": [
       {
-        "name": "Bodyweight Squat",
+        "name": "Bodyweight Squats",
         "description": "Stand with feet shoulder-width apart. Push hips back and bend knees to lower down as if sitting in a chair. Keep weight on heels and chest upright. Push through heels to return to standing.",
         "sets": 3,
         "reps": 12,
@@ -924,7 +923,7 @@
         "imageName": "exercise_bodyweight_squat"
       },
       {
-        "name": "Incline Push-Up",
+        "name": "Incline Push-Ups",
         "description": "Place hands on a stable elevated surface (like a bench). Lower chest toward the surface, keeping elbows at ~45 degrees. Push back up to starting position.",
         "sets": 3,
         "reps": 10,
@@ -948,8 +947,8 @@
     ],
     "cooldown": [
       { "name": "Standing Forward Bend", "duration": "60s", "targetMuscle": "Hamstrings, Lower Back" },
-      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" },
-      { "name": "Chest Opener Stretch", "duration": "60s", "targetMuscle": "Chest, Shoulders" }
+      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Shoulders, Triceps, Lower Back" },
+      { "name": "Chest Openers", "duration": "60s", "targetMuscle": "Chest, Shoulders" }
     ]
   },
   {
@@ -982,7 +981,7 @@
         "imageName": "exercise_pushup"
       },
       {
-        "name": "Walking Lunge",
+        "name": "Walking Lunges",
         "description": "Step forward with one leg, lowering hips until both knees are bent at ~90 degrees. Push through the front heel to step forward with the opposite leg.",
         "sets": 3,
         "reps": 12,
@@ -1064,8 +1063,8 @@
     ],
     "cooldown": [
       { "name": "Standing Forward Fold", "duration": "60s", "targetMuscle": "Hamstrings, Lower Back" },
-      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Back, Hips" },
-      { "name": "Chest Opener Stretch", "duration": "60s", "targetMuscle": "Chest, Shoulders" }
+      { "name": "Child's Pose", "duration": "60s", "targetMuscle": "Shoulders, Triceps, Lower Back" },
+      { "name": "Chest Openers", "duration": "60s", "targetMuscle": "Chest, Shoulders" }
     ]
   },
   {
@@ -1098,7 +1097,7 @@
         "imageName": "exercise_squat_knee_raise"
       },
       {
-        "name": "Modified Jumping Jacks",
+        "name": "Jumping Jacks",
         "description": "Step out to the side instead of jumping, swinging arms overhead and returning to starting position.",
         "sets": 3,
         "reps": 12,
@@ -1109,7 +1108,7 @@
         "imageName": "exercise_modified_jumping_jacks"
       },
       {
-        "name": "Incline Push-Ups on Wall or Table",
+        "name": "Incline Push-Ups",
         "description": "Place hands on a wall or table and perform push-ups, keeping body straight and core engaged.",
         "sets": 3,
         "reps": 10,
@@ -1140,7 +1139,7 @@
     },
     "warmup": [
       { "name": "Leg Swings Forward & Side", "duration": "60s", "targetMuscle": "Hips, Hamstrings" },
-      { "name": "Bodyweight Squats Slow", "duration": "60s", "targetMuscle": "Quads, Glutes" },
+      { "name": "Bodyweight Squats", "duration": "60s", "targetMuscle": "Quads, Glutes" },
       { "name": "Hip Circles", "duration": "60s", "targetMuscle": "Hips, Lower Back" }
     ],
     "exercises": [
@@ -1180,8 +1179,7 @@
     ],
     "cooldown": [
       { "name": "Seated Hamstring Stretch", "duration": "60s", "targetMuscle": "Hamstrings" },
-      { "name": "Figure 4 Glute Stretch", "duration": "60s", "targetMuscle": "Glutes, Hips" },
-      { "name": "Calf Stretch Against Wall", "duration": "60s", "targetMuscle": "Calves, Ankles" }
+      { "name": "Calf Stretch", "duration": "60s", "targetMuscle": "Calves, Ankles" }
     ]
   },
   {
@@ -1238,8 +1236,7 @@
     ],
     "cooldown": [
       { "name": "Standing Quad Stretch", "duration": "60s", "targetMuscle": "Quads" },
-      { "name": "Seated Figure 4 Stretch", "duration": "60s", "targetMuscle": "Glutes, Hips" },
-      { "name": "Calf Stretch with Bent Knee", "duration": "60s", "targetMuscle": "Calves, Ankles" }
+      { "name": "Calf Stretch", "duration": "60s", "targetMuscle": "Calves, Ankles" }
     ]
   },
   {
@@ -1313,7 +1310,7 @@
       "tags": ["shoulders", "strength", "bodyweight", "intermediate"]
     },
     "warmup": [
-      { "name": "Arm Circles Forward and Backward", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" },
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" },
       { "name": "Scapular Push-Ups", "duration": "60s", "targetMuscle": "Shoulders, Upper Back, Core" },
       { "name": "Shoulder Rolls", "duration": "60s", "targetMuscle": "Traps, Shoulders" }
     ],
@@ -1371,13 +1368,12 @@
       "tags": ["shoulders", "strength", "bodyweight", "advanced"]
     },
     "warmup": [
-      { "name": "Arm Circles Large", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" },
-      { "name": "Scapular Push-Ups", "duration": "60s", "targetMuscle": "Shoulders, Upper Back, Core" },
-      { "name": "Shoulder Dislocates with Towel", "duration": "60s", "targetMuscle": "Shoulders, Chest, Back" }
+      { "name": "Arm Circles", "duration": "60s", "targetMuscle": "Shoulders, Upper Back" },
+      { "name": "Scapular Push-Ups", "duration": "60s", "targetMuscle": "Shoulders, Upper Back, Core" }
     ],
     "exercises": [
       {
-        "name": "Handstand Push-Ups Against Wall",
+        "name": "Handstand Push-Ups",
         "description": "Kick into a wall-supported handstand, bend elbows to lower your head, then push back up explosively.",
         "sets": 3,
         "reps": 10,

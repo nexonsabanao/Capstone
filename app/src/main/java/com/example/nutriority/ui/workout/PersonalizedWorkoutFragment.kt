@@ -38,11 +38,15 @@ class PersonalizedWorkoutFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.backButton.setOnClickListener {
+            // Standard fragment back behavior: let the activity handle it or navigate up
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+
         userViewModel.user.observe(viewLifecycleOwner) { user ->
             user?.personalizedPlanJson?.let { jsonString ->
                 Log.d("WorkoutDebug", "Attempting to parse JSON: $jsonString")
                 try {
-                    // Corrected: Parse as WorkoutPlan directly
                     val workoutPlan = Gson().fromJson(jsonString, WorkoutPlan::class.java)
                     if (workoutPlan?.sessions != null) {
                         Log.d("WorkoutDebug", "Parse successful. Found ${workoutPlan.sessions.size} sessions.")

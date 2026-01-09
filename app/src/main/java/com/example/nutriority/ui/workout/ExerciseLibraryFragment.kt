@@ -1,19 +1,17 @@
 package com.example.nutriority.ui.workout
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.ContextThemeWrapper
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentExerciseLibraryBinding
 import com.example.nutriority.ui.adapter.ExerciseAdapter
+import com.example.nutriority.ui.adapter.WorkoutItem
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -27,7 +25,6 @@ class ExerciseLibraryFragment : Fragment() {
     private val viewModel: ExerciseLibraryViewModel by viewModels()
     private lateinit var exerciseAdapter: ExerciseAdapter
 
-    // Define the fixed list of filter categories for the UI.
     private val filterCategories = listOf("Warm-up", "Cool-down", "Shoulders", "Abs", "Legs", "Back", "Chest", "Arms", "Neck")
 
     override fun onCreateView(
@@ -45,7 +42,7 @@ class ExerciseLibraryFragment : Fragment() {
         setupRecyclerView()
         observeViewModel()
         setupChipGroupListener()
-        updateChipGroup(filterCategories) // Use the fixed list to create chips.
+        updateChipGroup(filterCategories)
     }
 
     private fun setupChipGroupListener() {
@@ -70,8 +67,9 @@ class ExerciseLibraryFragment : Fragment() {
                 startActivity(intent)
             },
             onListUpdated = {},
-            // Provide the missing onDragStart parameter.
-            onDragStart = { /* This fragment does not use drag-and-drop. */ }
+            onDragStart = { /* Not used in library */ },
+            showDragHandle = false,
+            displayTargetMuscle = true
         )
 
         binding.exercisesRecyclerView.apply {
@@ -83,29 +81,30 @@ class ExerciseLibraryFragment : Fragment() {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.allExercises.collect { exercises ->
-                exerciseAdapter.submitList(exercises)
+                // Map the list of Exercises to a list of WorkoutItems.ExerciseItem
+                val workoutItems = exercises.map { WorkoutItem.ExerciseItem(it) }
+                exerciseAdapter.submitList(workoutItems)
             }
         }
     }
 
     private fun updateChipGroup(categories: List<String>) {
         binding.targetMuscleChipGroup.removeAllViews()
+        val inflater = LayoutInflater.from(requireContext())
 
-        val themedContext = ContextThemeWrapper(requireContext(), R.style.FilterChip)
-
-        // Add the "All" chip.
-        val allChip = Chip(themedContext).apply {
+        // 1. Add the "All" chip
+        val allChip = inflater.inflate(com.example.nutriority.R.layout.item_filter_chip, binding.targetMuscleChipGroup, false) as Chip
+        allChip.apply {
             text = "All"
-            isCheckable = true
             isChecked = viewModel.selectedTargetMuscle.value == "All"
         }
         binding.targetMuscleChipGroup.addView(allChip)
 
-        // Add chips for each predefined category.
+        // 2. Add chips for each predefined category
         for (category in categories) {
-            val chip = Chip(themedContext).apply {
+            val chip = inflater.inflate(com.example.nutriority.R.layout.item_filter_chip, binding.targetMuscleChipGroup, false) as Chip
+            chip.apply {
                 text = category
-                isCheckable = true
                 isChecked = viewModel.selectedTargetMuscle.value == category
             }
             binding.targetMuscleChipGroup.addView(chip)

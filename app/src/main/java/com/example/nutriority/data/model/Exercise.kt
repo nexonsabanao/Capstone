@@ -22,7 +22,7 @@ import androidx.room.PrimaryKey
 data class Exercise(
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0,
-    var workoutId: Int = 0,
+    var workoutId: Int? = null, // Changed to nullable to allow unlinking without FK errors
     var name: String = "",
     var description: String = "",
     var imageName: String = "",
@@ -35,7 +35,7 @@ data class Exercise(
     var rest: String = "",
     var tips: String = "",
     var order: Int = 0,
-    var difficulty: String = "", // Added for individual exercise difficulty
+    var difficulty: String = "",
 
     @Ignore
     var imageResId: Int = 0

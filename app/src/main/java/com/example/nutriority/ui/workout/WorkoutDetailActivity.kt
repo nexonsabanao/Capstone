@@ -1,19 +1,37 @@
 package com.example.nutriority.ui.workout
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.view.MotionEvent
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.Window
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
+import com.example.nutriority.R
+import com.example.nutriority.data.model.Exercise
+import com.example.nutriority.data.model.WorkoutWithExercises
 import com.example.nutriority.databinding.ActivityWorkoutDetailBinding
+import com.example.nutriority.databinding.DialogEditWorkoutBinding
 import com.example.nutriority.ui.adapter.ExerciseAdapter
+import com.example.nutriority.ui.adapter.SelectableExerciseAdapter
+import com.example.nutriority.ui.adapter.WorkoutItem
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -23,6 +41,8 @@ class WorkoutDetailActivity : AppCompatActivity() {
     private val viewModel: WorkoutDetailViewModel by viewModels()
     private lateinit var exerciseAdapter: ExerciseAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
+
+    private var currentWorkoutId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,13 +54,92 @@ class WorkoutDetailActivity : AppCompatActivity() {
 
         binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
 
-        val workoutId = intent.getIntExtra("workout_id", -1)
-        if (workoutId != -1) {
-            viewModel.getWorkoutById(workoutId)
+        currentWorkoutId = intent.getIntExtra("workout_id", -1)
+        if (currentWorkoutId != -1) {
+            viewModel.getWorkoutById(currentWorkoutId)
         }
 
         setupRecyclerView()
         observeViewModel()
+        setupClickListeners()
+    }
+
+    private fun setupClickListeners() {
+        binding.addExerciseButton.setOnClickListener {
+            showEditWorkoutDialog()
+        }
+        
+        binding.switchIncludeWarmupCooldown.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.workout.value?.let { workout ->
+                updateDisplayList(workout, isChecked)
+            }
+        }
+    }
+
+    private fun showEditWorkoutDialog() {
+        val dialog = Dialog(this, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen)
+        val dialogBinding = DialogEditWorkoutBinding.inflate(LayoutInflater.from(this))
+        dialog.setContentView(dialogBinding.root)
+
+        val selectableAdapter = SelectableExerciseAdapter { _, _ -> }
+
+        dialogBinding.rvSelectExercises.apply {
+            layoutManager = LinearLayoutManager(this@WorkoutDetailActivity)
+            adapter = selectableAdapter
+        }
+
+        lifecycleScope.launch {
+            val workoutWithExercises = viewModel.workout.filterNotNull().first()
+            val allExercises = viewModel.getAllExercises().filter { it.isNotEmpty() }.first()
+            
+            val workoutName = workoutWithExercises.workout.name
+            val systemWorkoutNames = listOf("Arm Workout", "Abs Workout", "Chest Workout", "Leg Workout", "Shoulder Workout", "Back Workout")
+            val isSystemWorkout = systemWorkoutNames.any { workoutName.contains(it, ignoreCase = true) }
+            
+            if (isSystemWorkout) {
+                dialogBinding.tvSystemWorkoutName.text = workoutName
+                dialogBinding.tvSystemWorkoutName.visibility = View.VISIBLE
+                dialogBinding.workoutNameLayout.visibility = View.GONE
+                dialogBinding.btnReset.visibility = View.VISIBLE
+            } else {
+                dialogBinding.etWorkoutName.setText(workoutName)
+                dialogBinding.tvSystemWorkoutName.visibility = View.GONE
+                dialogBinding.workoutNameLayout.visibility = View.VISIBLE
+                dialogBinding.btnReset.visibility = View.GONE
+            }
+            
+            selectableAdapter.setData(allExercises, workoutWithExercises.exercises)
+
+            dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+                val category = when (checkedIds.firstOrNull()) {
+                    R.id.chip_warmup -> "Warm-up"
+                    R.id.chip_cooldown -> "Cool-down"
+                    else -> "Exercise"
+                }
+                selectableAdapter.setFilter(category)
+            }
+
+            dialogBinding.btnReset.setOnClickListener {
+                val originalExercises = allExercises.filter { it.workoutId == currentWorkoutId }
+                selectableAdapter.setData(allExercises, originalExercises)
+            }
+
+            dialogBinding.btnSave.setOnClickListener {
+                val finalName = if (isSystemWorkout) workoutName else dialogBinding.etWorkoutName.text.toString()
+                if (finalName.isBlank()) {
+                    Toast.makeText(this@WorkoutDetailActivity, "Please enter a workout name", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                val finalSelectedExercises = selectableAdapter.getSelectedExercises()
+                viewModel.updateWorkout(workoutWithExercises.workout.copy(name = finalName), finalSelectedExercises)
+                dialog.dismiss()
+            }
+
+            dialogBinding.toolbar.setNavigationOnClickListener { dialog.dismiss() }
+        }
+
+        dialog.show()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -54,12 +153,14 @@ class WorkoutDetailActivity : AppCompatActivity() {
                 }
                 startActivity(intent)
             },
-            onListUpdated = { exercises ->
-                viewModel.updateExercises(exercises)
+            onListUpdated = { updatedList ->
+                // This updates the order in the database
+                viewModel.updateExercises(updatedList)
             },
             onDragStart = { viewHolder ->
                 itemTouchHelper.startDrag(viewHolder)
-            }
+            },
+            showDragHandle = true
         )
 
         binding.exercisesRecyclerView.apply {
@@ -77,23 +178,84 @@ class WorkoutDetailActivity : AppCompatActivity() {
             viewModel.workout.collect { workoutWithExercises ->
                 workoutWithExercises?.let { workout ->
                     binding.collapsingToolbar.title = workout.workout.name
-                    supportActionBar?.title = ""
                     binding.workoutTitle.text = workout.workout.name
-                    binding.workoutDuration.text = workout.workout.duration
-                    val filteredExercises = workout.exercises.filter {
-                        !it.category.equals("Warm-up", ignoreCase = true) &&
-                                !it.category.equals("Cool-down", ignoreCase = true)
-                    }
-                    binding.workoutExerciseCount.text = filteredExercises.size.toString()
-                    exerciseAdapter.submitList(filteredExercises.sortedBy { exercise -> exercise.order })
+                    
+                    updateDisplayList(workout, binding.switchIncludeWarmupCooldown.isChecked)
                 }
             }
         }
     }
 
+    private fun updateDisplayList(workout: WorkoutWithExercises, includeAll: Boolean) {
+        TransitionManager.beginDelayedTransition(binding.contentContainer, AutoTransition().apply {
+            duration = 300
+        })
+
+        val displayList = mutableListOf<WorkoutItem>()
+        
+        // Step 1: Process and sort exercises by their saved order
+        val processedExercises = workout.exercises.map { ex ->
+            if (ex.category.equals("Warm-up", ignoreCase = true) || ex.category.equals("Cool-down", ignoreCase = true)) {
+                ex.copy(
+                    sets = if (ex.sets <= 0) 1 else ex.sets,
+                    duration = if (ex.duration.isBlank()) "30s" else ex.duration
+                ).apply { imageResId = ex.imageResId }
+            } else {
+                ex
+            }
+        }.sortedBy { it.order } // CRITICAL FIX: Sort by order to persist drag results
+
+        val warmup = processedExercises.filter { it.category.equals("Warm-up", ignoreCase = true) }
+        val cooldown = processedExercises.filter { it.category.equals("Cool-down", ignoreCase = true) }
+        val main = processedExercises.filter { 
+            !it.category.equals("Warm-up", ignoreCase = true) && 
+            !it.category.equals("Cool-down", ignoreCase = true) 
+        }
+
+        binding.workoutExerciseCount.text = main.size.toString()
+
+        if (includeAll) {
+            if (warmup.isNotEmpty()) {
+                displayList.add(WorkoutItem.DividerItem("Warm-up"))
+                displayList.addAll(warmup.map { WorkoutItem.ExerciseItem(it) })
+            }
+            
+            displayList.add(WorkoutItem.DividerItem("Exercises"))
+            displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
+            
+            if (cooldown.isNotEmpty()) {
+                displayList.add(WorkoutItem.DividerItem("Cool-down"))
+                displayList.addAll(cooldown.map { WorkoutItem.ExerciseItem(it) })
+            }
+        } else {
+            displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
+        }
+
+        val totalSeconds = processedExercises.filter { 
+            includeAll || (!it.category.equals("Warm-up", ignoreCase = true) && !it.category.equals("Cool-down", ignoreCase = true))
+        }.sumOf { exercise ->
+            val durationStr = exercise.duration.lowercase().trim()
+            if (durationStr.contains("s") || durationStr.contains(":")) {
+                val secondsPerSet = if (durationStr.contains(":")) {
+                    val parts = durationStr.split(":")
+                    (parts.getOrNull(0)?.toIntOrNull() ?: 0) * 60 + (parts.getOrNull(1)?.toIntOrNull() ?: 0)
+                } else {
+                    durationStr.filter { it.isDigit() }.toIntOrNull() ?: 30
+                }
+                exercise.sets * secondsPerSet
+            } else {
+                val repsList = exercise.reps.split(",").mapNotNull { it.trim().toIntOrNull() }
+                val totalReps = if (repsList.isNotEmpty()) repsList.sum() else exercise.sets * 10
+                (totalReps * 3) + (exercise.sets * 45)
+            }
+        }
+        
+        binding.workoutDuration.text = "${Math.ceil(totalSeconds / 60.0).toInt()} mins"
+        exerciseAdapter.submitList(displayList)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        // Clear the adapter to help prevent memory leaks
         binding.exercisesRecyclerView.adapter = null
     }
 

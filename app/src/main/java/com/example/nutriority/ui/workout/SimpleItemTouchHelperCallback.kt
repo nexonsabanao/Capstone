@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 class SimpleItemTouchHelperCallback(private val listener: ItemMoveCallbackListener) : ItemTouchHelper.Callback() {
 
     override fun isLongPressDragEnabled(): Boolean {
-        // Disable default long-press drag, we will start it manually from the handle.
         return false
     }
 
@@ -21,8 +20,7 @@ class SimpleItemTouchHelperCallback(private val listener: ItemMoveCallbackListen
     }
 
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-        listener.onItemMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
-        return true
+        return listener.onItemMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -43,5 +41,6 @@ class SimpleItemTouchHelperCallback(private val listener: ItemMoveCallbackListen
         viewHolder.itemView.apply {
             setBackgroundColor(Color.TRANSPARENT)
         }
+        listener.onDragDropped()
     }
 }

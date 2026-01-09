@@ -24,7 +24,7 @@ import java.io.BufferedReader
 
 @Database(
     entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class],
-    version = 25,
+    version = 26,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -99,7 +99,8 @@ abstract class AppDatabase : RoomDatabase() {
                     db.mealDao().insertAllMeals(meals)
 
                     // Pre-populate Workouts
-                    data class SimpleExercise(val name: String, val duration: String)
+                    // FIX: Added targetMuscle to SimpleExercise to capture it from JSON
+                    data class SimpleExercise(val name: String, val duration: String, val targetMuscle: String?)
                     data class WorkoutJson(val workout: Workout, val exercises: List<Exercise>, val warmup: List<SimpleExercise>, val cooldown: List<SimpleExercise>)
 
                     val workoutType = object : TypeToken<List<WorkoutJson>>() {}.type
@@ -114,7 +115,6 @@ abstract class AppDatabase : RoomDatabase() {
                             else -> 5.0
                         }
                         
-                        // Ensure all fields have values, even if missing in JSON
                         val workoutToInsert = workoutJsonItem.workout.copy(
                             metValue = met,
                             imageName = workoutJsonItem.workout.imageName ?: "img_balanced_diet"
@@ -126,7 +126,6 @@ abstract class AppDatabase : RoomDatabase() {
                             exercise.workoutId = workoutId.toInt()
                             exercise.order = index
                             exercise.category = "Exercise"
-                            // Fallback for missing difficulty in individual exercises
                             if (exercise.difficulty.isEmpty()) {
                                 exercise.difficulty = workoutToInsert.difficulty
                             }
@@ -139,7 +138,8 @@ abstract class AppDatabase : RoomDatabase() {
                                 duration = simpleExercise.duration,
                                 category = "Warm-up",
                                 workoutId = workoutId.toInt(),
-                                difficulty = workoutToInsert.difficulty
+                                difficulty = workoutToInsert.difficulty,
+                                targetMuscle = simpleExercise.targetMuscle ?: "" // FIX: Corrected missing muscle
                             )
                             db.workoutDao().insertExercise(exercise)
                         }
@@ -150,7 +150,8 @@ abstract class AppDatabase : RoomDatabase() {
                                 duration = simpleExercise.duration,
                                 category = "Cool-down",
                                 workoutId = workoutId.toInt(),
-                                difficulty = workoutToInsert.difficulty
+                                difficulty = workoutToInsert.difficulty,
+                                targetMuscle = simpleExercise.targetMuscle ?: "" // FIX: Corrected missing muscle
                             )
                             db.workoutDao().insertExercise(exercise)
                         }

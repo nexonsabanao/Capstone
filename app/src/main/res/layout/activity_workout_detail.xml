@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -45,11 +46,13 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
+            android:id="@+id/content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -151,19 +154,15 @@
                     android:text="Exercises"
                     android:textSize="20sp" />
 
-                <TextView
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/add_exercise_button"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:drawablePadding="8dp"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center_vertical"
-                    android:textAllCaps="true"
                     android:text="@string/add_exercise_underlined"
-                    android:textColor="@color/secondary_blue"
-                    android:textSize="12sp" />
+                    android:textColor="@color/secondary_blue" />
 
             </RelativeLayout>
 
@@ -175,6 +174,18 @@
                 android:nestedScrollingEnabled="false"
                 tools:itemCount="4"
                 tools:listitem="@layout/item_exercise" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switch_include_warmup_cooldown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="80dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="Include Warm-up &amp; Cool-down"
+                android:textSize="16sp"
+                app:thumbTint="@color/white"
+                app:trackTint="@color/switch_track_selector" />
 
         </LinearLayout>
 

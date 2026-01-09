@@ -31,21 +31,21 @@ class ExerciseSetAdapter(
 
         fun bind(set: ExerciseSet, onRepClick: (Int) -> Unit, onDeleteClick: (Int) -> Unit, itemCount: Int) {
             binding.setNumber.text = set.setNumber.toString()
-            binding.repsCount.text = set.reps.toString()
+            binding.repsCount.text = set.value.toString()
+            
+            // Toggle label based on duration vs reps
+            binding.unitLabel.text = if (set.isDuration) "sec" else "rep"
 
             val context = itemView.context
             val isDeletable = itemCount > 1
 
-            // This logic is now correct: enabled state depends only on the number of items.
             binding.deleteButton.isEnabled = isDeletable
             binding.deleteButton.alpha = if (isDeletable) 1.0f else 0.5f
 
             if (set.isActive) {
-                // Active state styling
                 binding.setNumber.background = ContextCompat.getDrawable(context, R.drawable.bg_set_number_active)
                 binding.repsCount.setTextColor(Color.BLACK)
             } else {
-                // Inactive state styling
                 binding.setNumber.background = ContextCompat.getDrawable(context, R.drawable.bg_set_number_inactive)
                 binding.repsCount.setTextColor(Color.parseColor("#BDBDBD"))
             }
@@ -55,9 +55,7 @@ class ExerciseSetAdapter(
             }
 
             binding.deleteButton.setOnClickListener {
-                if (isDeletable) {
-                    onDeleteClick(absoluteAdapterPosition)
-                }
+                onDeleteClick(absoluteAdapterPosition)
             }
         }
     }
