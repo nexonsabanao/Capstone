@@ -10,7 +10,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.example.nutriority.R
@@ -102,19 +101,32 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     homeViewModel.allMeals.collect { meals ->
-                        mealAdapter.submitList(meals)
+                        if (meals.isNotEmpty()) {
+                            mealAdapter.submitList(meals)
+                            binding.mealsRecyclerView.visibility = View.VISIBLE
+                            binding.mealsProgressBar.visibility = View.GONE
+                        }
                     }
                 }
 
                 launch {
                     homeViewModel.allWorkouts.collect { workouts ->
-                        workoutAdapter.submitList(workouts)
+                        if (workouts.isNotEmpty()) {
+                            workoutAdapter.submitList(workouts)
+                            binding.workoutsRecyclerView.visibility = View.VISIBLE
+                            binding.workoutsIndicator.visibility = View.VISIBLE
+                            binding.workoutsProgressBar.visibility = View.GONE
+                        }
                     }
                 }
 
                 launch {
                     homeViewModel.allArticles.collect { articles ->
-                        articleAdapter.submitList(articles)
+                        if (articles.isNotEmpty()) {
+                            articleAdapter.submitList(articles)
+                            binding.articlesRecyclerView.visibility = View.VISIBLE
+                            binding.articlesProgressBar.visibility = View.GONE
+                        }
                     }
                 }
 

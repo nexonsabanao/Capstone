@@ -29,6 +29,7 @@ import com.example.nutriority.ui.adapter.ExerciseAdapter
 import com.example.nutriority.ui.adapter.SelectableExerciseAdapter
 import com.example.nutriority.ui.adapter.WorkoutItem
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -43,6 +44,9 @@ class WorkoutDetailActivity : AppCompatActivity() {
     private lateinit var itemTouchHelper: ItemTouchHelper
 
     private var currentWorkoutId: Int = -1
+    private var lastToastTime: Long = 0
+    private val TOAST_DURATION_MS = 800L
+    private val TOAST_COOLDOWN_MS = 900L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +79,22 @@ class WorkoutDetailActivity : AppCompatActivity() {
             }
         }
     }
+    
+    private fun showThrottledToast(message: String) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastToastTime > TOAST_COOLDOWN_MS) {
+            val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
+            toast.show()
+            
+            // Fast-dismiss logic: cancel the toast after 1 second
+            lifecycleScope.launch {
+                delay(TOAST_DURATION_MS)
+                toast.cancel()
+            }
+            
+            lastToastTime = currentTime
+        }
+    }
 
     private fun showEditWorkoutDialog() {
         val dialog = Dialog(this, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen)
@@ -89,13 +109,18 @@ class WorkoutDetailActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
+            // Wait for workout data
             val workoutWithExercises = viewModel.workout.filterNotNull().first()
+            // Wait for all exercises data
             val allExercises = viewModel.getAllExercises().filter { it.isNotEmpty() }.first()
             
             val workoutName = workoutWithExercises.workout.name
-            val systemWorkoutNames = listOf("Arm Workout", "Abs Workout", "Chest Workout", "Leg Workout", "Shoulder Workout", "Back Workout")
-            val isSystemWorkout = systemWorkoutNames.any { workoutName.contains(it, ignoreCase = true) }
+            // IMPROVED SYSTEM WORKOUT DETECTION: Check ID range (1-25 are default) or name keywords
+            val isSystemWorkout = workoutWithExercises.workout.id <= 25 || 
+                listOf("Arm", "Abs", "Chest", "Leg", "Shoulder", "Back", "Full Body", "Lower Body")
+                    .any { workoutName.contains(it, ignoreCase = true) }
             
+            // CONFIGURE UI
             if (isSystemWorkout) {
                 dialogBinding.tvSystemWorkoutName.text = workoutName
                 dialogBinding.tvSystemWorkoutName.visibility = View.VISIBLE
@@ -108,7 +133,9 @@ class WorkoutDetailActivity : AppCompatActivity() {
                 dialogBinding.btnReset.visibility = View.GONE
             }
             
-            selectableAdapter.setData(allExercises, workoutWithExercises.exercises)
+            // Capture the state when the dialog was opened for the Reset button
+            val initialExercises = workoutWithExercises.exercises
+            selectableAdapter.setData(allExercises, initialExercises)
 
             dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
                 val category = when (checkedIds.firstOrNull()) {
@@ -120,14 +147,18 @@ class WorkoutDetailActivity : AppCompatActivity() {
             }
 
             dialogBinding.btnReset.setOnClickListener {
-                val originalExercises = allExercises.filter { it.workoutId == currentWorkoutId }
-                selectableAdapter.setData(allExercises, originalExercises)
+                // BUG FIX: Reset to the exercises that were active when the dialog opened,
+                // rather than filtering the grouped 'allExercises' list which loses associations.
+                selectableAdapter.setData(allExercises, initialExercises)
+                
+                // FIX: Only show toast if it's not currently on screen (throttled by time)
+                showThrottledToast("Reset to default exercises")
             }
 
             dialogBinding.btnSave.setOnClickListener {
                 val finalName = if (isSystemWorkout) workoutName else dialogBinding.etWorkoutName.text.toString()
                 if (finalName.isBlank()) {
-                    Toast.makeText(this@WorkoutDetailActivity, "Please enter a workout name", Toast.LENGTH_SHORT).show()
+                    showThrottledToast("Please enter a workout name")
                     return@setOnClickListener
                 }
 
@@ -137,6 +168,10 @@ class WorkoutDetailActivity : AppCompatActivity() {
             }
 
             dialogBinding.toolbar.setNavigationOnClickListener { dialog.dismiss() }
+
+            // GENIUS FIX: DATA IS LOADED, REVEAL CONTENT AND HIDE PROGRESS
+            dialogBinding.loadingProgress.visibility = View.GONE
+            dialogBinding.contentLayout.visibility = View.VISIBLE
         }
 
         dialog.show()
@@ -145,16 +180,23 @@ class WorkoutDetailActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
-            onItemClick = { exercise, position, totalCount ->
+            onItemClick = { exercise, position, _ ->
+                // BUG FIX: Correctly calculate position based on ExerciseItems ONLY
+                val currentList = exerciseAdapter.currentList
+                val exerciseItems = currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
+                val totalExercises = exerciseItems.size
+                
+                // Find index of this specific exercise object in the filtered list
+                val exercisePos = exerciseItems.indexOfFirst { it.exercise.id == exercise.id } + 1
+                
                 val intent = Intent(this, ExerciseDetailActivity::class.java).apply {
                     putExtra("exercise_id", exercise.id)
-                    putExtra("exercise_position", position + 1)
-                    putExtra("total_exercises", totalCount)
+                    putExtra("exercise_position", exercisePos)
+                    putExtra("total_exercises", totalExercises)
                 }
                 startActivity(intent)
             },
             onListUpdated = { updatedList ->
-                // This updates the order in the database
                 viewModel.updateExercises(updatedList)
             },
             onDragStart = { viewHolder ->
@@ -193,7 +235,6 @@ class WorkoutDetailActivity : AppCompatActivity() {
 
         val displayList = mutableListOf<WorkoutItem>()
         
-        // Step 1: Process and sort exercises by their saved order
         val processedExercises = workout.exercises.map { ex ->
             if (ex.category.equals("Warm-up", ignoreCase = true) || ex.category.equals("Cool-down", ignoreCase = true)) {
                 ex.copy(
@@ -203,7 +244,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
             } else {
                 ex
             }
-        }.sortedBy { it.order } // CRITICAL FIX: Sort by order to persist drag results
+        }.sortedBy { it.order }
 
         val warmup = processedExercises.filter { it.category.equals("Warm-up", ignoreCase = true) }
         val cooldown = processedExercises.filter { it.category.equals("Cool-down", ignoreCase = true) }

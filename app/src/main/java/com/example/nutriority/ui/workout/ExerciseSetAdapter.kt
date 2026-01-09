@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.R
 import com.example.nutriority.data.model.ExerciseSet
@@ -14,7 +13,34 @@ import com.example.nutriority.databinding.ItemExerciseSetBinding
 class ExerciseSetAdapter(
     private val onRepClick: (Int) -> Unit,
     private val onDeleteClick: (Int) -> Unit
-) : ListAdapter<ExerciseSet, ExerciseSetAdapter.ExerciseSetViewHolder>(DiffCallback) {
+) : RecyclerView.Adapter<ExerciseSetAdapter.ExerciseSetViewHolder>() {
+
+    private var sets: List<ExerciseSet> = emptyList()
+
+    fun submitList(newList: List<ExerciseSet>) {
+        val oldList = sets
+        val diffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize(): Int = oldList.size
+            override fun getNewListSize(): Int = newList.size
+            
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return oldList[oldItemPosition].id == newList[newItemPosition].id
+            }
+
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return oldList[oldItemPosition] == newList[newItemPosition]
+            }
+        })
+        
+        sets = newList
+        diffResult.dispatchUpdatesTo(this)
+        
+        // BUG FIX: When moving between 1 and 2 items, we must re-bind the first item
+        // to enable/disable the delete button correctly while keeping animations.
+        if (oldList.size <= 2 || newList.size <= 2) {
+            notifyItemRangeChanged(0, sets.size)
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExerciseSetViewHolder {
         val binding = ItemExerciseSetBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -22,22 +48,23 @@ class ExerciseSetAdapter(
     }
 
     override fun onBindViewHolder(holder: ExerciseSetViewHolder, position: Int) {
-        val set = getItem(position)
-        holder.bind(set, onRepClick, onDeleteClick, itemCount)
+        val set = sets[position]
+        holder.bind(set, onRepClick, onDeleteClick, sets.size)
     }
+
+    override fun getItemCount() = sets.size
 
     inner class ExerciseSetViewHolder(private val binding: ItemExerciseSetBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(set: ExerciseSet, onRepClick: (Int) -> Unit, onDeleteClick: (Int) -> Unit, itemCount: Int) {
+        fun bind(set: ExerciseSet, onRepClick: (Int) -> Unit, onDeleteClick: (Int) -> Unit, totalSets: Int) {
             binding.setNumber.text = set.setNumber.toString()
             binding.repsCount.text = set.value.toString()
             
-            // Toggle label based on duration vs reps
             binding.unitLabel.text = if (set.isDuration) "sec" else "rep"
 
             val context = itemView.context
-            val isDeletable = itemCount > 1
+            val isDeletable = totalSets > 1
 
             binding.deleteButton.isEnabled = isDeletable
             binding.deleteButton.alpha = if (isDeletable) 1.0f else 0.5f
@@ -51,23 +78,17 @@ class ExerciseSetAdapter(
             }
 
             binding.repsContainer.setOnClickListener {
-                onRepClick(absoluteAdapterPosition)
+                val pos = bindingAdapterPosition
+                if (pos != RecyclerView.NO_POSITION) {
+                    onRepClick(pos)
+                }
             }
 
             binding.deleteButton.setOnClickListener {
-                onDeleteClick(absoluteAdapterPosition)
-            }
-        }
-    }
-
-    companion object {
-        private val DiffCallback = object : DiffUtil.ItemCallback<ExerciseSet>() {
-            override fun areItemsTheSame(oldItem: ExerciseSet, newItem: ExerciseSet): Boolean {
-                return oldItem.id == newItem.id
-            }
-
-            override fun areContentsTheSame(oldItem: ExerciseSet, newItem: ExerciseSet): Boolean {
-                return oldItem == newItem
+                val pos = bindingAdapterPosition
+                if (pos != RecyclerView.NO_POSITION) {
+                    onDeleteClick(pos)
+                }
             }
         }
     }

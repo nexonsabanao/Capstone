@@ -2,6 +2,7 @@ package com.example.nutriority.ui.workout
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -16,6 +17,7 @@ import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.databinding.ActivityExerciseDetailBinding
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -27,6 +29,10 @@ class ExerciseDetailActivity : AppCompatActivity() {
     private lateinit var exerciseSetAdapter: ExerciseSetAdapter
     private lateinit var addSetAdapter: AddSetAdapter
     private var currentSets = listOf<ExerciseSet>()
+    
+    private var isProcessing = false
+    private var currentDialog: AlertDialog? = null
+    private var isInitialized = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,32 +62,42 @@ class ExerciseDetailActivity : AppCompatActivity() {
                 showEditRepsDialog(position)
             },
             onDeleteClick = { position ->
-                val mutableList = currentSets.toMutableList()
-                if (mutableList.size > 1) {
-                    mutableList.removeAt(position)
-                    updateAndSubmitList(mutableList)
+                if (!isProcessing && position >= 0 && position < currentSets.size) {
+                    isProcessing = true
+                    val mutableList = currentSets.toMutableList()
+                    if (mutableList.size > 1) {
+                        mutableList.removeAt(position)
+                        updateAndSubmitList(mutableList)
+                    } else {
+                        Toast.makeText(this, "Workout must have at least one set", Toast.LENGTH_SHORT).show()
+                    }
+                    binding.root.postDelayed({ isProcessing = false }, 150)
                 }
             }
         )
 
         addSetAdapter = AddSetAdapter {
-            val lastSet = currentSets.lastOrNull()
-            val exercise = viewModel.exercise.value
-            
-            // GENIUS FIX: Correctly determine if the NEW set should be duration-based
-            val isDuration = if (exercise != null) {
-                exercise.category.contains("Warm-up", ignoreCase = true) || 
-                exercise.category.contains("Cool-down", ignoreCase = true) ||
-                (exercise.duration.isNotBlank() && (exercise.duration.contains("s") || exercise.duration.contains(":")))
-            } else {
-                lastSet?.isDuration ?: false
-            }
+            if (!isProcessing) {
+                isProcessing = true
+                val lastSet = currentSets.lastOrNull()
+                val exercise = viewModel.exercise.value
+                
+                val isDuration = if (exercise != null) {
+                    exercise.category.contains("Warm-up", ignoreCase = true) || 
+                    exercise.category.contains("Cool-down", ignoreCase = true) ||
+                    (exercise.duration.isNotBlank() && (exercise.duration.contains("s") || exercise.duration.contains(":")))
+                } else {
+                    lastSet?.isDuration ?: false
+                }
 
-            val newValue = lastSet?.value ?: if (isDuration) 30 else 8
-            val mutableList = currentSets.toMutableList()
-            val newSet = ExerciseSet(value = newValue, isDuration = isDuration)
-            mutableList.add(newSet)
-            updateAndSubmitList(mutableList)
+                val newValue = lastSet?.value ?: if (isDuration) 30 else 8
+                val mutableList = currentSets.toMutableList()
+                val newSet = ExerciseSet(value = newValue, isDuration = isDuration)
+                mutableList.add(newSet)
+                updateAndSubmitList(mutableList)
+                
+                binding.root.postDelayed({ isProcessing = false }, 150)
+            }
         }
 
         val concatAdapter = ConcatAdapter(exerciseSetAdapter, addSetAdapter)
@@ -93,12 +109,16 @@ class ExerciseDetailActivity : AppCompatActivity() {
     }
 
     private fun showEditRepsDialog(position: Int) {
+        currentDialog?.dismiss()
+
+        if (position < 0 || position >= currentSets.size) return
+
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_reps, null)
         val repsInput = dialogView.findViewById<EditText>(R.id.edit_reps_input)
         val btnOk = dialogView.findViewById<MaterialButton>(R.id.btn_ok)
         val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btn_cancel)
 
-        val dialog = AlertDialog.Builder(this)
+        currentDialog = AlertDialog.Builder(this)
             .setView(dialogView)
             .create()
 
@@ -108,34 +128,37 @@ class ExerciseDetailActivity : AppCompatActivity() {
             val newValue = repsInput.text.toString().toIntOrNull()
             if (newValue != null) {
                 val mutableList = currentSets.toMutableList()
-                val updatedSet = mutableList[position].copy(value = newValue)
-                mutableList[position] = updatedSet
-                updateAndSubmitList(mutableList)
+                if (position >= 0 && position < mutableList.size) {
+                    val updatedSet = mutableList[position].copy(value = newValue)
+                    mutableList[position] = updatedSet
+                    updateAndSubmitList(mutableList)
+                }
             }
-            dialog.dismiss()
+            currentDialog?.dismiss()
         }
 
         btnCancel.setOnClickListener {
-            dialog.dismiss()
+            currentDialog?.dismiss()
         }
 
-        dialog.show()
+        currentDialog?.show()
     }
 
     private fun observeViewModel() {
         lifecycleScope.launch {
             viewModel.exercise.collect { exercise ->
-                exercise?.let { ex ->
+                // BUG FIX: Only initialize from DB once to prevent loops/stale data overwriting manual changes
+                if (exercise != null && !isInitialized) {
+                    isInitialized = true
+                    val ex = exercise
                     binding.exerciseTitle.text = ex.name
 
-                    // GENIUS DETECTION: Warm-up/Cool-down are ALWAYS duration based
                     val isWarmupCooldown = ex.category.contains("Warm-up", ignoreCase = true) || 
                                          ex.category.contains("Cool-down", ignoreCase = true)
                     
                     val durationStr = "${ex.duration} ${ex.reps}".lowercase()
                     val isDuration = isWarmupCooldown || durationStr.contains("s") || durationStr.contains(":")
                     
-                    // Parse fallback value: 30s for warm-up or extracted number
                     val parsedValue = if (isDuration) {
                         val sourceStr = if (ex.duration.any { it.isDigit() }) ex.duration else ex.reps
                         if (sourceStr.contains(":")) {
@@ -150,10 +173,7 @@ class ExerciseDetailActivity : AppCompatActivity() {
                         ex.reps.split(",").firstOrNull()?.trim()?.filter { it.isDigit() }?.toIntOrNull() ?: 8
                     }
 
-                    // Parse existing values from the reps string
                     val savedValues = ex.reps.split(",").mapNotNull { it.trim().filter { c -> c.isDigit() }.toIntOrNull() }
-                    
-                    // Ensure at least 1 set for warm-up/cool-down if sets is 0
                     val setsCount = if (isWarmupCooldown && ex.sets <= 0) 1 else ex.sets
 
                     val initialSets = if (savedValues.size == setsCount && savedValues.isNotEmpty()) {
@@ -162,7 +182,6 @@ class ExerciseDetailActivity : AppCompatActivity() {
                         List(setsCount) { ExerciseSet(value = parsedValue, isDuration = isDuration) }
                     }
                     
-                    Log.d("ExerciseDetail", "Loaded ${ex.name}: category=${ex.category}, isDuration=$isDuration, sets=${initialSets.size}")
                     updateAndSubmitList(initialSets)
                 }
             }

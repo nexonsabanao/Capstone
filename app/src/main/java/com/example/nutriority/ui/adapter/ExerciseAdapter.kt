@@ -99,7 +99,8 @@ class ExerciseAdapter(
             binding.exerciseDuration.text = if (displayTargetMuscle) {
                 simplifyTargetMuscle(exercise.name, exercise.targetMuscle)
             } else {
-                "${exercise.sets} sets"
+                val unit = if (exercise.sets == 1) "set" else "sets"
+                "${exercise.sets} $unit"
             }
             
             if (exercise.imageResId != 0) {

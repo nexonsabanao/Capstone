@@ -47,7 +47,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:fontFamily="sans-serif-semibold"
+            android:fontFamily="sans-serif-condensed-medium"
             android:lineSpacingExtra="-4dp"
             android:maxLines="2"
             android:text="FULL BODY WORKOUT"

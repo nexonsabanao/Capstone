@@ -14,16 +14,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO) {
-
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-
             recreate()
-
             return
         }
         setContentView(R.layout.activity_main)
 
         supportActionBar?.hide()
-
     }
 }

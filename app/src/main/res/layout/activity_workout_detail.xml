@@ -162,7 +162,8 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:text="@string/add_exercise_underlined"
-                    android:textColor="@color/secondary_blue" />
+                    android:textColor="@color/secondary_blue"
+                    android:textSize="16sp" />
 
             </RelativeLayout>
 
@@ -184,6 +185,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:text="Include Warm-up &amp; Cool-down"
                 android:textSize="16sp"
+                android:checked="true"
                 app:thumbTint="@color/white"
                 app:trackTint="@color/switch_track_selector" />
 
