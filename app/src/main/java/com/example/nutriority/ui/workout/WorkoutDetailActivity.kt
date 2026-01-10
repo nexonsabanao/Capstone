@@ -64,6 +64,8 @@ class WorkoutDetailActivity : AppCompatActivity() {
         binding.switchIncludeWarmupCooldown.setOnCheckedChangeListener { _, isChecked ->
             viewModel.workout.value?.let { workout ->
                 updateDisplayList(workout, isChecked)
+                // Save preference to database
+                viewModel.updateWorkoutPreference(isChecked)
             }
         }
         
@@ -197,7 +199,12 @@ class WorkoutDetailActivity : AppCompatActivity() {
                     binding.collapsingToolbar.title = workout.workout.name
                     binding.workoutTitle.text = workout.workout.name
 
-                    updateDisplayList(workout, binding.switchIncludeWarmupCooldown.isChecked)
+                    // Sync the switch state with the database value
+                    if (binding.switchIncludeWarmupCooldown.isChecked != workout.workout.includeWarmupCooldown) {
+                        binding.switchIncludeWarmupCooldown.isChecked = workout.workout.includeWarmupCooldown
+                    }
+
+                    updateDisplayList(workout, workout.workout.includeWarmupCooldown)
                 }
             }
         }
@@ -239,12 +246,18 @@ class WorkoutDetailActivity : AppCompatActivity() {
         binding.workoutExerciseCount.text = main.size.toString()
 
         if (includeAll) {
-            displayList.add(WorkoutItem.DividerItem("Warm-up"))
-            displayList.addAll(warmup.map { WorkoutItem.ExerciseItem(it) })
+            if (warmup.isNotEmpty()) {
+                displayList.add(WorkoutItem.DividerItem("Warm-up"))
+                displayList.addAll(warmup.map { WorkoutItem.ExerciseItem(it) })
+            }
+
             displayList.add(WorkoutItem.DividerItem("Exercises"))
             displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
-            displayList.add(WorkoutItem.DividerItem("Cool-down"))
-            displayList.addAll(cooldown.map { WorkoutItem.ExerciseItem(it) })
+
+            if (cooldown.isNotEmpty()) {
+                displayList.add(WorkoutItem.DividerItem("Cool-down"))
+                displayList.addAll(cooldown.map { WorkoutItem.ExerciseItem(it) })
+            }
         } else {
             displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
         }

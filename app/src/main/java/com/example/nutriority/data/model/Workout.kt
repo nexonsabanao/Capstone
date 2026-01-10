@@ -13,11 +13,12 @@ data class Workout(
     val description: String = "",
     val category: String = "",
     val targetMuscle: String = "",
-    val imageName: String = "img_balanced_diet", // Fixed: Added default value to prevent crashes
+    val imageName: String = "img_balanced_diet",
     val difficulty: String = "",
     val duration: String = "",
     val metValue: Double = 5.0,
-    val tags: List<String> = emptyList()
+    val tags: List<String> = emptyList(),
+    val includeWarmupCooldown: Boolean = true
 ) {
     @Ignore
     var imageResId: Int = 0

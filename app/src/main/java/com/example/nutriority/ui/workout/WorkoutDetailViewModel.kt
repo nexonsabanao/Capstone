@@ -46,6 +46,15 @@ class WorkoutDetailViewModel @Inject constructor(
         }
     }
 
+    fun updateWorkoutPreference(includeWarmupCooldown: Boolean) {
+        val currentWorkout = _workout.value?.workout ?: return
+        if (currentWorkout.includeWarmupCooldown == includeWarmupCooldown) return
+        
+        viewModelScope.launch {
+            workoutRepository.updateWorkout(currentWorkout.copy(includeWarmupCooldown = includeWarmupCooldown))
+        }
+    }
+
     fun getAllExercises(): Flow<List<Exercise>> {
         return workoutRepository.getAllExercises()
     }
@@ -88,7 +97,6 @@ class WorkoutDetailViewModel @Inject constructor(
     fun updateWorkout(workout: Workout, exercises: List<Exercise>) {
         viewModelScope.launch {
             _isLoading.value = true
-            // Small artificial delay to ensure the loading state is visible and UI has time to transition
             delay(300)
             
             workoutRepository.unlinkExercisesFromWorkout(workout.id)
@@ -96,7 +104,6 @@ class WorkoutDetailViewModel @Inject constructor(
             val updatedExercises = exercises.map { it.copy(workoutId = workout.id) }
             workoutRepository.updateExercises(updatedExercises)
             
-            // Allow DB update to propagate through Flow before hiding loader
             delay(200)
             _isLoading.value = false
         }
