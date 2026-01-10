@@ -11,9 +11,11 @@ import com.example.nutriority.data.repository.WorkoutRepository
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import javax.inject.Inject
@@ -26,6 +28,9 @@ class WorkoutDetailViewModel @Inject constructor(
 
     private val _workout = MutableStateFlow<WorkoutWithExercises?>(null)
     val workout = _workout.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
 
     fun getWorkoutById(workoutId: Int) {
         viewModelScope.launch {
@@ -56,7 +61,6 @@ class WorkoutDetailViewModel @Inject constructor(
             val workoutType = object : TypeToken<List<WorkoutJsonItem>>() {}.type
             val workoutData: List<WorkoutJsonItem> = gson.fromJson(workoutJson, workoutType)
             
-            // IMPROVED MATCHING: Look for name contains or ID match to be more robust
             val match = workoutData.find { 
                 it.workout.name.equals(workoutName, ignoreCase = true) || 
                 workoutName.contains(it.workout.name, ignoreCase = true) ||
@@ -64,7 +68,6 @@ class WorkoutDetailViewModel @Inject constructor(
             }
             
             if (match != null) {
-                Log.d("WorkoutDetailVM", "Found default match for: $workoutName")
                 val results = mutableListOf<Exercise>()
                 match.warmup.forEach { w ->
                     results.add(Exercise(name = w.name, duration = w.duration, category = "Warm-up", targetMuscle = w.targetMuscle ?: ""))
@@ -75,21 +78,27 @@ class WorkoutDetailViewModel @Inject constructor(
                 }
                 results
             } else {
-                Log.e("WorkoutDetailVM", "No default workout found in JSON for name: $workoutName")
                 emptyList()
             }
         } catch (e: Exception) {
-            Log.e("WorkoutDetailVM", "Error reading assets for reset", e)
             emptyList()
         }
     }
 
     fun updateWorkout(workout: Workout, exercises: List<Exercise>) {
         viewModelScope.launch {
+            _isLoading.value = true
+            // Small artificial delay to ensure the loading state is visible and UI has time to transition
+            delay(300)
+            
             workoutRepository.unlinkExercisesFromWorkout(workout.id)
             workoutRepository.updateWorkout(workout)
             val updatedExercises = exercises.map { it.copy(workoutId = workout.id) }
             workoutRepository.updateExercises(updatedExercises)
+            
+            // Allow DB update to propagate through Flow before hiding loader
+            delay(200)
+            _isLoading.value = false
         }
     }
 }

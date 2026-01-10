@@ -1,6 +1,5 @@
 package com.example.nutriority.ui.workout
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -59,12 +58,10 @@ class ExerciseLibraryFragment : Fragment() {
 
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
-            onItemClick = { exercise, position, totalCount ->
-                val intent = Intent(requireActivity(), ExerciseDetailActivity::class.java)
-                intent.putExtra("exercise_id", exercise.id)
-                intent.putExtra("exercise_position", position + 1)
-                intent.putExtra("total_exercises", totalCount)
-                startActivity(intent)
+            onItemClick = { exercise, _, _ ->
+                // Use the new separate BottomSheet class to show about exercise dialog
+                AboutExerciseBottomSheet.newInstance(exercise)
+                    .show(parentFragmentManager, "AboutExerciseBottomSheet")
             },
             onListUpdated = {},
             onDragStart = { /* Not used in library */ },

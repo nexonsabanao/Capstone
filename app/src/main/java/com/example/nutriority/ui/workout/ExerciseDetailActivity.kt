@@ -1,8 +1,6 @@
 package com.example.nutriority.ui.workout
 
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -17,7 +15,6 @@ import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.databinding.ActivityExerciseDetailBinding
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -144,10 +141,16 @@ class ExerciseDetailActivity : AppCompatActivity() {
         currentDialog?.show()
     }
 
+    private fun showAboutExerciseDialog() {
+        viewModel.exercise.value?.let { exercise ->
+            AboutExerciseBottomSheet.newInstance(exercise)
+                .show(supportFragmentManager, "AboutExerciseBottomSheet")
+        }
+    }
+
     private fun observeViewModel() {
         lifecycleScope.launch {
             viewModel.exercise.collect { exercise ->
-                // BUG FIX: Only initialize from DB once to prevent loops/stale data overwriting manual changes
                 if (exercise != null && !isInitialized) {
                     isInitialized = true
                     val ex = exercise
@@ -218,6 +221,10 @@ class ExerciseDetailActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         binding.backButton.setOnClickListener {
             finish()
+        }
+
+        binding.btnAboutExercise.setOnClickListener {
+            showAboutExerciseDialog()
         }
 
         binding.btnCheck.setOnClickListener {
