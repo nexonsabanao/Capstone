@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="16dp"
-    android:paddingBottom="16dp">
+    android:paddingVertical="24dp">
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_restart_workout"
+        style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:fontFamily="sans-serif-medium"
-        android:textSize="16sp"
-        android:text="Restart Workout Plan" />
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:letterSpacing="0.05"
+        android:textColor="@color/bmi_obese"
+        android:text="RESTART WORKOUT PLAN" />
 </FrameLayout>

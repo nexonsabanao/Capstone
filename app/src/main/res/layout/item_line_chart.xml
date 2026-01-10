@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="16dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="0dp"
-    app:cardBackgroundColor="@android:color/white">
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="2dp"
+    app:cardPreventCornerOverlap="false"
+    app:cardUseCompatPadding="true"
+    app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:background="@android:color/transparent"
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/text_weight_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:text="Weight"
-            android:textColor="@android:color/black"
+            android:fontFamily="sans-serif"
+            android:textStyle="bold"
+            android:text="Weight Progress"
+            android:textColor="#212121"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -30,107 +36,120 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
-            android:text="Log"
-            android:textColor="@color/secondary_blue"
-            android:textSize="14sp"
+            android:textStyle="bold"
+            android:text="LOG"
+            android:textColor="@color/green"
+            android:textSize="12sp"
+            android:letterSpacing="0.05"
             app:layout_constraintBaseline_toBaselineOf="@id/text_weight_title"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <TextView
-            android:id="@+id/text_current_label"
+        <LinearLayout
+            android:id="@+id/current_weight_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="Current"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="12sp"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_weight_title" />
+            app:layout_constraintTop_toBottomOf="@id/text_weight_title">
 
-        <TextView
-            android:id="@+id/text_current_weight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:text="61 kg"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_current_label" />
+            <TextView
+                android:id="@+id/text_current_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:text="CURRENT"
+                android:textColor="#757575"
+                android:textSize="10sp"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:id="@+id/text_current_weight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="61 kg"
+                android:textColor="#212121"
+                android:textSize="24sp" />
+        </LinearLayout>
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/line_chart"
             android:layout_width="0dp"
-            android:layout_height="140dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintBottom_toTopOf="@id/stats_layout"
+            android:layout_height="160dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_current_weight" />
+            app:layout_constraintTop_toBottomOf="@id/current_weight_container" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="#F5F5F5"
+            app:layout_constraintTop_toBottomOf="@id/line_chart" />
 
         <LinearLayout
             android:id="@+id/stats_layout"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/line_chart">
+            app:layout_constraintTop_toBottomOf="@id/divider">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
-                    android:text="Heaviest"
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="12sp" />
+                    android:text="HEAVIEST"
+                    android:textColor="#757575"
+                    android:textSize="10sp"
+                    android:letterSpacing="0.1" />
 
                 <TextView
                     android:id="@+id/text_heaviest_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="61"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp"
-                    tools:text="70 kg" />
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold"
+                    android:text="70 kg"
+                    android:textColor="#212121"
+                    android:textSize="16sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
-                    android:text="Lightest"
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="12sp" />
+                    android:text="LIGHTEST"
+                    android:textColor="#757575"
+                    android:textSize="10sp"
+                    android:letterSpacing="0.1" />
 
                 <TextView
                     android:id="@+id/text_lightest_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="54"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp"
-                    tools:text="60 kg" />
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold"
+                    android:text="60 kg"
+                    android:textColor="#212121"
+                    android:textSize="16sp" />
             </LinearLayout>
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

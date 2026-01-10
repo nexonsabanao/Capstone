@@ -5,26 +5,30 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginEnd="8dp"
+    android:layout_marginVertical="8dp"
+    android:layout_marginEnd="16dp"
     app:cardBackgroundColor="@android:color/white"
-    app:cardCornerRadius="12dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="2dp"
+    app:cardPreventCornerOverlap="false"
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="12dp">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/workout_image"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:scaleType="centerCrop"
-            android:background="#E0E0E0"
-            tools:src="@tools:sample/avatars"
+            android:background="#F5F5F5"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CornerSize16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/avatars"
             tools:ignore="ContentDescription" />
 
         <TextView
@@ -32,67 +36,80 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:fontFamily="sans-serif-medium"
-            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:textStyle="bold"
+            android:textSize="18sp"
             android:textColor="#212121"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/workout_image"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="30-Minute HIIT Burner" />
+            tools:text="HIIT Core Burner" />
 
-        <TextView
-            android:id="@+id/tvDifficulty"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/workout_meta"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:fontFamily="sans-serif"
-            android:textSize="12sp"
-            android:textColor="#212121"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             app:layout_constraintStart_toStartOf="@+id/workout_name"
-            app:layout_constraintTop_toBottomOf="@+id/workout_name"
-            tools:text="Intermediate" />
+            app:layout_constraintTop_toBottomOf="@+id/workout_name">
 
-        <TextView
-            android:id="@+id/workout_target_separator"
+            <TextView
+                android:id="@+id/tvDifficulty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="12sp"
+                android:textColor="@color/green"
+                tools:text="Intermediate" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="6dp"
+                android:text="•"
+                android:textColor="#9E9E9E" />
+
+            <TextView
+                android:id="@+id/workout_target"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:textSize="12sp"
+                android:textColor="#757575"
+                tools:text="Full Body" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:fontFamily="sans-serif"
-            android:text="•"
-            android:textSize="12sp"
-            android:textColor="#212121"
-            app:layout_constraintBaseline_toBaselineOf="@+id/tvDifficulty"
-            app:layout_constraintStart_toEndOf="@+id/tvDifficulty" />
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="@+id/workout_name"
+            app:layout_constraintTop_toBottomOf="@+id/workout_meta">
 
-        <TextView
-            android:id="@+id/workout_target"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:fontFamily="sans-serif"
-            android:textSize="12sp"
-            android:textColor="#212121"
-            app:layout_constraintBaseline_toBaselineOf="@+id/tvDifficulty"
-            app:layout_constraintStart_toEndOf="@+id/workout_target_separator"
-            tools:text="Full Body" />
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_time"
+                app:tint="#757575" />
 
-        <TextView
-            android:id="@+id/tvDuration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:layout_marginTop="16dp"
-            android:fontFamily="sans-serif"
-            android:textSize="12sp"
-            android:textColor="#212121"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/tvDifficulty"
-            app:layout_constraintTop_toBottomOf="@+id/tvDifficulty"
-            tools:text="30 min" />
+            <TextView
+                android:id="@+id/tvDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:fontFamily="sans-serif"
+                android:textSize="12sp"
+                android:textColor="#757575"
+                tools:text="30 min" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -4,286 +4,294 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
+    android:background="@color/app_background"
     tools:context=".ui.onboarding.screens.FourthScreen">
 
     <ImageView
         android:id="@+id/backButton"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="24dp"
-        android:alpha="0.7"
+        android:layout_marginTop="56dp"
+        android:padding="8dp"
         android:clickable="true"
-        android:contentDescription="action_back"
         android:focusable="true"
-        android:padding="4dp"
         android:src="@drawable/ic_arrow_back"
-        app:layout_constraintBottom_toTopOf="@+id/titleTextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/primary_dark"
-        tools:ignore="TouchTargetSizeCheck" />
+        app:tint="#212121" />
 
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="80dp"
-        android:fontFamily="sans-serif-black"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
         android:gravity="center_horizontal"
-        android:text="Select diet preference"
-        android:textColor="@color/dark_gray"
+        android:text="Diet preference"
+        android:textColor="#212121"
         android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/backButton" />
 
     <TextView
         android:id="@+id/subtitleTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="sans-serif"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-medium"
         android:gravity="center_horizontal"
-        android:text="This helps us tailor your meal plan"
+        android:text="Choose how you'd like to eat"
+        android:textColor="#757575"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="@id/titleTextView"
         app:layout_constraintStart_toStartOf="@id/titleTextView"
         app:layout_constraintTop_toBottomOf="@id/titleTextView" />
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="24dp"
-        android:layout_marginBottom="16dp"
-        android:fillViewport="true"
-        android:scrollbars="none"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
         app:layout_constraintTop_toBottomOf="@id/subtitleTextView"
-        app:layout_constraintBottom_toTopOf="@+id/nextButton"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <RadioGroup
-            android:id="@+id/dietPreferenceRadioGroup"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/balancedCard"
+            <RadioGroup
+                android:id="@+id/dietPreferenceRadioGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginVertical="8dp"
-                android:checkable="true"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardBackgroundColor="@android:color/white"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                android:orientation="vertical">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <!-- Balanced Diet Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/balancedCard"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="8dp"
+                    android:checkable="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="@android:color/white"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="2dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:cardUseCompatPadding="true"
+                    app:strokeWidth="0dp">
 
-                    <RadioButton
-                        android:id="@+id/radioBalanced"
-                        android:layout_width="0dp"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:button="@null"
-                        android:clickable="false"
-                        android:fontFamily="sans-serif-medium"
-                        android:padding="20dp"
-                        android:text="⚖️   Balanced"
-                        android:textSize="20sp"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        android:background="@android:color/transparent">
 
-                    <View
-                        android:id="@+id/divider1"
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:background="?android:attr/listDivider"
-                        android:alpha="0.2"
-                        app:layout_constraintTop_toBottomOf="@id/radioBalanced"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        <RadioButton
+                            android:id="@+id/radioBalanced"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:button="@null"
+                            android:clickable="false"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold"
+                            android:padding="20dp"
+                            android:text="⚖️   Balanced"
+                            android:textColor="#212121"
+                            android:textSize="18sp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"/>
 
-                    <TextView
-                        android:id="@+id/detailsBalanced"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="View Details"
-                        android:fontFamily="sans-serif-medium"
-                        android:textSize="14sp"
-                        android:textColor="@color/primary_dark"
-                        android:gravity="center"
-                        android:padding="12dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground"
-                        app:layout_constraintTop_toBottomOf="@id/divider1"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        <View
+                            android:id="@+id/divider1"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#F5F5F5"
+                            app:layout_constraintTop_toBottomOf="@id/radioBalanced" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        <TextView
+                            android:id="@+id/detailsBalanced"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="View Details"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold"
+                            android:textSize="12sp"
+                            android:letterSpacing="0.05"
+                            android:textColor="@color/green"
+                            android:gravity="center"
+                            android:padding="16dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground"
+                            app:layout_constraintTop_toBottomOf="@id/divider1"
+                            app:layout_constraintBottom_toBottomOf="parent" />
 
-            </com.google.android.material.card.MaterialCardView>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/lowCarbCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginVertical="8dp"
-                android:checkable="true"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardBackgroundColor="@android:color/white"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <!-- Low Carb Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/lowCarbCard"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="8dp"
+                    android:checkable="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="@android:color/white"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="2dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:cardUseCompatPadding="true"
+                    app:strokeWidth="0dp">
 
-                    <RadioButton
-                        android:id="@+id/radioLowCarb"
-                        android:layout_width="0dp"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:button="@null"
-                        android:clickable="false"
-                        android:fontFamily="sans-serif-medium"
-                        android:padding="20dp"
-                        android:text="🥑   Low Carb"
-                        android:textSize="20sp"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        android:background="@android:color/transparent">
 
-                    <View
-                        android:id="@+id/divider2"
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:background="?android:attr/listDivider"
-                        android:alpha="0.2"
-                        app:layout_constraintTop_toBottomOf="@id/radioLowCarb"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        <RadioButton
+                            android:id="@+id/radioLowCarb"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:button="@null"
+                            android:clickable="false"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold"
+                            android:padding="20dp"
+                            android:text="🥑   Low Carb"
+                            android:textColor="#212121"
+                            android:textSize="18sp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"/>
 
-                    <TextView
-                        android:id="@+id/detailsLowCarb"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="View Details"
-                        android:fontFamily="sans-serif-medium"
-                        android:textSize="14sp"
-                        android:textColor="@color/primary_dark"
-                        android:gravity="center"
-                        android:padding="12dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground"
-                        app:layout_constraintTop_toBottomOf="@id/divider2"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        <View
+                            android:id="@+id/divider2"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#F5F5F5"
+                            app:layout_constraintTop_toBottomOf="@id/radioLowCarb" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        <TextView
+                            android:id="@+id/detailsLowCarb"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="View Details"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold"
+                            android:textSize="12sp"
+                            android:letterSpacing="0.05"
+                            android:textColor="@color/green"
+                            android:gravity="center"
+                            android:padding="16dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground"
+                            app:layout_constraintTop_toBottomOf="@id/divider2"
+                            app:layout_constraintBottom_toBottomOf="parent" />
 
-            </com.google.android.material.card.MaterialCardView>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/vegetarianCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginVertical="8dp"
-                android:checkable="true"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardBackgroundColor="@android:color/white"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <!-- Vegetarian Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/vegetarianCard"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="8dp"
+                    android:checkable="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="@android:color/white"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="2dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:cardUseCompatPadding="true"
+                    app:strokeWidth="0dp">
 
-                    <RadioButton
-                        android:id="@+id/radioVegetarian"
-                        android:layout_width="0dp"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:button="@null"
-                        android:clickable="false"
-                        android:fontFamily="sans-serif-medium"
-                        android:padding="20dp"
-                        android:text="🥦   Vegetarian"
-                        android:textSize="20sp"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        android:background="@android:color/transparent">
 
-                    <View
-                        android:id="@+id/divider3"
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:background="?android:attr/listDivider"
-                        android:alpha="0.2"
-                        app:layout_constraintTop_toBottomOf="@id/radioVegetarian"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        <RadioButton
+                            android:id="@+id/radioVegetarian"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:button="@null"
+                            android:clickable="false"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold"
+                            android:padding="20dp"
+                            android:text="🥦   Vegetarian"
+                            android:textColor="#212121"
+                            android:textSize="18sp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"/>
 
-                    <TextView
-                        android:id="@+id/detailsVegetarian"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="View Details"
-                        android:fontFamily="sans-serif-medium"
-                        android:textSize="14sp"
-                        android:textColor="@color/primary_dark"
-                        android:gravity="center"
-                        android:padding="12dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground"
-                        app:layout_constraintTop_toBottomOf="@id/divider3"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        <View
+                            android:id="@+id/divider3"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#F5F5F5"
+                            app:layout_constraintTop_toBottomOf="@id/radioVegetarian" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        <TextView
+                            android:id="@+id/detailsVegetarian"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="View Details"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold"
+                            android:textSize="12sp"
+                            android:letterSpacing="0.05"
+                            android:textColor="@color/green"
+                            android:gravity="center"
+                            android:padding="16dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground"
+                            app:layout_constraintTop_toBottomOf="@id/divider3"
+                            app:layout_constraintBottom_toBottomOf="parent" />
 
-            </com.google.android.material.card.MaterialCardView>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-        </RadioGroup>
-    </ScrollView>
+            </RadioGroup>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/nextButton"
-        style="@style/Widget.Material3.Button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="40dp"
         android:alpha="0.5"
         android:backgroundTint="@color/primary_dark"
-        android:enabled="false"
-        android:fontFamily="sans-serif-medium"
-        android:paddingVertical="16dp"
-        android:text="@string/action_next"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
         android:textColor="@color/white"
+        android:text="@string/action_next"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:letterSpacing="0.05"
+        android:enabled="false"
+        app:cornerRadius="32dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

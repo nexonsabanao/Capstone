@@ -2,95 +2,123 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
+    android:background="@color/app_background"
     tools:context=".ui.onboarding.screens.AgeFragment">
 
-    <!-- top/bottom spacing handled by root padding + BaseFragment insets -->
-
-    <ImageView
-        android:id="@+id/backButton"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="24dp"
-        android:alpha="0.7"
-        android:clickable="true"
-        android:contentDescription="action_back"
-        android:focusable="true"
-        android:padding="4dp"
-        android:src="@drawable/ic_arrow_back"
-        app:layout_constraintBottom_toTopOf="@+id/titleTextView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/primary_dark"
-        tools:ignore="TouchTargetSizeCheck" />
-
-    <!-- Main Title -->
-    <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="0dp"
+    <!-- Header Section -->
+    <LinearLayout
+        android:id="@+id/header_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="80dp"
-        android:textStyle="bold"
-        android:gravity="center_horizontal"
-        android:text="How old are you?"
-        android:textColor="@color/dark_gray"
-        android:textSize="32sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="56dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <!-- Age Input -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/ageInputLayout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="32dp"
-        android:hint="Enter your age"
-        android:textColorHint="@color/primary_dark"
-        app:boxStrokeColor="@color/text_input_layout_stroke_color"
-        app:cursorColor="@color/primary_dark"
-        app:cursorErrorColor="@color/primary_dark"
-        app:errorEnabled="true"
-        app:errorIconDrawable="@null"
-        app:hintTextColor="@color/primary_dark"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titleTextView">
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="#212121" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/ageInput"
+        <TextView
+            android:id="@+id/titleTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="sans-serif"
+            android:textStyle="bold"
+            android:gravity="center_horizontal"
+            android:text="How old are you?"
+            android:textColor="#212121"
+            android:textSize="32sp" />
+
+        <TextView
+            android:id="@+id/subtitleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:fontFamily="sans-serif-medium"
-            android:gravity="center"
-            android:imeOptions="actionNext"
-            android:inputType="number"
-            android:maxLength="2"
-            android:maxLines="1"
-            android:textColor="@color/primary_dark"
-            android:textSize="20sp" />
+            android:gravity="center_horizontal"
+            android:text="Age helps us calculate your BMI and goal"
+            android:textColor="#757575"
+            android:textSize="16sp" />
+    </LinearLayout>
 
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <Button
-        android:id="@+id/nextButton"
-        style="@style/Widget.Material3.Button"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="40dp"
-        android:backgroundTint="@color/primary_dark"
-        android:fontFamily="sans-serif-medium"
-        android:paddingVertical="16dp"
-        android:text="@string/action_next"
-        android:textColor="@color/white"
-        android:textSize="16sp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_container">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="32dp"
+            android:paddingTop="48dp">
+
+            <!-- Age Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ageInputLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter your age"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxStrokeColor="@color/green"
+                app:hintTextColor="@color/green"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ageInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
+                    android:maxLength="3"
+                    android:maxLines="1"
+                    android:textColor="#212121"
+                    android:textSize="24sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/nextButton"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="40dp"
+        android:backgroundTint="@color/primary_dark"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:text="@string/action_next"
+        android:textSize="16sp"
+        android:letterSpacing="0.05"
+        app:cornerRadius="32dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

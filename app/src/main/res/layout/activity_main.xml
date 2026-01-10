@@ -5,10 +5,9 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <!-- The fragment container filling the space above the navigation -->
+    <!-- The fragment container filling the screen -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView"
         android:name="androidx.navigation.fragment.NavHostFragment"
@@ -16,7 +15,7 @@
         android:layout_height="0dp"
         app:defaultNavHost="true"
         app:navGraph="@navigation/my_nav"
-        app:layout_constraintBottom_toTopOf="@id/separator"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -35,7 +34,8 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation_view"
         android:layout_width="0dp"
-        android:layout_height="65dp"
+        android:layout_height="wrap_content"
+        android:minHeight="65dp"
         android:background="@color/app_background"
         android:visibility="gone"
         app:itemTextAppearanceActive="@style/BottomNav.Text"

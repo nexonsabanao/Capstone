@@ -4,63 +4,61 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
+    android:background="@color/app_background"
     tools:context=".ui.onboarding.screens.FifthScreen">
 
     <ImageView
         android:id="@+id/backButton"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="24dp"
-        android:alpha="0.7"
+        android:layout_marginTop="56dp"
+        android:padding="8dp"
         android:clickable="true"
-        android:contentDescription="action_back"
         android:focusable="true"
-        android:padding="4dp"
         android:src="@drawable/ic_arrow_back"
-        app:layout_constraintBottom_toTopOf="@+id/titleTextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/primary_dark"
-        tools:ignore="TouchTargetSizeCheck" />
+        app:tint="#212121" />
 
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="80dp"
-        android:fontFamily="sans-serif-black"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
         android:gravity="center_horizontal"
-        android:text="Any ingredients to exclude?"
-        android:textColor="@color/dark_gray"
+        android:text="Exclusions"
+        android:textColor="#212121"
         android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/backButton" />
 
     <TextView
         android:id="@+id/subtitleTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="sans-serif"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-medium"
         android:gravity="center_horizontal"
-        android:text="Select any you'd like to avoid"
+        android:text="Any ingredients you'd like to avoid?"
+        android:textColor="#757575"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="@id/titleTextView"
         app:layout_constraintStart_toStartOf="@id/titleTextView"
         app:layout_constraintTop_toBottomOf="@id/titleTextView" />
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="24dp"
-        android:layout_marginBottom="16dp"
-        android:fillViewport="true"
-        android:scrollbars="none"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
         app:layout_constraintTop_toBottomOf="@id/subtitleTextView"
-        app:layout_constraintBottom_toTopOf="@+id/nextButton"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -69,224 +67,152 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="24dp"
-            app:chipSpacingHorizontal="8dp"
-            app:chipSpacingVertical="4dp">
+            app:chipSpacingHorizontal="12dp"
+            app:chipSpacingVertical="12dp">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_nuts"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🥜 Tree Nuts" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_dairy"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🥛 Dairy" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_gluten"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🍞 Gluten" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_shellfish"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🦐 Shellfish" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_eggs"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🥚 Eggs" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_soy"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🌱 Soy" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_pork"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🐷 Pork" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_fish"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🐟 Fish" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_red_meat"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🥩 Red Meat" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_sesame"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🌰 Sesame" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_mushrooms"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🍄 Mushrooms" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_corn"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🌽 Corn" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_peanuts"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🥜 Peanuts" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_beef"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🐄 Beef" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_mustard"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🌭 Mustard" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_celery"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🌿 Celery" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_sulphites"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🍾 Sulphites" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_lupin"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
+                style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                app:chipIconVisible="false"
-                app:checkedIconVisible="false"
                 android:text="🌸 Lupin" />
 
         </com.google.android.material.chip.ChipGroup>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/nextButton"
-        style="@style/Widget.Material3.Button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="40dp"
         android:backgroundTint="@color/primary_dark"
-        android:fontFamily="sans-serif-medium"
-        android:paddingVertical="16dp"
-        android:text="Next"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
         android:textColor="@color/white"
+        android:text="CONTINUE"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:letterSpacing="0.05"
+        app:cornerRadius="32dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

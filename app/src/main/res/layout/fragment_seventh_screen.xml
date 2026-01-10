@@ -4,78 +4,95 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
+    android:background="@color/app_background"
     tools:context=".ui.onboarding.screens.SeventhScreen">
 
     <TextView
         android:id="@+id/user_data_recap_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="32dp"
+        android:layout_marginHorizontal="40dp"
         android:fontFamily="sans-serif"
-        android:text="Calculating your plan..."
+        android:textStyle="bold"
+        android:text="Creating your personalized plan..."
         android:textAlignment="center"
-        android:textColor="@color/dark_gray"
-        android:textSize="20sp"
+        android:textColor="#212121"
+        android:textSize="24sp"
+        android:lineSpacingExtra="4dp"
         app:layout_constraintBottom_toTopOf="@+id/loading_progress_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        tools:text="Gender: Male" />
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <ProgressBar
         android:id="@+id/loading_progress_bar"
-        android:layout_width="123dp"
-        android:layout_height="110dp"
-        android:layout_marginTop="32dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="48dp"
         android:indeterminate="true"
-        android:indeterminateTint="@color/primary_dark"
-        app:layout_constraintBottom_toTopOf="@id/bmi_container"
+        android:indeterminateTint="@color/green"
+        app:layout_constraintBottom_toTopOf="@id/bmi_card"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/user_data_recap_text" />
 
-    <LinearLayout
-        android:id="@+id/bmi_container"
-        android:layout_width="wrap_content"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bmi_card"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:gravity="center"
-        android:orientation="vertical"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="48dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="2dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true"
+        app:strokeWidth="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/loading_progress_bar">
 
-        <TextView
-            android:id="@+id/bmi_title_text"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/bmi_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:text="Your BMI"
-            android:textColor="@color/dark_gray"
-            android:textSize="20sp" />
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp">
 
-        <TextView
-            android:id="@+id/bmi_value_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:textSize="48sp"
-            tools:text="21.5"
-            tools:textColor="@color/primary_dark" />
+            <TextView
+                android:id="@+id/bmi_title_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:text="YOUR BMI"
+                android:textColor="#757575"
+                android:textSize="14sp"
+                android:letterSpacing="0.1" />
 
-        <TextView
-            android:id="@+id/bmi_category_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:textAllCaps="true"
-            android:textSize="16sp"
-            tools:text="Normal"
-            tools:textColor="@color/primary_dark" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/bmi_value_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:textSize="56sp"
+                android:textColor="#212121"
+                tools:text="21.5" />
+
+            <TextView
+                android:id="@+id/bmi_category_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:textSize="18sp"
+                android:textColor="@color/green"
+                tools:text="NORMAL WEIGHT" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

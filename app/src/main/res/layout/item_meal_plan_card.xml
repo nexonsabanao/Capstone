@@ -5,18 +5,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="12dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="4dp"
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Hero Image (Height Reduced) -->
+        <!-- Hero Image -->
         <ImageView
             android:id="@+id/imgMeal"
             android:layout_width="0dp"
-            android:layout_height="100dp"
+            android:layout_height="160dp"
             android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +25,7 @@
             tools:src="@tools:sample/backgrounds/scenic"
             tools:ignore="ContentDescription" />
 
-        <!-- Overlay Gradient for better text readability -->
+        <!-- Overlay Gradient -->
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -34,13 +35,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/imgMeal" />
 
-        <!-- Meal Plan Title & Description (Combined) -->
+        <!-- Meal Plan Text -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="16dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="@+id/imgMeal"
             app:layout_constraintEnd_toEndOf="parent"
@@ -50,120 +51,109 @@
                 android:id="@+id/tvMealTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
-                android:shadowColor="#000000"
-                android:shadowDy="2"
-                android:shadowRadius="4"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
                 android:text="7-Day Healthy Eating"
                 android:textColor="@android:color/white"
-                android:textSize="20sp" />
+                android:textSize="22sp" />
 
             <TextView
                 android:id="@+id/tvMealDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:shadowColor="#000000"
-                android:shadowDy="1"
-                android:shadowRadius="3"
+                android:layout_marginTop="2dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="A balanced week of nutritious meals."
-                android:textColor="@color/material_on_primary_disabled"
+                android:textColor="#E0E0E0"
                 android:textSize="14sp" />
 
         </LinearLayout>
 
-        <!-- Compact container for stats and button -->
-        <LinearLayout
+        <!-- Stats and Button Section -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp"
-            android:background="@drawable/gradient_orange_background"
+            android:background="@color/primary_dark"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/imgMeal">
 
-            <!-- Stats Section (Calories and Duration) -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/stats_container"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <!-- Calories Stat -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="14dp"
                         android:layout_height="14dp"
                         android:src="@drawable/ic_fire"
-                        app:tint="@color/black" />
+                        app:tint="@color/green" />
 
                     <TextView
                         android:id="@+id/tvCalories"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:fontFamily="sans-serif-medium"
-                        android:text="1500-1800 kcal / day"
-                        android:textAllCaps="true"
-                        android:textColor="@color/white"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="sans-serif"
+                        android:textStyle="bold"
+                        android:text="1500-1800 kcal"
+                        android:textColor="@android:color/white"
                         android:textSize="12sp" />
                 </LinearLayout>
 
-                <!-- Duration Stat -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="14dp"
                         android:layout_height="14dp"
                         android:src="@drawable/ic_time"
-                        app:tint="@color/black" />
+                        app:tint="@color/green" />
 
                     <TextView
                         android:id="@+id/tvMealDuration"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="sans-serif"
+                        android:textStyle="bold"
                         android:text="7 DAYS"
-                        android:textAllCaps="true"
-                        android:textColor="@color/white"
+                        android:textColor="@android:color/white"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- View Plan Button (More Compact) -->
-            <!-- View Plan Button (More Compact) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnViewPlan"
-                style="@style/Widget.Material3.Button"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:fontFamily="sans-serif-medium"
-                android:minWidth="0dp"
-                android:paddingVertical="10dp"
+                android:layout_height="54dp"
+                android:paddingHorizontal="24dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
                 android:text="View Plan"
-                android:textSize="16sp"
-                android:textColor="#FF6F00"
-                app:backgroundTint="@android:color/white"
-                app:cornerRadius="12dp" />
+                android:textColor="@color/primary_dark"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

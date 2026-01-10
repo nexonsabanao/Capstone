@@ -1,47 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Enter New Reps"
-        android:textColor="@android:color/black"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <EditText
-        android:id="@+id/edit_reps_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="e.g., 12"
-        android:inputType="number"
-        android:autofillHints="" />
+    app:cardCornerRadius="28dp"
+    app:cardElevation="8dp"
+    app:cardPreventCornerOverlap="false"
+    app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:gravity="end"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:background="@android:color/transparent"
+        android:padding="24dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_cancel"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="Cancel" />
+            android:fontFamily="sans-serif"
+            android:textStyle="bold"
+            android:text="Enter Repetitions"
+            android:textColor="#212121"
+            android:textSize="22sp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_ok"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="OK" />
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="How many reps did you complete?"
+            android:textColor="#757575"
+            android:textSize="14sp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxStrokeColor="@color/green">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_reps_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:hint="Number of reps"
+                android:inputType="number"
+                android:textSize="16sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancel"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="54dp"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="CANCEL"
+                android:textColor="#757575" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="54dp"
+                android:minWidth="100dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="CONFIRM"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/primary_dark"
+                app:cornerRadius="16dp" />
+        </LinearLayout>
+
     </LinearLayout>
-
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

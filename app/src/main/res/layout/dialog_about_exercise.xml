@@ -11,21 +11,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="24dp"
+        app:cardCornerRadius="28dp"
         app:cardElevation="8dp"
+        app:cardPreventCornerOverlap="false"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerTop">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@android:color/transparent"
             android:orientation="vertical">
+
+            <!-- Handle bar for Bottom Sheet -->
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp"
+                android:background="#E0E0E0" />
 
             <!-- Sticky Header -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="20dp">
+                android:paddingHorizontal="24dp"
+                android:paddingVertical="20dp">
 
                 <TextView
                     android:id="@+id/tv_exercise_name"
@@ -35,7 +46,8 @@
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/btn_close"
                     android:layout_marginEnd="12dp"
-                    android:fontFamily="sans-serif-black"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold"
                     android:textColor="#212121"
                     android:textSize="24sp"
                     tools:text="INCHWORMS" />
@@ -62,25 +74,29 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingHorizontal="20dp"
-                    android:paddingBottom="24dp">
+                    android:paddingHorizontal="24dp"
+                    android:paddingBottom="32dp">
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
-                        android:layout_height="220dp"
-                        app:cardBackgroundColor="#F9F9F9"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="0dp">
+                        android:layout_height="240dp"
+                        app:cardBackgroundColor="#F5F5F5"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="0dp"
+                        app:cardPreventCornerOverlap="false"
+                        app:strokeWidth="0dp">
 
                         <FrameLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent">
+                            android:layout_height="match_parent"
+                            android:background="@android:color/transparent">
 
                             <ImageView
                                 android:id="@+id/iv_exercise_visual"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerInside"
+                                android:padding="24dp"
                                 tools:src="@tools:sample/backgrounds/scenic" />
                         </FrameLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -88,62 +104,61 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginTop="32dp"
                         android:fontFamily="sans-serif"
+                        android:textStyle="bold"
                         android:text="INSTRUCTIONS"
                         android:textColor="@color/primary_dark"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/tv_instructions"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:lineSpacingExtra="4dp"
-                        android:textColor="#424242"
-                        android:textSize="14sp"
+                        android:layout_marginTop="12dp"
+                        android:lineSpacingExtra="6dp"
+                        android:textColor="#616161"
+                        android:textSize="15sp"
                         tools:text="Start with your feet shoulder width apart.\n\nBend your body and walk your hands in front of you as far as you can, then walk your hands back. Repeat the exercise." />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginTop="32dp"
                         android:fontFamily="sans-serif"
+                        android:textStyle="bold"
                         android:text="TARGET MUSCLE"
                         android:textColor="@color/primary_dark"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:textSize="18sp" />
 
                     <com.google.android.material.chip.ChipGroup
                         android:id="@+id/cg_target_muscle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="12dp"
                         app:chipSpacingHorizontal="8dp"
-                        app:chipSpacingVertical="4dp">
+                        app:chipSpacingVertical="8dp">
                         <!-- Chips will be added dynamically -->
                     </com.google.android.material.chip.ChipGroup>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginTop="32dp"
                         android:fontFamily="sans-serif"
+                        android:textStyle="bold"
                         android:text="TIPS"
                         android:textColor="@color/primary_dark"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/tv_tips"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="24dp"
-                        android:lineSpacingExtra="4dp"
-                        android:textColor="#424242"
-                        android:textSize="14sp"
+                        android:layout_marginTop="12dp"
+                        android:lineSpacingExtra="6dp"
+                        android:textColor="#616161"
+                        android:textSize="15sp"
                         tools:text="• Keep your core tight throughout the exercise." />
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>

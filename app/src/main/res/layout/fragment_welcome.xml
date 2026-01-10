@@ -4,68 +4,95 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
+    android:background="@color/app_background"
     tools:context=".ui.onboarding.screens.WelcomeFragment">
-
-    <!-- top/bottom spacing handled by root padding + BaseFragment insets -->
 
     <TextView
         android:id="@+id/welcome_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Welcome To Nutriority!"
-        android:textColor="@color/dark_gray"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/accept_button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.1"
-        app:layout_constraintVertical_chainStyle="spread_inside" />
-
-    <CheckBox
-        android:id="@+id/terms_checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:fontFamily="sans-serif"
-        android:textSize="14sp"
-        app:buttonTint="@color/checkbox_tint"
-        android:text="I agree to the"
-        app:layout_constraintBottom_toTopOf="@id/accept_button"
-        app:layout_constraintStart_toStartOf="@id/accept_button" />
-
-    <TextView
-        android:id="@+id/terms_link"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
-        android:text=" Terms and Services"
-        android:textColor="@color/secondary_blue"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/terms_checkbox"
-        app:layout_constraintStart_toEndOf="@id/terms_checkbox"
-        app:layout_constraintTop_toTopOf="@id/terms_checkbox" />
-    
-    <Button
-        android:id="@+id/accept_button"
-        style="@style/Widget.Material3.Button"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="40dp"
-        android:backgroundTint="@color/primary_dark"
+        android:layout_marginTop="120dp"
+        android:gravity="center"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
+        android:text="Welcome to Nutriority"
+        android:textColor="#212121"
+        android:textSize="36sp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/welcome_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
         android:fontFamily="sans-serif-medium"
-        android:paddingVertical="16dp"
-        android:text="Continue"
-        android:textSize="16sp"
-        android:textColor="@color/white"
-        android:enabled="false"
-        android:alpha="0.5"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Your journey to a healthier, stronger you starts here."
+        android:textColor="#757575"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/welcome_title" />
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:src="@drawable/logo"
+        android:alpha="0.8"
+        app:layout_constraintBottom_toTopOf="@+id/terms_container"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/welcome_subtitle" />
+
+    <LinearLayout
+        android:id="@+id/terms_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/accept_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <CheckBox
+            android:id="@+id/terms_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:textSize="14sp"
+            app:buttonTint="@color/green"
+            android:text="I agree to the"
+            android:textColor="#757575" />
+
+        <TextView
+            android:id="@+id/terms_link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:fontFamily="sans-serif"
+            android:textStyle="bold"
+            android:text="Terms &amp; Services"
+            android:textColor="@color/green"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/accept_button"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="48dp"
+        android:alpha="0.5"
+        android:backgroundTint="@color/primary_dark"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
+        android:text="GET STARTED"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:letterSpacing="0.05"
+        android:enabled="false"
+        app:cornerRadius="32dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,214 +1,252 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="#F5F5F5"
+    android:background="@color/app_background"
     tools:context=".ui.workout.ExerciseDetailFragment">
 
-    <ImageView
-        android:id="@+id/back_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:contentDescription="Back"
-        android:src="@drawable/ic_arrow_back"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/exercise_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:fontFamily="sans-serif"
-        android:text="Breast Stroke"
-        android:textColor="#212121"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/back_button"
-        app:layout_constraintStart_toEndOf="@+id/back_button"
-        app:layout_constraintTop_toTopOf="@+id/back_button" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/visual_container"
-        android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:layout_marginTop="16dp"
-        android:background="#FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/back_button">
-
-        <TextView
-            android:id="@+id/exercise_count_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:background="#F0F0F0"
-            android:fontFamily="sans-serif-medium"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp"
-            android:text="1/8"
-            android:textAllCaps="true"
-            android:textColor="#000000"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/img_exercise"
-            android:layout_width="200dp"
-            android:layout_height="150dp"
-            android:scaleType="centerCrop"
-            android:src="@android:drawable/ic_menu_gallery"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="#999999" />
-
-        <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:alpha="0.3"
-            android:src="@android:drawable/ic_media_play"
-            app:layout_constraintBottom_toBottomOf="@id/img_exercise"
-            app:layout_constraintEnd_toEndOf="@id/img_exercise"
-            app:layout_constraintStart_toStartOf="@id/img_exercise"
-            app:layout_constraintTop_toTopOf="@id/img_exercise"
-            app:tint="#000000" />
-
-        <TextView
-            android:id="@+id/btn_about_exercise"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="ABOUT EXERCISE >"
-            android:textAllCaps="true"
-            android:textColor="#555555"
-            android:textSize="12sp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackground"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
+    <!-- Header Section -->
     <LinearLayout
-        android:id="@+id/settings_row"
+        android:id="@+id/header_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:gravity="center"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp"
-        app:layout_constraintTop_toBottomOf="@id/visual_container">
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="56dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_auto_log"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:fontFamily="sans-serif-condensed-medium"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:text="Auto Log : OFF"
-            android:textAllCaps="false"
-            android:textColor="#000000"
-            android:textSize="14sp"
-            app:cornerRadius="8dp"
-            app:icon="@android:drawable/ic_popup_sync"
-            app:iconTint="#000000"
-            app:strokeColor="#E0E0E0" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <Space
-            android:layout_width="12dp"
-            android:layout_height="wrap_content" />
+            <ImageView
+                android:id="@+id/back_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="#212121" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_rest"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:fontFamily="sans-serif-condensed-medium"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:text="Rest : ON"
-            android:textAllCaps="false"
-            android:textColor="#000000"
-            android:textSize="14sp"
-            app:cornerRadius="8dp"
-            app:icon="@android:drawable/stat_sys_warning"
-            app:iconTint="#000000"
-            app:strokeColor="#E0E0E0" />
+            <TextView
+                android:id="@+id/exercise_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="Breast Stroke"
+                android:textColor="#212121"
+                android:textSize="24sp" />
+        </LinearLayout>
     </LinearLayout>
 
-    <View
-        android:id="@+id/divider_settings"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#E0E0E0"
-        app:layout_constraintTop_toBottomOf="@id/settings_row" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/sets_recycler_view"
-        android:layout_width="match_parent"
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/divider_settings"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_bar"
-        tools:listitem="@layout/item_exercise_set" />
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_container">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp">
+
+            <!-- Visual Container Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/visual_card"
+                android:layout_width="match_parent"
+                android:layout_height="280dp"
+                android:layout_marginTop="8dp"
+                app:cardBackgroundColor="@android:color/white"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
+                app:cardPreventCornerOverlap="false"
+                app:cardUseCompatPadding="true"
+                app:strokeWidth="0dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent">
+
+                    <TextView
+                        android:id="@+id/exercise_count_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:background="@drawable/rounded_chip_background_light"
+                        android:fontFamily="sans-serif"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp"
+                        android:text="1/8"
+                        android:textColor="@color/green"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/img_exercise"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerInside"
+                        android:layout_margin="32dp"
+                        android:src="@android:drawable/ic_menu_gallery"
+                        app:tint="#E0E0E0" />
+
+                    <ImageView
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@android:drawable/ic_media_play"
+                        android:alpha="0.2"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/primary_dark" />
+
+                    <TextView
+                        android:id="@+id/btn_about_exercise"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:fontFamily="sans-serif"
+                        android:textStyle="bold"
+                        android:text="ABOUT EXERCISE >"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:letterSpacing="0.05"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Settings Row -->
+            <LinearLayout
+                android:id="@+id/settings_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_auto_log"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold"
+                    android:text="Auto Log : OFF"
+                    android:textSize="13sp"
+                    app:cornerRadius="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_rest"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold"
+                    android:text="Rest : ON"
+                    android:textSize="13sp"
+                    app:cornerRadius="16dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="Sets"
+                android:textColor="#212121"
+                android:textSize="20sp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/sets_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_exercise_set" />
+
+            <include
+                android:id="@+id/item_add_set"
+                layout="@layout/item_add_set"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="#FFFFFF"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:strokeWidth="0dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_check"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:padding="0dp"
-            android:contentDescription="Next set"
-            app:backgroundTint="#FFFFFF"
-            app:cornerRadius="8dp"
-            app:icon="@android:drawable/ic_media_next"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            app:iconTint="#000000"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:strokeColor="#E0E0E0"
-            app:strokeWidth="1dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_log_set"
-            android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="16dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="Log set 1"
-            android:textSize="16sp"
-            app:backgroundTint="#121212"
-            app:cornerRadius="8dp"
-            app:icon="@android:drawable/ic_input_get"
-            app:iconGravity="textStart"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btn_check"
-            app:layout_constraintTop_toTopOf="parent" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_check"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:padding="0dp"
+                app:cornerRadius="20dp"
+                app:icon="@android:drawable/ic_media_next"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="28dp"
+                app:iconTint="@color/primary_dark" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_log_set"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="LOG SET 1"
+                android:textSize="16sp"
+                android:backgroundTint="@color/primary_dark"
+                android:textColor="@color/white"
+                app:cornerRadius="20dp"
+                app:icon="@android:drawable/ic_input_get"
+                app:iconTint="@color/white"
+                app:iconGravity="textStart" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

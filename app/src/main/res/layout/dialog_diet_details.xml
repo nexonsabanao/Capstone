@@ -5,48 +5,50 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="0dp"
+    app:cardCornerRadius="28dp"
     app:cardElevation="8dp"
-    app:cardBackgroundColor="@android:color/transparent">
+    app:cardPreventCornerOverlap="false"
+    app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="@android:color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@android:color/transparent"
         android:padding="24dp">
 
-        <!-- THIS IS THE OPTIMIZED PART -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/dialog_icon"
-            android:layout_width="134dp"
-            android:layout_height="139dp"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:scaleType="centerCrop"
             android:contentDescription="Diet Icon"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CornerSize16dp"
-            tools:src="@drawable/ic_launcher_foreground" />
+            tools:src="@tools:sample/backgrounds/scenic" />
 
         <TextView
             android:id="@+id/dialog_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="20dp"
+            android:fontFamily="sans-serif"
             android:textStyle="bold"
-            android:textColor="@color/dark_gray"
-            android:textSize="24sp"
+            android:textColor="#212121"
+            android:textSize="22sp"
             app:layout_constraintBottom_toBottomOf="@+id/dialog_icon"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/dialog_icon"
             app:layout_constraintTop_toTopOf="@+id/dialog_icon"
-            tools:text="Diet Title" />
+            tools:text="Keto Diet Plan" />
 
         <View
             android:id="@+id/divider"
             android:layout_width="0dp"
             android:layout_height="1dp"
-            android:layout_marginTop="16dp"
-            android:background="?android:attr/dividerVertical"
+            android:layout_marginTop="24dp"
+            android:background="#F5F5F5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/dialog_icon" />
@@ -55,28 +57,28 @@
             android:id="@+id/dialog_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:fontFamily="sans-serif"
-            android:lineSpacingExtra="4sp"
-            android:textColor="@color/dark_gray"
-            android:textSize="16sp"
+            android:lineSpacingExtra="6dp"
+            android:textColor="#616161"
+            android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/divider"
-            tools:text="This is the detailed description of the diet plan. It explains the benefits and what the diet consists of." />
+            tools:text="This is the detailed description of the diet plan. It explains the benefits and what the diet consists of in high protein and low carb format." />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/dialog_ok_button"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:fontFamily="sans-serif-medium"
-            android:paddingHorizontal="32dp"
-            android:text="OK"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="32dp"
+            android:fontFamily="sans-serif"
+            android:textStyle="bold"
+            android:text="GOT IT"
             android:textSize="16sp"
+            android:textColor="@color/white"
             app:backgroundTint="@color/primary_dark"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:cornerRadius="16dp"
             app:layout_constraintTop_toBottomOf="@+id/dialog_description" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

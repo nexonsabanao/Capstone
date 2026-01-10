@@ -4,43 +4,44 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingVertical="4dp">
 
     <TextView
         android:id="@+id/macro_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
-        android:textColor="#333333"
-        android:textSize="14sp"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="#757575"
+        android:textSize="12sp"
+        android:textAllCaps="true"
+        android:letterSpacing="0.05"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:text="Nutrient" />
+        tools:text="PROTEIN" />
 
     <TextView
         android:id="@+id/macro_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif"
-        android:textColor="#666666"
-        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#212121"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:text="0/100 g" />
+        tools:text="45/100g" />
 
     <ProgressBar
         android:id="@+id/macro_progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_marginTop="4dp"
-        android:backgroundTint="#F0F0F0"
-        android:indeterminate="false"
+        android:layout_height="6dp"
+        android:layout_marginTop="8dp"
+        android:progressDrawable="@drawable/custom_progress_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/macro_label"
         tools:max="100"
-        tools:progress="50"
-        tools:progressTint="#4CAF50" />
+        tools:progress="45" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

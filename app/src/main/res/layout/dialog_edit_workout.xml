@@ -4,40 +4,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@color/app_background"
     android:fitsSystemWindows="true">
 
-    <ImageView
-        android:id="@+id/btn_back"
-        android:layout_width="wrap_content"
+    <!-- Header Section -->
+    <LinearLayout
+        android:id="@+id/header_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="16dp"
-        android:src="@drawable/ic_arrow_back"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="56dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:fontFamily="sans-serif"
-        android:text="Edit Workout"
-        android:textColor="#212121"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_back"
-        app:layout_constraintStart_toEndOf="@+id/btn_back"
-        app:layout_constraintTop_toTopOf="@+id/btn_back" />
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="#212121" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFamily="sans-serif"
+            android:textStyle="bold"
+            android:text="Edit Workout"
+            android:textColor="#212121"
+            android:textSize="24sp" />
+    </LinearLayout>
 
     <!-- LOADING STATE -->
     <ProgressBar
         android:id="@+id/loading_progress"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:indeterminateTint="@color/primary_dark"
+        android:indeterminateTint="@color/green"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -50,18 +57,23 @@
         android:layout_height="0dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        app:layout_constraintTop_toBottomOf="@id/header_container"
         tools:visibility="visible">
 
         <!-- Editable Workout Name Layout -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/workout_name_layout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
+            android:layout_marginHorizontal="24dp"
             android:layout_marginTop="8dp"
             android:visibility="gone"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxStrokeColor="@color/green"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible">
 
@@ -69,11 +81,11 @@
                 android:id="@+id/et_workout_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
                 android:inputType="textCapWords"
                 android:textColor="#212121"
-                android:textSize="32sp"
-                tools:ignore="SpeakableTextPresentCheck" />
+                android:textSize="24sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <androidx.constraintlayout.widget.Barrier
@@ -83,86 +95,100 @@
             app:barrierDirection="bottom"
             app:constraint_referenced_ids="workout_name_layout" />
 
-        <HorizontalScrollView
-            android:id="@+id/chip_scroll_view"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/filter_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="8dp"
-            android:scrollbars="none"
-            app:layout_constraintEnd_toStartOf="@+id/btn_reset"
-            app:layout_constraintStart_toStartOf="parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="24dp"
             app:layout_constraintTop_toBottomOf="@id/name_barrier">
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/category_chip_group"
+            <HorizontalScrollView
+                android:id="@+id/chip_scroll_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/category_chip_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_warmup"
+                        style="@style/FilterChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Warm-up" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_exercises"
+                        style="@style/FilterChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="Exercises" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_cooldown"
+                        style="@style/FilterChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cool-down" />
+                </com.google.android.material.chip.ChipGroup>
+            </HorizontalScrollView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_reset"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:selectionRequired="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_warmup"
-                    style="@style/FilterChip"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Warm-up" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_exercises"
-                    style="@style/FilterChip"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="Exercises" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_cooldown"
-                    style="@style/FilterChip"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Cool-down" />
-            </com.google.android.material.chip.ChipGroup>
-        </HorizontalScrollView>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_reset"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:text="@string/reset_exercise_underlined"
-            android:textColor="@color/bmi_obese"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/chip_scroll_view"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/chip_scroll_view"
-            tools:visibility="visible" />
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="RESET"
+                android:textColor="@color/bmi_obese"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_select_exercises"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:color/white"
+            android:layout_marginTop="16dp"
             android:clipToPadding="false"
-            android:paddingBottom="16dp"
-            app:layout_constraintBottom_toTopOf="@id/btn_save"
-            app:layout_constraintTop_toBottomOf="@id/chip_scroll_view"
+            android:paddingBottom="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/filter_container"
             tools:listitem="@layout/item_selectable_exercise" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_save"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bottom_action_card"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_margin="16dp"
-            android:backgroundTint="@color/primary_dark"
-            android:text="Save"
-            android:textAllCaps="false"
-            android:textSize="16sp"
-            app:cornerRadius="12dp"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="16dp"
+            app:strokeWidth="0dp"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_margin="24dp"
+                android:backgroundTint="@color/primary_dark"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="SAVE CHANGES"
+                android:textColor="@color/white"
+                app:cornerRadius="32dp" />
+        </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

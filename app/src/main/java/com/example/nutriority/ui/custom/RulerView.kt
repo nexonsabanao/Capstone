@@ -67,15 +67,18 @@ class RulerView @JvmOverloads constructor(
     private fun setupPaints() {
         tickPaint.color = tickColor
         tickPaint.style = Paint.Style.STROKE
-        tickPaint.strokeWidth = 2f
+        tickPaint.strokeWidth = 3f
+        tickPaint.strokeCap = Paint.Cap.ROUND
 
         textPaint.color = textColor
         textPaint.textSize = textSize
         textPaint.textAlign = Paint.Align.CENTER
+        textPaint.typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
 
         indicatorPaint.color = indicatorColor
         indicatorPaint.style = Paint.Style.STROKE
         indicatorPaint.strokeWidth = indicatorWidth
+        indicatorPaint.strokeCap = Paint.Cap.ROUND
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -88,8 +91,9 @@ class RulerView @JvmOverloads constructor(
 
         val rulerCenterY = height / 2f
 
-        val shortTickHeight = 20f
-        val longTickHeight = 40f
+        // More compact tick dimensions
+        val shortTickHeight = height * 0.15f
+        val longTickHeight = height * 0.35f
 
         val visibleStartValue = minValue + ((scrollX - tickInterval) / tickInterval).toInt()
         val visibleEndValue = minValue + ((scrollX + width + tickInterval) / tickInterval).toInt()
@@ -107,13 +111,15 @@ class RulerView @JvmOverloads constructor(
             if (isMajorTick) {
                 val value = i.toFloat() / multiplier
                 val label = labelFormatter?.invoke(value) ?: String.format("%.${decimalPlaces}f", value)
-                canvas.drawText(label, x, tickYEnd + textSize + 10, textPaint)
+                // Position text closer to ticks for a compact look
+                canvas.drawText(label, x, tickYEnd + textSize + 4, textPaint)
             }
         }
 
         val indicatorX = scrollX + width / 2f
-        val indicatorYStart = rulerCenterY - longTickHeight / 2 - 10
-        val indicatorYEnd = rulerCenterY + longTickHeight / 2 + 10
+        // Indicator slightly taller than long ticks
+        val indicatorYStart = rulerCenterY - longTickHeight / 2 - 12
+        val indicatorYEnd = rulerCenterY + longTickHeight / 2 + 12
 
         canvas.drawLine(indicatorX, indicatorYStart, indicatorX, indicatorYEnd, indicatorPaint)
     }

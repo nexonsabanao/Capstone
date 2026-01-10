@@ -5,61 +5,60 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
+    android:background="@color/app_background"
     tools:context=".ui.onboarding.screens.SecondScreen">
 
     <ImageView
         android:id="@+id/backButton"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="24dp"
-        android:alpha="0.7"
+        android:layout_marginTop="56dp"
+        android:padding="8dp"
         android:clickable="true"
-        android:contentDescription="action_back"
         android:focusable="true"
-        android:padding="4dp"
         android:src="@drawable/ic_arrow_back"
-        app:layout_constraintBottom_toTopOf="@id/titleTextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/primary_dark"
-        tools:ignore="TouchTargetSizeCheck" />
+        app:tint="#212121" />
 
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="80dp"
-        android:fontFamily="sans-serif-black"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
         android:gravity="center_horizontal"
-        android:text="Tell Us About Yourself"
-        android:textColor="@color/dark_gray"
+        android:text="About You"
+        android:textColor="#212121"
         android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/backButton" />
 
     <TextView
         android:id="@+id/subtitleTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="sans-serif"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-medium"
         android:gravity="center_horizontal"
-        android:text="This helps us personalize your workout plan"
+        android:text="Help us personalize your journey"
+        android:textColor="#757575"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="@id/titleTextView"
         app:layout_constraintStart_toStartOf="@id/titleTextView"
         app:layout_constraintTop_toBottomOf="@id/titleTextView" />
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginVertical="16dp"
-        android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@id/nextButton"
+        android:layout_marginTop="24dp"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/subtitleTextView">
@@ -68,223 +67,240 @@
             android:id="@+id/card_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp">
 
+            <!-- Height Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/heightCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@android:color/white"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
+                app:cardPreventCornerOverlap="false"
+                app:cardUseCompatPadding="true"
                 app:strokeWidth="0dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="16dp">
+                    android:background="@android:color/transparent"
+                    android:padding="24dp">
 
                     <TextView
                         android:id="@+id/heightLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="24dp"
-                        android:fontFamily="sans-serif-medium"
+                        android:fontFamily="sans-serif"
+                        android:textStyle="bold"
                         android:text="Height"
-                        android:textColor="@color/dark_gray"
+                        android:textColor="#212121"
                         android:textSize="20sp"
-                        app:layout_constraintBottom_toBottomOf="@id/heightUnitToggleGroup"
-                        app:layout_constraintEnd_toStartOf="@id/heightUnitToggleGroup"
-                        app:layout_constraintHorizontal_chainStyle="spread_inside"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/heightUnitToggleGroup" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <com.google.android.material.button.MaterialButtonToggleGroup
                         android:id="@+id/heightUnitToggleGroup"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
-                        android:layout_marginEnd="24dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/heightLabel"
                         app:layout_constraintTop_toTopOf="parent"
                         app:selectionRequired="true"
                         app:singleSelection="true">
 
                         <Button
                             android:id="@+id/btnCm"
-                            style="?attr/materialButtonOutlinedStyle"
-                            android:layout_width="80dp"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="64dp"
                             android:layout_height="wrap_content"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:paddingHorizontal="0dp"
+                            android:minWidth="0dp"
                             android:text="cm"
-                            android:fontFamily="sans-serif-medium"
                             android:textSize="12sp"
-                            app:backgroundTint="@color/toggle_button_background_color"
-                            tools:ignore="TouchTargetSizeCheck" />
+                            app:backgroundTint="#F5F5F5" />
 
                         <Button
                             android:id="@+id/btnFt"
-                            style="?attr/materialButtonOutlinedStyle"
-                            android:layout_width="80dp"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="64dp"
                             android:layout_height="wrap_content"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:paddingHorizontal="0dp"
+                            android:minWidth="0dp"
                             android:text="ft"
-                            android:fontFamily="sans-serif-medium"
                             android:textSize="12sp"
-                            app:backgroundTint="@color/toggle_button_background_color"
-                            tools:ignore="TouchTargetSizeCheck" />
+                            app:backgroundTint="#F5F5F5" />
                     </com.google.android.material.button.MaterialButtonToggleGroup>
 
-                    <TextView
-                        android:id="@+id/heightValue"
+                    <LinearLayout
+                        android:id="@+id/height_display"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:fontFamily="sans-serif-black"
-                        android:textSize="32sp"
-                        app:layout_constraintEnd_toStartOf="@id/heightUnit"
-                        app:layout_constraintHorizontal_chainStyle="packed"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/heightUnitToggleGroup"
-                        tools:text="170" />
-
-                    <TextView
-                        android:id="@+id/heightUnit"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:fontFamily="sans-serif-medium"
-                        android:textColor="@color/dark_gray"
-                        android:textSize="16sp"
-                        app:layout_constraintBaseline_toBaselineOf="@id/heightValue"
+                        android:layout_marginTop="32dp"
+                        android:gravity="bottom"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/heightValue"
-                        tools:text="cm" />
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/heightUnitToggleGroup">
+
+                        <TextView
+                            android:id="@+id/heightValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold"
+                            android:textColor="#212121"
+                            android:textSize="40sp"
+                            tools:text="170" />
+
+                        <TextView
+                            android:id="@+id/heightUnit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:fontFamily="sans-serif-medium"
+                            android:textColor="#757575"
+                            android:textSize="16sp"
+                            tools:text="cm" />
+                    </LinearLayout>
 
                     <com.example.nutriority.ui.custom.RulerView
                         android:id="@+id/heightRulerView"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:layout_marginTop="-10dp"
+                        android:layout_height="80dp"
+                        android:layout_marginTop="16dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/heightValue"
+                        app:layout_constraintTop_toBottomOf="@id/height_display"
                         app:ruler_defaultValue="170"
-                        app:ruler_indicatorColor="@color/secondary_blue"
+                        app:ruler_indicatorColor="@color/green"
                         app:ruler_indicatorWidth="4dp"
                         app:ruler_maxValue="250"
                         app:ruler_minValue="100"
-                        app:ruler_textColor="@color/black"
-                        app:ruler_tickColor="@color/dark_gray"
+                        app:ruler_textColor="#212121"
+                        app:ruler_tickColor="#E0E0E0"
                         app:ruler_majorTickFactor="10"
                         app:ruler_decimal_places="0" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Weight Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/weightCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 app:cardBackgroundColor="@android:color/white"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
+                app:cardPreventCornerOverlap="false"
+                app:cardUseCompatPadding="true"
                 app:strokeWidth="0dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="16dp">
+                    android:background="@android:color/transparent"
+                    android:padding="24dp">
 
                     <TextView
                         android:id="@+id/weightLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="24dp"
-                        android:fontFamily="sans-serif-medium"
+                        android:fontFamily="sans-serif"
+                        android:textStyle="bold"
                         android:text="Weight"
-                        android:textColor="@color/dark_gray"
+                        android:textColor="#212121"
                         android:textSize="20sp"
-                        app:layout_constraintBottom_toBottomOf="@id/weightUnitToggleGroup"
-                        app:layout_constraintEnd_toStartOf="@id/weightUnitToggleGroup"
-                        app:layout_constraintHorizontal_chainStyle="spread_inside"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/weightUnitToggleGroup" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <com.google.android.material.button.MaterialButtonToggleGroup
                         android:id="@+id/weightUnitToggleGroup"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
-                        android:layout_marginEnd="24dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/weightLabel"
                         app:layout_constraintTop_toTopOf="parent"
                         app:selectionRequired="true"
                         app:singleSelection="true">
 
                         <Button
                             android:id="@+id/btnKg"
-                            style="?attr/materialButtonOutlinedStyle"
-                            android:layout_width="80dp"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="64dp"
                             android:layout_height="wrap_content"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:paddingHorizontal="0dp"
+                            android:minWidth="0dp"
                             android:text="kg"
-                            android:fontFamily="sans-serif-medium"
                             android:textSize="12sp"
-                            app:backgroundTint="@color/toggle_button_background_color"
-                            tools:ignore="TouchTargetSizeCheck" />
+                            app:backgroundTint="#F5F5F5" />
 
                         <Button
                             android:id="@+id/btnLbs"
-                            style="?attr/materialButtonOutlinedStyle"
-                            android:layout_width="80dp"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="64dp"
                             android:layout_height="wrap_content"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:paddingHorizontal="0dp"
+                            android:minWidth="0dp"
                             android:text="lbs"
-                            android:fontFamily="sans-serif-medium"
                             android:textSize="12sp"
-                            app:backgroundTint="@color/toggle_button_background_color"
-                            tools:ignore="TouchTargetSizeCheck" />
+                            app:backgroundTint="#F5F5F5" />
                     </com.google.android.material.button.MaterialButtonToggleGroup>
 
-                    <TextView
-                        android:id="@+id/weightValue"
+                    <LinearLayout
+                        android:id="@+id/weight_display"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:fontFamily="sans-serif-black"
-                        android:textSize="32sp"
-                        app:layout_constraintEnd_toStartOf="@id/weightUnit"
-                        app:layout_constraintHorizontal_chainStyle="packed"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/weightUnitToggleGroup"
-                        tools:text="60" />
-
-                    <TextView
-                        android:id="@+id/weightUnit"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:fontFamily="sans-serif-medium"
-                        android:textColor="@color/dark_gray"
-                        android:textSize="16sp"
-                        app:layout_constraintBaseline_toBaselineOf="@id/weightValue"
+                        android:layout_marginTop="32dp"
+                        android:gravity="bottom"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/weightValue"
-                        tools:text="kg" />
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/weightUnitToggleGroup">
+
+                        <TextView
+                            android:id="@+id/weightValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold"
+                            android:textColor="#212121"
+                            android:textSize="40sp"
+                            tools:text="60" />
+
+                        <TextView
+                            android:id="@+id/weightUnit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:fontFamily="sans-serif-medium"
+                            android:textColor="#757575"
+                            android:textSize="16sp"
+                            tools:text="kg" />
+                    </LinearLayout>
 
                     <com.example.nutriority.ui.custom.RulerView
                         android:id="@+id/weightRulerView"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:layout_marginTop="-10dp"
+                        android:layout_height="80dp"
+                        android:layout_marginTop="16dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/weightValue"
+                        app:layout_constraintTop_toBottomOf="@id/weight_display"
                         app:ruler_defaultValue="60"
-                        app:ruler_indicatorColor="@color/secondary_blue"
+                        app:ruler_indicatorColor="@color/green"
                         app:ruler_indicatorWidth="4dp"
                         app:ruler_maxValue="150"
                         app:ruler_minValue="30"
-                        app:ruler_textColor="@color/black"
-                        app:ruler_tickColor="@color/dark_gray"
+                        app:ruler_textColor="#212121"
+                        app:ruler_tickColor="#E0E0E0"
                         app:ruler_majorTickFactor="10"
                         app:ruler_decimal_places="1" />
 
@@ -292,23 +308,23 @@
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/nextButton"
-        style="@style/Widget.Material3.Button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="40dp"
         android:alpha="0.5"
         android:backgroundTint="@color/primary_dark"
-        android:enabled="false"
-        android:fontFamily="sans-serif-medium"
-        android:paddingVertical="16dp"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
+        android:textColor="@color/white"
         android:text="@string/action_next"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:letterSpacing="0.05"
+        app:cornerRadius="32dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
