@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 import com.example.nutriority.R
 import com.example.nutriority.data.model.WorkoutWithExercises
 import com.example.nutriority.databinding.ActivityWorkoutDetailBinding
@@ -184,6 +186,9 @@ class WorkoutDetailActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             viewModel.isLoading.collect { isLoading ->
+                TransitionManager.beginDelayedTransition(binding.exercisesContainer, AutoTransition().apply {
+                    duration = 300
+                })
                 if (isLoading) {
                     binding.exercisesContainer.visibility = View.INVISIBLE
                     binding.loadingProgress.visibility = View.VISIBLE
@@ -253,6 +258,10 @@ class WorkoutDetailActivity : AppCompatActivity() {
                 (totalReps * 3) + (exercise.sets * 45)
             }
         }
+
+        TransitionManager.beginDelayedTransition(binding.contentContainer, AutoTransition().apply {
+            duration = 300
+        })
 
         binding.workoutDuration.text = "${Math.ceil(totalSeconds / 60.0).toInt()} mins"
         exerciseAdapter.submitList(displayList)
