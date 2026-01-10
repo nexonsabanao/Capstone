@@ -86,7 +86,6 @@ class WorkoutDetailActivity : AppCompatActivity() {
             val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
             toast.show()
             
-            // Fast-dismiss logic: cancel the toast after 1 second
             lifecycleScope.launch {
                 delay(TOAST_DURATION_MS)
                 toast.cancel()
@@ -97,12 +96,10 @@ class WorkoutDetailActivity : AppCompatActivity() {
     }
 
     private fun showEditWorkoutDialog() {
-        // Changed to use a non-fullscreen theme that respects system insets
         val dialog = Dialog(this, android.R.style.Theme_Material_Light_NoActionBar)
         val dialogBinding = DialogEditWorkoutBinding.inflate(LayoutInflater.from(this))
         dialog.setContentView(dialogBinding.root)
         
-        // Ensure dialog takes up the full width/height while respecting insets
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         val selectableAdapter = SelectableExerciseAdapter { _, _ -> }
@@ -113,20 +110,15 @@ class WorkoutDetailActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            // Wait for workout data
             val workoutWithExercises = viewModel.workout.filterNotNull().first()
-            // Wait for all exercises data
             val allExercises = viewModel.getAllExercises().filter { it.isNotEmpty() }.first()
             
             val workoutName = workoutWithExercises.workout.name
-            // IMPROVED SYSTEM WORKOUT DETECTION: Check ID range (1-25 are default) or name keywords
             val isSystemWorkout = workoutWithExercises.workout.id <= 25 || 
                 listOf("Arm", "Abs", "Chest", "Leg", "Shoulder", "Back", "Full Body", "Lower Body")
                     .any { workoutName.contains(it, ignoreCase = true) }
             
-            // CONFIGURE UI
             if (isSystemWorkout) {
-                // System workout: hide name entry but SHOW reset button
                 dialogBinding.workoutNameLayout.visibility = View.GONE
                 dialogBinding.btnReset.visibility = View.VISIBLE
             } else {
@@ -135,7 +127,6 @@ class WorkoutDetailActivity : AppCompatActivity() {
                 dialogBinding.btnReset.visibility = View.GONE
             }
             
-            // Capture the state when the dialog was opened for the Reset button
             val initialExercises = workoutWithExercises.exercises
             selectableAdapter.setData(allExercises, initialExercises)
 
@@ -149,12 +140,18 @@ class WorkoutDetailActivity : AppCompatActivity() {
             }
 
             dialogBinding.btnReset.setOnClickListener {
-                // BUG FIX: Reset to the exercises that were active when the dialog opened,
-                // rather than filtering the grouped 'allExercises' list which loses associations.
-                selectableAdapter.setData(allExercises, initialExercises)
-                
-                // FIX: Only show toast if it's not currently on screen (throttled by time)
-                showThrottledToast("Reset to default exercises")
+                lifecycleScope.launch {
+                    // FIX: Fetch the actual DEFAULT exercises for this workout from the assets via ViewModel
+                    val defaultExercises = viewModel.getDefaultExercisesFromAssets(workoutName)
+                    if (defaultExercises.isNotEmpty()) {
+                        selectableAdapter.setData(allExercises, defaultExercises)
+                        showThrottledToast("Reset to default exercises")
+                    } else {
+                        // Fallback: if no defaults found, reset to whatever was there when dialog opened
+                        selectableAdapter.setData(allExercises, initialExercises)
+                        showThrottledToast("Reset to initial state")
+                    }
+                }
             }
 
             dialogBinding.btnSave.setOnClickListener {
@@ -171,7 +168,6 @@ class WorkoutDetailActivity : AppCompatActivity() {
 
             dialogBinding.btnBack.setOnClickListener { dialog.dismiss() }
 
-            // GENIUS FIX: DATA IS LOADED, REVEAL CONTENT AND HIDE PROGRESS
             dialogBinding.loadingProgress.visibility = View.GONE
             dialogBinding.contentLayout.visibility = View.VISIBLE
         }
@@ -183,12 +179,10 @@ class WorkoutDetailActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
             onItemClick = { exercise, position, _ ->
-                // BUG FIX: Correctly calculate position based on ExerciseItems ONLY
                 val currentList = exerciseAdapter.currentList
                 val exerciseItems = currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
                 val totalExercises = exerciseItems.size
                 
-                // Find index of this specific exercise object in the filtered list
                 val exercisePos = exerciseItems.indexOfFirst { it.exercise.id == exercise.id } + 1
                 
                 val intent = Intent(this, ExerciseDetailActivity::class.java).apply {
