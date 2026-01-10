@@ -58,7 +58,13 @@ interface WorkoutDao {
     @Update
     suspend fun updateWorkout(workout: Workout)
 
-    // FIX: Set to NULL instead of -1 to respect Foreign Key constraints
     @Query("UPDATE exercises SET workoutId = NULL WHERE workoutId = :workoutId")
     suspend fun unlinkExercisesFromWorkout(workoutId: Int)
+
+    @Transaction
+    suspend fun updateWorkoutWithExercises(workout: Workout, exercises: List<Exercise>) {
+        unlinkExercisesFromWorkout(workout.id)
+        updateWorkout(workout)
+        updateExercises(exercises)
+    }
 }

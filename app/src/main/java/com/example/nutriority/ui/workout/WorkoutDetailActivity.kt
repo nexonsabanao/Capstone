@@ -13,8 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.AutoTransition
-import androidx.transition.TransitionManager
 import com.example.nutriority.R
 import com.example.nutriority.data.model.WorkoutWithExercises
 import com.example.nutriority.databinding.ActivityWorkoutDetailBinding
@@ -23,7 +21,6 @@ import com.example.nutriority.ui.adapter.ExerciseAdapter
 import com.example.nutriority.ui.adapter.SelectableExerciseAdapter
 import com.example.nutriority.ui.adapter.WorkoutItem
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -67,6 +64,19 @@ class WorkoutDetailActivity : AppCompatActivity() {
         binding.switchIncludeWarmupCooldown.setOnCheckedChangeListener { _, isChecked ->
             viewModel.workout.value?.let { workout ->
                 updateDisplayList(workout, isChecked)
+            }
+        }
+        
+        binding.startButton.setOnClickListener {
+            val exercises = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
+            if (exercises.isNotEmpty()) {
+                val firstExercise = exercises.first().exercise
+                val intent = Intent(this, ExerciseDetailActivity::class.java).apply {
+                    putExtra("exercise_id", firstExercise.id)
+                    putExtra("exercise_position", 1)
+                    putExtra("total_exercises", exercises.size)
+                }
+                startActivity(intent)
             }
         }
     }
@@ -150,8 +160,16 @@ class WorkoutDetailActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
             onItemClick = { exercise, _, _ ->
-                AboutExerciseBottomSheet.newInstance(exercise)
-                    .show(supportFragmentManager, "AboutExerciseBottomSheet")
+                val exerciseItems = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
+                val exerciseIndex = exerciseItems.indexOfFirst { it.exercise.id == exercise.id } + 1
+                val totalExercises = exerciseItems.size
+
+                val intent = Intent(this, ExerciseDetailActivity::class.java).apply {
+                    putExtra("exercise_id", exercise.id)
+                    putExtra("exercise_position", exerciseIndex)
+                    putExtra("total_exercises", totalExercises)
+                }
+                startActivity(intent)
             },
             onListUpdated = { updatedList ->
                 viewModel.updateExercises(updatedList)
@@ -186,9 +204,6 @@ class WorkoutDetailActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             viewModel.isLoading.collect { isLoading ->
-                TransitionManager.beginDelayedTransition(binding.exercisesContainer, AutoTransition().apply {
-                    duration = 300
-                })
                 if (isLoading) {
                     binding.exercisesContainer.visibility = View.INVISIBLE
                     binding.loadingProgress.visibility = View.VISIBLE
@@ -224,18 +239,12 @@ class WorkoutDetailActivity : AppCompatActivity() {
         binding.workoutExerciseCount.text = main.size.toString()
 
         if (includeAll) {
-            if (warmup.isNotEmpty()) {
-                displayList.add(WorkoutItem.DividerItem("Warm-up"))
-                displayList.addAll(warmup.map { WorkoutItem.ExerciseItem(it) })
-            }
-
+            displayList.add(WorkoutItem.DividerItem("Warm-up"))
+            displayList.addAll(warmup.map { WorkoutItem.ExerciseItem(it) })
             displayList.add(WorkoutItem.DividerItem("Exercises"))
             displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
-
-            if (cooldown.isNotEmpty()) {
-                displayList.add(WorkoutItem.DividerItem("Cool-down"))
-                displayList.addAll(cooldown.map { WorkoutItem.ExerciseItem(it) })
-            }
+            displayList.add(WorkoutItem.DividerItem("Cool-down"))
+            displayList.addAll(cooldown.map { WorkoutItem.ExerciseItem(it) })
         } else {
             displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
         }
@@ -258,10 +267,6 @@ class WorkoutDetailActivity : AppCompatActivity() {
                 (totalReps * 3) + (exercise.sets * 45)
             }
         }
-
-        TransitionManager.beginDelayedTransition(binding.contentContainer, AutoTransition().apply {
-            duration = 300
-        })
 
         binding.workoutDuration.text = "${Math.ceil(totalSeconds / 60.0).toInt()} mins"
         exerciseAdapter.submitList(displayList)
