@@ -1,27 +1,32 @@
 package com.example.nutriority.ui.workout
 
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.activity.viewModels
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
 import com.example.nutriority.data.model.ExerciseSet
 import com.example.nutriority.data.model.WorkoutLog
-import com.example.nutriority.databinding.ActivityExerciseDetailBinding
+import com.example.nutriority.databinding.FragmentExerciseDetailBinding
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.Date
 
 @AndroidEntryPoint
-class ExerciseDetailActivity : AppCompatActivity() {
+class ExerciseDetailFragment : Fragment() {
 
-    private lateinit var binding: ActivityExerciseDetailBinding
+    private var _binding: FragmentExerciseDetailBinding? = null
+    private val binding get() = _binding!!
     private val viewModel: ExerciseDetailViewModel by viewModels()
     private lateinit var exerciseSetAdapter: ExerciseSetAdapter
     private lateinit var addSetAdapter: AddSetAdapter
@@ -31,14 +36,20 @@ class ExerciseDetailActivity : AppCompatActivity() {
     private var currentDialog: AlertDialog? = null
     private var isInitialized = false
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityExerciseDetailBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentExerciseDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        val exerciseId = intent.getIntExtra("exercise_id", -1)
-        val exercisePosition = intent.getIntExtra("exercise_position", -1)
-        val totalExercises = intent.getIntExtra("total_exercises", -1)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val exerciseId = arguments?.getInt("exercise_id", -1) ?: -1
+        val exercisePosition = arguments?.getInt("exercise_position", -1) ?: -1
+        val totalExercises = arguments?.getInt("total_exercises", -1) ?: -1
 
         if (exerciseId != -1) {
             viewModel.getExerciseById(exerciseId)
@@ -66,7 +77,7 @@ class ExerciseDetailActivity : AppCompatActivity() {
                         mutableList.removeAt(position)
                         updateAndSubmitList(mutableList)
                     } else {
-                        Toast.makeText(this, "Workout must have at least one set", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Workout must have at least one set", Toast.LENGTH_SHORT).show()
                     }
                     binding.root.postDelayed({ isProcessing = false }, 150)
                 }
@@ -100,7 +111,7 @@ class ExerciseDetailActivity : AppCompatActivity() {
         val concatAdapter = ConcatAdapter(exerciseSetAdapter, addSetAdapter)
 
         binding.setsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@ExerciseDetailActivity)
+            layoutManager = LinearLayoutManager(requireContext())
             adapter = concatAdapter
         }
     }
@@ -115,7 +126,7 @@ class ExerciseDetailActivity : AppCompatActivity() {
         val btnOk = dialogView.findViewById<MaterialButton>(R.id.btn_ok)
         val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btn_cancel)
 
-        currentDialog = AlertDialog.Builder(this)
+        currentDialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .create()
 
@@ -144,26 +155,25 @@ class ExerciseDetailActivity : AppCompatActivity() {
     private fun showAboutExerciseDialog() {
         viewModel.exercise.value?.let { exercise ->
             AboutExerciseBottomSheet.newInstance(exercise)
-                .show(supportFragmentManager, "AboutExerciseBottomSheet")
+                .show(childFragmentManager, "AboutExerciseBottomSheet")
         }
     }
 
     private fun observeViewModel() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.exercise.collect { exercise ->
                 if (exercise != null && !isInitialized) {
                     isInitialized = true
-                    val ex = exercise
-                    binding.exerciseTitle.text = ex.name
+                    binding.exerciseTitle.text = exercise.name
 
-                    val isWarmupCooldown = ex.category.contains("Warm-up", ignoreCase = true) || 
-                                         ex.category.contains("Cool-down", ignoreCase = true)
+                    val isWarmupCooldown = exercise.category.contains("Warm-up", ignoreCase = true) || 
+                                         exercise.category.contains("Cool-down", ignoreCase = true)
                     
-                    val durationStr = "${ex.duration} ${ex.reps}".lowercase()
+                    val durationStr = "${exercise.duration} ${exercise.reps}".lowercase()
                     val isDuration = isWarmupCooldown || durationStr.contains("s") || durationStr.contains(":")
                     
                     val parsedValue = if (isDuration) {
-                        val sourceStr = if (ex.duration.any { it.isDigit() }) ex.duration else ex.reps
+                        val sourceStr = if (exercise.duration.any { it.isDigit() }) exercise.duration else exercise.reps
                         if (sourceStr.contains(":")) {
                             val parts = sourceStr.split(":")
                             val mins = parts.getOrNull(0)?.toIntOrNull() ?: 0
@@ -173,11 +183,11 @@ class ExerciseDetailActivity : AppCompatActivity() {
                             sourceStr.filter { it.isDigit() }.toIntOrNull() ?: 30
                         }
                     } else {
-                        ex.reps.split(",").firstOrNull()?.trim()?.filter { it.isDigit() }?.toIntOrNull() ?: 8
+                        exercise.reps.split(",").firstOrNull()?.trim()?.filter { it.isDigit() }?.toIntOrNull() ?: 8
                     }
 
-                    val savedValues = ex.reps.split(",").mapNotNull { it.trim().filter { c -> c.isDigit() }.toIntOrNull() }
-                    val setsCount = if (isWarmupCooldown && ex.sets <= 0) 1 else ex.sets
+                    val savedValues = exercise.reps.split(",").mapNotNull { it.trim().filter { c -> c.isDigit() }.toIntOrNull() }
+                    val setsCount = if (isWarmupCooldown && exercise.sets <= 0) 1 else exercise.sets
 
                     val initialSets = if (savedValues.size == setsCount && savedValues.isNotEmpty()) {
                         savedValues.map { ExerciseSet(value = it, isDuration = isDuration) }
@@ -213,14 +223,9 @@ class ExerciseDetailActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.setsRecyclerView.adapter = null
-    }
-
     private fun setupClickListeners() {
         binding.backButton.setOnClickListener {
-            finish()
+            findNavController().navigateUp()
         }
 
         binding.btnAboutExercise.setOnClickListener {
@@ -237,7 +242,7 @@ class ExerciseDetailActivity : AppCompatActivity() {
                 exerciseSetAdapter.submitList(currentSets)
                 binding.btnLogSet.text = "Log set ${activeIndex + 2}"
             } else {
-                Toast.makeText(this, "All sets complete! Tap Log to finish.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "All sets complete! Tap Log to finish.", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -260,9 +265,15 @@ class ExerciseDetailActivity : AppCompatActivity() {
                     reps = valueString
                 )
                 viewModel.logWorkout(log)
-                Toast.makeText(this, "Workout logged successfully!", Toast.LENGTH_SHORT).show()
-                finish()
+                Toast.makeText(requireContext(), "Workout logged successfully!", Toast.LENGTH_SHORT).show()
+                findNavController().navigateUp()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.setsRecyclerView.adapter = null
+        _binding = null
     }
 }

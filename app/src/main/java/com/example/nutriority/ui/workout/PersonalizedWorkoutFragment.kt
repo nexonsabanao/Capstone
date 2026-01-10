@@ -1,6 +1,5 @@
 package com.example.nutriority.ui.workout
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,7 +8,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentPersonalizedWorkoutBinding
 import com.example.nutriority.planner.WorkoutPlan
@@ -39,8 +40,7 @@ class PersonalizedWorkoutFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.backButton.setOnClickListener {
-            // Standard fragment back behavior: let the activity handle it or navigate up
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            findNavController().navigateUp()
         }
 
         userViewModel.user.observe(viewLifecycleOwner) { user ->
@@ -74,9 +74,11 @@ class PersonalizedWorkoutFragment : Fragment() {
                 handleRestartWorkout()
             },
             onWorkoutClicked = { workoutId ->
-                val intent = Intent(requireActivity(), WorkoutDetailActivity::class.java)
-                intent.putExtra("workout_id", workoutId)
-                startActivity(intent)
+                // Use Navigation Component instead of Intent
+                val bundle = Bundle().apply {
+                    putInt("workout_id", workoutId)
+                }
+                findNavController().navigate(R.id.action_personalizedWorkoutFragment_to_workoutDetailFragment, bundle)
             }
         )
         binding.rvWorkoutPlan.layoutManager = LinearLayoutManager(context)

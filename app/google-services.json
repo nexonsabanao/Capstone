@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "427591895572",
+    "project_id": "nutriority",
+    "storage_bucket": "nutriority.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:427591895572:android:51325c2cba9e47b666f501",
+        "android_client_info": {
+          "package_name": "com.example.nutriority"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7ML7csl8bwO_n1EWtYSscPlcZ7KS0gCY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

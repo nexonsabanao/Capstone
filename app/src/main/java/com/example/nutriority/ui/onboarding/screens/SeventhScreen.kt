@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,13 +14,13 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.data.model.User
 import com.example.nutriority.databinding.FragmentSeventhScreenBinding
 import com.example.nutriority.planner.PlannerService
-import com.example.nutriority.ui.BottomNavigationActivity
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -91,9 +90,8 @@ class SeventhScreen : Fragment() {
 
                 if (saveSuccess) {
                     finishOnboarding()
-                    val intent = Intent(requireActivity(), BottomNavigationActivity::class.java)
-                    startActivity(intent)
-                    requireActivity().finish()
+                    // Navigate to HomeFragment within the same MainActivity
+                    findNavController().navigate(R.id.action_viewPagerFragment_to_homeFragment)
                 } else {
                     Log.e("OnboardingError", "Failed to save the personalized workout plan.")
                 }

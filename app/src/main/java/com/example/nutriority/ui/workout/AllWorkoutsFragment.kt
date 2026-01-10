@@ -1,16 +1,18 @@
 package com.example.nutriority.ui.workout
 
-import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentAllWorkoutsBinding
 import com.example.nutriority.ui.adapter.WorkoutAdapter
+import com.example.nutriority.ui.home.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -19,14 +21,12 @@ class AllWorkoutsFragment : Fragment() {
 
     private var _binding: FragmentAllWorkoutsBinding? = null
     private val binding get() = _binding!!
-
-    // Use the new, dedicated ViewModel to get the complete list of workouts.
-    private val viewModel: AllWorkoutsViewModel by viewModels()
+    
+    private val homeViewModel: HomeViewModel by viewModels()
     private lateinit var workoutAdapter: WorkoutAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentAllWorkoutsBinding.inflate(inflater, container, false)
@@ -35,28 +35,32 @@ class AllWorkoutsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.backButton.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
         setupRecyclerView()
         observeViewModel()
     }
 
     private fun setupRecyclerView() {
         workoutAdapter = WorkoutAdapter { workout ->
-            // When a workout is clicked, navigate to the detail screen.
-            val intent = Intent(requireActivity(), WorkoutDetailActivity::class.java)
-            intent.putExtra("workout_id", workout.id)
-            startActivity(intent)
+            val bundle = Bundle().apply {
+                putInt("workout_id", workout.id)
+            }
+            findNavController().navigate(R.id.action_allWorkoutsFragment_to_workoutDetailFragment, bundle)
         }
-
-        binding.workoutsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
+        
+        binding.allWorkoutsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
             adapter = workoutAdapter
         }
     }
 
     private fun observeViewModel() {
-        // Observe the list of workouts and submit it to the adapter.
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.allWorkouts.collect { workouts ->
+            homeViewModel.allWorkouts.collect { workouts ->
                 workoutAdapter.submitList(workouts)
             }
         }
@@ -64,7 +68,7 @@ class AllWorkoutsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.workoutsRecyclerView.adapter = null
+        binding.allWorkoutsRecyclerView.adapter = null
         _binding = null
     }
 }

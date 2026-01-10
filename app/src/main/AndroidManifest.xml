@@ -28,47 +28,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Home Activity -->
-        <activity
-            android:name=".ui.BottomNavigationActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".ui.workout.PersonalizedWorkoutActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".ui.workout.WorkoutDetailActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".ui.workout.ExerciseDetailActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".ui.workout.ExerciseLibraryActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".ui.workout.AllWorkoutsActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".ui.meal.MealDetailActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".ui.home.ArticleDetailActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
     </application>
 
 </manifest>

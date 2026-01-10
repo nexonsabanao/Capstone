@@ -1,6 +1,5 @@
 package com.example.nutriority.ui.home
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,17 +9,15 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import com.example.nutriority.MainActivity
 import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentHomeBinding
-import com.example.nutriority.ui.BottomNavigationActivity
 import com.example.nutriority.ui.adapter.MealAdapter
 import com.example.nutriority.ui.adapter.WorkoutAdapter
 import com.example.nutriority.ui.adapter.ArticleAdapter
-import com.example.nutriority.ui.meal.MealDetailActivity
-import com.example.nutriority.ui.workout.PersonalizedWorkoutActivity
-import com.example.nutriority.ui.workout.WorkoutDetailActivity
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -57,32 +54,35 @@ class HomeFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.sevenDaysWorkoutCard.btnStart.setOnClickListener {
-            val intent = Intent(requireActivity(), PersonalizedWorkoutActivity::class.java)
-            startActivity(intent)
+            findNavController().navigate(R.id.action_navigation_home_to_personalizedWorkoutFragment)
         }
 
         binding.mealPlanCard.btnViewPlan.setOnClickListener {
-            (activity as? BottomNavigationActivity)?.navigateToTab(R.id.navigation_meal)
+            // Navigate using the bottom nav controller in MainActivity
+            (activity as? MainActivity)?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_navigation_view)?.selectedItemId = R.id.navigation_meal
         }
     }
 
     private fun setupRecyclerViews() {
         mealAdapter = MealAdapter { meal ->
-            val intent = Intent(requireContext(), MealDetailActivity::class.java)
-            intent.putExtra("meal_json", Gson().toJson(meal))
-            startActivity(intent)
+            val bundle = Bundle().apply {
+                putString("meal_json", Gson().toJson(meal))
+            }
+            findNavController().navigate(R.id.action_navigation_home_to_mealDetailFragment, bundle)
         }
         
         workoutAdapter = WorkoutAdapter { workout ->
-            val intent = Intent(requireActivity(), WorkoutDetailActivity::class.java)
-            intent.putExtra("workout_id", workout.id)
-            startActivity(intent)
+            val bundle = Bundle().apply {
+                putInt("workout_id", workout.id)
+            }
+            findNavController().navigate(R.id.action_navigation_home_to_workoutDetailFragment, bundle)
         }
         
         articleAdapter = ArticleAdapter { article ->
-            val intent = Intent(requireContext(), ArticleDetailActivity::class.java)
-            intent.putExtra("article_json", Gson().toJson(article))
-            startActivity(intent)
+            val bundle = Bundle().apply {
+                putString("article_json", Gson().toJson(article))
+            }
+            findNavController().navigate(R.id.action_navigation_home_to_articleDetailFragment, bundle)
         }
 
         binding.mealsRecyclerView.apply {

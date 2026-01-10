@@ -1,6 +1,5 @@
 package com.example.nutriority.ui.workout
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentWorkoutBinding
 import com.example.nutriority.ui.adapter.WorkoutAdapter
 import com.example.nutriority.ui.home.HomeViewModel
@@ -36,18 +37,15 @@ class WorkoutFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.starterPlanCard.setOnClickListener {
-            val intent = Intent(requireActivity(), PersonalizedWorkoutActivity::class.java)
-            startActivity(intent)
+            findNavController().navigate(R.id.action_navigation_workout_to_personalizedWorkoutFragment)
         }
 
         binding.exercisesLibraryCard.setOnClickListener {
-            val intent = Intent(requireActivity(), ExerciseLibraryActivity::class.java)
-            startActivity(intent)
+            findNavController().navigate(R.id.action_navigation_workout_to_exerciseLibraryFragment)
         }
 
         binding.showAllButton.setOnClickListener {
-            val intent = Intent(requireActivity(), AllWorkoutsActivity::class.java)
-            startActivity(intent)
+            findNavController().navigate(R.id.action_navigation_workout_to_allWorkoutsFragment)
         }
 
         setupRecyclerView()
@@ -56,9 +54,10 @@ class WorkoutFragment : Fragment() {
 
     private fun setupRecyclerView() {
         workoutAdapter = WorkoutAdapter { workout ->
-            val intent = Intent(requireActivity(), WorkoutDetailActivity::class.java)
-            intent.putExtra("workout_id", workout.id)
-            startActivity(intent)
+            val bundle = Bundle().apply {
+                putInt("workout_id", workout.id)
+            }
+            findNavController().navigate(R.id.action_workout_to_detail, bundle)
         }
         binding.bodyFocusRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)

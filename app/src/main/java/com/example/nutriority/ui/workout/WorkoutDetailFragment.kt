@@ -2,20 +2,20 @@ package com.example.nutriority.ui.workout
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
 import com.example.nutriority.data.model.WorkoutWithExercises
-import com.example.nutriority.databinding.ActivityWorkoutDetailBinding
+import com.example.nutriority.databinding.FragmentWorkoutDetailBinding
 import com.example.nutriority.databinding.DialogEditWorkoutBinding
 import com.example.nutriority.ui.adapter.ExerciseAdapter
 import com.example.nutriority.ui.adapter.SelectableExerciseAdapter
@@ -27,26 +27,34 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class WorkoutDetailActivity : AppCompatActivity() {
+class WorkoutDetailFragment : Fragment() {
 
-    private lateinit var binding: ActivityWorkoutDetailBinding
+    private var _binding: FragmentWorkoutDetailBinding? = null
+    private val binding get() = _binding!!
     private val viewModel: WorkoutDetailViewModel by viewModels()
     private lateinit var exerciseAdapter: ExerciseAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
 
     private var currentWorkoutId: Int = -1
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityWorkoutDetailBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentWorkoutDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
 
         binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
 
-        currentWorkoutId = intent.getIntExtra("workout_id", -1)
+        currentWorkoutId = arguments?.getInt("workout_id", -1) ?: -1
         if (currentWorkoutId != -1) {
             viewModel.getWorkoutById(currentWorkoutId)
         }
@@ -64,7 +72,6 @@ class WorkoutDetailActivity : AppCompatActivity() {
         binding.switchIncludeWarmupCooldown.setOnCheckedChangeListener { _, isChecked ->
             viewModel.workout.value?.let { workout ->
                 updateDisplayList(workout, isChecked)
-                // Save preference to database
                 viewModel.updateWorkoutPreference(isChecked)
             }
         }
@@ -73,19 +80,19 @@ class WorkoutDetailActivity : AppCompatActivity() {
             val exercises = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
             if (exercises.isNotEmpty()) {
                 val firstExercise = exercises.first().exercise
-                val intent = Intent(this, ExerciseDetailActivity::class.java).apply {
-                    putExtra("exercise_id", firstExercise.id)
-                    putExtra("exercise_position", 1)
-                    putExtra("total_exercises", exercises.size)
+                val bundle = Bundle().apply {
+                    putInt("exercise_id", firstExercise.id)
+                    putInt("exercise_position", 1)
+                    putInt("total_exercises", exercises.size)
                 }
-                startActivity(intent)
+                findNavController().navigate(R.id.action_workoutDetailFragment_to_exerciseDetailFragment, bundle)
             }
         }
     }
 
     private fun showEditWorkoutDialog() {
-        val dialog = Dialog(this, android.R.style.Theme_Material_Light_NoActionBar)
-        val dialogBinding = DialogEditWorkoutBinding.inflate(LayoutInflater.from(this))
+        val dialog = Dialog(requireContext(), android.R.style.Theme_Material_Light_NoActionBar)
+        val dialogBinding = DialogEditWorkoutBinding.inflate(LayoutInflater.from(requireContext()))
         dialog.setContentView(dialogBinding.root)
 
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -93,11 +100,11 @@ class WorkoutDetailActivity : AppCompatActivity() {
         val selectableAdapter = SelectableExerciseAdapter { _, _ -> }
 
         dialogBinding.rvSelectExercises.apply {
-            layoutManager = LinearLayoutManager(this@WorkoutDetailActivity)
+            layoutManager = LinearLayoutManager(requireContext())
             adapter = selectableAdapter
         }
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             val workoutWithExercises = viewModel.workout.filterNotNull().first()
             val allExercises = viewModel.getAllExercises().filter { it.isNotEmpty() }.first()
 
@@ -128,7 +135,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
             }
 
             dialogBinding.btnReset.setOnClickListener {
-                lifecycleScope.launch {
+                viewLifecycleOwner.lifecycleScope.launch {
                     val defaultExercises = viewModel.getDefaultExercisesFromAssets(workoutName)
                     if (defaultExercises.isNotEmpty()) {
                         selectableAdapter.setData(allExercises, defaultExercises)
@@ -166,12 +173,12 @@ class WorkoutDetailActivity : AppCompatActivity() {
                 val exerciseIndex = exerciseItems.indexOfFirst { it.exercise.id == exercise.id } + 1
                 val totalExercises = exerciseItems.size
 
-                val intent = Intent(this, ExerciseDetailActivity::class.java).apply {
-                    putExtra("exercise_id", exercise.id)
-                    putExtra("exercise_position", exerciseIndex)
-                    putExtra("total_exercises", totalExercises)
+                val bundle = Bundle().apply {
+                    putInt("exercise_id", exercise.id)
+                    putInt("exercise_position", exerciseIndex)
+                    putInt("total_exercises", totalExercises)
                 }
-                startActivity(intent)
+                findNavController().navigate(R.id.action_workoutDetailFragment_to_exerciseDetailFragment, bundle)
             },
             onListUpdated = { updatedList ->
                 viewModel.updateExercises(updatedList)
@@ -183,7 +190,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
         )
 
         binding.exercisesRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@WorkoutDetailActivity)
+            layoutManager = LinearLayoutManager(requireContext())
             adapter = exerciseAdapter
         }
 
@@ -193,13 +200,12 @@ class WorkoutDetailActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.workout.collect { workoutWithExercises ->
                 workoutWithExercises?.let { workout ->
                     binding.collapsingToolbar.title = workout.workout.name
                     binding.workoutTitle.text = workout.workout.name
 
-                    // Sync the switch state with the database value
                     if (binding.switchIncludeWarmupCooldown.isChecked != workout.workout.includeWarmupCooldown) {
                         binding.switchIncludeWarmupCooldown.isChecked = workout.workout.includeWarmupCooldown
                     }
@@ -209,7 +215,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
             }
         }
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoading.collect { isLoading ->
                 if (isLoading) {
                     binding.exercisesContainer.visibility = View.INVISIBLE
@@ -285,13 +291,9 @@ class WorkoutDetailActivity : AppCompatActivity() {
         exerciseAdapter.submitList(displayList)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         binding.exercisesRecyclerView.adapter = null
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressedDispatcher.onBackPressed()
-        return true
+        _binding = null
     }
 }

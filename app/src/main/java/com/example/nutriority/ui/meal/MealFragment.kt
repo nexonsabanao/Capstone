@@ -1,6 +1,5 @@
 package com.example.nutriority.ui.meal
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +7,9 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentMealBinding
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,9 +45,11 @@ class MealFragment : Fragment() {
 
     private fun setupRecyclerView() {
         mealAdapter = GeneratedMealPlanAdapter { meal ->
-            val intent = Intent(requireContext(), MealDetailActivity::class.java)
-            intent.putExtra("meal_json", Gson().toJson(meal))
-            startActivity(intent)
+            // Navigate using Navigation Component
+            val bundle = Bundle().apply {
+                putString("meal_json", Gson().toJson(meal))
+            }
+            findNavController().navigate(R.id.action_mealFragment_to_mealDetailFragment, bundle)
         }
         
         binding.generatedMealPlanRecyclerView.apply {
@@ -69,7 +72,6 @@ class MealFragment : Fragment() {
         mealViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.loadingProgressBar.isVisible = isLoading
             if (isLoading) {
-                // Hide everything when loading
                 binding.initialView.isVisible = false
                 binding.generatedMealPlanRecyclerView.isVisible = false
                 binding.doneButton.isVisible = false
@@ -93,7 +95,6 @@ class MealFragment : Fragment() {
                 }.flatten()
                 mealAdapter.submitList(mealListItems)
             } else {
-                // Clear the adapter when there is no plan
                 mealAdapter.submitList(emptyList())
             }
         }
@@ -101,7 +102,6 @@ class MealFragment : Fragment() {
         mealViewModel.isPlanExpired.observe(viewLifecycleOwner) { isExpired ->
             val hasPlan = mealViewModel.mealPlan.value?.any { it.isNotEmpty() } == true
             binding.doneButton.isVisible = hasPlan && isExpired
-            // Hide the generate button if a plan exists and is not expired
             binding.nextButton.isVisible = !hasPlan || isExpired
         }
     }

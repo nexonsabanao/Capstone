@@ -2,35 +2,44 @@ package com.example.nutriority.ui.meal
 
 import android.graphics.Color
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.nutriority.data.model.Meal
-import com.example.nutriority.databinding.ActivityMealDetailBinding
+import com.example.nutriority.databinding.FragmentMealDetailBinding
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MealDetailActivity : AppCompatActivity() {
+class MealDetailFragment : Fragment() {
 
-    private lateinit var binding: ActivityMealDetailBinding
+    private var _binding: FragmentMealDetailBinding? = null
+    private val binding get() = _binding!!
     private var currentMeal: Meal? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityMealDetailBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentMealDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        // Set up toolbar
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-        binding.toolbar.setNavigationOnClickListener { finish() }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Set up toolbar back button
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
 
         // Hide title when expanded to match WorkoutDetail style
         binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
 
-        // Get meal data from intent
-        val mealJson = intent.getStringExtra("meal_json")
+        // Get meal data from arguments
+        val mealJson = arguments?.getString("meal_json")
         if (mealJson != null) {
             currentMeal = Gson().fromJson(mealJson, Meal::class.java)
             displayMealDetails()
@@ -71,5 +80,10 @@ class MealDetailActivity : AppCompatActivity() {
 
     private fun showIngredients() {
         binding.sectionTitle.text = "Ingredients"
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
