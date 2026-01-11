@@ -89,7 +89,7 @@
             android:layout_height="32dp"
             android:padding="4dp"
             android:contentDescription="@null"
-            android:src="@drawable/ic_reorder"
+            android:src="@drawable/circles"
             app:tint="#BDBDBD"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

@@ -12,6 +12,7 @@ data class Article(
     val author: String,
     val readingTime: String,
     val category: String,
+    val content: String,
     val imageName: String // stored in DB
 ) {
     @Ignore // tell Room to ignore this property

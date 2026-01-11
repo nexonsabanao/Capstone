@@ -8,15 +8,17 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
 import com.example.nutriority.data.model.ExerciseSet
 import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.databinding.FragmentExerciseDetailBinding
+import com.example.nutriority.ui.NavigationViewModel
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -27,11 +29,59 @@ class ExerciseDetailFragment : Fragment() {
 
     private var _binding: FragmentExerciseDetailBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: ExerciseDetailViewModel by viewModels()
-    private lateinit var exerciseSetAdapter: ExerciseSetAdapter
-    private lateinit var addSetAdapter: AddSetAdapter
-    private var currentSets = listOf<ExerciseSet>()
     
+    // Lazy UI: Scoped to activity for shared navigation
+    private val navigationViewModel: NavigationViewModel by activityViewModels()
+    private val viewModel: ExerciseDetailViewModel by activityViewModels()
+    
+    private val exerciseSetAdapter by lazy {
+        ExerciseSetAdapter(
+            onRepClick = { position ->
+                showEditRepsDialog(position)
+            },
+            onDeleteClick = { position ->
+                if (!isProcessing && position >= 0 && position < currentSets.size) {
+                    isProcessing = true
+                    val mutableList = currentSets.toMutableList()
+                    if (mutableList.size > 1) {
+                        mutableList.removeAt(position)
+                        updateAndSubmitList(mutableList)
+                    } else {
+                        Toast.makeText(requireContext(), "Workout must have at least one set", Toast.LENGTH_SHORT).show()
+                    }
+                    binding.root.postDelayed({ isProcessing = false }, 150)
+                }
+            }
+        )
+    }
+    
+    private val addSetAdapter by lazy {
+        AddSetAdapter {
+            if (!isProcessing) {
+                isProcessing = true
+                val lastSet = currentSets.lastOrNull()
+                val exercise = viewModel.exercise.value
+                
+                val isDuration = if (exercise != null) {
+                    exercise.category.contains("Warm-up", ignoreCase = true) || 
+                    exercise.category.contains("Cool-down", ignoreCase = true) ||
+                    (exercise.duration.isNotBlank() && (exercise.duration.contains("s") || exercise.duration.contains(":")))
+                } else {
+                    lastSet?.isDuration ?: false
+                }
+
+                val newValue = lastSet?.value ?: if (isDuration) 30 else 8
+                val mutableList = currentSets.toMutableList()
+                val newSet = ExerciseSet(value = newValue, isDuration = isDuration)
+                mutableList.add(newSet)
+                updateAndSubmitList(mutableList)
+                
+                binding.root.postDelayed({ isProcessing = false }, 150)
+            }
+        }
+    }
+    
+    private var currentSets = listOf<ExerciseSet>()
     private var isProcessing = false
     private var currentDialog: AlertDialog? = null
     private var isInitialized = false
@@ -65,54 +115,13 @@ class ExerciseDetailFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        exerciseSetAdapter = ExerciseSetAdapter(
-            onRepClick = { position ->
-                showEditRepsDialog(position)
-            },
-            onDeleteClick = { position ->
-                if (!isProcessing && position >= 0 && position < currentSets.size) {
-                    isProcessing = true
-                    val mutableList = currentSets.toMutableList()
-                    if (mutableList.size > 1) {
-                        mutableList.removeAt(position)
-                        updateAndSubmitList(mutableList)
-                    } else {
-                        Toast.makeText(requireContext(), "Workout must have at least one set", Toast.LENGTH_SHORT).show()
-                    }
-                    binding.root.postDelayed({ isProcessing = false }, 150)
-                }
-            }
-        )
-
-        addSetAdapter = AddSetAdapter {
-            if (!isProcessing) {
-                isProcessing = true
-                val lastSet = currentSets.lastOrNull()
-                val exercise = viewModel.exercise.value
-                
-                val isDuration = if (exercise != null) {
-                    exercise.category.contains("Warm-up", ignoreCase = true) || 
-                    exercise.category.contains("Cool-down", ignoreCase = true) ||
-                    (exercise.duration.isNotBlank() && (exercise.duration.contains("s") || exercise.duration.contains(":")))
-                } else {
-                    lastSet?.isDuration ?: false
-                }
-
-                val newValue = lastSet?.value ?: if (isDuration) 30 else 8
-                val mutableList = currentSets.toMutableList()
-                val newSet = ExerciseSet(value = newValue, isDuration = isDuration)
-                mutableList.add(newSet)
-                updateAndSubmitList(mutableList)
-                
-                binding.root.postDelayed({ isProcessing = false }, 150)
-            }
-        }
-
         val concatAdapter = ConcatAdapter(exerciseSetAdapter, addSetAdapter)
 
         binding.setsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = concatAdapter
+            if (adapter == null) {
+                adapter = concatAdapter
+            }
         }
     }
 
@@ -130,7 +139,6 @@ class ExerciseDetailFragment : Fragment() {
             .setView(dialogView)
             .create()
 
-        // Set transparent background to allow rounded corners to show correctly
         currentDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         repsInput.setText(currentSets[position].value.toString())
@@ -164,41 +172,44 @@ class ExerciseDetailFragment : Fragment() {
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.exercise.collect { exercise ->
-                if (exercise != null && !isInitialized) {
-                    isInitialized = true
-                    binding.exerciseTitle.text = exercise.name
+            // Lazy UI Fix: Only update when resumed to keep the app smooth
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.exercise.collect { exercise ->
+                    if (exercise != null && !isInitialized) {
+                        isInitialized = true
+                        binding.exerciseTitle.text = exercise.name
 
-                    val isWarmupCooldown = exercise.category.contains("Warm-up", ignoreCase = true) || 
-                                         exercise.category.contains("Cool-down", ignoreCase = true)
-                    
-                    val durationStr = "${exercise.duration} ${exercise.reps}".lowercase()
-                    val isDuration = isWarmupCooldown || durationStr.contains("s") || durationStr.contains(":")
-                    
-                    val parsedValue = if (isDuration) {
-                        val sourceStr = if (exercise.duration.any { it.isDigit() }) exercise.duration else exercise.reps
-                        if (sourceStr.contains(":")) {
-                            val parts = sourceStr.split(":")
-                            val mins = parts.getOrNull(0)?.toIntOrNull() ?: 0
-                            val secs = parts.getOrNull(1)?.toIntOrNull() ?: 0
-                            (mins * 60) + secs
+                        val isWarmupCooldown = exercise.category.contains("Warm-up", ignoreCase = true) || 
+                                             exercise.category.contains("Cool-down", ignoreCase = true)
+                        
+                        val durationStr = "${exercise.duration} ${exercise.reps}".lowercase()
+                        val isDuration = isWarmupCooldown || durationStr.contains("s") || durationStr.contains(":")
+                        
+                        val parsedValue = if (isDuration) {
+                            val sourceStr = if (exercise.duration.any { it.isDigit() }) exercise.duration else exercise.reps
+                            if (sourceStr.contains(":")) {
+                                val parts = sourceStr.split(":")
+                                val mins = parts.getOrNull(0)?.toIntOrNull() ?: 0
+                                val secs = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                                (mins * 60) + secs
+                            } else {
+                                sourceStr.filter { it.isDigit() }.toIntOrNull() ?: 30
+                            }
                         } else {
-                            sourceStr.filter { it.isDigit() }.toIntOrNull() ?: 30
+                            exercise.reps.split(",").firstOrNull()?.trim()?.filter { it.isDigit() }?.toIntOrNull() ?: 8
                         }
-                    } else {
-                        exercise.reps.split(",").firstOrNull()?.trim()?.filter { it.isDigit() }?.toIntOrNull() ?: 8
-                    }
 
-                    val savedValues = exercise.reps.split(",").mapNotNull { it.trim().filter { c -> c.isDigit() }.toIntOrNull() }
-                    val setsCount = if (isWarmupCooldown && exercise.sets <= 0) 1 else exercise.sets
+                        val savedValues = exercise.reps.split(",").mapNotNull { it.trim().filter { c -> c.isDigit() }.toIntOrNull() }
+                        val setsCount = if (isWarmupCooldown && exercise.sets <= 0) 1 else exercise.sets
 
-                    val initialSets = if (savedValues.size == setsCount && savedValues.isNotEmpty()) {
-                        savedValues.map { ExerciseSet(value = it, isDuration = isDuration) }
-                    } else {
-                        List(setsCount) { ExerciseSet(value = parsedValue, isDuration = isDuration) }
+                        val initialSets = if (savedValues.size == setsCount && savedValues.isNotEmpty()) {
+                            savedValues.map { ExerciseSet(value = it, isDuration = isDuration) }
+                        } else {
+                            List(setsCount) { ExerciseSet(value = parsedValue, isDuration = isDuration) }
+                        }
+                        
+                        updateAndSubmitList(initialSets)
                     }
-                    
-                    updateAndSubmitList(initialSets)
                 }
             }
         }
@@ -228,7 +239,7 @@ class ExerciseDetailFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.backButton.setOnClickListener {
-            findNavController().navigateUp()
+            navigationViewModel.goBack()
         }
 
         binding.btnAboutExercise.setOnClickListener {
@@ -269,14 +280,13 @@ class ExerciseDetailFragment : Fragment() {
                 )
                 viewModel.logWorkout(log)
                 Toast.makeText(requireContext(), "Workout logged successfully!", Toast.LENGTH_SHORT).show()
-                findNavController().navigateUp()
+                navigationViewModel.goBack()
             }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.setsRecyclerView.adapter = null
         _binding = null
     }
 }

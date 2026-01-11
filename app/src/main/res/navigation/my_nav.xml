@@ -14,8 +14,8 @@
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
         <action
-            android:id="@+id/action_splashFragment_to_home"
-            app:destination="@id/navigation_home"
+            android:id="@+id/action_splashFragment_to_mainTabsFragment"
+            app:destination="@id/mainTabsFragment"
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -26,68 +26,39 @@
         android:label="Onboarding"
         tools:layout="@layout/fragment_view_pager">
         <action
-            android:id="@+id/action_viewPagerFragment_to_homeFragment"
-            app:destination="@id/navigation_home"
+            android:id="@+id/action_viewPagerFragment_to_mainTabsFragment"
+            app:destination="@id/mainTabsFragment"
             app:popUpTo="@id/viewPagerFragment"
             app:popUpToInclusive="true" />
     </fragment>
 
-    <!-- Main App Destinations -->
+    <!-- Main Tabs Container (Hosts Home, Workout, Meal, Profile) -->
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.example.nutriority.ui.home.HomeFragment"
-        android:label="Home"
-        tools:layout="@layout/fragment_home">
+        android:id="@+id/mainTabsFragment"
+        android:name="com.example.nutriority.ui.MainTabsFragment"
+        android:label="Main"
+        tools:layout="@layout/fragment_main_tabs">
         <action
-            android:id="@+id/action_navigation_home_to_articleDetailFragment"
+            android:id="@+id/action_mainTabs_to_articleDetailFragment"
             app:destination="@id/articleDetailFragment" />
         <action
-            android:id="@+id/action_navigation_home_to_personalizedWorkoutFragment"
+            android:id="@+id/action_mainTabs_to_personalizedWorkoutFragment"
             app:destination="@id/personalizedWorkoutFragment" />
         <action
-            android:id="@+id/action_navigation_home_to_mealDetailFragment"
+            android:id="@+id/action_mainTabs_to_mealDetailFragment"
             app:destination="@id/mealDetailFragment" />
         <action
-            android:id="@+id/action_navigation_home_to_workoutDetailFragment"
-            app:destination="@id/workoutDetailFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/navigation_workout"
-        android:name="com.example.nutriority.ui.workout.WorkoutFragment"
-        android:label="Workouts"
-        tools:layout="@layout/fragment_workout">
-        <action
-            android:id="@+id/action_workout_to_detail"
+            android:id="@+id/action_mainTabs_to_workoutDetailFragment"
             app:destination="@id/workoutDetailFragment" />
         <action
-            android:id="@+id/action_navigation_workout_to_personalizedWorkoutFragment"
-            app:destination="@id/personalizedWorkoutFragment" />
-        <action
-            android:id="@+id/action_navigation_workout_to_exerciseLibraryFragment"
+            android:id="@+id/action_mainTabs_to_exerciseLibraryFragment"
             app:destination="@id/exerciseLibraryFragment" />
         <action
-            android:id="@+id/action_navigation_workout_to_allWorkoutsFragment"
+            android:id="@+id/action_mainTabs_to_allWorkoutsFragment"
             app:destination="@id/allWorkoutsFragment" />
     </fragment>
 
-    <fragment
-        android:id="@+id/navigation_meal"
-        android:name="com.example.nutriority.ui.meal.MealFragment"
-        android:label="Meals"
-        tools:layout="@layout/fragment_meal">
-        <action
-            android:id="@+id/action_mealFragment_to_mealDetailFragment"
-            app:destination="@id/mealDetailFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/navigation_profile"
-        android:name="com.example.nutriority.ui.profile.ProfileFragment"
-        android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
-
-    <!-- Detail Screens (Updated tools:layout to fragment_*) -->
+    <!-- Detail Screens (Accessed via mainTabsFragment) -->
     <fragment
         android:id="@+id/mealDetailFragment"
         android:name="com.example.nutriority.ui.meal.MealDetailFragment"

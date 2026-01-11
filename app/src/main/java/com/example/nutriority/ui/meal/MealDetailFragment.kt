@@ -6,17 +6,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.databinding.FragmentMealDetailBinding
+import com.example.nutriority.ui.NavigationViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MealDetailFragment : Fragment() {
 
     private var _binding: FragmentMealDetailBinding? = null
     private val binding get() = _binding!!
+    
+    private val navigationViewModel: NavigationViewModel by activityViewModels()
     private var currentMeal: Meal? = null
 
     override fun onCreateView(
@@ -30,23 +37,33 @@ class MealDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set up toolbar back button
+        // Set up toolbar back button to use our custom back logic
         binding.toolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+            navigationViewModel.goBack()
         }
 
-        // Hide title when expanded to match style
+        // Hide title when expanded
         binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
         binding.collapsingToolbar.setCollapsedTitleTextColor(Color.BLACK)
 
-        // Get meal data from arguments
-        val mealJson = arguments?.getString("meal_json")
-        if (mealJson != null) {
-            currentMeal = Gson().fromJson(mealJson, Meal::class.java)
-            displayMealDetails()
-        }
-
         setupToggleGroup()
+        observeMealData()
+    }
+
+    private fun observeMealData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                navigationViewModel.selectedMealJson.collect { json ->
+                    if (json != null) {
+                        currentMeal = Gson().fromJson(json, Meal::class.java)
+                        displayMealDetails()
+                        // Scroll to top when new data loaded
+                        binding.nestedScrollView.scrollTo(0, 0)
+                        binding.appBarLayout.setExpanded(true)
+                    }
+                }
+            }
+        }
     }
 
     private fun displayMealDetails() {
@@ -60,7 +77,12 @@ class MealDetailFragment : Fragment() {
                 binding.mealImage.setImageResource(meal.imageResId)
             }
 
-            showInstructions()
+            // Fix: Use checkedButtonId from the toggle group instead of isChecked on the button
+            if (binding.toggleGroup.checkedButtonId == binding.btnIngredients.id) {
+                showIngredients()
+            } else {
+                showInstructions()
+            }
         }
     }
 
@@ -77,10 +99,12 @@ class MealDetailFragment : Fragment() {
 
     private fun showInstructions() {
         binding.sectionTitle.text = "Instructions"
+        // Update content_recycler_view with instructions
     }
 
     private fun showIngredients() {
         binding.sectionTitle.text = "Ingredients"
+        // Update content_recycler_view with ingredients
     }
 
     override fun onDestroyView() {

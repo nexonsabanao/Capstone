@@ -138,7 +138,7 @@ class SeventhScreen : Fragment() {
 
                 if (saveSuccess) {
                     finishOnboarding()
-                    findNavController().navigate(R.id.action_viewPagerFragment_to_homeFragment)
+                    findNavController().navigate(R.id.action_viewPagerFragment_to_mainTabsFragment)
                 } else {
                     Log.e("OnboardingError", "Failed to save the personalized workout plan.")
                 }

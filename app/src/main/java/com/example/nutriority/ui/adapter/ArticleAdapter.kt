@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.nutriority.R
 import com.example.nutriority.data.model.Article
 import com.example.nutriority.databinding.ItemArticlePreviewBinding
 
@@ -29,8 +31,15 @@ class ArticleAdapter(
             articleReadingTime.text = currentArticle.readingTime
             articleCategory.text = currentArticle.category
 
+            // Use Glide for efficient article preview image loading
             if (currentArticle.imageResId != 0) {
-                articleImage.setImageResource(currentArticle.imageResId)
+                Glide.with(articleImage.context)
+                    .load(currentArticle.imageResId)
+                    .centerCrop()
+                    .placeholder(R.drawable.img_balanced_diet)
+                    .into(articleImage)
+            } else {
+                articleImage.setImageResource(R.drawable.img_balanced_diet)
             }
 
             root.setOnClickListener {

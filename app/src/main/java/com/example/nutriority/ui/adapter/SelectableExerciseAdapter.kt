@@ -4,6 +4,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.nutriority.R
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.databinding.ItemSelectableExerciseBinding
 
@@ -12,7 +14,6 @@ class SelectableExerciseAdapter(
 ) : RecyclerView.Adapter<SelectableExerciseAdapter.ViewHolder>() {
 
     private var allExercises = listOf<Exercise>()
-    // GENIUS FIX: Track selection by NAME and CATEGORY to handle duplicate library entries
     private var selectedKeys = mutableSetOf<String>() 
     private var currentFilter = "Exercise"
 
@@ -23,7 +24,6 @@ class SelectableExerciseAdapter(
     fun setData(exercises: List<Exercise>, initialSelectedExercises: List<Exercise>) {
         allExercises = exercises
         selectedKeys = initialSelectedExercises.map { getExerciseKey(it) }.toMutableSet()
-        Log.d("SelectableAdapter", "Data set: ${exercises.size} templates, ${selectedKeys.size} selected names.")
         updateDisplayList()
     }
 
@@ -33,12 +33,10 @@ class SelectableExerciseAdapter(
             "Cool-down" -> "Cool-down"
             else -> "Exercise"
         }
-        Log.d("SelectableAdapter", "Filter set to: $currentFilter")
         updateDisplayList()
     }
 
     fun getSelectedExercises(): List<Exercise> {
-        // Return one template for each selected name/category key
         return allExercises.filter { getExerciseKey(it) in selectedKeys }
     }
 
@@ -55,7 +53,6 @@ class SelectableExerciseAdapter(
             }
         }
         
-        // Sorting: Selected items always at the top
         displayList = filtered.sortedWith(compareByDescending<Exercise> { getExerciseKey(it) in selectedKeys }
             .thenBy { it.name })
             
@@ -80,8 +77,15 @@ class SelectableExerciseAdapter(
             binding.tvTargetMuscle.text = exercise.targetMuscle
             binding.rbSelect.isChecked = isSelected
             
+            // Use Glide for efficient loading in the Edit Workout dialog
             if (exercise.imageResId != 0) {
-                binding.ivExerciseImage.setImageResource(exercise.imageResId)
+                Glide.with(binding.ivExerciseImage.context)
+                    .load(exercise.imageResId)
+                    .centerCrop()
+                    .placeholder(R.drawable.img_balanced_diet)
+                    .into(binding.ivExerciseImage)
+            } else {
+                binding.ivExerciseImage.setImageResource(R.drawable.img_balanced_diet)
             }
 
             binding.root.setOnClickListener {

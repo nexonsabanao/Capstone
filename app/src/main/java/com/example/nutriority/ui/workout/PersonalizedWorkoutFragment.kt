@@ -10,12 +10,11 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentPersonalizedWorkoutBinding
 import com.example.nutriority.planner.WorkoutPlan
+import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.PersonalizedWorkoutAdapter
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
@@ -29,6 +28,8 @@ class PersonalizedWorkoutFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val userViewModel: UserViewModel by activityViewModels()
+    private val navigationViewModel: NavigationViewModel by activityViewModels()
+    
     private lateinit var workoutAdapter: PersonalizedWorkoutAdapter
 
     override fun onCreateView(
@@ -43,7 +44,7 @@ class PersonalizedWorkoutFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.backButton.setOnClickListener {
-            findNavController().navigateUp()
+            navigationViewModel.goBack()
         }
 
         setupRecyclerView()
@@ -57,22 +58,23 @@ class PersonalizedWorkoutFragment : Fragment() {
             onStartWorkoutClicked = { dayIndex -> handleWorkoutStarted(dayIndex) },
             onRestartWorkoutClicked = { handleRestartWorkout() },
             onWorkoutClicked = { workoutId ->
-                val bundle = Bundle().apply { putInt("workout_id", workoutId) }
-                findNavController().navigate(R.id.action_personalizedWorkoutFragment_to_workoutDetailFragment, bundle)
+                navigationViewModel.navigateToWorkoutDetail(workoutId)
             }
         )
         
         binding.rvWorkoutPlan.apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = workoutAdapter
-            // Prevent flickering during updates
+            if (adapter != workoutAdapter) {
+                adapter = workoutAdapter
+            }
             itemAnimator = null 
         }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            // Lazy UI Fix: Only update when resumed to keep the app smooth
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 userViewModel.user.observe(viewLifecycleOwner) { user ->
                     user?.personalizedPlanJson?.let { jsonString ->
                         try {
@@ -90,7 +92,6 @@ class PersonalizedWorkoutFragment : Fragment() {
     }
 
     private fun updateUI(plan: WorkoutPlan, lastCompletedDay: Int) {
-        // Update header based on progress
         val currentDay = lastCompletedDay + 1
         if (currentDay <= plan.sessions.size) {
             val session = plan.sessions[lastCompletedDay]
@@ -100,7 +101,6 @@ class PersonalizedWorkoutFragment : Fragment() {
             binding.tvTitle.text = "Plan Completed!"
         }
 
-        // Update list
         workoutAdapter.updateData(plan.sessions, lastCompletedDay)
     }
 
@@ -118,7 +118,6 @@ class PersonalizedWorkoutFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.rvWorkoutPlan.adapter = null
         _binding = null
     }
 }

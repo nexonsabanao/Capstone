@@ -1,22 +1,28 @@
 package com.example.nutriority.ui.home
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.nutriority.data.model.Article
 import com.example.nutriority.databinding.FragmentArticleDetailBinding
+import com.example.nutriority.ui.NavigationViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ArticleDetailFragment : Fragment() {
 
     private var _binding: FragmentArticleDetailBinding? = null
     private val binding get() = _binding!!
+    
+    private val navigationViewModel: NavigationViewModel by activityViewModels()
     private var currentArticle: Article? = null
 
     override fun onCreateView(
@@ -30,33 +36,35 @@ class ArticleDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Set up toolbar back button
         binding.toolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+            navigationViewModel.goBack()
         }
 
-        // Set collapsed title color to white so it's visible against the contentScrim
-        binding.collapsingToolbar.setCollapsedTitleTextColor(Color.BLACK)
-        binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
+        observeArticleData()
+    }
 
-        // Get article data from arguments
-        val articleJson = arguments?.getString("article_json")
-        if (articleJson != null) {
-            currentArticle = Gson().fromJson(articleJson, Article::class.java)
-            displayArticleDetails()
+    private fun observeArticleData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                navigationViewModel.selectedArticleJson.collect { json ->
+                    if (json != null) {
+                        currentArticle = Gson().fromJson(json, Article::class.java)
+                        displayArticleDetails()
+                        // Scroll to top
+                        binding.nestedScrollView.scrollTo(0, 0)
+                    }
+                }
+            }
         }
     }
 
     private fun displayArticleDetails() {
         currentArticle?.let { article ->
-            binding.collapsingToolbar.title = article.title
             binding.articleTitle.text = article.title
-            binding.articleAuthor.text = article.author
-            binding.articleReadingTime.text = article.readingTime
-            binding.articleCategory.text = article.category
-
-            val resId = resources.getIdentifier(article.imageName, "drawable", requireContext().packageName)
-            if (resId != 0) {
-                binding.articleImage.setImageResource(resId)
+            binding.articleContent.text = article.content
+            if (article.imageResId != 0) {
+                binding.articleImage.setImageResource(article.imageResId)
             }
         }
     }

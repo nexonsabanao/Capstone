@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.nutriority.R
 import com.example.nutriority.data.model.Workout
 import com.example.nutriority.databinding.ItemPreviewWorkoutBinding
 
@@ -43,8 +45,15 @@ class WorkoutAdapter(
             tvDifficulty.text = currentWorkout.difficulty
             tvDuration.text = currentWorkout.duration
 
+            // Use Glide for efficient image loading
             if (currentWorkout.imageResId != 0) {
-                workoutImage.setImageResource(currentWorkout.imageResId)
+                Glide.with(workoutImage.context)
+                    .load(currentWorkout.imageResId)
+                    .centerCrop()
+                    .placeholder(R.drawable.img_balanced_diet)
+                    .into(workoutImage)
+            } else {
+                workoutImage.setImageResource(R.drawable.img_balanced_diet)
             }
         }
     }
@@ -62,11 +71,9 @@ class WorkoutAdapter(
         }
 
         // 2. Second priority: Check the target muscle string with better ordering
-        // We look for specific primary keywords first to avoid "Shoulder" stealing focus
         val priorityOrder = listOf("Full Body", "Abs", "Legs", "Leg", "Back", "Chest", "Shoulder", "Arms", "Arm")
         
         for (category in priorityOrder) {
-            // Use word boundary check or specific substring check to avoid "Back" matching "Lower Back" incorrectly
             if (targetLower.contains(category.lowercase())) {
                 return when(category) {
                     "Leg", "Legs" -> "Legs"

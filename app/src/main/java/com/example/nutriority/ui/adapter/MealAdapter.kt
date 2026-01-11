@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.nutriority.R
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.databinding.ItemPreviewMealCardBinding
 
@@ -15,11 +17,17 @@ class MealAdapter(private val onItemClick: (Meal) -> Unit) : ListAdapter<Meal, M
 
         fun bind(meal: Meal, onItemClick: (Meal) -> Unit) {
             binding.mealName.text = meal.name
-            // Format the integer calories into a user-friendly string
             binding.mealCalories.text = "${meal.calories} kcal"
 
+            // Use Glide for efficient image loading from resources
             if (meal.imageResId != 0) {
-                binding.mealImage.setImageResource(meal.imageResId)
+                Glide.with(binding.mealImage.context)
+                    .load(meal.imageResId)
+                    .centerCrop()
+                    .placeholder(R.drawable.img_balanced_diet)
+                    .into(binding.mealImage)
+            } else {
+                binding.mealImage.setImageResource(R.drawable.img_balanced_diet)
             }
 
             binding.root.setOnClickListener {
