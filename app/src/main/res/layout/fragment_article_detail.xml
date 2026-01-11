@@ -44,8 +44,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:navigationIconTint="@color/white"
-                app:navigationIcon="@drawable/ic_arrow_back"
+                app:navigationIcon="@drawable/ic_back_boxed"
                 app:layout_collapseMode="pin"/>
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -55,17 +54,18 @@
         android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="40dp"
+        app:behavior_overlapTop="32dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:id="@+id/content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_top_rounded_white"
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
-            android:paddingTop="24dp">
+            android:paddingTop="32dp"
+            android:paddingBottom="40dp">
 
             <TextView
                 android:id="@+id/article_category"

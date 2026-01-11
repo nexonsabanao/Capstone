@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
@@ -36,6 +38,12 @@ class WorkoutFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupRecyclerView()
+        setupClickListeners()
+        observeViewModel()
+    }
+
+    private fun setupClickListeners() {
         binding.starterPlanCard.setOnClickListener {
             findNavController().navigate(R.id.action_navigation_workout_to_personalizedWorkoutFragment)
         }
@@ -47,9 +55,6 @@ class WorkoutFragment : Fragment() {
         binding.showAllButton.setOnClickListener {
             findNavController().navigate(R.id.action_navigation_workout_to_allWorkoutsFragment)
         }
-
-        setupRecyclerView()
-        observeViewModel()
     }
 
     private fun setupRecyclerView() {
@@ -67,15 +72,18 @@ class WorkoutFragment : Fragment() {
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            homeViewModel.allWorkouts.collect { workouts ->
-                workoutAdapter.submitList(workouts)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeViewModel.allWorkouts.collect { workouts ->
+                    if (workouts.isNotEmpty()) {
+                        workoutAdapter.submitList(workouts)
+                    }
+                }
             }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.bodyFocusRecyclerView.adapter = null
         _binding = null
     }
 }

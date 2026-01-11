@@ -48,7 +48,7 @@ class ArticleDetailFragment : Fragment() {
             binding.articleAuthor.text = article.author
             binding.articleReadingTime.text = article.readingTime
             binding.articleCategory.text = article.category
-            
+
             val resId = resources.getIdentifier(article.imageName, "drawable", requireContext().packageName)
             if (resId != 0) {
                 binding.articleImage.setImageResource(resId)

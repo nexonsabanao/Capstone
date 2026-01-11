@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/app_background"
     tools:context=".MainActivity">
 
     <!-- The fragment container filling the screen -->
@@ -20,33 +21,35 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Separator line -->
     <View
         android:id="@+id/separator"
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="@color/material_grey_300"
+        android:background="#E0E0E0"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- The Bottom Navigation View at the bottom -->
+    <!-- Modern Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:minHeight="65dp"
-        android:background="@color/app_background"
+        android:minHeight="72dp"
+        android:background="@color/white"
         android:visibility="gone"
+        app:elevation="16dp"
+        app:itemIconSize="24dp"
+        app:itemPaddingTop="12dp"
+        app:itemPaddingBottom="12dp"
         app:itemTextAppearanceActive="@style/BottomNav.Text"
         app:itemTextAppearanceInactive="@style/BottomNav.Text"
-        app:itemBackground="@drawable/custom_ripple"
-        app:itemActiveIndicatorStyle="@style/NoActiveIndicator"
         app:itemIconTint="@color/bottom_nav_item_color_selector"
         app:itemTextColor="@color/bottom_nav_item_color_selector"
-        app:itemIconPadding="0dp"
-        app:itemPaddingBottom="0dp"
-        app:itemPaddingTop="20dp"
+        app:itemActiveIndicatorStyle="@style/BottomNav.NoIndicator"
+        app:itemRippleColor="@android:color/transparent"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"

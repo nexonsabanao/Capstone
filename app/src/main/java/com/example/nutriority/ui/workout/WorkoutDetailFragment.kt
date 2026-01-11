@@ -51,6 +51,11 @@ class WorkoutDetailFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
+        
+        // Clicks on the new custom boxed back button
+        binding.ivBack.setOnClickListener {
+            findNavController().navigateUp()
+        }
 
         binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
 
@@ -218,10 +223,10 @@ class WorkoutDetailFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoading.collect { isLoading ->
                 if (isLoading) {
-                    binding.exercisesContainer.visibility = View.INVISIBLE
+                    binding.contentContainer.visibility = View.INVISIBLE
                     binding.loadingProgress.visibility = View.VISIBLE
                 } else {
-                    binding.exercisesContainer.visibility = View.VISIBLE
+                    binding.contentContainer.visibility = View.VISIBLE
                     binding.loadingProgress.visibility = View.GONE
                 }
             }

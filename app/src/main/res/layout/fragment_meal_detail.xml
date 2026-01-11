@@ -3,13 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/app_background"
     tools:context=".ui.meal.MealDetailFragment">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar"
+        android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="350dp"
         android:background="@android:color/transparent"
@@ -19,11 +20,15 @@
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:contentScrim="@color/white"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:contentScrim="@color/white"
             app:statusBarScrim="?attr/colorPrimaryVariant"
             app:collapsedTitleTextAppearance="@style/CollapsedAppBar"
-            app:expandedTitleTextAppearance="@style/ExpandedAppBar">
+            app:collapsedTitleGravity="center"
+            app:expandedTitleTextAppearance="@style/ExpandedAppBar"
+            app:expandedTitleMarginStart="24dp"
+            app:expandedTitleMarginEnd="24dp"
+            app:expandedTitleMarginBottom="24dp">
 
             <ImageView
                 android:id="@+id/meal_image"
@@ -43,9 +48,21 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin"
-                app:navigationIconTint="@color/white"
-                app:navigationIcon="@drawable/ic_arrow_back" />
+                app:contentInsetStart="72dp"
+                app:contentInsetEnd="72dp"
+                app:layout_collapseMode="pin" />
+
+            <ImageView
+                android:id="@+id/iv_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/ic_back_boxed"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:layout_collapseMode="pin" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -54,16 +71,18 @@
         android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="100dp"
+        app:behavior_overlapTop="32dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
+            android:id="@+id/content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_top_rounded_white"
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
-            android:paddingTop="24dp">
+            android:paddingTop="32dp"
+            android:paddingBottom="40dp">
 
             <TextView
                 android:id="@+id/meal_name"
@@ -91,6 +110,7 @@
                     app:cardCornerRadius="20dp"
                     app:cardElevation="2dp"
                     app:cardPreventCornerOverlap="false"
+                    app:cardUseCompatPadding="true"
                     app:strokeWidth="0dp">
 
                     <LinearLayout
@@ -98,6 +118,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:orientation="vertical"
+                        android:background="@android:color/transparent"
                         android:padding="16dp">
 
                         <TextView
@@ -130,6 +151,7 @@
                     app:cardCornerRadius="20dp"
                     app:cardElevation="2dp"
                     app:cardPreventCornerOverlap="false"
+                    app:cardUseCompatPadding="true"
                     app:strokeWidth="0dp">
 
                     <LinearLayout
@@ -137,6 +159,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:orientation="vertical"
+                        android:background="@android:color/transparent"
                         android:padding="16dp">
 
                         <TextView
@@ -179,6 +202,7 @@
                 app:cardCornerRadius="24dp"
                 app:cardElevation="2dp"
                 app:cardPreventCornerOverlap="false"
+                app:cardUseCompatPadding="true"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -186,6 +210,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
+                    android:background="@android:color/transparent"
                     android:padding="20dp">
 
                     <com.mikhaellopez.circularprogressbar.CircularProgressBar

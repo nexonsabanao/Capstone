@@ -114,7 +114,12 @@
 
     <style name="BottomNav.Text" parent="TextAppearance.AppCompat.Caption">
         <item name="android:textSize">12sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="BottomNav.NoIndicator" parent="">
+        <item name="colorSecondaryContainer">@android:color/transparent</item>
     </style>
 
     <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">

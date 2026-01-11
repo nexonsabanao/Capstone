@@ -12,7 +12,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="350dp"
         android:background="@android:color/transparent"
         app:elevation="0dp">
 
@@ -24,7 +24,11 @@
             app:contentScrim="@color/white"
             app:statusBarScrim="?attr/colorPrimaryVariant"
             app:collapsedTitleTextAppearance="@style/CollapsedAppBar"
-            app:expandedTitleTextAppearance="@style/ExpandedAppBar">
+            app:collapsedTitleGravity="center"
+            app:expandedTitleTextAppearance="@style/ExpandedAppBar"
+            app:expandedTitleMarginStart="24dp"
+            app:expandedTitleMarginEnd="24dp"
+            app:expandedTitleMarginBottom="24dp">
 
             <ImageView
                 android:id="@+id/workout_banner_image"
@@ -44,29 +48,42 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:navigationIcon="@drawable/ic_arrow_back"
-                app:navigationIconTint="@color/white"
-                app:layout_collapseMode="pin"/>
+                app:contentInsetStart="72dp"
+                app:contentInsetEnd="72dp"
+                app:layout_collapseMode="pin" />
+
+            <!-- Custom Boxed Back Button -->
+            <ImageView
+                android:id="@+id/iv_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/ic_back_boxed"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:layout_collapseMode="pin" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="100dp"
+        app:behavior_overlapTop="32dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:id="@+id/content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_top_rounded_white"
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
-            android:paddingTop="24dp">
+            android:paddingTop="32dp"
+            android:paddingBottom="40dp">
 
             <TextView
                 android:id="@+id/workout_title"

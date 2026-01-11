@@ -49,7 +49,7 @@
             android:background="@drawable/rounded_chip_background_light"
             android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
-            android:textColor="@color/green"
+            android:textColor="#212121"
             android:fontFamily="sans-serif"
             android:textStyle="bold"
             android:textSize="10sp"

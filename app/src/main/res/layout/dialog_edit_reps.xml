@@ -2,19 +2,19 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="28dp"
-    app:cardElevation="8dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="@android:color/white"
     app:cardPreventCornerOverlap="false"
-    app:cardUseCompatPadding="true"
-    app:cardBackgroundColor="@android:color/white">
+    app:cardUseCompatPadding="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@android:color/transparent"
         android:padding="24dp">
 
         <TextView
@@ -44,13 +44,17 @@
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusTopStart="16dp"
-            app:boxStrokeColor="@color/green">
+            app:boxStrokeColor="@color/green"
+            app:hintTextColor="@color/green"
+            app:placeholderTextColor="@color/green"
+            app:cursorColor="@color/green">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edit_reps_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
                 android:hint="Number of reps"
                 android:inputType="number"
                 android:textSize="16sp" />

@@ -130,6 +130,9 @@ class ExerciseDetailFragment : Fragment() {
             .setView(dialogView)
             .create()
 
+        // Set transparent background to allow rounded corners to show correctly
+        currentDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
         repsInput.setText(currentSets[position].value.toString())
 
         btnOk.setOnClickListener {

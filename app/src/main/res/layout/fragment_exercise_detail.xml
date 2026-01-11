@@ -141,11 +141,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:clipToPadding="false"
+                android:paddingVertical="4dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_auto_log"
-                    style="@style/Widget.Material3.Button.TonalButton"
+                    style="@style/Widget.Material3.Button.ElevatedButton"
                     android:layout_width="0dp"
                     android:layout_height="54dp"
                     android:layout_weight="1"
@@ -153,12 +155,15 @@
                     android:fontFamily="sans-serif"
                     android:textStyle="bold"
                     android:text="Auto Log : OFF"
+                    android:textColor="#212121"
                     android:textSize="13sp"
-                    app:cornerRadius="16dp" />
+                    app:backgroundTint="@color/white"
+                    app:cornerRadius="16dp"
+                    app:elevation="2dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_rest"
-                    style="@style/Widget.Material3.Button.TonalButton"
+                    style="@style/Widget.Material3.Button.ElevatedButton"
                     android:layout_width="0dp"
                     android:layout_height="54dp"
                     android:layout_weight="1"
@@ -166,8 +171,11 @@
                     android:fontFamily="sans-serif"
                     android:textStyle="bold"
                     android:text="Rest : ON"
+                    android:textColor="#212121"
                     android:textSize="13sp"
-                    app:cornerRadius="16dp" />
+                    app:backgroundTint="@color/white"
+                    app:cornerRadius="16dp"
+                    app:elevation="2dp" />
             </LinearLayout>
 
             <TextView
@@ -185,16 +193,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_exercise_set" />
-
-            <include
-                android:id="@+id/item_add_set"
-                layout="@layout/item_add_set"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="24dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
@@ -218,11 +219,14 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_check"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:padding="0dp"
-                app:cornerRadius="20dp"
+                app:cornerRadius="16dp"
+                app:backgroundTint="#F5F5F5"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp"
                 app:icon="@android:drawable/ic_media_next"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
