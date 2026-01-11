@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.home
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -32,6 +33,10 @@ class ArticleDetailFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
+
+        // Set collapsed title color to white so it's visible against the contentScrim
+        binding.collapsingToolbar.setCollapsedTitleTextColor(Color.BLACK)
+        binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
 
         // Get article data from arguments
         val articleJson = arguments?.getString("article_json")

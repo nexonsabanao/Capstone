@@ -11,15 +11,17 @@
     app:cardCornerRadius="20dp"
     app:cardElevation="2dp"
     app:cardPreventCornerOverlap="false"
+    app:cardUseCompatPadding="true"
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
         android:padding="12dp">
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/workout_image"
+            android:id="@+id/workoutImage"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:scaleType="centerCrop"
@@ -32,7 +34,7 @@
             tools:ignore="ContentDescription" />
 
         <TextView
-            android:id="@+id/workout_name"
+            android:id="@+id/workoutName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -44,20 +46,24 @@
             android:textStyle="bold"
             android:textSize="18sp"
             android:textColor="#212121"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="14sp"
+            app:autoSizeMaxTextSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/workout_image"
+            app:layout_constraintStart_toEndOf="@+id/workoutImage"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="HIIT Core Burner" />
 
         <LinearLayout
-            android:id="@+id/workout_meta"
+            android:id="@+id/workoutMeta"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            app:layout_constraintStart_toStartOf="@+id/workout_name"
-            app:layout_constraintTop_toBottomOf="@+id/workout_name">
+            app:layout_constraintStart_toStartOf="@+id/workoutName"
+            app:layout_constraintTop_toBottomOf="@+id/workoutName"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
                 android:id="@+id/tvDifficulty"
@@ -66,6 +72,9 @@
                 android:fontFamily="sans-serif-medium"
                 android:textSize="12sp"
                 android:textColor="@color/green"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="9sp"
+                app:autoSizeMaxTextSize="12sp"
                 tools:text="Intermediate" />
 
             <TextView
@@ -76,12 +85,15 @@
                 android:textColor="#9E9E9E" />
 
             <TextView
-                android:id="@+id/workout_target"
+                android:id="@+id/workoutTarget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
                 android:textSize="12sp"
                 android:textColor="#757575"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="9sp"
+                app:autoSizeMaxTextSize="12sp"
                 tools:text="Full Body" />
         </LinearLayout>
 
@@ -91,12 +103,13 @@
             android:layout_marginTop="8dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            app:layout_constraintStart_toStartOf="@+id/workout_name"
-            app:layout_constraintTop_toBottomOf="@+id/workout_meta">
+            app:layout_constraintStart_toStartOf="@+id/workoutName"
+            app:layout_constraintTop_toBottomOf="@+id/workoutMeta">
 
             <ImageView
                 android:layout_width="14dp"
                 android:layout_height="14dp"
+                android:importantForAccessibility="no"
                 android:src="@drawable/ic_time"
                 app:tint="#757575" />
 
@@ -108,6 +121,9 @@
                 android:fontFamily="sans-serif"
                 android:textSize="12sp"
                 android:textColor="#757575"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="12sp"
                 tools:text="30 min" />
         </LinearLayout>
 

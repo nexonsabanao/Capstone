@@ -20,20 +20,18 @@
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@android:color/transparent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:contentScrim="@color/white"
             app:statusBarScrim="?attr/colorPrimaryVariant"
             app:collapsedTitleTextAppearance="@style/CollapsedAppBar"
-            app:collapsedTitleGravity="center"
-            app:expandedTitleTextAppearance="@style/ExpandedAppBar"
-            app:expandedTitleMarginStart="24dp"
-            app:expandedTitleMarginEnd="24dp"
-            app:expandedTitleMarginBottom="24dp">
+            app:expandedTitleTextAppearance="@style/ExpandedAppBar">
 
             <ImageView
                 android:id="@+id/workout_banner_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:importantForAccessibility="no"
                 android:scaleType="centerCrop"
                 android:src="@drawable/img_full_body_pose"
                 app:layout_collapseMode="parallax" />
@@ -48,21 +46,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:contentInsetStart="72dp"
-                app:contentInsetEnd="72dp"
-                app:layout_collapseMode="pin" />
-
-            <!-- Custom Boxed Back Button -->
-            <ImageView
-                android:id="@+id/iv_back"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:src="@drawable/ic_back_boxed"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                app:navigationIcon="@drawable/ic_back_boxed"
                 app:layout_collapseMode="pin" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -76,23 +60,26 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
-            android:id="@+id/content_container"
+            android:id="@+id/contentContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_top_rounded_white"
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
             android:paddingTop="32dp"
-            android:paddingBottom="40dp">
+            android:paddingBottom="100dp">
 
             <TextView
-                android:id="@+id/workout_title"
+                android:id="@+id/workoutTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
                 android:textStyle="bold"
                 android:textColor="#212121"
                 android:textSize="28sp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="20sp"
+                app:autoSizeMaxTextSize="28sp"
                 tools:text="Full Body Beginner" />
 
             <LinearLayout
@@ -122,13 +109,16 @@
                         android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/workout_duration"
+                            android:id="@+id/workoutDuration"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans-serif"
                             android:textStyle="bold"
                             android:textColor="@color/green"
                             android:textSize="20sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="14sp"
+                            app:autoSizeMaxTextSize="20sp"
                             tools:text="16 mins" />
 
                         <TextView
@@ -138,7 +128,10 @@
                             android:text="TIME"
                             android:textColor="#757575"
                             android:textSize="12sp"
-                            android:letterSpacing="0.1" />
+                            android:letterSpacing="0.1"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="8sp"
+                            app:autoSizeMaxTextSize="12sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -163,13 +156,16 @@
                         android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/workout_exercise_count"
+                            android:id="@+id/workoutExerciseCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans-serif"
                             android:textStyle="bold"
                             android:textColor="@color/green"
                             android:textSize="20sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="14sp"
+                            app:autoSizeMaxTextSize="20sp"
                             tools:text="19" />
 
                         <TextView
@@ -179,7 +175,10 @@
                             android:text="EXERCISES"
                             android:textColor="#757575"
                             android:textSize="12sp"
-                            android:letterSpacing="0.1" />
+                            android:letterSpacing="0.1"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="8sp"
+                            app:autoSizeMaxTextSize="12sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -192,6 +191,7 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/tvExercisesTitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -199,10 +199,13 @@
                     android:textStyle="bold"
                     android:text="Exercises"
                     android:textColor="#212121"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="16sp"
+                    app:autoSizeMaxTextSize="20sp" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/add_exercise_button"
+                    android:id="@+id/addExerciseButton"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -210,17 +213,36 @@
                     android:textColor="@color/green"
                     android:fontFamily="sans-serif"
                     android:textStyle="bold"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeMaxTextSize="14sp" />
             </LinearLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/exercises_recycler_view"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false"
-                tools:itemCount="4"
-                tools:listitem="@layout/item_exercise" />
+                android:layout_marginTop="8dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/exercisesRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    tools:itemCount="4"
+                    tools:listitem="@layout/item_exercise" />
+
+                <ProgressBar
+                    android:id="@+id/loadingProgress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="32dp"
+                    android:indeterminateTint="@color/green"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </FrameLayout>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -235,7 +257,7 @@
                 app:cardUseCompatPadding="true">
 
                 <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switch_include_warmup_cooldown"
+                    android:id="@+id/switchIncludeWarmupCooldown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="20dp"
@@ -249,20 +271,11 @@
                     app:thumbTint="@android:color/white" />
             </com.google.android.material.card.MaterialCardView>
 
-            <ProgressBar
-                android:id="@+id/loading_progress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="40dp"
-                android:indeterminateTint="@color/green"
-                android:visibility="gone" />
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/start_button"
+        android:id="@+id/startButton"
         android:layout_width="160dp"
         android:layout_height="64dp"
         android:layout_gravity="bottom|center_horizontal"
@@ -273,6 +286,9 @@
         android:textColor="@color/white"
         android:backgroundTint="@color/primary_dark"
         app:cornerRadius="32dp"
-        app:elevation="8dp"/>
+        app:elevation="8dp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="16sp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

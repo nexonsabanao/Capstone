@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/app_background"
@@ -23,6 +22,7 @@
             android:id="@+id/backButton"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:importantForAccessibility="no"
             android:padding="8dp"
             android:clickable="true"
             android:focusable="true"
@@ -39,7 +39,10 @@
             android:gravity="center_horizontal"
             android:text="How old are you?"
             android:textColor="#212121"
-            android:textSize="32sp" />
+            android:textSize="32sp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="24sp"
+            app:autoSizeMaxTextSize="32sp" />
 
         <TextView
             android:id="@+id/subtitleTextView"
@@ -50,7 +53,10 @@
             android:gravity="center_horizontal"
             android:text="Age helps us calculate your BMI and goal"
             android:textColor="#757575"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="12sp"
+            app:autoSizeMaxTextSize="16sp" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView

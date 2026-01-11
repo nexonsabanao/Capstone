@@ -20,15 +20,15 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/btn_back"
+            android:id="@+id/btnBack"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:importantForAccessibility="no"
             android:padding="8dp"
             android:src="@drawable/ic_arrow_back"
             app:tint="#212121" />
 
         <TextView
-            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
@@ -41,7 +41,7 @@
 
     <!-- LOADING STATE -->
     <ProgressBar
-        android:id="@+id/loading_progress"
+        android:id="@+id/loadingProgress"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:indeterminateTint="@color/green"
@@ -52,7 +52,7 @@
 
     <!-- MAIN CONTENT CONTAINER -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/content_layout"
+        android:id="@+id/contentLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:visibility="gone"
@@ -62,7 +62,7 @@
 
         <!-- Editable Workout Name Layout -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/workout_name_layout"
+            android:id="@+id/workoutNameLayout"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
             tools:visibility="visible">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_workout_name"
+                android:id="@+id/etWorkoutName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
@@ -93,7 +93,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="workout_name_layout" />
+            app:constraint_referenced_ids="workoutNameLayout" />
 
         <LinearLayout
             android:id="@+id/filter_container"
@@ -106,14 +106,13 @@
             app:layout_constraintTop_toBottomOf="@id/name_barrier">
 
             <HorizontalScrollView
-                android:id="@+id/chip_scroll_view"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:scrollbars="none">
 
                 <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/category_chip_group"
+                    android:id="@+id/categoryChipGroup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:selectionRequired="true"
@@ -127,7 +126,6 @@
                         android:text="Warm-up" />
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_exercises"
                         style="@style/FilterChip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -144,7 +142,7 @@
             </HorizontalScrollView>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_reset"
+                android:id="@+id/btnReset"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -157,7 +155,7 @@
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_select_exercises"
+            android:id="@+id/rvSelectExercises"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="16dp"
@@ -168,7 +166,6 @@
             tools:listitem="@layout/item_selectable_exercise" />
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/bottom_action_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardBackgroundColor="@android:color/white"
@@ -178,7 +175,7 @@
             app:layout_constraintBottom_toBottomOf="parent">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_save"
+                android:id="@+id/btnSave"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:layout_margin="24dp"

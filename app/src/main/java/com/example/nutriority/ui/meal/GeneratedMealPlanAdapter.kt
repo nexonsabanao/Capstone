@@ -23,7 +23,7 @@ sealed class MealListItem {
         override val id: String = dateText
     }
 
-    data class MealItem(val meal: Meal, val isToday: Boolean) : MealListItem() {
+    data class MealItem(val meal: Meal) : MealListItem() {
         // Create a unique ID for each meal item for DiffUtil to work correctly
         override val id: String = meal.name + meal.time
     }

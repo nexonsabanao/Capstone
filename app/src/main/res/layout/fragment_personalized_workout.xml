@@ -26,15 +26,16 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/back_button"
+                android:id="@+id/backButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:importantForAccessibility="no"
                 android:padding="8dp"
                 android:src="@drawable/ic_arrow_back"
                 app:tint="#212121" />
 
             <TextView
-                android:id="@+id/tv_title"
+                android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
@@ -42,12 +43,15 @@
                 android:textStyle="bold"
                 android:text="My Plan"
                 android:textColor="#212121"
-                android:textSize="24sp" />
+                android:textSize="24sp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="18sp"
+                app:autoSizeMaxTextSize="24sp" />
         </LinearLayout>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_workout_plan"
+        android:id="@+id/rvWorkoutPlan"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"

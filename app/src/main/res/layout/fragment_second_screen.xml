@@ -14,6 +14,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="56dp"
+        android:importantForAccessibility="no"
         android:padding="8dp"
         android:clickable="true"
         android:focusable="true"
@@ -34,6 +35,9 @@
         android:text="About You"
         android:textColor="#212121"
         android:textSize="32sp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="24sp"
+        app:autoSizeMaxTextSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/backButton" />
@@ -48,6 +52,9 @@
         android:text="Help us personalize your journey"
         android:textColor="#757575"
         android:textSize="16sp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="16sp"
         app:layout_constraintEnd_toEndOf="@id/titleTextView"
         app:layout_constraintStart_toStartOf="@id/titleTextView"
         app:layout_constraintTop_toBottomOf="@id/titleTextView" />
@@ -64,7 +71,6 @@
         app:layout_constraintTop_toBottomOf="@id/subtitleTextView">
 
         <LinearLayout
-            android:id="@+id/card_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -72,7 +78,6 @@
 
             <!-- Height Card -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/heightCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@android:color/white"
@@ -89,7 +94,6 @@
                     android:padding="24dp">
 
                     <TextView
-                        android:id="@+id/heightLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif"
@@ -97,6 +101,9 @@
                         android:text="Height"
                         android:textColor="#212121"
                         android:textSize="20sp"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="16sp"
+                        app:autoSizeMaxTextSize="20sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -119,8 +126,9 @@
                             android:paddingHorizontal="0dp"
                             android:minWidth="0dp"
                             android:text="cm"
+                            android:textColor="@color/toggle_button_text_color"
                             android:textSize="12sp"
-                            app:backgroundTint="#F5F5F5" />
+                            app:backgroundTint="@color/toggle_button_background_color" />
 
                         <Button
                             android:id="@+id/btnFt"
@@ -132,8 +140,9 @@
                             android:paddingHorizontal="0dp"
                             android:minWidth="0dp"
                             android:text="ft"
+                            android:textColor="@color/toggle_button_text_color"
                             android:textSize="12sp"
-                            app:backgroundTint="#F5F5F5" />
+                            app:backgroundTint="@color/toggle_button_background_color" />
                     </com.google.android.material.button.MaterialButtonToggleGroup>
 
                     <LinearLayout
@@ -154,6 +163,9 @@
                             android:textStyle="bold"
                             android:textColor="#212121"
                             android:textSize="40sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="28sp"
+                            app:autoSizeMaxTextSize="40sp"
                             tools:text="170" />
 
                         <TextView
@@ -165,6 +177,9 @@
                             android:fontFamily="sans-serif-medium"
                             android:textColor="#757575"
                             android:textSize="16sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="12sp"
+                            app:autoSizeMaxTextSize="16sp"
                             tools:text="cm" />
                     </LinearLayout>
 
@@ -190,7 +205,6 @@
 
             <!-- Weight Card -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/weightCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -208,7 +222,6 @@
                     android:padding="24dp">
 
                     <TextView
-                        android:id="@+id/weightLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif"
@@ -216,6 +229,9 @@
                         android:text="Weight"
                         android:textColor="#212121"
                         android:textSize="20sp"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="16sp"
+                        app:autoSizeMaxTextSize="20sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -238,8 +254,9 @@
                             android:paddingHorizontal="0dp"
                             android:minWidth="0dp"
                             android:text="kg"
+                            android:textColor="@color/toggle_button_text_color"
                             android:textSize="12sp"
-                            app:backgroundTint="#F5F5F5" />
+                            app:backgroundTint="@color/toggle_button_background_color" />
 
                         <Button
                             android:id="@+id/btnLbs"
@@ -251,8 +268,9 @@
                             android:paddingHorizontal="0dp"
                             android:minWidth="0dp"
                             android:text="lbs"
+                            android:textColor="@color/toggle_button_text_color"
                             android:textSize="12sp"
-                            app:backgroundTint="#F5F5F5" />
+                            app:backgroundTint="@color/toggle_button_background_color" />
                     </com.google.android.material.button.MaterialButtonToggleGroup>
 
                     <LinearLayout
@@ -273,6 +291,9 @@
                             android:textStyle="bold"
                             android:textColor="#212121"
                             android:textSize="40sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="28sp"
+                            app:autoSizeMaxTextSize="40sp"
                             tools:text="60" />
 
                         <TextView
@@ -284,6 +305,9 @@
                             android:fontFamily="sans-serif-medium"
                             android:textColor="#757575"
                             android:textSize="16sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="12sp"
+                            app:autoSizeMaxTextSize="16sp"
                             tools:text="kg" />
                     </LinearLayout>
 
@@ -299,6 +323,7 @@
                         app:ruler_indicatorWidth="4dp"
                         app:ruler_maxValue="150"
                         app:ruler_minValue="30"
+                        app:ruler_tickInterval="7dp"
                         app:ruler_textColor="#212121"
                         app:ruler_tickColor="#E0E0E0"
                         app:ruler_majorTickFactor="10"
@@ -325,6 +350,9 @@
         android:textSize="16sp"
         android:letterSpacing="0.05"
         app:cornerRadius="32dp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

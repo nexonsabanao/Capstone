@@ -26,9 +26,10 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/back_button"
+                android:id="@+id/backButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:importantForAccessibility="no"
                 android:padding="8dp"
                 android:src="@drawable/ic_arrow_back"
                 app:tint="#212121" />
@@ -42,12 +43,15 @@
                 android:textStyle="bold"
                 android:text="All Workouts"
                 android:textColor="#212121"
-                android:textSize="24sp" />
+                android:textSize="24sp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="18sp"
+                app:autoSizeMaxTextSize="24sp" />
         </LinearLayout>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/all_workouts_recycler_view"
+        android:id="@+id/allWorkoutsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"

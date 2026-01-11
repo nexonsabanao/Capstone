@@ -10,43 +10,15 @@
     <string name="male">MALE</string>
     <string name="female">FEMALE</string>
 
-    <string name="onboarding_first_screen_title">Hello this is the sample first page</string>
     <string name="action_next">Next</string>
 
     <string name="app_logo_description">The Nutriority app logo</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <!-- ADD THIS STRING FOR THE TERMS -->
-    <string name="terms_and_services_placeholder">
-        "By clicking \'Accept and Continue\', you agree to our Terms of Service and Privacy
-        Policy.\n\n"
-        "1. Introduction\n"
-        "Welcome to Nutriority. These are the terms and conditions governing your access to and use
-        of the application.\n\n"
-        "2. Use of the App\n"
-        "You agree to use the app only for lawful purposes and in a way that does not infringe the
-        rights of, restrict or inhibit anyone else\'s use and enjoyment of the app.\n\n"
-        "3. Privacy Policy\n"
-        "Our Privacy Policy, which sets out how we will use your information, can be found at [Your
-        Privacy Policy Link]. By using this App, you consent to the processing described therein and
-        warrant that all data provided by you is accurate.\n\n"
-        "4. Intellectual Property\n"
-        "The intellectual property rights in all software and content made available to you on or
-        through this App remains the property of Nutriority or its licensors.\n\n"
-        "Please read these terms carefully. This is a placeholder text."
-    </string>
-    <string name="reset_exercise_underlined">Reset</string>
-    <string name="add_exercise_underlined">Edit</string>
-    <string name="height_format">%.1f cm</string>
-    <string name="weight_format">%.1f kg</string>
-    <string name="no_plan_available">No personalized plan available — complete onboarding to create one.</string>
-    <string name="no_age_available">Age not set</string>
-    <string name="no_goal_available">Goal not set</string>
 
     <string name="age_error_invalid">Please enter a valid age</string>
     <string name="age_error_underage">You must be at least 15 years old</string>
     <string name="age_error_over_limit">We don\'t recommend you to use the app</string>
-    <string name="check_button_content_description">Check button</string>
 </resources>
     

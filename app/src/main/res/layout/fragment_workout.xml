@@ -26,7 +26,10 @@
             android:fontFamily="sans-serif-medium"
             android:text="Your training,"
             android:textColor="#757575"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="12sp"
+            app:autoSizeMaxTextSize="16sp" />
 
         <TextView
             android:id="@+id/workout_title"
@@ -35,7 +38,10 @@
             android:text="Workouts"
             android:textColor="#212121"
             android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="24sp"
+            app:autoSizeMaxTextSize="32sp" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -82,7 +88,10 @@
                         android:textStyle="bold"
                         android:text="TRAINER"
                         android:textColor="@android:color/white"
-                        android:background="@drawable/rounded_chip_selected_dark" />
+                        android:background="@drawable/rounded_chip_selected_dark"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeMaxTextSize="14sp" />
 
                     <TextView
                         android:id="@+id/tabCustom"
@@ -93,7 +102,10 @@
                         android:fontFamily="sans-serif"
                         android:textStyle="bold"
                         android:text="CUSTOM"
-                        android:textColor="#757575" />
+                        android:textColor="#757575"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeMaxTextSize="14sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -107,12 +119,15 @@
                 android:textStyle="bold"
                 android:text="Discover"
                 android:textColor="#212121"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="16sp"
+                app:autoSizeMaxTextSize="20sp" />
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/exercises_library_card"
+                android:id="@+id/exercisesLibraryCard"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 app:cardBackgroundColor="@color/green"
                 app:cardCornerRadius="24dp"
@@ -121,7 +136,7 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:padding="20dp">
 
                     <TextView
@@ -133,10 +148,14 @@
                         android:text="Exercise Library"
                         android:textColor="@android:color/white"
                         android:textSize="22sp"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="18sp"
+                        app:autoSizeMaxTextSize="22sp"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent" />
 
                     <TextView
+                        android:id="@+id/tvLibSub"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
@@ -144,16 +163,22 @@
                         android:text="Browse 500+ movements"
                         android:textColor="#E0F2F1"
                         android:textSize="14sp"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="12sp"
+                        app:autoSizeMaxTextSize="14sp"
                         app:layout_constraintTop_toBottomOf="@id/tvLibTitle"
                         app:layout_constraintStart_toStartOf="parent" />
 
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/ic_library_books_24"
+                        android:layout_marginTop="12dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_play_arrow"
                         app:tint="@color/white"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvLibSub" />
                     
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -168,10 +193,13 @@
                 android:textStyle="bold"
                 android:text="Current Plan"
                 android:textColor="#212121"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="16sp"
+                app:autoSizeMaxTextSize="20sp" />
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/starter_plan_card"
+                android:id="@+id/starterPlanCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -199,7 +227,10 @@
                             android:textStyle="bold"
                             android:text="Starter Plan"
                             android:textColor="@android:color/white"
-                            android:textSize="22sp" />
+                            android:textSize="22sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="18sp"
+                            app:autoSizeMaxTextSize="22sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -208,7 +239,10 @@
                             android:fontFamily="sans-serif-medium"
                             android:text="7 Days • Beginner"
                             android:textColor="@color/green"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="12sp"
+                            app:autoSizeMaxTextSize="14sp" />
                     </LinearLayout>
 
                     <ImageView
@@ -231,6 +265,7 @@
                 android:paddingHorizontal="4dp">
 
                 <TextView
+                    android:id="@+id/workoutsLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -238,10 +273,13 @@
                     android:textStyle="bold"
                     android:text="Body Focus"
                     android:textColor="#212121"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="16sp"
+                    app:autoSizeMaxTextSize="20sp" />
 
                 <TextView
-                    android:id="@+id/show_all_button"
+                    android:id="@+id/showAllButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif"
@@ -249,7 +287,10 @@
                     android:text="SEE ALL"
                     android:textColor="@color/green"
                     android:textSize="14sp"
-                    android:letterSpacing="0.05" />
+                    android:letterSpacing="0.05"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="12sp"
+                    app:autoSizeMaxTextSize="14sp" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView

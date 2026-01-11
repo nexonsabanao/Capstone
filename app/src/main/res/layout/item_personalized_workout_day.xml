@@ -18,6 +18,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="132dp"
         android:background="@android:color/transparent"
         android:padding="16dp">
 
@@ -42,6 +43,9 @@
             android:textStyle="bold"
             android:textColor="#212121"
             android:textSize="22sp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="18sp"
+            app:autoSizeMaxTextSize="22sp"
             app:layout_constraintEnd_toStartOf="@+id/iv_workout_image"
             app:layout_constraintStart_toEndOf="@+id/timeline_dot"
             app:layout_constraintTop_toTopOf="parent"
@@ -55,13 +59,17 @@
             android:fontFamily="sans-serif-medium"
             android:textColor="#757575"
             android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="@+id/tv_day_title"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="11sp"
+            app:autoSizeMaxTextSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/iv_workout_image"
             app:layout_constraintStart_toStartOf="@+id/tv_day_title"
             app:layout_constraintTop_toBottomOf="@+id/tv_day_title"
             tools:text="5 min • 61.5 kcal" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_start"
+            style="@style/Widget.Material3.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -69,12 +77,16 @@
             android:textStyle="bold"
             android:text="START"
             android:textColor="@color/white"
-            android:backgroundTint="@color/primary_dark"
+            app:backgroundTint="@color/green"
             android:visibility="gone"
             app:cornerRadius="16dp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="12sp"
+            app:autoSizeMaxTextSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tv_day_details"
             app:layout_constraintTop_toBottomOf="@+id/tv_day_details"
+            app:layout_constraintVertical_bias="1.0"
             tools:visibility="visible" />
 
         <com.google.android.material.imageview.ShapeableImageView

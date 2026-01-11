@@ -90,7 +90,7 @@ class MealFragment : Fragment() {
                     val isToday = dayLabel.startsWith("Today")
 
                     listOf(MealListItem.HeaderItem(dayLabel)) + dailyMeals.map { meal ->
-                        MealListItem.MealItem(meal, isToday)
+                        MealListItem.MealItem(meal)
                     }
                 }.flatten()
                 mealAdapter.submitList(mealListItems)

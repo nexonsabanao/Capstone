@@ -35,8 +35,9 @@ class MealDetailFragment : Fragment() {
             findNavController().navigateUp()
         }
 
-        // Hide title when expanded to match WorkoutDetail style
+        // Hide title when expanded to match style
         binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
+        binding.collapsingToolbar.setCollapsedTitleTextColor(Color.BLACK)
 
         // Get meal data from arguments
         val mealJson = arguments?.getString("meal_json")

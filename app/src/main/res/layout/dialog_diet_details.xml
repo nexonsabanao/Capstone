@@ -29,7 +29,7 @@
             tools:src="@tools:sample/backgrounds/scenic" />
 
         <TextView
-            android:id="@+id/dialog_title"
+            android:id="@+id/dialogTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
@@ -68,7 +68,7 @@
             tools:text="This is the detailed description of the diet plan. It explains the benefits and what the diet consists of in high protein and low carb format." />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/dialog_ok_button"
+            android:id="@+id/dialogOkButton"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="32dp"

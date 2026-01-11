@@ -8,7 +8,6 @@
 
     <!-- Daily Calories Card -->
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/caloriesCard"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginEnd="8dp"
@@ -61,7 +60,6 @@
                 tools:text="1280" />
 
             <TextView
-                android:id="@+id/caloriesLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
@@ -133,7 +131,6 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/log_macros_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
@@ -154,19 +151,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/macroTitle">
 
-                <include
-                    android:id="@+id/protein_item"
-                    layout="@layout/item_macro_progress" />
+                <include layout="@layout/item_macro_progress" />
 
                 <include
-                    android:id="@+id/fat_item"
                     layout="@layout/item_macro_progress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp" />
 
                 <include
-                    android:id="@+id/carbs_item"
                     layout="@layout/item_macro_progress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -177,7 +170,6 @@
 
     <!-- Food Intake Header -->
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/foodHeaderCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -211,7 +203,6 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/totalKcal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"

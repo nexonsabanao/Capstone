@@ -25,16 +25,21 @@
             android:fontFamily="sans-serif-medium"
             android:text="Your progress,"
             android:textColor="#757575"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="12sp"
+            app:autoSizeMaxTextSize="16sp" />
 
         <TextView
-            android:id="@+id/profile_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Profile"
             android:textColor="#212121"
             android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="24sp"
+            app:autoSizeMaxTextSize="32sp" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -81,11 +86,13 @@
                         android:text="Activity Overview"
                         android:textColor="#212121"
                         android:textSize="20sp"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="16sp"
+                        app:autoSizeMaxTextSize="20sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <LinearLayout
-                        android:id="@+id/stats_container"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
@@ -105,11 +112,11 @@
                             <ImageView
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
+                                android:importantForAccessibility="no"
                                 android:src="@drawable/ic_workout_fl"
                                 app:tint="@color/green" />
 
                             <TextView
-                                android:id="@+id/stat_workouts"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -117,7 +124,10 @@
                                 android:textStyle="bold"
                                 android:text="0"
                                 android:textColor="#212121"
-                                android:textSize="22sp" />
+                                android:textSize="22sp"
+                                app:autoSizeTextType="uniform"
+                                app:autoSizeMinTextSize="16sp"
+                                app:autoSizeMaxTextSize="22sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -127,7 +137,10 @@
                                 android:textColor="#757575"
                                 android:textSize="12sp"
                                 android:letterSpacing="0.05"
-                                android:textAllCaps="true" />
+                                android:textAllCaps="true"
+                                app:autoSizeTextType="uniform"
+                                app:autoSizeMinTextSize="8sp"
+                                app:autoSizeMaxTextSize="12sp" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -140,11 +153,11 @@
                             <ImageView
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
+                                android:importantForAccessibility="no"
                                 android:src="@drawable/ic_fire"
                                 app:tint="@color/green" />
 
                             <TextView
-                                android:id="@+id/stat_kcal"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -152,7 +165,10 @@
                                 android:textStyle="bold"
                                 android:text="0"
                                 android:textColor="#212121"
-                                android:textSize="22sp" />
+                                android:textSize="22sp"
+                                app:autoSizeTextType="uniform"
+                                app:autoSizeMinTextSize="16sp"
+                                app:autoSizeMaxTextSize="22sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -162,7 +178,10 @@
                                 android:textColor="#757575"
                                 android:textSize="12sp"
                                 android:letterSpacing="0.05"
-                                android:textAllCaps="true" />
+                                android:textAllCaps="true"
+                                app:autoSizeTextType="uniform"
+                                app:autoSizeMinTextSize="8sp"
+                                app:autoSizeMaxTextSize="12sp" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -175,11 +194,11 @@
                             <ImageView
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
+                                android:importantForAccessibility="no"
                                 android:src="@drawable/ic_time"
                                 app:tint="@color/green" />
 
                             <TextView
-                                android:id="@+id/stat_minutes"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -187,7 +206,10 @@
                                 android:textStyle="bold"
                                 android:text="0"
                                 android:textColor="#212121"
-                                android:textSize="22sp" />
+                                android:textSize="22sp"
+                                app:autoSizeTextType="uniform"
+                                app:autoSizeMinTextSize="16sp"
+                                app:autoSizeMaxTextSize="22sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -197,7 +219,10 @@
                                 android:textColor="#757575"
                                 android:textSize="12sp"
                                 android:letterSpacing="0.05"
-                                android:textAllCaps="true" />
+                                android:textAllCaps="true"
+                                app:autoSizeTextType="uniform"
+                                app:autoSizeMinTextSize="8sp"
+                                app:autoSizeMaxTextSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,7 +22,7 @@ class ExerciseSetAdapter(
         val diffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
             override fun getOldListSize(): Int = oldList.size
             override fun getNewListSize(): Int = newList.size
-            
+
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 return oldList[oldItemPosition].id == newList[newItemPosition].id
             }
@@ -31,10 +31,10 @@ class ExerciseSetAdapter(
                 return oldList[oldItemPosition] == newList[newItemPosition]
             }
         })
-        
+
         sets = newList
         diffResult.dispatchUpdatesTo(this)
-        
+
         // BUG FIX: When moving between 1 and 2 items, we must re-bind the first item
         // to enable/disable the delete button correctly while keeping animations.
         if (oldList.size <= 2 || newList.size <= 2) {
@@ -60,7 +60,7 @@ class ExerciseSetAdapter(
         fun bind(set: ExerciseSet, onRepClick: (Int) -> Unit, onDeleteClick: (Int) -> Unit, totalSets: Int) {
             binding.setNumber.text = set.setNumber.toString()
             binding.repsCount.text = set.value.toString()
-            
+
             binding.unitLabel.text = if (set.isDuration) "sec" else "rep"
 
             val context = itemView.context

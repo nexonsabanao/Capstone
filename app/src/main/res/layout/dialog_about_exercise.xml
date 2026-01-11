@@ -7,7 +7,6 @@
     android:background="@android:color/transparent">
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:cardBackgroundColor="@color/white"
@@ -39,12 +38,12 @@
                 android:paddingVertical="20dp">
 
                 <TextView
-                    android:id="@+id/tv_exercise_name"
+                    android:id="@+id/tvExerciseName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:layout_toStartOf="@id/btn_close"
+                    android:layout_toStartOf="@id/btnClose"
                     android:layout_marginEnd="12dp"
                     android:fontFamily="sans-serif"
                     android:textStyle="bold"
@@ -53,12 +52,13 @@
                     tools:text="INCHWORMS" />
 
                 <ImageView
-                    android:id="@+id/btn_close"
+                    android:id="@+id/btnClose"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:background="?attr/selectableItemBackgroundBorderless"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_close"
                     app:tint="#BDBDBD" />
             </RelativeLayout>
@@ -92,9 +92,10 @@
                             android:background="@android:color/transparent">
 
                             <ImageView
-                                android:id="@+id/iv_exercise_visual"
+                                android:id="@+id/ivExerciseVisual"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:importantForAccessibility="no"
                                 android:scaleType="centerInside"
                                 android:padding="24dp"
                                 tools:src="@tools:sample/backgrounds/scenic" />
@@ -112,7 +113,7 @@
                         android:textSize="18sp" />
 
                     <TextView
-                        android:id="@+id/tv_instructions"
+                        android:id="@+id/tvInstructions"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
@@ -132,7 +133,7 @@
                         android:textSize="18sp" />
 
                     <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/cg_target_muscle"
+                        android:id="@+id/cgTargetMuscle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
@@ -152,7 +153,7 @@
                         android:textSize="18sp" />
 
                     <TextView
-                        android:id="@+id/tv_tips"
+                        android:id="@+id/tvTips"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"

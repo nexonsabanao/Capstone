@@ -13,6 +13,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="56dp"
+        android:importantForAccessibility="no"
         android:padding="8dp"
         android:clickable="true"
         android:focusable="true"
@@ -33,6 +34,9 @@
         android:text="Diet preference"
         android:textColor="#212121"
         android:textSize="32sp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="24sp"
+        app:autoSizeMaxTextSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/backButton" />
@@ -47,6 +51,9 @@
         android:text="Choose how you'd like to eat"
         android:textColor="#757575"
         android:textSize="16sp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="16sp"
         app:layout_constraintEnd_toEndOf="@id/titleTextView"
         app:layout_constraintStart_toStartOf="@id/titleTextView"
         app:layout_constraintTop_toBottomOf="@id/titleTextView" />
@@ -69,7 +76,6 @@
             android:paddingHorizontal="24dp">
 
             <RadioGroup
-                android:id="@+id/dietPreferenceRadioGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -108,6 +114,9 @@
                             android:text="⚖️   Balanced"
                             android:textColor="#212121"
                             android:textSize="18sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="14sp"
+                            app:autoSizeMaxTextSize="18sp"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"/>
@@ -128,12 +137,15 @@
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:letterSpacing="0.05"
-                            android:textColor="@color/green"
+                            android:textColor="#212121"
                             android:gravity="center"
                             android:padding="16dp"
                             android:clickable="true"
                             android:focusable="true"
                             android:background="?attr/selectableItemBackground"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="10sp"
+                            app:autoSizeMaxTextSize="12sp"
                             app:layout_constraintTop_toBottomOf="@id/divider1"
                             app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -174,6 +186,9 @@
                             android:text="🥑   Low Carb"
                             android:textColor="#212121"
                             android:textSize="18sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="14sp"
+                            app:autoSizeMaxTextSize="18sp"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"/>
@@ -194,12 +209,15 @@
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:letterSpacing="0.05"
-                            android:textColor="@color/green"
+                            android:textColor="#212121"
                             android:gravity="center"
                             android:padding="16dp"
                             android:clickable="true"
                             android:focusable="true"
                             android:background="?attr/selectableItemBackground"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="10sp"
+                            app:autoSizeMaxTextSize="12sp"
                             app:layout_constraintTop_toBottomOf="@id/divider2"
                             app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -240,6 +258,9 @@
                             android:text="🥦   Vegetarian"
                             android:textColor="#212121"
                             android:textSize="18sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="14sp"
+                            app:autoSizeMaxTextSize="18sp"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"/>
@@ -260,12 +281,15 @@
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:letterSpacing="0.05"
-                            android:textColor="@color/green"
+                            android:textColor="#212121"
                             android:gravity="center"
                             android:padding="16dp"
                             android:clickable="true"
                             android:focusable="true"
                             android:background="?attr/selectableItemBackground"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="10sp"
+                            app:autoSizeMaxTextSize="12sp"
                             app:layout_constraintTop_toBottomOf="@id/divider3"
                             app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -290,6 +314,9 @@
         android:text="@string/action_next"
         android:textSize="16sp"
         android:letterSpacing="0.05"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="16sp"
         android:enabled="false"
         app:cornerRadius="32dp"
         app:layout_constraintBottom_toBottomOf="parent" />

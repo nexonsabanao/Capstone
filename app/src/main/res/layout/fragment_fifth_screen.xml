@@ -13,6 +13,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="56dp"
+        android:importantForAccessibility="no"
         android:padding="8dp"
         android:clickable="true"
         android:focusable="true"
@@ -33,6 +34,9 @@
         android:text="Exclusions"
         android:textColor="#212121"
         android:textSize="32sp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="24sp"
+        app:autoSizeMaxTextSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/backButton" />
@@ -47,6 +51,9 @@
         android:text="Any ingredients you'd like to avoid?"
         android:textColor="#757575"
         android:textSize="16sp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="16sp"
         app:layout_constraintEnd_toEndOf="@id/titleTextView"
         app:layout_constraintStart_toStartOf="@id/titleTextView"
         app:layout_constraintTop_toBottomOf="@id/titleTextView" />
@@ -71,130 +78,166 @@
             app:chipSpacingVertical="12dp">
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_nuts"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🥜 Tree Nuts" />
+                android:text="🥜 Tree Nuts"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_dairy"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🥛 Dairy" />
+                android:text="🥛 Dairy"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_gluten"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🍞 Gluten" />
+                android:text="🍞 Gluten"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_shellfish"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🦐 Shellfish" />
+                android:text="🦐 Shellfish"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_eggs"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🥚 Eggs" />
+                android:text="🥚 Eggs"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_soy"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🌱 Soy" />
+                android:text="🌱 Soy"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_pork"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🐷 Pork" />
+                android:text="🐷 Pork"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_fish"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🐟 Fish" />
+                android:text="🐟 Fish"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_red_meat"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🥩 Red Meat" />
+                android:text="🥩 Red Meat"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_sesame"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🌰 Sesame" />
+                android:text="🌰 Sesame"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_mushrooms"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🍄 Mushrooms" />
+                android:text="🍄 Mushrooms"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_corn"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🌽 Corn" />
+                android:text="🌽 Corn"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_peanuts"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🥜 Peanuts" />
+                android:text="🥜 Peanuts"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_beef"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🐄 Beef" />
+                android:text="🐄 Beef"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_mustard"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🌭 Mustard" />
+                android:text="🌭 Mustard"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_celery"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🌿 Celery" />
+                android:text="🌿 Celery"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_sulphites"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🍾 Sulphites" />
+                android:text="🍾 Sulphites"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_lupin"
                 style="@style/FilterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🌸 Lupin" />
+                android:text="🌸 Lupin"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
         </com.google.android.material.chip.ChipGroup>
     </androidx.core.widget.NestedScrollView>
@@ -209,9 +252,12 @@
         android:fontFamily="sans-serif"
         android:textStyle="bold"
         android:textColor="@color/white"
-        android:text="CONTINUE"
+        android:text="Next"
         android:textSize="16sp"
         android:letterSpacing="0.05"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="16sp"
         app:cornerRadius="32dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 

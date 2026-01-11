@@ -1,6 +1,5 @@
 package com.example.nutriority.ui.home
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
@@ -22,7 +21,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    application: Application,
     mealRepository: MealRepository,
     workoutRepository: WorkoutRepository,
     articleRepository: ArticleRepository,

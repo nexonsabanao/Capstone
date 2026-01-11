@@ -209,4 +209,9 @@ class RulerView @JvmOverloads constructor(
         this.majorTickFactor = factor
         invalidate()
     }
+
+    fun setTickInterval(interval: Float) {
+        this.tickInterval = interval
+        invalidate()
+    }
 }

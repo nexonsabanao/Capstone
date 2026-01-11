@@ -32,7 +32,6 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/text_view_all"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
@@ -54,7 +53,6 @@
             app:layout_constraintTop_toBottomOf="@id/text_weight_title">
 
             <TextView
-                android:id="@+id/text_current_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
@@ -64,7 +62,6 @@
                 android:letterSpacing="0.1" />
 
             <TextView
-                android:id="@+id/text_current_weight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
@@ -92,7 +89,6 @@
             app:layout_constraintTop_toBottomOf="@id/line_chart" />
 
         <LinearLayout
-            android:id="@+id/stats_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -115,7 +111,6 @@
                     android:letterSpacing="0.1" />
 
                 <TextView
-                    android:id="@+id/text_heaviest_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif"
@@ -141,7 +136,6 @@
                     android:letterSpacing="0.1" />
 
                 <TextView
-                    android:id="@+id/text_lightest_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif"

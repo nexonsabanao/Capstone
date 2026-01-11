@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
@@ -27,6 +29,7 @@ class PersonalizedWorkoutFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val userViewModel: UserViewModel by activityViewModels()
+    private lateinit var workoutAdapter: PersonalizedWorkoutAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,46 +46,62 @@ class PersonalizedWorkoutFragment : Fragment() {
             findNavController().navigateUp()
         }
 
-        userViewModel.user.observe(viewLifecycleOwner) { user ->
-            user?.personalizedPlanJson?.let { jsonString ->
-                Log.d("WorkoutDebug", "Attempting to parse JSON: $jsonString")
-                try {
-                    val workoutPlan = Gson().fromJson(jsonString, WorkoutPlan::class.java)
-                    if (workoutPlan?.sessions != null) {
-                        Log.d("WorkoutDebug", "Parse successful. Found ${workoutPlan.sessions.size} sessions.")
-                        setupRecyclerView(workoutPlan, user.lastCompletedWorkoutDay)
-                    } else {
-                        Log.e("WorkoutDebug", "Parsing failed: workoutPlan or sessions are null.")
+        setupRecyclerView()
+        observeViewModel()
+    }
+
+    private fun setupRecyclerView() {
+        workoutAdapter = PersonalizedWorkoutAdapter(
+            emptyList(),
+            0,
+            onStartWorkoutClicked = { dayIndex -> handleWorkoutStarted(dayIndex) },
+            onRestartWorkoutClicked = { handleRestartWorkout() },
+            onWorkoutClicked = { workoutId ->
+                val bundle = Bundle().apply { putInt("workout_id", workoutId) }
+                findNavController().navigate(R.id.action_personalizedWorkoutFragment_to_workoutDetailFragment, bundle)
+            }
+        )
+        
+        binding.rvWorkoutPlan.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = workoutAdapter
+            // Prevent flickering during updates
+            itemAnimator = null 
+        }
+    }
+
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                userViewModel.user.observe(viewLifecycleOwner) { user ->
+                    user?.personalizedPlanJson?.let { jsonString ->
+                        try {
+                            val workoutPlan = Gson().fromJson(jsonString, WorkoutPlan::class.java)
+                            if (workoutPlan?.sessions != null) {
+                                updateUI(workoutPlan, user.lastCompletedWorkoutDay)
+                            }
+                        } catch (e: JsonSyntaxException) {
+                            Log.e("WorkoutDebug", "JSON Syntax Error in plan", e)
+                        }
                     }
-                } catch (e: JsonSyntaxException) {
-                    Log.e("WorkoutDebug", "JSON Syntax Error. Check if the JSON is well-formed.", e)
                 }
-            } ?: run {
-                Log.w("WorkoutDebug", "personalizedPlanJson is null for the current user.")
             }
         }
     }
 
-    private fun setupRecyclerView(plan: WorkoutPlan, lastCompletedDay: Int) {
-        val adapter = PersonalizedWorkoutAdapter(
-            plan.sessions,
-            lastCompletedDay,
-            onStartWorkoutClicked = { dayIndex ->
-                handleWorkoutStarted(dayIndex)
-            },
-            onRestartWorkoutClicked = {
-                handleRestartWorkout()
-            },
-            onWorkoutClicked = { workoutId ->
-                // Use Navigation Component instead of Intent
-                val bundle = Bundle().apply {
-                    putInt("workout_id", workoutId)
-                }
-                findNavController().navigate(R.id.action_personalizedWorkoutFragment_to_workoutDetailFragment, bundle)
-            }
-        )
-        binding.rvWorkoutPlan.layoutManager = LinearLayoutManager(context)
-        binding.rvWorkoutPlan.adapter = adapter
+    private fun updateUI(plan: WorkoutPlan, lastCompletedDay: Int) {
+        // Update header based on progress
+        val currentDay = lastCompletedDay + 1
+        if (currentDay <= plan.sessions.size) {
+            val session = plan.sessions[lastCompletedDay]
+            val focusText = if (session.focus == "Rest Day") "Recover & Rebuild" else session.focus
+            binding.tvTitle.text = "Day $currentDay: $focusText"
+        } else {
+            binding.tvTitle.text = "Plan Completed!"
+        }
+
+        // Update list
+        workoutAdapter.updateData(plan.sessions, lastCompletedDay)
     }
 
     private fun handleWorkoutStarted(dayIndex: Int) {

@@ -7,79 +7,146 @@
     android:background="@color/app_background"
     tools:context=".ui.onboarding.screens.SeventhScreen">
 
-    <TextView
-        android:id="@+id/user_data_recap_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="40dp"
-        android:fontFamily="sans-serif"
-        android:textStyle="bold"
-        android:text="Creating your personalized plan..."
-        android:textAlignment="center"
-        android:textColor="#212121"
-        android:textSize="24sp"
-        android:lineSpacingExtra="4dp"
-        app:layout_constraintBottom_toTopOf="@+id/loading_progress_bar"
+    <!-- Decorative Background Elements -->
+    <View
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="-100dp"
+        android:layout_marginEnd="-100dp"
+        android:alpha="0.05"
+        android:background="@drawable/bg_circle_green"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginStart="-50dp"
+        android:layout_marginBottom="-50dp"
+        android:alpha="0.05"
+        android:background="@drawable/bg_circle_orange"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Pulsing Background Halos -->
+    <View
+        android:id="@+id/pulse_inner"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:alpha="0.2"
+        android:background="@drawable/bg_circle_green"
+        app:layout_constraintBottom_toBottomOf="@+id/loading_progress_bar"
+        app:layout_constraintEnd_toEndOf="@+id/loading_progress_bar"
+        app:layout_constraintStart_toStartOf="@+id/loading_progress_bar"
+        app:layout_constraintTop_toTopOf="@+id/loading_progress_bar" />
+
+    <View
+        android:id="@+id/pulse_outer"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:alpha="0.1"
+        android:background="@drawable/bg_circle_green"
+        app:layout_constraintBottom_toBottomOf="@+id/loading_progress_bar"
+        app:layout_constraintEnd_toEndOf="@+id/loading_progress_bar"
+        app:layout_constraintStart_toStartOf="@+id/loading_progress_bar"
+        app:layout_constraintTop_toTopOf="@+id/loading_progress_bar" />
+
+    <!-- Progress bar -->
+    <com.mikhaellopez.circularprogressbar.CircularProgressBar
+        android:id="@+id/loading_progress_bar"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:cpb_background_progressbar_color="#00000000"
+        app:cpb_background_progressbar_width="4dp"
+        app:cpb_indeterminate_mode="true"
+        app:cpb_progressbar_color="@color/green"
+        app:cpb_progressbar_width="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintVertical_bias="0.45" />
 
-    <ProgressBar
-        android:id="@+id/loading_progress_bar"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_marginTop="48dp"
-        android:indeterminate="true"
-        android:indeterminateTint="@color/green"
-        app:layout_constraintBottom_toTopOf="@id/bmi_card"
+    <!-- Recap Text Container -->
+    <FrameLayout
+        android:id="@+id/text_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="48dp"
+        android:layout_marginBottom="56dp"
+        app:layout_constraintBottom_toTopOf="@+id/loading_progress_bar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/user_data_recap_text" />
+        app:layout_constraintStart_toStartOf="parent">
 
+        <TextView
+            android:id="@+id/user_data_recap_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:lineSpacingExtra="6dp"
+            android:text="Preparing your journey..."
+            android:textColor="#212121"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="16sp"
+            app:autoSizeMaxTextSize="22sp" />
+    </FrameLayout>
+
+    <!-- BMI Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/bmi_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
         android:layout_marginTop="48dp"
+        android:alpha="0"
+        android:visibility="invisible"
         app:cardBackgroundColor="@android:color/white"
-        app:cardCornerRadius="28dp"
-        app:cardElevation="2dp"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="8dp"
         app:cardPreventCornerOverlap="false"
         app:cardUseCompatPadding="true"
         app:strokeWidth="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/loading_progress_bar">
 
         <LinearLayout
             android:id="@+id/bmi_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
             android:gravity="center"
             android:orientation="vertical"
             android:padding="32dp">
 
             <TextView
-                android:id="@+id/bmi_title_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
-                android:text="YOUR BMI"
+                android:letterSpacing="0.15"
+                android:text="YOUR CALCULATED BMI"
                 android:textColor="#757575"
-                android:textSize="14sp"
-                android:letterSpacing="0.1" />
+                android:textSize="12sp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="8sp"
+                app:autoSizeMaxTextSize="12sp" />
 
             <TextView
                 android:id="@+id/bmi_value_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="12dp"
                 android:fontFamily="sans-serif"
-                android:textStyle="bold"
-                android:textSize="56sp"
                 android:textColor="#212121"
-                tools:text="21.5" />
+                android:textSize="64sp"
+                android:textStyle="bold"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="40sp"
+                app:autoSizeMaxTextSize="64sp"
+                tools:text="22.4" />
 
             <TextView
                 android:id="@+id/bmi_category_text"
@@ -87,11 +154,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:fontFamily="sans-serif"
+                android:letterSpacing="0.05"
+                android:textColor="@color/green"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textAllCaps="true"
-                android:textSize="18sp"
-                android:textColor="@color/green"
-                tools:text="NORMAL WEIGHT" />
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="14sp"
+                app:autoSizeMaxTextSize="18sp"
+                tools:text="Normal Weight" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

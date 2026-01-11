@@ -22,28 +22,6 @@
         <item name="cornerSize">16dp</item>
     </style>
 
-    <style name="NoActiveIndicator" parent="Widget.Material3.TabLayout">
-        <item name="tabIndicatorHeight">0dp</item>
-    </style>
-
-    <style name="XAxisLabel" parent="Widget.AppCompat.TextView">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:gravity">center</item>
-        <item name="android:textColor">@android:color/darker_gray</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="YAxisLabel" parent="Widget.AppCompat.TextView">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">0dp</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:textColor">@android:color/darker_gray</item>
-        <item name="android:textSize">14sp</item>
-    </style>
-
     <style name="DayLabel" parent="Widget.AppCompat.TextView">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
@@ -73,21 +51,6 @@
         <item name="android:textColor">@color/design_default_color_primary</item>
     </style>
 
-    <style name="CalendarDate.Current">
-        <item name="android:textColor">@android:color/holo_red_dark</item>
-    </style>
-
-
-    <style name="FilterButton" parent="Widget.AppCompat.TextView">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">#AAAAAA</item>
-        <item name="android:textSize">12sp</item>
-        <item name="android:paddingStart">10dp</item>
-        <item name="android:paddingEnd">10dp</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:gravity">center</item>
-    </style>
 
     <style name="CollapsedAppBar" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@android:color/black</item>

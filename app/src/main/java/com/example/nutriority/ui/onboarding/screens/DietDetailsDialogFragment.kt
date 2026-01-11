@@ -11,6 +11,7 @@ import androidx.core.text.HtmlCompat
 import androidx.fragment.app.DialogFragment
 import com.example.nutriority.R
 import com.example.nutriority.databinding.DialogDietDetailsBinding
+import androidx.core.graphics.drawable.toDrawable
 
 class DietDetailsDialogFragment : DialogFragment() {
 
@@ -27,7 +28,7 @@ class DietDetailsDialogFragment : DialogFragment() {
         _binding = DialogDietDetailsBinding.inflate(inflater, container, false)
 
         // Make the dialog background transparent to show the card's rounded corners.
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
 
         return binding.root
     }

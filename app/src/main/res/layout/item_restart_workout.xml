@@ -6,7 +6,7 @@
     android:paddingVertical="24dp">
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_restart_workout"
+        android:id="@+id/btnRestartWorkout"
         style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,5 +16,8 @@
         android:textSize="14sp"
         android:letterSpacing="0.05"
         android:textColor="@color/bmi_obese"
-        android:text="RESTART WORKOUT PLAN" />
+        android:text="RESTART WORKOUT PLAN"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="10sp"
+        app:autoSizeMaxTextSize="14sp" />
 </FrameLayout>

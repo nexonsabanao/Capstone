@@ -20,6 +20,7 @@
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@android:color/transparent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:contentScrim="@color/white"
             app:statusBarScrim="?attr/colorPrimaryVariant"
@@ -54,6 +55,7 @@
         android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
         app:behavior_overlapTop="32dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 

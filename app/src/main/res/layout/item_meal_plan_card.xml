@@ -48,24 +48,28 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <TextView
-                android:id="@+id/tvMealTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
                 android:textStyle="bold"
                 android:text="7-Day Healthy Eating"
                 android:textColor="@android:color/white"
-                android:textSize="22sp" />
+                android:textSize="22sp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="16sp"
+                app:autoSizeMaxTextSize="22sp" />
 
             <TextView
-                android:id="@+id/tvMealDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:fontFamily="sans-serif-medium"
                 android:text="A balanced week of nutritious meals."
                 android:textColor="#E0E0E0"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeMaxTextSize="14sp" />
 
         </LinearLayout>
 
@@ -82,11 +86,12 @@
             app:layout_constraintTop_toBottomOf="@id/imgMeal">
 
             <LinearLayout
-                android:id="@+id/stats_container"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btnViewPlan"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -98,6 +103,7 @@
                     <ImageView
                         android:layout_width="14dp"
                         android:layout_height="14dp"
+                        android:importantForAccessibility="no"
                         android:src="@drawable/ic_fire"
                         app:tint="@color/green" />
 
@@ -110,7 +116,10 @@
                         android:textStyle="bold"
                         android:text="1500-1800 kcal"
                         android:textColor="@android:color/white"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="9sp"
+                        app:autoSizeMaxTextSize="12sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -122,11 +131,11 @@
                     <ImageView
                         android:layout_width="14dp"
                         android:layout_height="14dp"
+                        android:importantForAccessibility="no"
                         android:src="@drawable/ic_time"
                         app:tint="@color/green" />
 
                     <TextView
-                        android:id="@+id/tvMealDuration"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -134,7 +143,10 @@
                         android:textStyle="bold"
                         android:text="7 DAYS"
                         android:textColor="@android:color/white"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="9sp"
+                        app:autoSizeMaxTextSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
 

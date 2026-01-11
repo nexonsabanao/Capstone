@@ -8,7 +8,6 @@
     android:paddingVertical="12dp">
 
     <TextView
-        android:id="@+id/step_number"
         android:layout_width="24dp"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-black"
@@ -24,7 +23,6 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/step_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
@@ -34,7 +32,6 @@
             tools:text="Wash and dry all produce. Trim string ends from the snap peas. Halve the cucumber lengthwise and thinly slice into half-moons." />
 
         <com.google.android.material.chip.ChipGroup
-            android:id="@+id/ingredient_chips"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

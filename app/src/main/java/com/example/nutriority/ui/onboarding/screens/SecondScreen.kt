@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.onboarding.screens
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -196,6 +197,7 @@ class SecondScreen : Fragment() {
         binding.heightUnit.text = if (isHeightImperial) "ft" else "cm"
     }
 
+    @SuppressLint("DefaultLocale")
     private fun updateWeight(value: Float) {
         currentWeightKg = if (isWeightImperial) value / LBS_PER_KG else value.toDouble()
         binding.weightValue.text = String.format("%.1f", value)

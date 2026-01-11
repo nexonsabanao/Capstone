@@ -19,6 +19,9 @@
         android:text="Welcome to Nutriority"
         android:textColor="#212121"
         android:textSize="36sp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="24sp"
+        app:autoSizeMaxTextSize="36sp"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -32,13 +35,19 @@
         android:text="Your journey to a healthier, stronger you starts here."
         android:textColor="#757575"
         android:textSize="18sp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="14sp"
+        app:autoSizeMaxTextSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/welcome_title" />
 
     <ImageView
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:importantForAccessibility="no"
         android:src="@drawable/logo"
         android:alpha="0.8"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintWidth_percent="0.5"
         app:layout_constraintBottom_toTopOf="@+id/terms_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -56,7 +65,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <CheckBox
-            android:id="@+id/terms_checkbox"
+            android:id="@+id/termsCheckbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
@@ -66,7 +75,7 @@
             android:textColor="#757575" />
 
         <TextView
-            android:id="@+id/terms_link"
+            android:id="@+id/termsLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"

@@ -2,6 +2,7 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="4dp"
@@ -28,6 +29,9 @@
             android:textStyle="bold"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="12sp"
+            app:autoSizeMaxTextSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -45,23 +49,31 @@
 
             <TextView
                 android:id="@+id/reps_count"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
                 android:textStyle="bold"
                 android:textColor="#212121"
-                android:textSize="22sp" />
+                android:textSize="22sp"
+                android:gravity="center"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="16sp"
+                app:autoSizeMaxTextSize="22sp" />
 
             <TextView
                 android:id="@+id/unit_label"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
                 android:text="reps"
                 android:textAllCaps="true"
                 android:textColor="#757575"
                 android:textSize="10sp"
-                android:letterSpacing="0.1" />
+                android:letterSpacing="0.1"
+                android:gravity="center"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="8sp"
+                app:autoSizeMaxTextSize="10sp" />
         </LinearLayout>
 
         <View
@@ -88,11 +100,13 @@
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
+                android:importantForAccessibility="no"
                 android:src="@android:drawable/ic_menu_delete"
                 app:tint="#757575" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/delete_text"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:fontFamily="sans-serif"
@@ -100,7 +114,11 @@
                 android:text="REMOVE"
                 android:textColor="#757575"
                 android:textSize="10sp"
-                android:letterSpacing="0.05" />
+                android:letterSpacing="0.05"
+                android:gravity="center"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="8sp"
+                app:autoSizeMaxTextSize="10sp" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

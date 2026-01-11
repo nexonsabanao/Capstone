@@ -25,7 +25,10 @@
             android:fontFamily="sans-serif-medium"
             android:text="Eat healthy,"
             android:textColor="#757575"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="12sp"
+            app:autoSizeMaxTextSize="16sp" />
 
         <TextView
             android:id="@+id/title"
@@ -34,7 +37,10 @@
             android:text="Meal Plan"
             android:textColor="#212121"
             android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="24sp"
+            app:autoSizeMaxTextSize="32sp" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -64,6 +70,9 @@
                 android:textColor="#616161"
                 android:textSize="16sp"
                 android:lineSpacingExtra="4dp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="12sp"
+                app:autoSizeMaxTextSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -104,10 +113,13 @@
                             android:text="START"
                             android:textColor="@color/green"
                             android:textSize="12sp"
-                            android:letterSpacing="0.1" />
+                            android:letterSpacing="0.1"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="8sp"
+                            app:autoSizeMaxTextSize="12sp" />
 
                         <TextView
-                            android:id="@+id/start_day_name"
+                            android:id="@+id/startDayName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
@@ -115,16 +127,22 @@
                             android:textStyle="bold"
                             android:text="Today"
                             android:textColor="#212121"
-                            android:textSize="20sp" />
+                            android:textSize="20sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="14sp"
+                            app:autoSizeMaxTextSize="20sp" />
 
                         <TextView
-                            android:id="@+id/start_date_text"
+                            android:id="@+id/startDateText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans-serif"
                             android:text="Dec 26"
                             android:textColor="#757575"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="10sp"
+                            app:autoSizeMaxTextSize="14sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -154,10 +172,13 @@
                             android:text="END"
                             android:textColor="@color/green"
                             android:textSize="12sp"
-                            android:letterSpacing="0.1" />
+                            android:letterSpacing="0.1"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="8sp"
+                            app:autoSizeMaxTextSize="12sp" />
 
                         <TextView
-                            android:id="@+id/end_day_name"
+                            android:id="@+id/endDayName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
@@ -165,16 +186,22 @@
                             android:textStyle="bold"
                             android:text="Friday"
                             android:textColor="#212121"
-                            android:textSize="20sp" />
+                            android:textSize="20sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="14sp"
+                            app:autoSizeMaxTextSize="20sp" />
 
                         <TextView
-                            android:id="@+id/end_date_text"
+                            android:id="@+id/endDateText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans-serif"
                             android:text="Jan 02"
                             android:textColor="#757575"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="10sp"
+                            app:autoSizeMaxTextSize="14sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -236,7 +263,7 @@
                 tools:visibility="gone" />
 
             <androidx.constraintlayout.widget.Group
-                android:id="@+id/initial_view"
+                android:id="@+id/initialView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:constraint_referenced_ids="description,date_selectors,nextButton" />
