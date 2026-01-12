@@ -126,6 +126,9 @@
                 android:textColor="#212121"
                 android:textSize="28sp"
                 android:lineSpacingExtra="4dp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="20sp"
+                app:autoSizeMaxTextSize="28sp"
                 tools:text="The Benefits of a High-Protein Diet" />
 
             <LinearLayout

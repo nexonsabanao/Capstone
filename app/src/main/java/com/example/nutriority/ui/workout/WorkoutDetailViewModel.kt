@@ -1,7 +1,6 @@
 package com.example.nutriority.ui.workout
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nutriority.data.model.Exercise
@@ -11,6 +10,7 @@ import com.example.nutriority.data.repository.WorkoutRepository
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,9 +31,20 @@ class WorkoutDetailViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
+    
+    private var workoutJob: Job? = null
 
     fun getWorkoutById(workoutId: Int) {
-        viewModelScope.launch {
+        // Optimization: Don't reload if it's already the same workout
+        if (_workout.value?.workout?.id == workoutId) return
+        
+        // Cancel previous collection to avoid old data flickering
+        workoutJob?.cancel()
+        
+        // Clear current data immediately to avoid showing old workout while loading
+        _workout.value = null
+        
+        workoutJob = viewModelScope.launch {
             workoutRepository.getWorkoutWithExercises(workoutId).collect {
                 _workout.value = it
             }

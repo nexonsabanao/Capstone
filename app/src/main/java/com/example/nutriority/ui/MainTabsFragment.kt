@@ -24,6 +24,7 @@ import com.example.nutriority.ui.meal.MealDetailFragment
 import com.example.nutriority.ui.meal.MealFragment
 import com.example.nutriority.ui.profile.ProfileFragment
 import com.example.nutriority.ui.workout.AllWorkoutsFragment
+import com.example.nutriority.ui.workout.ExerciseDetailFragment
 import com.example.nutriority.ui.workout.ExerciseLibraryFragment
 import com.example.nutriority.ui.workout.PersonalizedWorkoutFragment
 import com.example.nutriority.ui.workout.WorkoutDetailFragment
@@ -67,7 +68,7 @@ class MainTabsFragment : Fragment() {
         binding.viewPager.adapter = adapter
         
         // keeps ALL fragments alive in memory for instant switching
-        binding.viewPager.offscreenPageLimit = 9 
+        binding.viewPager.offscreenPageLimit = 10 
         
         binding.viewPager.isUserInputEnabled = false
 
@@ -133,7 +134,7 @@ class MainTabsFragment : Fragment() {
     }
 
     private inner class TabsAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
-        override fun getItemCount(): Int = 10
+        override fun getItemCount(): Int = 11
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
@@ -147,6 +148,7 @@ class MainTabsFragment : Fragment() {
                 7 -> MealDetailFragment()
                 8 -> ArticleDetailFragment()
                 9 -> WorkoutDetailFragment()
+                10 -> ExerciseDetailFragment()
                 else -> HomeFragment()
             }
         }

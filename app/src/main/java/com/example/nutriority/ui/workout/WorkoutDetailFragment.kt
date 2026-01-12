@@ -42,6 +42,8 @@ class WorkoutDetailFragment : Fragment() {
     
     private lateinit var exerciseAdapter: ExerciseAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
+    
+    private var isSettingInitialState = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -115,8 +117,11 @@ class WorkoutDetailFragment : Fragment() {
         }
 
         binding.switchIncludeWarmupCooldown.setOnCheckedChangeListener { _, isChecked ->
+            if (isSettingInitialState) return@setOnCheckedChangeListener
+            
             viewModel.workout.value?.let { workout ->
-                updateDisplayList(workout, isChecked)
+                // Don't call updateDisplayList here if the observer will handle it
+                // This prevents the flickering caused by double UI updates
                 viewModel.updateWorkoutPreference(isChecked)
             }
         }
@@ -124,7 +129,12 @@ class WorkoutDetailFragment : Fragment() {
         binding.startButton.setOnClickListener {
             val exercises = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
             if (exercises.isNotEmpty()) {
-                // Navigation logic here
+                val firstExercise = exercises[0].exercise
+                navigationViewModel.navigateToExerciseDetail(
+                    firstExercise.id,
+                    1,
+                    exercises.size
+                )
             }
         }
     }
@@ -207,8 +217,16 @@ class WorkoutDetailFragment : Fragment() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
-            onItemClick = { _, _, _ ->
-                // Implementation for exercise detail navigation
+            onItemClick = { exercise, _, _ ->
+                val exercisesOnly = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
+                val exerciseIndex = exercisesOnly.indexOfFirst { it.exercise.id == exercise.id }
+                if (exerciseIndex != -1) {
+                    navigationViewModel.navigateToExerciseDetail(
+                        exercise.id,
+                        exerciseIndex + 1,
+                        exercisesOnly.size
+                    )
+                }
             },
             onListUpdated = { updatedList ->
                 viewModel.updateExercises(updatedList)
@@ -222,6 +240,12 @@ class WorkoutDetailFragment : Fragment() {
         binding.exercisesRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             if (adapter != exerciseAdapter) adapter = exerciseAdapter
+            
+            // Disable item animations to prevent flickering when switch is toggled
+            itemAnimator = null
+            
+            // Optimization for NestedScrollView
+            isNestedScrollingEnabled = false
         }
 
         val callback = SimpleItemTouchHelperCallback(exerciseAdapter)
@@ -237,9 +261,12 @@ class WorkoutDetailFragment : Fragment() {
                         binding.tvToolbarTitle.text = workout.workout.name
                         binding.workoutTitle.text = workout.workout.name
 
+                        // Use flag to prevent infinite loop and flickering
+                        isSettingInitialState = true
                         if (binding.switchIncludeWarmupCooldown.isChecked != workout.workout.includeWarmupCooldown) {
                             binding.switchIncludeWarmupCooldown.isChecked = workout.workout.includeWarmupCooldown
                         }
+                        isSettingInitialState = false
 
                         updateDisplayList(workout, workout.workout.includeWarmupCooldown)
                     }
@@ -322,7 +349,9 @@ class WorkoutDetailFragment : Fragment() {
         }
 
         binding.workoutDuration.text = "${Math.ceil(totalSeconds / 60.0).toInt()} mins"
-        exerciseAdapter.submitList(displayList)
+        // Pass the list to adapter. Using submitList with a new list instance 
+        // helps DiffUtil work correctly.
+        exerciseAdapter.submitList(displayList.toList())
     }
 
     override fun onDestroyView() {

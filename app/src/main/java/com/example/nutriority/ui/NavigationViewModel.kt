@@ -21,6 +21,15 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
     private val _selectedWorkoutId = MutableStateFlow(-1)
     val selectedWorkoutId: StateFlow<Int> = _selectedWorkoutId
 
+    private val _selectedExerciseId = MutableStateFlow(-1)
+    val selectedExerciseId: StateFlow<Int> = _selectedExerciseId
+
+    private val _exercisePosition = MutableStateFlow(-1)
+    val exercisePosition: StateFlow<Int> = _exercisePosition
+
+    private val _totalExercises = MutableStateFlow(-1)
+    val totalExercises: StateFlow<Int> = _totalExercises
+
     private val backStack = Stack<Int>()
 
     fun setTab(index: Int, addToBackStack: Boolean = true) {
@@ -43,6 +52,13 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
     fun navigateToWorkoutDetail(workoutId: Int) {
         _selectedWorkoutId.value = workoutId
         setTab(9) // New index for Workout Detail
+    }
+
+    fun navigateToExerciseDetail(exerciseId: Int, position: Int, total: Int) {
+        _selectedExerciseId.value = exerciseId
+        _exercisePosition.value = position
+        _totalExercises.value = total
+        setTab(10)
     }
 
     fun goBack(): Boolean {
