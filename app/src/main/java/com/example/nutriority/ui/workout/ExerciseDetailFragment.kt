@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -20,6 +21,7 @@ import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.databinding.FragmentExerciseDetailBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -144,17 +146,34 @@ class ExerciseDetailFragment : Fragment() {
         currentDialog?.dismiss()
         if (position < 0 || position >= currentSets.size) return
 
+        val exerciseSet = currentSets[position]
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_reps, null)
+        
+        val tvTitle = dialogView.findViewById<TextView>(R.id.dialog_title)
+        val tvSubtitle = dialogView.findViewById<TextView>(R.id.dialog_subtitle)
+        val layoutInput = dialogView.findViewById<TextInputLayout>(R.id.edit_reps_layout)
         val repsInput = dialogView.findViewById<EditText>(R.id.edit_reps_input)
         val btnOk = dialogView.findViewById<MaterialButton>(R.id.btn_ok)
         val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btn_cancel)
+
+        if (exerciseSet.isDuration) {
+            tvTitle.text = "Enter Seconds"
+            tvSubtitle.text = "How many seconds did you complete?"
+            layoutInput.hint = "Number of seconds"
+            repsInput.hint = "Number of seconds"
+        } else {
+            tvTitle.text = "Enter Repetitions"
+            tvSubtitle.text = "How many reps did you complete?"
+            layoutInput.hint = "Number of reps"
+            repsInput.hint = "Number of reps"
+        }
 
         currentDialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .create()
 
         currentDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        repsInput.setText(currentSets[position].value.toString())
+        repsInput.setText(exerciseSet.value.toString())
 
         btnOk.setOnClickListener {
             val newValue = repsInput.text.toString().toIntOrNull()

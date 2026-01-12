@@ -107,16 +107,14 @@ class WorkoutDetailViewModel @Inject constructor(
 
     fun updateWorkout(workout: Workout, exercises: List<Exercise>) {
         viewModelScope.launch {
-            _isLoading.value = true
-            delay(300)
+            // REMOVED artificial delays and _isLoading.value = true
+            // These were causing the UI to hide and show, leading to "flickering" 
+            // when saving exercises in the dialog.
             
             workoutRepository.unlinkExercisesFromWorkout(workout.id)
             workoutRepository.updateWorkout(workout)
             val updatedExercises = exercises.map { it.copy(workoutId = workout.id) }
             workoutRepository.updateExercises(updatedExercises)
-            
-            delay(200)
-            _isLoading.value = false
         }
     }
 }

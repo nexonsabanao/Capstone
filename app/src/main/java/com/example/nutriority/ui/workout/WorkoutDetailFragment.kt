@@ -258,8 +258,13 @@ class WorkoutDetailFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.workout.collect { workoutWithExercises ->
                     workoutWithExercises?.let { workout ->
-                        binding.tvToolbarTitle.text = workout.workout.name
-                        binding.workoutTitle.text = workout.workout.name
+                        // Only update if text has actually changed to prevent flickering
+                        if (binding.tvToolbarTitle.text != workout.workout.name) {
+                            binding.tvToolbarTitle.text = workout.workout.name
+                        }
+                        if (binding.workoutTitle.text != workout.workout.name) {
+                            binding.workoutTitle.text = workout.workout.name
+                        }
 
                         // Use flag to prevent infinite loop and flickering
                         isSettingInitialState = true
@@ -296,7 +301,7 @@ class WorkoutDetailFragment : Fragment() {
             if (ex.category.equals("Warm-up", ignoreCase = true) || ex.category.equals("Cool-down", ignoreCase = true)) {
                 ex.copy(
                     sets = if (ex.sets <= 0) 1 else ex.sets,
-                    duration = if (ex.duration.isBlank()) "30s" else ex.duration
+                    duration = ex.duration.ifBlank { "30s" }
                 ).apply { imageResId = ex.imageResId }
             } else {
                 ex
@@ -310,7 +315,10 @@ class WorkoutDetailFragment : Fragment() {
                     !it.category.equals("Cool-down", ignoreCase = true)
         }
 
-        binding.workoutExerciseCount.text = main.size.toString()
+        val mainExerciseCountStr = main.size.toString()
+        if (binding.workoutExerciseCount.text != mainExerciseCountStr) {
+            binding.workoutExerciseCount.text = mainExerciseCountStr
+        }
 
         if (includeAll) {
             if (warmup.isNotEmpty()) {
@@ -348,7 +356,11 @@ class WorkoutDetailFragment : Fragment() {
             }
         }
 
-        binding.workoutDuration.text = "${Math.ceil(totalSeconds / 60.0).toInt()} mins"
+        val durationText = "${Math.ceil(totalSeconds / 60.0).toInt()} mins"
+        if (binding.workoutDuration.text != durationText) {
+            binding.workoutDuration.text = durationText
+        }
+        
         // Pass the list to adapter. Using submitList with a new list instance 
         // helps DiffUtil work correctly.
         exerciseAdapter.submitList(displayList.toList())

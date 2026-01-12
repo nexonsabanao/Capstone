@@ -30,17 +30,13 @@ class SimpleItemTouchHelperCallback(private val listener: ItemMoveCallbackListen
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         super.onSelectedChanged(viewHolder, actionState)
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-            viewHolder?.itemView?.apply {
-                setBackgroundColor(Color.LTGRAY)
-            }
+            viewHolder?.itemView?.alpha = 0.8f
         }
     }
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
-        viewHolder.itemView.apply {
-            setBackgroundColor(Color.TRANSPARENT)
-        }
+        viewHolder.itemView.alpha = 1.0f
         listener.onDragDropped()
     }
 }
