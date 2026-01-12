@@ -23,6 +23,7 @@ import com.example.nutriority.ui.NavigationViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -120,12 +121,17 @@ class ExerciseDetailFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                navigationViewModel.exercisePosition.collect { pos ->
-                    val total = navigationViewModel.totalExercises.value
-                    if (pos != -1 && total != -1) {
-                        binding.exerciseCountText.text = "$pos/$total"
+                // Using combine ensures that the UI is updated immediately when either pos or total changes,
+                // preventing the "X/Y" text from being out of sync or delayed.
+                combine(
+                    navigationViewModel.exercisePosition,
+                    navigationViewModel.totalExercises
+                ) { pos, total -> pos to total }
+                    .collect { (pos, total) ->
+                        if (pos != -1 && total != -1) {
+                            binding.exerciseCountText.text = "$pos/$total"
+                        }
                     }
-                }
             }
         }
     }
