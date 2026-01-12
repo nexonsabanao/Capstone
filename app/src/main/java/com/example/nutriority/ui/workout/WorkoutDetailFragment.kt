@@ -120,8 +120,6 @@ class WorkoutDetailFragment : Fragment() {
             if (isSettingInitialState) return@setOnCheckedChangeListener
             
             viewModel.workout.value?.let { workout ->
-                // Don't call updateDisplayList here if the observer will handle it
-                // This prevents the flickering caused by double UI updates
                 viewModel.updateWorkoutPreference(isChecked)
             }
         }
@@ -283,7 +281,10 @@ class WorkoutDetailFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.isLoading.collect { isLoading ->
                     if (isLoading) {
-                        binding.exercisesRecyclerView.visibility = View.GONE
+                        // Avoid hiding the recycler view if it already has items to prevent flicker
+                        if (exerciseAdapter.itemCount == 0) {
+                            binding.exercisesRecyclerView.visibility = View.GONE
+                        }
                         binding.loadingProgress.visibility = View.VISIBLE
                     } else {
                         binding.exercisesRecyclerView.visibility = View.VISIBLE

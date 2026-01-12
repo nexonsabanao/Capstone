@@ -11,11 +11,11 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import javax.inject.Inject
@@ -31,6 +31,9 @@ class WorkoutDetailViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
+    
+    private val _onWorkoutUpdated = MutableSharedFlow<Unit>()
+    val onWorkoutUpdated = _onWorkoutUpdated.asSharedFlow()
     
     private var workoutJob: Job? = null
 
@@ -63,6 +66,7 @@ class WorkoutDetailViewModel @Inject constructor(
         
         viewModelScope.launch {
             workoutRepository.updateWorkout(currentWorkout.copy(includeWarmupCooldown = includeWarmupCooldown))
+            _onWorkoutUpdated.emit(Unit)
         }
     }
 
@@ -107,14 +111,11 @@ class WorkoutDetailViewModel @Inject constructor(
 
     fun updateWorkout(workout: Workout, exercises: List<Exercise>) {
         viewModelScope.launch {
-            // REMOVED artificial delays and _isLoading.value = true
-            // These were causing the UI to hide and show, leading to "flickering" 
-            // when saving exercises in the dialog.
-            
             workoutRepository.unlinkExercisesFromWorkout(workout.id)
             workoutRepository.updateWorkout(workout)
             val updatedExercises = exercises.map { it.copy(workoutId = workout.id) }
             workoutRepository.updateExercises(updatedExercises)
+            _onWorkoutUpdated.emit(Unit)
         }
     }
 }
