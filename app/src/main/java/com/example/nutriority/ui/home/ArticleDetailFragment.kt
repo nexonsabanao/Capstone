@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.home
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,16 +13,18 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.nutriority.data.model.Article
 import com.example.nutriority.databinding.FragmentArticleDetailBinding
 import com.example.nutriority.ui.NavigationViewModel
+import com.google.android.material.appbar.AppBarLayout
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @AndroidEntryPoint
 class ArticleDetailFragment : Fragment() {
 
     private var _binding: FragmentArticleDetailBinding? = null
     private val binding get() = _binding!!
-    
+
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     private var currentArticle: Article? = null
 
@@ -36,10 +39,39 @@ class ArticleDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set up toolbar back button
-        binding.toolbar.setNavigationOnClickListener {
+        // Set up custom back button listener
+        binding.btnBack.setOnClickListener {
             navigationViewModel.goBack()
         }
+
+        // Initially hide the toolbar title and background
+        binding.tvToolbarTitle.alpha = 0f
+        binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
+
+        // Handle app bar collapse state with a smooth fade effect
+        binding.appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+            val totalScrollRange = appBarLayout.totalScrollRange
+            if (totalScrollRange == 0) return@OnOffsetChangedListener
+
+            val percentage = abs(verticalOffset).toFloat() / totalScrollRange
+
+            // Start fading in the background and title during the last 20% of scroll
+            val startFadeAt = 0.8f
+            if (percentage > startFadeAt) {
+                // Map the 0.8 -> 1.0 range to 0.0 -> 1.0
+                val alphaProgress = (percentage - startFadeAt) / (1f - startFadeAt)
+                val alphaInt = (alphaProgress * 255).toInt().coerceIn(0, 255)
+
+                // Set white background with calculated alpha
+                binding.toolbar.setBackgroundColor(Color.argb(alphaInt, 255, 255, 255))
+
+                // Fade in the title
+                binding.tvToolbarTitle.alpha = alphaProgress
+            } else {
+                binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
+                binding.tvToolbarTitle.alpha = 0f
+            }
+        })
 
         observeArticleData()
     }
@@ -51,8 +83,9 @@ class ArticleDetailFragment : Fragment() {
                     if (json != null) {
                         currentArticle = Gson().fromJson(json, Article::class.java)
                         displayArticleDetails()
-                        // Scroll to top
+                        // Scroll to top and ensure app bar is expanded
                         binding.nestedScrollView.scrollTo(0, 0)
+                        binding.appBarLayout.setExpanded(true)
                     }
                 }
             }
@@ -62,6 +95,10 @@ class ArticleDetailFragment : Fragment() {
     private fun displayArticleDetails() {
         currentArticle?.let { article ->
             binding.articleTitle.text = article.title
+            binding.tvToolbarTitle.text = article.title
+            binding.articleCategory.text = article.category
+            binding.articleAuthor.text = article.author
+            binding.articleReadingTime.text = article.readingTime
             binding.articleContent.text = article.content
             if (article.imageResId != 0) {
                 binding.articleImage.setImageResource(article.imageResId)

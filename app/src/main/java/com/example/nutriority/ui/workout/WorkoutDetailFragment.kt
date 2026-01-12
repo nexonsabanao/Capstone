@@ -22,11 +22,13 @@ import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.ExerciseAdapter
 import com.example.nutriority.ui.adapter.SelectableExerciseAdapter
 import com.example.nutriority.ui.adapter.WorkoutItem
+import com.google.android.material.appbar.AppBarLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @AndroidEntryPoint
 class WorkoutDetailFragment : Fragment() {
@@ -52,13 +54,39 @@ class WorkoutDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Fix: Use NavigationViewModel for back navigation
-        binding.toolbar.setNavigationOnClickListener {
+        // Set up custom back button listener
+        binding.btnBack.setOnClickListener {
             navigationViewModel.goBack()
         }
 
-        binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
-        binding.collapsingToolbar.setCollapsedTitleTextColor(Color.BLACK)
+        // Initially hide the toolbar title and background
+        binding.tvToolbarTitle.alpha = 0f
+        binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
+
+        // Handle app bar collapse state with a smooth fade effect
+        binding.appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+            val totalScrollRange = appBarLayout.totalScrollRange
+            if (totalScrollRange == 0) return@OnOffsetChangedListener
+
+            val percentage = abs(verticalOffset).toFloat() / totalScrollRange
+
+            // Start fading in the background and title during the last 20% of scroll
+            val startFadeAt = 0.8f
+            if (percentage > startFadeAt) {
+                // Map the 0.8 -> 1.0 range to 0.0 -> 1.0
+                val alphaProgress = (percentage - startFadeAt) / (1f - startFadeAt)
+                val alphaInt = (alphaProgress * 255).toInt().coerceIn(0, 255)
+
+                // Set white background with calculated alpha
+                binding.toolbar.setBackgroundColor(Color.argb(alphaInt, 255, 255, 255))
+
+                // Fade in the title
+                binding.tvToolbarTitle.alpha = alphaProgress
+            } else {
+                binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
+                binding.tvToolbarTitle.alpha = 0f
+            }
+        })
 
         setupRecyclerView()
         observeNavigationData()
@@ -96,8 +124,7 @@ class WorkoutDetailFragment : Fragment() {
         binding.startButton.setOnClickListener {
             val exercises = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
             if (exercises.isNotEmpty()) {
-                // Navigation to Exercise Detail can remain as standard navigate for now 
-                // as it's a deep linear flow, but we'll monitor performance.
+                // Navigation logic here
             }
         }
     }
@@ -207,7 +234,7 @@ class WorkoutDetailFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.workout.collect { workoutWithExercises ->
                     workoutWithExercises?.let { workout ->
-                        binding.collapsingToolbar.title = workout.workout.name
+                        binding.tvToolbarTitle.text = workout.workout.name
                         binding.workoutTitle.text = workout.workout.name
 
                         if (binding.switchIncludeWarmupCooldown.isChecked != workout.workout.includeWarmupCooldown) {
