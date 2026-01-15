@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.Workout
+import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutWithExercises
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.google.gson.Gson
@@ -38,13 +39,9 @@ class WorkoutDetailViewModel @Inject constructor(
     private var workoutJob: Job? = null
 
     fun getWorkoutById(workoutId: Int) {
-        // Optimization: Don't reload if it's already the same workout
         if (_workout.value?.workout?.id == workoutId) return
         
-        // Cancel previous collection to avoid old data flickering
         workoutJob?.cancel()
-        
-        // Clear current data immediately to avoid showing old workout while loading
         _workout.value = null
         
         workoutJob = viewModelScope.launch {
@@ -54,19 +51,10 @@ class WorkoutDetailViewModel @Inject constructor(
         }
     }
 
-    fun updateExercises(exercises: List<Exercise>) {
-        viewModelScope.launch {
-            workoutRepository.updateExercises(exercises)
-        }
-    }
-
     fun updateWorkoutPreference(includeWarmupCooldown: Boolean) {
         val currentWorkout = _workout.value?.workout ?: return
-        if (currentWorkout.includeWarmupCooldown == includeWarmupCooldown) return
-        
         viewModelScope.launch {
             workoutRepository.updateWorkout(currentWorkout.copy(includeWarmupCooldown = includeWarmupCooldown))
-            _onWorkoutUpdated.emit(Unit)
         }
     }
 
@@ -74,47 +62,38 @@ class WorkoutDetailViewModel @Inject constructor(
         return workoutRepository.getAllExercises()
     }
 
-    suspend fun getDefaultExercisesFromAssets(workoutName: String): List<Exercise> {
+    private data class WorkoutExerciseJson(val exerciseId: String, val category: String?, val sets: Int, val reps: String, val rest: String, val duration: String?)
+    private data class WorkoutJson(val id: Int, val name: String, val exercises: List<WorkoutExerciseJson>)
+    private data class RootJson(val exercises: List<Exercise>, val workouts: List<WorkoutJson>)
+
+    suspend fun getDefaultAssignmentsFromAssets(workoutId: Int, workoutName: String): List<WorkoutExercise> {
         return try {
             val gson = Gson()
-            val workoutJson = application.assets.open("workouts.json").bufferedReader().use(BufferedReader::readText)
+            val jsonStr = application.assets.open("workouts.json").bufferedReader().use(BufferedReader::readText)
+            val rootData: RootJson = gson.fromJson(jsonStr, RootJson::class.java)
             
-            data class SimpleExercise(val name: String, val duration: String, val targetMuscle: String?)
-            data class WorkoutJsonItem(val workout: Workout, val exercises: List<Exercise>, val warmup: List<SimpleExercise>, val cooldown: List<SimpleExercise>)
+            val match = rootData.workouts.find { it.id == workoutId || it.name.equals(workoutName, ignoreCase = true) }
             
-            val workoutType = object : TypeToken<List<WorkoutJsonItem>>() {}.type
-            val workoutData: List<WorkoutJsonItem> = gson.fromJson(workoutJson, workoutType)
-            
-            val match = workoutData.find { 
-                it.workout.name.equals(workoutName, ignoreCase = true) || 
-                workoutName.contains(it.workout.name, ignoreCase = true) ||
-                it.workout.name.contains(workoutName, ignoreCase = true)
-            }
-            
-            if (match != null) {
-                val results = mutableListOf<Exercise>()
-                match.warmup.forEach { w ->
-                    results.add(Exercise(name = w.name, duration = w.duration, category = "Warm-up", targetMuscle = w.targetMuscle ?: ""))
-                }
-                match.exercises.forEach { e -> results.add(e.copy(category = "Exercise")) }
-                match.cooldown.forEach { c ->
-                    results.add(Exercise(name = c.name, duration = c.duration, category = "Cool-down", targetMuscle = c.targetMuscle ?: ""))
-                }
-                results
-            } else {
-                emptyList()
-            }
+            match?.exercises?.mapIndexed { index, we ->
+                WorkoutExercise(
+                    workoutId = workoutId,
+                    exerciseId = we.exerciseId,
+                    category = we.category ?: "Exercise",
+                    sets = we.sets,
+                    reps = we.reps,
+                    rest = we.rest,
+                    duration = we.duration ?: "",
+                    order = index
+                )
+            } ?: emptyList()
         } catch (e: Exception) {
             emptyList()
         }
     }
 
-    fun updateWorkout(workout: Workout, exercises: List<Exercise>) {
+    fun updateWorkout(workout: Workout, workoutExercises: List<WorkoutExercise>) {
         viewModelScope.launch {
-            workoutRepository.unlinkExercisesFromWorkout(workout.id)
-            workoutRepository.updateWorkout(workout)
-            val updatedExercises = exercises.map { it.copy(workoutId = workout.id) }
-            workoutRepository.updateExercises(updatedExercises)
+            workoutRepository.updateWorkoutWithExercises(workout, workoutExercises)
             _onWorkoutUpdated.emit(Unit)
         }
     }

@@ -15,6 +15,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
+import com.example.nutriority.data.model.Exercise
+import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.data.model.WorkoutWithExercises
 import com.example.nutriority.databinding.FragmentWorkoutDetailBinding
 import com.example.nutriority.databinding.DialogEditWorkoutBinding
@@ -36,7 +38,6 @@ class WorkoutDetailFragment : Fragment() {
     private var _binding: FragmentWorkoutDetailBinding? = null
     private val binding get() = _binding!!
     
-    // Use ActivityViewModel for shared navigation state
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     private val viewModel: WorkoutDetailViewModel by activityViewModels()
     
@@ -56,33 +57,23 @@ class WorkoutDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set up custom back button listener
         binding.btnBack.setOnClickListener {
             navigationViewModel.goBack()
         }
 
-        // Initially hide the toolbar title and background
         binding.tvToolbarTitle.alpha = 0f
         binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
 
-        // Handle app bar collapse state with a smooth fade effect
         binding.appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
             val totalScrollRange = appBarLayout.totalScrollRange
             if (totalScrollRange == 0) return@OnOffsetChangedListener
 
             val percentage = abs(verticalOffset).toFloat() / totalScrollRange
-
-            // Start fading in the background and title during the last 20% of scroll
             val startFadeAt = 0.8f
             if (percentage > startFadeAt) {
-                // Map the 0.8 -> 1.0 range to 0.0 -> 1.0
                 val alphaProgress = (percentage - startFadeAt) / (1f - startFadeAt)
                 val alphaInt = (alphaProgress * 255).toInt().coerceIn(0, 255)
-
-                // Set white background with calculated alpha
                 binding.toolbar.setBackgroundColor(Color.argb(alphaInt, 255, 255, 255))
-
-                // Fade in the title
                 binding.tvToolbarTitle.alpha = alphaProgress
             } else {
                 binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
@@ -102,7 +93,6 @@ class WorkoutDetailFragment : Fragment() {
                 navigationViewModel.selectedWorkoutId.collect { workoutId ->
                     if (workoutId != -1) {
                         viewModel.getWorkoutById(workoutId)
-                        // Reset scroll
                         binding.nestedScrollView.scrollTo(0, 0)
                         binding.appBarLayout.setExpanded(true)
                     }
@@ -118,20 +108,18 @@ class WorkoutDetailFragment : Fragment() {
 
         binding.switchIncludeWarmupCooldown.setOnCheckedChangeListener { _, isChecked ->
             if (isSettingInitialState) return@setOnCheckedChangeListener
-            
-            viewModel.workout.value?.let { workout ->
-                viewModel.updateWorkoutPreference(isChecked)
-            }
+            viewModel.updateWorkoutPreference(isChecked)
         }
         
         binding.startButton.setOnClickListener {
-            val exercises = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
-            if (exercises.isNotEmpty()) {
-                val firstExercise = exercises[0].exercise
+            val items = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
+            if (items.isNotEmpty()) {
+                val firstAssignment = items[0].detail.assignment
                 navigationViewModel.navigateToExerciseDetail(
-                    firstExercise.id,
+                    firstAssignment.workoutId,
+                    firstAssignment.exerciseId,
                     1,
-                    exercises.size
+                    items.size
                 )
             }
         }
@@ -141,11 +129,9 @@ class WorkoutDetailFragment : Fragment() {
         val dialog = Dialog(requireContext(), android.R.style.Theme_Material_Light_NoActionBar)
         val dialogBinding = DialogEditWorkoutBinding.inflate(LayoutInflater.from(requireContext()))
         dialog.setContentView(dialogBinding.root)
-
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         val selectableAdapter = SelectableExerciseAdapter { _, _ -> }
-
         dialogBinding.rvSelectExercises.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = selectableAdapter
@@ -156,9 +142,7 @@ class WorkoutDetailFragment : Fragment() {
             val allExercises = viewModel.getAllExercises().filter { it.isNotEmpty() }.first()
 
             val workoutName = workoutWithExercises.workout.name
-            val isSystemWorkout = workoutWithExercises.workout.id <= 25 ||
-                    listOf("Arm", "Abs", "Chest", "Leg", "Shoulder", "Back", "Full Body", "Lower Body")
-                        .any { workoutName.contains(it, ignoreCase = true) }
+            val isSystemWorkout = workoutWithExercises.workout.id <= 25
 
             if (isSystemWorkout) {
                 dialogBinding.workoutNameLayout.visibility = View.GONE
@@ -169,8 +153,10 @@ class WorkoutDetailFragment : Fragment() {
                 dialogBinding.btnReset.visibility = View.GONE
             }
 
-            val initialExercises = workoutWithExercises.exercises
-            selectableAdapter.setData(allExercises, initialExercises)
+            val selectedExercises = workoutWithExercises.exerciseAssignments.map { assignment ->
+                assignment.exercise.copy(category = assignment.assignment.category)
+            }
+            selectableAdapter.setData(allExercises, selectedExercises)
 
             dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
                 val category = when (checkedIds.firstOrNull()) {
@@ -183,66 +169,69 @@ class WorkoutDetailFragment : Fragment() {
 
             dialogBinding.btnReset.setOnClickListener {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val defaultExercises = viewModel.getDefaultExercisesFromAssets(workoutName)
-                    if (defaultExercises.isNotEmpty()) {
+                    val defaults = viewModel.getDefaultAssignmentsFromAssets(workoutWithExercises.workout.id, workoutName)
+                    if (defaults.isNotEmpty()) {
+                        val defaultExercises = defaults.mapNotNull { assignment ->
+                            allExercises.find { it.id == assignment.exerciseId }?.copy(category = assignment.category)
+                        }
                         selectableAdapter.setData(allExercises, defaultExercises)
-                    } else {
-                        selectableAdapter.setData(allExercises, initialExercises)
                     }
                 }
             }
 
             dialogBinding.btnSave.setOnClickListener {
                 val finalName = if (isSystemWorkout) workoutName else dialogBinding.etWorkoutName.text.toString()
-                if (finalName.isBlank()) {
-                    return@setOnClickListener
-                }
+                if (finalName.isBlank()) return@setOnClickListener
 
                 val finalSelectedExercises = selectableAdapter.getSelectedExercises()
-                viewModel.updateWorkout(workoutWithExercises.workout.copy(name = finalName), finalSelectedExercises)
+                val newAssignments = finalSelectedExercises.mapIndexed { index, ex ->
+                    com.example.nutriority.data.model.WorkoutExercise(
+                        workoutId = workoutWithExercises.workout.id,
+                        exerciseId = ex.id,
+                        category = ex.category.ifBlank { "Exercise" },
+                        sets = 3,
+                        reps = "10",
+                        rest = "60s",
+                        order = index
+                    )
+                }
+                viewModel.updateWorkout(workoutWithExercises.workout.copy(name = finalName), newAssignments)
                 dialog.dismiss()
             }
 
             dialogBinding.btnBack.setOnClickListener { dialog.dismiss() }
-
             dialogBinding.loadingProgress.visibility = View.GONE
             dialogBinding.contentLayout.visibility = View.VISIBLE
         }
-
         dialog.show()
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
-            onItemClick = { exercise, _, _ ->
-                val exercisesOnly = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
-                val exerciseIndex = exercisesOnly.indexOfFirst { it.exercise.id == exercise.id }
-                if (exerciseIndex != -1) {
+            onItemClick = { item, _, _ ->
+                val itemsOnly = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
+                val index = itemsOnly.indexOfFirst { it.detail.assignment.exerciseId == item.assignment.exerciseId }
+                if (index != -1) {
                     navigationViewModel.navigateToExerciseDetail(
-                        exercise.id,
-                        exerciseIndex + 1,
-                        exercisesOnly.size
+                        item.assignment.workoutId,
+                        item.assignment.exerciseId,
+                        index + 1,
+                        itemsOnly.size
                     )
                 }
             },
             onListUpdated = { updatedList ->
-                viewModel.updateExercises(updatedList)
             },
             onDragStart = { viewHolder ->
                 itemTouchHelper.startDrag(viewHolder)
-            },
-            showDragHandle = true
+            }
         )
 
         binding.exercisesRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            if (adapter != exerciseAdapter) adapter = exerciseAdapter
-            
-            // Disable item animations to prevent flickering when switch is toggled
+            adapter = exerciseAdapter
             itemAnimator = null
-            
-            // Optimization for NestedScrollView
             isNestedScrollingEnabled = false
         }
 
@@ -256,39 +245,16 @@ class WorkoutDetailFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.workout.collect { workoutWithExercises ->
                     workoutWithExercises?.let { workout ->
-                        // Only update if text has actually changed to prevent flickering
                         if (binding.tvToolbarTitle.text != workout.workout.name) {
                             binding.tvToolbarTitle.text = workout.workout.name
-                        }
-                        if (binding.workoutTitle.text != workout.workout.name) {
                             binding.workoutTitle.text = workout.workout.name
                         }
 
-                        // Use flag to prevent infinite loop and flickering
                         isSettingInitialState = true
-                        if (binding.switchIncludeWarmupCooldown.isChecked != workout.workout.includeWarmupCooldown) {
-                            binding.switchIncludeWarmupCooldown.isChecked = workout.workout.includeWarmupCooldown
-                        }
+                        binding.switchIncludeWarmupCooldown.isChecked = workout.workout.includeWarmupCooldown
                         isSettingInitialState = false
 
                         updateDisplayList(workout, workout.workout.includeWarmupCooldown)
-                    }
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isLoading.collect { isLoading ->
-                    if (isLoading) {
-                        // Avoid hiding the recycler view if it already has items to prevent flicker
-                        if (exerciseAdapter.itemCount == 0) {
-                            binding.exercisesRecyclerView.visibility = View.GONE
-                        }
-                        binding.loadingProgress.visibility = View.VISIBLE
-                    } else {
-                        binding.exercisesRecyclerView.visibility = View.VISIBLE
-                        binding.loadingProgress.visibility = View.GONE
                     }
                 }
             }
@@ -297,39 +263,21 @@ class WorkoutDetailFragment : Fragment() {
 
     private fun updateDisplayList(workout: WorkoutWithExercises, includeAll: Boolean) {
         val displayList = mutableListOf<WorkoutItem>()
+        val assignments = workout.exerciseAssignments.sortedBy { it.assignment.order }
 
-        val processedExercises = workout.exercises.map { ex ->
-            if (ex.category.equals("Warm-up", ignoreCase = true) || ex.category.equals("Cool-down", ignoreCase = true)) {
-                ex.copy(
-                    sets = if (ex.sets <= 0) 1 else ex.sets,
-                    duration = ex.duration.ifBlank { "30s" }
-                ).apply { imageResId = ex.imageResId }
-            } else {
-                ex
-            }
-        }.sortedBy { it.order }
+        val warmup = assignments.filter { it.assignment.category.equals("Warm-up", ignoreCase = true) }
+        val cooldown = assignments.filter { it.assignment.category.equals("Cool-down", ignoreCase = true) }
+        val main = assignments.filter { it.assignment.category.equals("Exercise", ignoreCase = true) }
 
-        val warmup = processedExercises.filter { it.category.equals("Warm-up", ignoreCase = true) }
-        val cooldown = processedExercises.filter { it.category.equals("Cool-down", ignoreCase = true) }
-        val main = processedExercises.filter {
-            !it.category.equals("Warm-up", ignoreCase = true) &&
-                    !it.category.equals("Cool-down", ignoreCase = true)
-        }
-
-        val mainExerciseCountStr = main.size.toString()
-        if (binding.workoutExerciseCount.text != mainExerciseCountStr) {
-            binding.workoutExerciseCount.text = mainExerciseCountStr
-        }
+        binding.workoutExerciseCount.text = main.size.toString()
 
         if (includeAll) {
             if (warmup.isNotEmpty()) {
                 displayList.add(WorkoutItem.DividerItem("Warm-up"))
                 displayList.addAll(warmup.map { WorkoutItem.ExerciseItem(it) })
             }
-
-            displayList.add(WorkoutItem.DividerItem("Exercises"))
+            displayList.add(WorkoutItem.DividerItem("Main Workout"))
             displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
-
             if (cooldown.isNotEmpty()) {
                 displayList.add(WorkoutItem.DividerItem("Cool-down"))
                 displayList.addAll(cooldown.map { WorkoutItem.ExerciseItem(it) })
@@ -338,33 +286,19 @@ class WorkoutDetailFragment : Fragment() {
             displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
         }
 
-        val totalSeconds = processedExercises.filter {
-            includeAll || (!it.category.equals("Warm-up", ignoreCase = true) && !it.category.equals("Cool-down", ignoreCase = true))
-        }.sumOf { exercise ->
-            val durationStr = exercise.duration.lowercase().trim()
-            if (durationStr.contains("s") || durationStr.contains(":")) {
-                val secondsPerSet = if (durationStr.contains(":")) {
-                    val parts = durationStr.split(":")
-                    (parts.getOrNull(0)?.toIntOrNull() ?: 0) * 60 + (parts.getOrNull(1)?.toIntOrNull() ?: 0)
-                } else {
-                    durationStr.filter { it.isDigit() }.toIntOrNull() ?: 30
-                }
-                exercise.sets * secondsPerSet
+        val totalSeconds = assignments.filter {
+            includeAll || it.assignment.category.equals("Exercise", ignoreCase = true)
+        }.sumOf { item ->
+            val durationStr = item.assignment.duration.lowercase()
+            if (durationStr.contains("s")) {
+                durationStr.filter { it.isDigit() }.toIntOrNull() ?: 30
             } else {
-                val repsList = exercise.reps.split(",").mapNotNull { it.trim().toIntOrNull() }
-                val totalReps = if (repsList.isNotEmpty()) repsList.sum() else exercise.sets * 10
-                (totalReps * 3) + (exercise.sets * 45)
+                (item.assignment.sets * 10 * 3) + (item.assignment.sets * 45)
             }
         }
 
-        val durationText = "${Math.ceil(totalSeconds / 60.0).toInt()} mins"
-        if (binding.workoutDuration.text != durationText) {
-            binding.workoutDuration.text = durationText
-        }
-        
-        // Pass the list to adapter. Using submitList with a new list instance 
-        // helps DiffUtil work correctly.
-        exerciseAdapter.submitList(displayList.toList())
+        binding.workoutDuration.text = "${Math.ceil(totalSeconds / 60.0).toInt()} mins"
+        exerciseAdapter.submitList(displayList)
     }
 
     override fun onDestroyView() {

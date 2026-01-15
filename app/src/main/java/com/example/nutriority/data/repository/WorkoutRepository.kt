@@ -5,10 +5,10 @@ import com.example.nutriority.data.local.WorkoutDao
 import com.example.nutriority.data.local.WorkoutLogDao
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.Workout
+import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.data.model.WorkoutWithExercises
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -30,7 +30,6 @@ class WorkoutRepository(
         return workoutDao.getAllWorkoutsWithExercises().first().map { it.applyImages() }
     }
 
-    // FIX: Ensure all exercises (warmup, main, cooldown) are included
     fun getWorkoutWithExercises(workoutId: Int): Flow<WorkoutWithExercises> {
         return workoutDao.getWorkoutWithExercises(workoutId).map { it.applyImages() }
     }
@@ -39,7 +38,7 @@ class WorkoutRepository(
         return workoutDao.getWorkoutById(workoutId)
     }
 
-    suspend fun getExerciseById(exerciseId: Int): Exercise? {
+    suspend fun getExerciseById(exerciseId: String): Exercise? {
         return workoutDao.getExerciseById(exerciseId)
     }
 
@@ -54,20 +53,20 @@ class WorkoutRepository(
         workoutDao.insertExercise(exercise)
     }
 
-    suspend fun updateExercise(exercise: Exercise) {
-        workoutDao.updateExercise(exercise)
+    suspend fun insertWorkoutExercise(workoutExercise: WorkoutExercise) {
+        workoutDao.insertWorkoutExercise(workoutExercise)
     }
 
-    suspend fun updateExercises(exercises: List<Exercise>) {
-        workoutDao.updateExercises(exercises)
+    suspend fun updateExercise(exercise: Exercise) {
+        workoutDao.updateExercise(exercise)
     }
 
     suspend fun updateWorkout(workout: Workout) {
         workoutDao.updateWorkout(workout)
     }
 
-    suspend fun unlinkExercisesFromWorkout(workoutId: Int) {
-        workoutDao.unlinkExercisesFromWorkout(workoutId)
+    suspend fun updateWorkoutWithExercises(workout: Workout, workoutExercises: List<WorkoutExercise>) {
+        workoutDao.updateWorkoutWithExercises(workout, workoutExercises)
     }
 
     suspend fun insertWorkoutLog(log: WorkoutLog) {
@@ -103,10 +102,13 @@ class WorkoutRepository(
         }
     }
 
-    // Helper to attach images to all exercises in a workout
     private fun WorkoutWithExercises.applyImages(): WorkoutWithExercises {
-        this.exercises.forEach {
-            it.imageResId = application.resources.getIdentifier(it.imageName, "drawable", application.packageName)
+        this.exerciseAssignments.forEach { assignment ->
+            assignment.exercise.imageResId = application.resources.getIdentifier(
+                assignment.exercise.imageName, 
+                "drawable", 
+                application.packageName
+            )
         }
         return this
     }

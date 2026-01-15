@@ -21,8 +21,8 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
     private val _selectedWorkoutId = MutableStateFlow(-1)
     val selectedWorkoutId: StateFlow<Int> = _selectedWorkoutId
 
-    private val _selectedExerciseId = MutableStateFlow(-1)
-    val selectedExerciseId: StateFlow<Int> = _selectedExerciseId
+    private val _selectedExerciseId = MutableStateFlow("")
+    val selectedExerciseId: StateFlow<String> = _selectedExerciseId
 
     private val _exercisePosition = MutableStateFlow(-1)
     val exercisePosition: StateFlow<Int> = _exercisePosition
@@ -51,10 +51,11 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
 
     fun navigateToWorkoutDetail(workoutId: Int) {
         _selectedWorkoutId.value = workoutId
-        setTab(9) // New index for Workout Detail
+        setTab(9)
     }
 
-    fun navigateToExerciseDetail(exerciseId: Int, position: Int, total: Int) {
+    fun navigateToExerciseDetail(workoutId: Int, exerciseId: String, position: Int, total: Int) {
+        _selectedWorkoutId.value = workoutId
         _selectedExerciseId.value = exerciseId
         _exercisePosition.value = position
         _totalExercises.value = total

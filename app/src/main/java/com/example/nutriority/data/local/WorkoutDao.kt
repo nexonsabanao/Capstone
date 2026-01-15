@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.Workout
+import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutWithExercises
 import kotlinx.coroutines.flow.Flow
 
@@ -23,13 +24,16 @@ interface WorkoutDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllExercises(exercises: List<Exercise>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWorkoutExercise(workoutExercise: WorkoutExercise)
+
     @Query("SELECT COUNT(id) FROM workouts")
     suspend fun getWorkoutCount(): Int
 
     @Query("SELECT * FROM workouts ORDER BY name ASC")
     fun getAllWorkouts(): Flow<List<Workout>>
 
-    @Query("SELECT * FROM exercises GROUP BY name ORDER BY name ASC")
+    @Query("SELECT * FROM exercises ORDER BY name ASC")
     fun getAllExercises(): Flow<List<Exercise>>
 
     @Query("SELECT DISTINCT targetMuscle FROM exercises")
@@ -39,7 +43,7 @@ interface WorkoutDao {
     suspend fun getWorkoutById(workoutId: Int): Workout?
 
     @Query("SELECT * FROM exercises WHERE id = :exerciseId")
-    suspend fun getExerciseById(exerciseId: Int): Exercise?
+    suspend fun getExerciseById(exerciseId: String): Exercise?
 
     @Transaction
     @Query("SELECT * FROM workouts WHERE id = :workoutId")
@@ -58,13 +62,13 @@ interface WorkoutDao {
     @Update
     suspend fun updateWorkout(workout: Workout)
 
-    @Query("UPDATE exercises SET workoutId = NULL WHERE workoutId = :workoutId")
-    suspend fun unlinkExercisesFromWorkout(workoutId: Int)
+    @Query("DELETE FROM workout_exercises WHERE workoutId = :workoutId")
+    suspend fun deleteWorkoutExercises(workoutId: Int)
 
     @Transaction
-    suspend fun updateWorkoutWithExercises(workout: Workout, exercises: List<Exercise>) {
-        unlinkExercisesFromWorkout(workout.id)
+    suspend fun updateWorkoutWithExercises(workout: Workout, workoutExercises: List<WorkoutExercise>) {
         updateWorkout(workout)
-        updateExercises(exercises)
+        deleteWorkoutExercises(workout.id)
+        workoutExercises.forEach { insertWorkoutExercise(it) }
     }
 }

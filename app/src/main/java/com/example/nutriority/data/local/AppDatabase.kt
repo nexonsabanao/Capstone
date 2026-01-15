@@ -14,6 +14,7 @@ import com.example.nutriority.data.model.Article
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.data.model.Workout
+import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutLog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -23,8 +24,8 @@ import kotlinx.coroutines.launch
 import java.io.BufferedReader
 
 @Database(
-    entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class],
-    version = 28,
+    entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class, WorkoutExercise::class],
+    version = 29, // Incremented version
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -98,62 +99,54 @@ abstract class AppDatabase : RoomDatabase() {
                     meals.forEach { it.imageResId = getSafeImageResId(it.imageName) }
                     db.mealDao().insertAllMeals(meals)
 
-                    // Pre-populate Workouts
-                    // FIX: Added targetMuscle to SimpleExercise to capture it from JSON
-                    data class SimpleExercise(val name: String, val duration: String, val targetMuscle: String?)
-                    data class WorkoutJson(val workout: Workout, val exercises: List<Exercise>, val warmup: List<SimpleExercise>, val cooldown: List<SimpleExercise>)
+                    // Pre-populate New Workouts structure
+                    data class WorkoutExerciseJson(val exerciseId: String, val category: String?, val sets: Int, val reps: String, val rest: String, val duration: String?)
+                    data class WorkoutJson(val id: Int, val name: String, val description: String, val category: String, val targetMuscle: String, val imageName: String, val difficulty: String, val duration: String, val exercises: List<WorkoutExerciseJson>)
+                    data class RootJson(val exercises: List<Exercise>, val workouts: List<WorkoutJson>)
 
-                    val workoutType = object : TypeToken<List<WorkoutJson>>() {}.type
-                    val workoutJson = context.assets.open("workouts.json").bufferedReader().use(BufferedReader::readText)
-                    val workoutData: List<WorkoutJson> = gson.fromJson(workoutJson, workoutType)
+                    val rootJsonStr = context.assets.open("workouts.json").bufferedReader().use(BufferedReader::readText)
+                    val rootData: RootJson = gson.fromJson(rootJsonStr, RootJson::class.java)
 
-                    workoutData.forEach { workoutJsonItem ->
-                        val met = when (workoutJsonItem.workout.category.lowercase()) {
+                    // 1. Insert Exercises (Library)
+                    rootData.exercises.forEach { exercise ->
+                        exercise.imageResId = getSafeImageResId(exercise.imageName)
+                        db.workoutDao().insertExercise(exercise)
+                    }
+
+                    // 2. Insert Workouts and the Junction table
+                    rootData.workouts.forEach { wJson ->
+                        val met = when (wJson.category.lowercase()) {
                             "cardio", "hiit" -> 8.0
                             "strength", "core" -> 5.0
                             "recovery", "flexibility" -> 2.5
                             else -> 5.0
                         }
                         
-                        val workoutToInsert = workoutJsonItem.workout.copy(
-                            metValue = met,
-                            imageName = workoutJsonItem.workout.imageName ?: "img_balanced_diet"
+                        val workout = Workout(
+                            id = wJson.id,
+                            name = wJson.name,
+                            description = wJson.description,
+                            category = wJson.category,
+                            targetMuscle = wJson.targetMuscle,
+                            imageName = wJson.imageName,
+                            difficulty = wJson.difficulty,
+                            duration = wJson.duration,
+                            metValue = met
                         )
-                        val workoutId = db.workoutDao().insertWorkout(workoutToInsert)
+                        db.workoutDao().insertWorkout(workout)
 
-                        workoutJsonItem.exercises.forEachIndexed { index, exercise ->
-                            exercise.imageResId = getSafeImageResId(exercise.imageName)
-                            exercise.workoutId = workoutId.toInt()
-                            exercise.order = index
-                            exercise.category = "Exercise"
-                            if (exercise.difficulty.isEmpty()) {
-                                exercise.difficulty = workoutToInsert.difficulty
-                            }
-                            db.workoutDao().insertExercise(exercise)
-                        }
-
-                        workoutJsonItem.warmup.forEach { simpleExercise ->
-                            val exercise = Exercise(
-                                name = simpleExercise.name,
-                                duration = simpleExercise.duration,
-                                category = "Warm-up",
-                                workoutId = workoutId.toInt(),
-                                difficulty = workoutToInsert.difficulty,
-                                targetMuscle = simpleExercise.targetMuscle ?: "" // FIX: Corrected missing muscle
+                        wJson.exercises.forEachIndexed { index, weJson ->
+                            val workoutExercise = WorkoutExercise(
+                                workoutId = wJson.id,
+                                exerciseId = weJson.exerciseId,
+                                category = weJson.category ?: "Exercise",
+                                sets = weJson.sets,
+                                reps = weJson.reps,
+                                rest = weJson.rest,
+                                duration = weJson.duration ?: "",
+                                order = index
                             )
-                            db.workoutDao().insertExercise(exercise)
-                        }
-
-                        workoutJsonItem.cooldown.forEach { simpleExercise ->
-                            val exercise = Exercise(
-                                name = simpleExercise.name,
-                                duration = simpleExercise.duration,
-                                category = "Cool-down",
-                                workoutId = workoutId.toInt(),
-                                difficulty = workoutToInsert.difficulty,
-                                targetMuscle = simpleExercise.targetMuscle ?: "" // FIX: Corrected missing muscle
-                            )
-                            db.workoutDao().insertExercise(exercise)
+                            db.workoutDao().insertWorkoutExercise(workoutExercise)
                         }
                     }
                 } catch (e: Exception) {

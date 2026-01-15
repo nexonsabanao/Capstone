@@ -50,8 +50,6 @@ class ExerciseDetailFragment : Fragment() {
                     if (mutableList.size > 1) {
                         mutableList.removeAt(position)
                         updateAndSubmitList(mutableList)
-                    } else {
-                        Toast.makeText(requireContext(), "Workout must have at least one set", Toast.LENGTH_SHORT).show()
                     }
                     binding.root.postDelayed({ isProcessing = false }, 150)
                 }
@@ -64,17 +62,9 @@ class ExerciseDetailFragment : Fragment() {
             if (!isProcessing) {
                 isProcessing = true
                 val lastSet = currentSets.lastOrNull()
-                val exercise = viewModel.exercise.value
-                
-                val isDuration = if (exercise != null) {
-                    exercise.category.contains("Warm-up", ignoreCase = true) || 
-                    exercise.category.contains("Cool-down", ignoreCase = true) ||
-                    (exercise.duration.isNotBlank() && (exercise.duration.contains("s") || exercise.duration.contains(":")))
-                } else {
-                    lastSet?.isDuration ?: false
-                }
+                val isDuration = lastSet?.isDuration ?: false
 
-                val newValue = lastSet?.value ?: if (isDuration) 30 else 8
+                val newValue = lastSet?.value ?: if (isDuration) 30 else 10
                 val mutableList = currentSets.toMutableList()
                 val newSet = ExerciseSet(value = newValue, isDuration = isDuration)
                 mutableList.add(newSet)
@@ -109,11 +99,14 @@ class ExerciseDetailFragment : Fragment() {
     private fun observeNavigationData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                navigationViewModel.selectedExerciseId.collect { exerciseId ->
-                    if (exerciseId != -1) {
-                        // Reset initialized flag when a new exercise is selected
+                combine(
+                    navigationViewModel.selectedWorkoutId,
+                    navigationViewModel.selectedExerciseId
+                ) { wId, eId -> wId to eId }
+                .collect { (workoutId, exerciseId) ->
+                    if (workoutId != -1 && exerciseId.isNotBlank()) {
                         isInitialized = false
-                        viewModel.getExerciseById(exerciseId)
+                        viewModel.getExerciseById(workoutId, exerciseId)
                     }
                 }
             }
@@ -121,8 +114,6 @@ class ExerciseDetailFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Using combine ensures that the UI is updated immediately when either pos or total changes,
-                // preventing the "X/Y" text from being out of sync or delayed.
                 combine(
                     navigationViewModel.exercisePosition,
                     navigationViewModel.totalExercises
@@ -140,10 +131,7 @@ class ExerciseDetailFragment : Fragment() {
         val concatAdapter = ConcatAdapter(exerciseSetAdapter, addSetAdapter)
         binding.setsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            if (adapter == null) {
-                adapter = concatAdapter
-            }
-            // Disable item animations to prevent flickering during quick updates
+            adapter = concatAdapter
             itemAnimator = null
         }
     }
@@ -209,51 +197,37 @@ class ExerciseDetailFragment : Fragment() {
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // Using STARTED instead of RESUMED to avoid re-triggering on every resume
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.exercise.collect { exercise ->
-                    if (exercise != null && !isInitialized) {
+                viewModel.exerciseWithDetail.collect { detail ->
+                    if (detail != null && !isInitialized) {
                         isInitialized = true
+                        val exercise = detail.exercise
+                        val assignment = detail.assignment
+                        
                         binding.exerciseTitle.text = exercise.name
+                        
+                        val isDuration = assignment.category.contains("Warm-up", true) || 
+                                         assignment.category.contains("Cool-down", true) ||
+                                         assignment.duration.isNotBlank()
 
-                        val isWarmupCooldown = exercise.category.contains("Warm-up", ignoreCase = true) || 
-                                             exercise.category.contains("Cool-down", ignoreCase = true)
-                        
-                        val durationStr = "${exercise.duration} ${exercise.reps}".lowercase()
-                        val isDuration = isWarmupCooldown || durationStr.contains("s") || durationStr.contains(":")
-                        
-                        val parsedValue = if (isDuration) {
-                            val sourceStr = if (exercise.duration.any { it.isDigit() }) exercise.duration else exercise.reps
-                            if (sourceStr.contains(":")) {
-                                val parts = sourceStr.split(":")
-                                val mins = parts.getOrNull(0)?.toIntOrNull() ?: 0
-                                val secs = parts.getOrNull(1)?.toIntOrNull() ?: 0
-                                (mins * 60) + secs
-                            } else {
-                                sourceStr.filter { it.isDigit() }.toIntOrNull() ?: 30
-                            }
+                        val setsCount = assignment.sets.coerceAtLeast(1)
+                        val initialValue = if (isDuration) {
+                            assignment.duration.filter { it.isDigit() }.toIntOrNull() ?: 30
                         } else {
-                            exercise.reps.split(",").firstOrNull()?.trim()?.filter { it.isDigit() }?.toIntOrNull() ?: 8
+                            assignment.reps.split(",").firstOrNull()?.trim()?.filter { it.isDigit() }?.toIntOrNull() ?: 10
                         }
 
-                        val savedValues = exercise.reps.split(",").mapNotNull { it.trim().filter { c -> c.isDigit() }.toIntOrNull() }
-                        val setsCount = if (isWarmupCooldown && exercise.sets <= 0) 1 else exercise.sets
-
-                        val initialSets = if (savedValues.size == setsCount && savedValues.isNotEmpty()) {
-                            savedValues.map { ExerciseSet(value = it, isDuration = isDuration) }
-                        } else {
-                            List(setsCount) { ExerciseSet(value = parsedValue, isDuration = isDuration) }
+                        val initialSets = List(setsCount) { 
+                            ExerciseSet(value = initialValue, isDuration = isDuration) 
                         }
-                        
-                        // Pass false to avoid redundant DB update during initial load
-                        updateAndSubmitList(initialSets, saveToDb = false)
+                        updateAndSubmitList(initialSets)
                     }
                 }
             }
         }
     }
 
-    private fun updateAndSubmitList(updatedSets: List<ExerciseSet>, saveToDb: Boolean = true) {
+    private fun updateAndSubmitList(updatedSets: List<ExerciseSet>) {
         currentSets = updatedSets.mapIndexed { index, set ->
             set.copy(setNumber = index + 1)
         }
@@ -264,16 +238,11 @@ class ExerciseDetailFragment : Fragment() {
         }
         
         exerciseSetAdapter.submitList(currentSets)
-
-        if (saveToDb) {
-            viewModel.exercise.value?.let { currentExercise ->
-                val updatedValueString = currentSets.joinToString(", ") { it.value.toString() }
-                val updatedExercise = currentExercise.copy(
-                    sets = currentSets.size,
-                    reps = updatedValueString
-                )
-                viewModel.updateExercise(updatedExercise)
-            }
+        
+        val activeSet = currentSets.find { it.isActive }
+        if (activeSet != null) {
+            val unit = if (activeSet.isDuration) "SEC" else "REPS"
+            binding.btnLogSet.text = "LOG SET ${activeSet.setNumber} (${activeSet.value} $unit)"
         }
     }
 
@@ -292,24 +261,21 @@ class ExerciseDetailFragment : Fragment() {
                 val mutableList = currentSets.toMutableList()
                 mutableList[activeIndex] = mutableList[activeIndex].copy(isActive = false)
                 mutableList[activeIndex + 1] = mutableList[activeIndex + 1].copy(isActive = true)
-                // UI update only for checking a set
-                updateAndSubmitList(mutableList, saveToDb = true)
-                binding.btnLogSet.text = "Log set ${activeIndex + 2}"
+                updateAndSubmitList(mutableList)
             } else {
                 Toast.makeText(requireContext(), "All sets complete! Tap Log to finish.", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.btnLogSet.setOnClickListener {
-            viewModel.exercise.value?.let { exercise ->
+            viewModel.exerciseWithDetail.value?.let { detail ->
                 val valueString = currentSets.joinToString(", ") { it.value.toString() }
                 val log = WorkoutLog(
-                    workoutId = exercise.workoutId ?: 0,
+                    workoutId = detail.assignment.workoutId,
                     date = Date(),
                     reps = valueString
                 )
                 viewModel.logWorkout(log)
-                Toast.makeText(requireContext(), "Workout logged successfully!", Toast.LENGTH_SHORT).show()
                 navigationViewModel.goBack()
             }
         }

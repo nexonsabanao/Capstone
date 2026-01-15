@@ -1,6 +1,5 @@
 package com.example.nutriority.ui.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -14,49 +13,45 @@ class SelectableExerciseAdapter(
 ) : RecyclerView.Adapter<SelectableExerciseAdapter.ViewHolder>() {
 
     private var allExercises = listOf<Exercise>()
-    private var selectedKeys = mutableSetOf<String>() 
+    private var selectedExercises = mutableListOf<Exercise>() 
     private var currentFilter = "Exercise"
-
     private var displayList = listOf<Exercise>()
 
-    private fun getExerciseKey(exercise: Exercise) = "${exercise.name}_${exercise.category}"
-
-    fun setData(exercises: List<Exercise>, initialSelectedExercises: List<Exercise>) {
+    fun setData(exercises: List<Exercise>, initialSelected: List<Exercise>) {
         allExercises = exercises
-        selectedKeys = initialSelectedExercises.map { getExerciseKey(it) }.toMutableSet()
+        selectedExercises = initialSelected.toMutableList()
         updateDisplayList()
     }
 
     fun setFilter(category: String) {
-        currentFilter = when (category) {
-            "Warm-up" -> "Warm-up"
-            "Cool-down" -> "Cool-down"
-            else -> "Exercise"
-        }
+        currentFilter = category
         updateDisplayList()
     }
 
     fun getSelectedExercises(): List<Exercise> {
-        return allExercises.filter { getExerciseKey(it) in selectedKeys }
+        return selectedExercises
     }
 
     private fun updateDisplayList() {
         val filtered = allExercises.filter { exercise ->
-            when (currentFilter) {
-                "Exercise" -> {
-                    !exercise.category.equals("Warm-up", ignoreCase = true) && 
-                    !exercise.category.equals("Cool-down", ignoreCase = true)
-                }
-                else -> {
-                    exercise.category.equals(currentFilter, ignoreCase = true)
-                }
+            // If the exercise is already selected in THIS category, we show it
+            // Or if it's available in the library for this category
+            val isMatch = when (currentFilter) {
+                "Exercise" -> !exercise.category.contains("Warm-up", true) && !exercise.category.contains("Cool-down", true)
+                else -> exercise.category.equals(currentFilter, true)
             }
+            isMatch
         }
-        
-        displayList = filtered.sortedWith(compareByDescending<Exercise> { getExerciseKey(it) in selectedKeys }
-            .thenBy { it.name })
-            
+
+        displayList = filtered.sortedWith(
+            compareByDescending<Exercise> { isSelected(it) }
+            .thenBy { it.name }
+        )
         notifyDataSetChanged()
+    }
+
+    private fun isSelected(exercise: Exercise): Boolean {
+        return selectedExercises.any { it.id == exercise.id && it.category.equals(currentFilter, true) }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -66,7 +61,7 @@ class SelectableExerciseAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val exercise = displayList[position]
-        holder.bind(exercise, selectedKeys.contains(getExerciseKey(exercise)))
+        holder.bind(exercise, isSelected(exercise))
     }
 
     override fun getItemCount() = displayList.size
@@ -77,26 +72,21 @@ class SelectableExerciseAdapter(
             binding.tvTargetMuscle.text = exercise.targetMuscle
             binding.rbSelect.isChecked = isSelected
             
-            // Use Glide for efficient loading in the Edit Workout dialog
             if (exercise.imageResId != 0) {
                 Glide.with(binding.ivExerciseImage.context)
                     .load(exercise.imageResId)
                     .centerCrop()
                     .placeholder(R.drawable.img_balanced_diet)
                     .into(binding.ivExerciseImage)
-            } else {
-                binding.ivExerciseImage.setImageResource(R.drawable.img_balanced_diet)
             }
 
             binding.root.setOnClickListener {
-                val key = getExerciseKey(exercise)
-                val currentlySelected = selectedKeys.contains(key)
-                if (currentlySelected) {
-                    selectedKeys.remove(key)
+                if (isSelected) {
+                    selectedExercises.removeAll { it.id == exercise.id && it.category.equals(currentFilter, true) }
                 } else {
-                    selectedKeys.add(key)
+                    selectedExercises.add(exercise.copy(category = currentFilter))
                 }
-                onExerciseSelected(exercise, !currentlySelected)
+                onExerciseSelected(exercise, !isSelected)
                 updateDisplayList()
             }
         }

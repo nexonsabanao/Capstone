@@ -10,6 +10,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.nutriority.data.model.WorkoutExercise
+import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.databinding.FragmentExerciseLibraryBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.ExerciseAdapter
@@ -28,14 +30,12 @@ class ExerciseLibraryFragment : Fragment() {
     
     private val exerciseAdapter by lazy {
         ExerciseAdapter(
-            onItemClick = { exercise, _, _ -> 
-                AboutExerciseBottomSheet.newInstance(exercise)
+            onItemClick = { item, _, _ -> 
+                AboutExerciseBottomSheet.newInstance(item.exercise)
                     .show(childFragmentManager, "AboutExerciseBottomSheet")
             },
             onListUpdated = { },
-            onDragStart = { },
-            showDragHandle = false,
-            displayTargetMuscle = true
+            onDragStart = { }
         )
     }
 
@@ -61,18 +61,31 @@ class ExerciseLibraryFragment : Fragment() {
     private fun setupRecyclerView() {
         binding.exerciseLibraryRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            if (adapter != exerciseAdapter) {
-                adapter = exerciseAdapter
-            }
+            adapter = exerciseAdapter
         }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // Lazy UI Fix: Only update when resumed to keep the app smooth
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.getAllExercises().collect { exercises ->
-                    val workoutItems = exercises.map { WorkoutItem.ExerciseItem(it) }
+                    // For the library view, we wrap Exercises into a dummy detail object 
+                    // since the Adapter expects WorkoutExerciseWithDetail
+                    val workoutItems = exercises.map { exercise -> 
+                        WorkoutItem.ExerciseItem(
+                            WorkoutExerciseWithDetail(
+                                assignment = WorkoutExercise(
+                                    workoutId = 0,
+                                    exerciseId = exercise.id,
+                                    category = "Library",
+                                    sets = 0,
+                                    reps = "",
+                                    rest = ""
+                                ),
+                                exercise = exercise
+                            )
+                        )
+                    }
                     exerciseAdapter.submitList(workoutItems)
                 }
             }

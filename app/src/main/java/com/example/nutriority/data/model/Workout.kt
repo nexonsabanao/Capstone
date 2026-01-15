@@ -7,18 +7,17 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "workouts")
 data class Workout(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-
-    val name: String = "",
-    val description: String = "",
-    val category: String = "",
-    val targetMuscle: String = "",
-    val imageName: String = "img_balanced_diet",
-    val difficulty: String = "",
-    val duration: String = "",
-    val metValue: Double = 5.0,
-    val tags: List<String> = emptyList(),
-    val includeWarmupCooldown: Boolean = true
+    var id: Int = 0,
+    var name: String = "",
+    var description: String = "",
+    var category: String = "",
+    var targetMuscle: String = "",
+    var imageName: String = "img_balanced_diet",
+    var difficulty: String = "",
+    var duration: String = "",
+    var metValue: Double = 5.0,
+    var tags: List<String> = emptyList(),
+    var includeWarmupCooldown: Boolean = true
 ) {
     @Ignore
     var imageResId: Int = 0

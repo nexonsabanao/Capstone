@@ -45,7 +45,6 @@ class WorkoutPlanner @Inject constructor(
         val bmi = calculateBmi(user.weightKg, user.heightCm)
         val workoutHistory = workoutRepository.getWorkoutLogs().firstOrNull() ?: emptyList()
 
-        // Load plans from JSON
         val plans: List<PlanConfig> = loadPlansFromJson()
         val config = plans.find { it.goal.equals(user.goal, ignoreCase = true) } ?: plans.first()
 
@@ -102,42 +101,30 @@ class WorkoutPlanner @Inject constructor(
     ): List<WorkoutWithExercises?> {
         val weeklyPlan = mutableListOf<WorkoutWithExercises?>()
         val usedWorkoutIds = mutableSetOf<Int>()
-        val trainedMusclesThisWeek = mutableSetOf<String>()
 
-        // GENIUS VARIETY: Group workouts by how many times the user has completed them.
-        // This ensures a perfect rotation through the library.
         val completionCounts = history.groupBy { it.workoutId }.mapValues { it.value.size }
 
-        // Sort pool by completion count (least performed workouts first), then shuffle within those groups
         val availablePool = allSuitableWorkouts.sortedBy { completionCounts[it.workout.id] ?: 0 }
             .toMutableList()
 
         for (focusMuscle in schedule) {
             if (focusMuscle == null) {
                 weeklyPlan.add(null)
-                trainedMusclesThisWeek.clear()
                 continue
             }
 
-            // Find workout that matches muscle group and hasn't been used yet THIS week
             var chosen = availablePool.firstOrNull { workout ->
                 val muscles = workout.workout.targetMuscle.lowercase()
                 workout.workout.id !in usedWorkoutIds &&
                         muscles.contains(focusMuscle.lowercase())
             }
 
-            // Fallback: If no match for that muscle, just take the least performed workout remaining
             if (chosen == null) {
                 chosen = availablePool.firstOrNull { it.workout.id !in usedWorkoutIds }
             }
 
             weeklyPlan.add(chosen)
-            chosen?.let { workout ->
-                usedWorkoutIds.add(workout.workout.id)
-                workout.workout.targetMuscle.split(",").forEach { muscle ->
-                    trainedMusclesThisWeek.add(muscle.trim().lowercase())
-                }
-            }
+            chosen?.let { usedWorkoutIds.add(it.workout.id) }
         }
         return weeklyPlan
     }
@@ -148,43 +135,36 @@ class WorkoutPlanner @Inject constructor(
         history: List<WorkoutLog>,
         userWeight: Double
     ): List<WorkoutSession> {
-        val minTargetRep = config.reps.split("-").firstOrNull()?.trim()?.toIntOrNull() ?: 8
-        val maxTargetRep = config.reps.split("-").lastOrNull()?.trim()?.toIntOrNull() ?: 12
-
-        return plan.mapIndexed { index, workoutData ->
-            if (workoutData != null) {
-                val lastLog = history.filter { it.workoutId == workoutData.workout.id }
-                    .maxByOrNull { it.date }
-
-                val (sets, reps) = if (lastLog != null) {
-                    val lastRepsList = lastLog.reps.split(",").mapNotNull { it.trim().toIntOrNull() }
-                    val lastAvgRep = lastRepsList.average().toInt()
-
-                    var nextRep = lastAvgRep + 1
-                    var nextSets = lastRepsList.size
-
-                    if (nextRep > maxTargetRep) {
-                        nextRep = minTargetRep
-                        nextSets += 1
+        return plan.mapIndexed { index, workoutWithExercises ->
+            if (workoutWithExercises != null) {
+                val workout = workoutWithExercises.workout
+                
+                // Calculate total duration from individual exercises
+                val totalDurationMinutes = workoutWithExercises.exerciseAssignments.sumOf { assignmentWithDetail ->
+                    val durationStr = assignmentWithDetail.assignment.duration.lowercase()
+                    if (durationStr.contains("s")) {
+                        (durationStr.filter { it.isDigit() }.toIntOrNull() ?: 30) / 60.0
+                    } else {
+                        // Estimate duration based on sets/reps: ~3 mins per set including rest
+                        assignmentWithDetail.assignment.sets * 3.0
                     }
+                }.toInt().coerceAtLeast(workout.duration.filter { it.isDigit() }.toIntOrNull() ?: 20)
 
-                    val newRepsString = List(nextSets) { nextRep }.joinToString(", ")
-                    Pair(nextSets, newRepsString)
-                } else {
-                    val initialReps = List(config.sets) { minTargetRep }.joinToString(", ")
-                    Pair(config.sets, initialReps)
-                }
+                val caloriesBurned = ((workout.metValue * 3.5 * userWeight) / 200 * totalDurationMinutes).toInt()
 
-                val duration = workoutData.workout.duration.filter { it.isDigit() }.toIntOrNull() ?: 45
-                val caloriesBurned = ((workoutData.workout.metValue * 3.5 * userWeight) / 200 * duration).toInt()
+                // Summarize the workout (main exercises only)
+                val mainExercises = workoutWithExercises.exerciseAssignments
+                    .filter { it.assignment.category == "Exercise" }
+                val sets = mainExercises.firstOrNull()?.assignment?.sets ?: config.sets
+                val reps = mainExercises.firstOrNull()?.assignment?.reps ?: config.reps
 
                 WorkoutSession(
                     day = "Day ${index + 1}",
-                    focus = workoutData.workout.name,
-                    durationMinutes = duration,
-                    description = workoutData.workout.description,
+                    focus = workout.name,
+                    durationMinutes = totalDurationMinutes,
+                    description = workout.description,
                     caloriesBurned = caloriesBurned,
-                    workoutDetails = WorkoutDetails(id = workoutData.workout.id, sets = sets, reps = reps),
+                    workoutDetails = WorkoutDetails(id = workout.id, sets = sets, reps = reps),
                     sets = sets,
                     reps = reps
                 )

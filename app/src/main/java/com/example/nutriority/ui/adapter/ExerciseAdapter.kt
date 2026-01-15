@@ -8,23 +8,22 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.nutriority.data.model.Exercise
+import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.databinding.ItemExerciseBinding
 import com.example.nutriority.databinding.ItemWorkoutDividerBinding
 import com.example.nutriority.ui.workout.ItemMoveCallbackListener
 import java.util.Collections
 
 sealed class WorkoutItem {
-    data class ExerciseItem(val exercise: Exercise) : WorkoutItem()
+    data class ExerciseItem(val detail: WorkoutExerciseWithDetail) : WorkoutItem()
     data class DividerItem(val title: String) : WorkoutItem()
 }
 
 class ExerciseAdapter(
-    private val onItemClick: (Exercise, Int, Int) -> Unit,
-    private val onListUpdated: (List<Exercise>) -> Unit,
+    private val onItemClick: (WorkoutExerciseWithDetail, Int, Int) -> Unit,
+    private val onListUpdated: (List<WorkoutExerciseWithDetail>) -> Unit,
     private val onDragStart: (RecyclerView.ViewHolder) -> Unit,
-    private val showDragHandle: Boolean = true,
-    private val displayTargetMuscle: Boolean = false
+    private val showDragHandle: Boolean = true
 ) : ListAdapter<WorkoutItem, RecyclerView.ViewHolder>(WorkoutItemDiffCallback()), ItemMoveCallbackListener {
 
     companion object {
@@ -51,7 +50,7 @@ class ExerciseAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = getItem(position)
         if (holder is ExerciseViewHolder && item is WorkoutItem.ExerciseItem) {
-            holder.bind(item.exercise, position)
+            holder.bind(item.detail, position)
         } else if (holder is DividerViewHolder && item is WorkoutItem.DividerItem) {
             holder.bind(item.title)
         }
@@ -59,14 +58,9 @@ class ExerciseAdapter(
 
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
         val mutableList = currentList.toMutableList()
-        
-        // GENIUS BOUNDARY FIX: Check if we are crossing or moving a divider
         if (fromPosition < 0 || toPosition < 0 || fromPosition >= mutableList.size || toPosition >= mutableList.size) return false
-        
-        // Prevent moving a divider
         if (mutableList[fromPosition] is WorkoutItem.DividerItem) return false
         
-        // Prevent jumping OVER a divider
         val start = Math.min(fromPosition, toPosition)
         val end = Math.max(fromPosition, toPosition)
         for (i in start..end) {
@@ -79,11 +73,11 @@ class ExerciseAdapter(
     }
 
     override fun onDragDropped() {
-        val updatedExercises = currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
+        val updated = currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
             .mapIndexed { index, item ->
-                item.exercise.copy(order = index)
+                item.detail.copy(assignment = item.detail.assignment.copy(order = index))
             }
-        onListUpdated(updatedExercises)
+        onListUpdated(updated)
     }
 
     inner class DividerViewHolder(private val binding: ItemWorkoutDividerBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -93,14 +87,23 @@ class ExerciseAdapter(
     }
 
     inner class ExerciseViewHolder(val binding: ItemExerciseBinding) : RecyclerView.ViewHolder(binding.root) {
-        @SuppressLint("ClickableViewAccessibility")
-        fun bind(exercise: Exercise, position: Int) {
+        @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
+        fun bind(item: WorkoutExerciseWithDetail, position: Int) {
+            val exercise = item.exercise
+            val assignment = item.assignment
+
             binding.exerciseName.text = exercise.name
-            binding.exerciseDuration.text = if (displayTargetMuscle) {
-                simplifyTargetMuscle(exercise.name, exercise.targetMuscle)
+            
+            // LOGIC FIX: Check for category and timed exercises
+            val isTimed = assignment.category.contains("Warm-up", true) || 
+                          assignment.category.contains("Cool-down", true) ||
+                          assignment.duration.isNotBlank()
+
+            if (isTimed && assignment.duration.isNotBlank()) {
+                binding.exerciseDuration.text = assignment.duration
             } else {
-                val unit = if (exercise.sets == 1) "set" else "sets"
-                "${exercise.sets} $unit"
+                val unit = if (assignment.sets == 1) "set" else "sets"
+                binding.exerciseDuration.text = "${assignment.sets} $unit"
             }
             
             if (exercise.imageResId != 0) {
@@ -116,44 +119,17 @@ class ExerciseAdapter(
             }
 
             binding.root.setOnClickListener {
-                onItemClick(exercise, position, itemCount)
+                onItemClick(item, position, itemCount)
             }
         }
-    }
-
-    private fun simplifyTargetMuscle(exerciseName: String, targetMuscles: String): String {
-        val categories = listOf("Full Body", "Leg", "Abs", "Arm", "Back", "Chest", "Shoulder")
-        val nameLower = exerciseName.lowercase()
-        val targetLower = targetMuscles.lowercase()
-
-        for (category in categories) {
-            if (nameLower.contains(category.lowercase())) {
-                return when(category) {
-                    "Leg" -> "Legs"
-                    "Arm" -> "Arms"
-                    else -> category
-                }
-            }
-        }
-
-        val priorityOrder = listOf("Full Body", "Abs", "Legs", "Leg", "Back", "Chest", "Shoulder", "Arms", "Arm")
-        for (category in priorityOrder) {
-            if (targetLower.contains(category.lowercase())) {
-                return when(category) {
-                    "Leg", "Legs" -> "Legs"
-                    "Arm", "Arms" -> "Arms"
-                    else -> category
-                }
-            }
-        }
-
-        return targetMuscles.split(",").firstOrNull()?.trim() ?: targetMuscles
     }
 
     class WorkoutItemDiffCallback : DiffUtil.ItemCallback<WorkoutItem>() {
         override fun areItemsTheSame(oldItem: WorkoutItem, newItem: WorkoutItem): Boolean {
             return if (oldItem is WorkoutItem.ExerciseItem && newItem is WorkoutItem.ExerciseItem) {
-                oldItem.exercise.id == newItem.exercise.id
+                val old = oldItem.detail.assignment
+                val new = newItem.detail.assignment
+                old.workoutId == new.workoutId && old.exerciseId == new.exerciseId && old.category == new.category
             } else if (oldItem is WorkoutItem.DividerItem && newItem is WorkoutItem.DividerItem) {
                 oldItem.title == newItem.title
             } else false
