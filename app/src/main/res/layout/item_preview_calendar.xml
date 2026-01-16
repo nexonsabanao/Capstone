@@ -113,6 +113,7 @@
                 app:tint="@color/green" />
 
             <TextView
+                android:id="@+id/tvStreakCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"

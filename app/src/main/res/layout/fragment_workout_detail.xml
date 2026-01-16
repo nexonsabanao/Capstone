@@ -99,7 +99,7 @@
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
             android:paddingTop="32dp"
-            android:paddingBottom="100dp">
+            android:paddingBottom="150dp">
 
             <TextView
                 android:id="@+id/workoutTitle"
@@ -229,7 +229,7 @@
                     android:layout_weight="1"
                     android:fontFamily="sans-serif"
                     android:textStyle="bold"
-                    android:text="Exercises"
+                    android:text="Main Workout"
                     android:textColor="#212121"
                     android:textSize="20sp"
                     app:autoSizeTextType="uniform"
@@ -306,6 +306,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- START BUTTON -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/startButton"
         android:layout_width="160dp"
@@ -322,5 +323,88 @@
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="12sp"
         app:autoSizeMaxTextSize="16sp" />
+
+    <!-- ACTIVE WORKOUT BAR (Shows after clicking START) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/activeWorkoutBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="16dp"
+        app:strokeWidth="0dp"
+        tools:visibility="visible">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="48dp">
+
+            <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                android:id="@+id/workoutProgress"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:cpb_background_progressbar_color="#F5F5F5"
+                app:cpb_background_progressbar_width="4dp"
+                app:cpb_progressbar_color="@color/green"
+                app:cpb_progressbar_width="4dp"
+                app:cpb_progress="0"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvActiveTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="sans-serif"
+                android:text="00:00"
+                android:textColor="#212121"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/tvActiveExercise"
+                app:layout_constraintStart_toEndOf="@id/workoutProgress"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <TextView
+                android:id="@+id/tvActiveExercise"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:text="Ready to begin"
+                android:textColor="#757575"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnEndWorkout"
+                app:layout_constraintStart_toStartOf="@id/tvActiveTimer"
+                app:layout_constraintTop_toBottomOf="@id/tvActiveTimer" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEndWorkout"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="54dp"
+                android:backgroundTint="#F5F5F5"
+                android:fontFamily="sans-serif"
+                android:text="END"
+                android:textColor="@color/bmi_obese"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

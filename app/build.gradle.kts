@@ -94,6 +94,8 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.13.2")
     implementation("com.mikhaellopez:circularprogressbar:3.1.0")
+    
+    // Standard version for CircleIndicator
     implementation("me.relex:circleindicator:2.1.6")
 
     implementation(libs.hilt.android)
@@ -102,6 +104,8 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     ksp("com.github.bumptech.glide:ksp:4.16.0")
     
-    // RootBeer for root detection (using correct MavenCentral coordinates)
     implementation("com.scottyab:rootbeer-lib:0.1.0")
+
+    // Konfetti for celebration effects
+    implementation("nl.dionsegijn:konfetti-xml:2.0.4")
 }

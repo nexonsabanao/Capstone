@@ -2,6 +2,7 @@ package com.example.nutriority.ui.workout
 
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -35,8 +36,6 @@ class ExerciseSetAdapter(
         sets = newList
         diffResult.dispatchUpdatesTo(this)
 
-        // BUG FIX: When moving between 1 and 2 items, we must re-bind the first item
-        // to enable/disable the delete button correctly while keeping animations.
         if (oldList.size <= 2 || newList.size <= 2) {
             notifyItemRangeChanged(0, sets.size)
         }
@@ -58,28 +57,43 @@ class ExerciseSetAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(set: ExerciseSet, onRepClick: (Int) -> Unit, onDeleteClick: (Int) -> Unit, totalSets: Int) {
-            binding.setNumber.text = set.setNumber.toString()
+            binding.setNumber.text = if (set.isCompleted) "" else set.setNumber.toString()
             binding.repsCount.text = set.value.toString()
-
             binding.unitLabel.text = if (set.isDuration) "sec" else "rep"
 
             val context = itemView.context
-            val isDeletable = totalSets > 1
-
-            binding.deleteButton.isEnabled = isDeletable
-            binding.deleteButton.alpha = if (isDeletable) 1.0f else 0.5f
-
-            if (set.isActive) {
-                binding.setNumber.background = ContextCompat.getDrawable(context, R.drawable.bg_set_number_active)
-                binding.repsCount.setTextColor(Color.BLACK)
+            
+            // COMPLETED STATE DESIGN
+            if (set.isCompleted) {
+                binding.setNumber.background = ContextCompat.getDrawable(context, R.drawable.ic_check_circle)
+                binding.setNumber.backgroundTintList = ContextCompat.getColorStateList(context, R.color.green)
+                binding.repsCount.setTextColor(ContextCompat.getColor(context, R.color.green))
+                binding.unitLabel.setTextColor(ContextCompat.getColor(context, R.color.green))
+                binding.root.alpha = 0.8f
+                binding.deleteButton.visibility = View.INVISIBLE
             } else {
-                binding.setNumber.background = ContextCompat.getDrawable(context, R.drawable.bg_set_number_inactive)
-                binding.repsCount.setTextColor(Color.parseColor("#BDBDBD"))
+                binding.root.alpha = 1.0f
+                binding.deleteButton.visibility = View.VISIBLE
+                binding.unitLabel.setTextColor(Color.parseColor("#757575"))
+                
+                if (set.isActive) {
+                    binding.setNumber.background = ContextCompat.getDrawable(context, R.drawable.bg_set_number_active)
+                    binding.setNumber.backgroundTintList = null
+                    binding.repsCount.setTextColor(Color.BLACK)
+                } else {
+                    binding.setNumber.background = ContextCompat.getDrawable(context, R.drawable.bg_set_number_inactive)
+                    binding.setNumber.backgroundTintList = null
+                    binding.repsCount.setTextColor(Color.parseColor("#BDBDBD"))
+                }
             }
+
+            val isDeletable = totalSets > 1 && !set.isCompleted
+            binding.deleteButton.isEnabled = isDeletable
+            binding.deleteButton.alpha = if (isDeletable) 1.0f else 0.3f
 
             binding.repsContainer.setOnClickListener {
                 val pos = bindingAdapterPosition
-                if (pos != RecyclerView.NO_POSITION) {
+                if (pos != RecyclerView.NO_POSITION && !set.isCompleted) {
                     onRepClick(pos)
                 }
             }

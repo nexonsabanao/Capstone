@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -15,7 +17,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
-import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.data.model.WorkoutWithExercises
 import com.example.nutriority.databinding.FragmentWorkoutDetailBinding
@@ -25,7 +26,10 @@ import com.example.nutriority.ui.adapter.ExerciseAdapter
 import com.example.nutriority.ui.adapter.SelectableExerciseAdapter
 import com.example.nutriority.ui.adapter.WorkoutItem
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -45,6 +49,7 @@ class WorkoutDetailFragment : Fragment() {
     private lateinit var itemTouchHelper: ItemTouchHelper
     
     private var isSettingInitialState = false
+    private var currentToast: Toast? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,6 +62,14 @@ class WorkoutDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupToolbar()
+        setupRecyclerView()
+        observeNavigationData()
+        observeViewModel()
+        setupClickListeners()
+    }
+
+    private fun setupToolbar() {
         binding.btnBack.setOnClickListener {
             navigationViewModel.goBack()
         }
@@ -80,11 +93,12 @@ class WorkoutDetailFragment : Fragment() {
                 binding.tvToolbarTitle.alpha = 0f
             }
         })
+    }
 
-        setupRecyclerView()
-        observeNavigationData()
-        observeViewModel()
-        setupClickListeners()
+    private fun showToast(message: String) {
+        currentToast?.cancel()
+        currentToast = Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT)
+        currentToast?.show()
     }
 
     private fun observeNavigationData() {
@@ -112,21 +126,76 @@ class WorkoutDetailFragment : Fragment() {
         }
         
         binding.startButton.setOnClickListener {
-            val items = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
-            if (items.isNotEmpty()) {
-                val firstAssignment = items[0].detail.assignment
-                navigationViewModel.navigateToExerciseDetail(
-                    firstAssignment.workoutId,
-                    firstAssignment.exerciseId,
-                    1,
-                    items.size
-                )
+            val currentWorkoutId = viewModel.workout.value?.workout?.id ?: -1
+            val activeWorkoutId = viewModel.activeWorkoutId.value
+            
+            if (viewModel.isWorkoutActive.value && activeWorkoutId != currentWorkoutId) {
+                showToast("You already have another workout in progress!")
+                return@setOnClickListener
             }
+            
+            viewModel.startWorkout(currentWorkoutId)
+            navigateToCurrentExercise()
+        }
+
+        binding.btnEndWorkout.setOnClickListener {
+            showEndWorkoutBottomSheet()
         }
     }
 
+    private fun navigateToCurrentExercise() {
+        val items = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
+        if (items.isNotEmpty()) {
+            val firstAssignment = items[0].detail.assignment
+            navigationViewModel.navigateToExerciseDetail(
+                firstAssignment.workoutId,
+                firstAssignment.exerciseId,
+                1,
+                items.size
+            )
+        }
+    }
+
+    private fun showEndWorkoutBottomSheet() {
+        val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
+        val view = layoutInflater.inflate(R.layout.layout_end_workout_bottom_sheet, null)
+        dialog.setContentView(view)
+
+        val workout = viewModel.workout.value ?: return
+        val totalCount = workout.exerciseAssignments.size
+        val completedCount = viewModel.completedExercisesCount.value
+        val progress = if (totalCount > 0) (completedCount * 100) / totalCount else 0
+
+        view.findViewById<TextView>(R.id.tvSubtitle).text = 
+            "($completedCount from $totalCount completed - $progress%)"
+
+        val resumeAction = {
+            viewModel.resumeWorkout()
+            dialog.dismiss()
+        }
+
+        view.findViewById<View>(R.id.btnClose).setOnClickListener { resumeAction() }
+        view.findViewById<MaterialButton>(R.id.btnResume).setOnClickListener { resumeAction() }
+        
+        dialog.setOnCancelListener { viewModel.resumeWorkout() }
+
+        view.findViewById<MaterialButton>(R.id.btnDiscard).setOnClickListener {
+            viewModel.stopWorkout(save = false)
+            dialog.dismiss()
+        }
+
+        view.findViewById<MaterialButton>(R.id.btnSaveFinish).setOnClickListener {
+            viewModel.finishWorkout()
+            navigationViewModel.navigateToWorkoutComplete()
+            dialog.dismiss()
+        }
+
+        viewModel.pauseWorkout()
+        dialog.show()
+    }
+
     private fun showEditWorkoutDialog() {
-        val dialog = Dialog(requireContext(), android.R.style.Theme_Material_Light_NoActionBar)
+        val dialog = Dialog(requireContext(), android.R.style. Theme_Material_Light_NoActionBar)
         val dialogBinding = DialogEditWorkoutBinding.inflate(LayoutInflater.from(requireContext()))
         dialog.setContentView(dialogBinding.root)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -210,6 +279,14 @@ class WorkoutDetailFragment : Fragment() {
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
             onItemClick = { item, _, _ ->
+                val currentWorkoutId = viewModel.workout.value?.workout?.id ?: -1
+                val activeWorkoutId = viewModel.activeWorkoutId.value
+                
+                if (viewModel.isWorkoutActive.value && activeWorkoutId != currentWorkoutId) {
+                    showToast("You already have another workout in progress!")
+                    return@ExerciseAdapter
+                }
+
                 val itemsOnly = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
                 val index = itemsOnly.indexOfFirst { it.detail.assignment.exerciseId == item.assignment.exerciseId }
                 if (index != -1) {
@@ -259,6 +336,42 @@ class WorkoutDetailFragment : Fragment() {
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                combine(
+                    viewModel.isWorkoutActive,
+                    viewModel.activeWorkoutId,
+                    viewModel.workout
+                ) { isActive: Boolean, activeId: Int, current: WorkoutWithExercises? ->
+                    val isThisActive = isActive && activeId == current?.workout?.id
+                    isThisActive to isActive
+                }.collect { (isThisWorkoutActive, anyWorkoutActive) ->
+                    binding.startButton.visibility = if (isThisWorkoutActive || !anyWorkoutActive) View.VISIBLE else View.GONE
+                    binding.activeWorkoutBar.visibility = if (isThisWorkoutActive) View.VISIBLE else View.GONE
+                    
+                    binding.startButton.text = if (isThisWorkoutActive) "RESUME" else "START"
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.elapsedTimeSeconds.collect { seconds ->
+                    binding.tvActiveTimer.text = viewModel.formatElapsedTime(seconds)
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.completedExercisesCount.collect { completed ->
+                    val total = viewModel.workout.value?.exerciseAssignments?.size ?: 1
+                    val progress = (completed.toFloat() / total.toFloat()) * 100
+                    binding.workoutProgress.progress = progress
+                }
+            }
+        }
     }
 
     private fun updateDisplayList(workout: WorkoutWithExercises, includeAll: Boolean) {
@@ -286,6 +399,7 @@ class WorkoutDetailFragment : Fragment() {
             displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
         }
 
+        // Calculate total duration
         val totalSeconds = assignments.filter {
             includeAll || it.assignment.category.equals("Exercise", ignoreCase = true)
         }.sumOf { item ->
@@ -303,6 +417,7 @@ class WorkoutDetailFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        currentToast?.cancel()
         _binding = null
     }
 }

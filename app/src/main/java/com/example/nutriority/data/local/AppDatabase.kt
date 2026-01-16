@@ -16,6 +16,7 @@ import com.example.nutriority.data.model.Meal
 import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutLog
+import com.example.nutriority.data.model.WorkoutSessionLog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
@@ -24,8 +25,8 @@ import kotlinx.coroutines.launch
 import java.io.BufferedReader
 
 @Database(
-    entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class, WorkoutExercise::class],
-    version = 29, // Incremented version
+    entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class, WorkoutExercise::class, WorkoutSessionLog::class],
+    version = 32, // Incremented version
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -107,13 +108,11 @@ abstract class AppDatabase : RoomDatabase() {
                     val rootJsonStr = context.assets.open("workouts.json").bufferedReader().use(BufferedReader::readText)
                     val rootData: RootJson = gson.fromJson(rootJsonStr, RootJson::class.java)
 
-                    // 1. Insert Exercises (Library)
                     rootData.exercises.forEach { exercise ->
                         exercise.imageResId = getSafeImageResId(exercise.imageName)
                         db.workoutDao().insertExercise(exercise)
                     }
 
-                    // 2. Insert Workouts and the Junction table
                     rootData.workouts.forEach { wJson ->
                         val met = when (wJson.category.lowercase()) {
                             "cardio", "hiit" -> 8.0

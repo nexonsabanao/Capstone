@@ -11,12 +11,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
-import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentHomeBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.MealAdapter
 import com.example.nutriority.ui.adapter.WorkoutAdapter
 import com.example.nutriority.ui.adapter.ArticleAdapter
+import com.example.nutriority.ui.workout.WorkoutDetailViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -30,6 +30,7 @@ class HomeFragment : Fragment() {
 
     private val homeViewModel: HomeViewModel by activityViewModels()
     private val navigationViewModel: NavigationViewModel by activityViewModels()
+    private val workoutViewModel: WorkoutDetailViewModel by activityViewModels()
 
     private val mealAdapter by lazy {
         MealAdapter { meal ->
@@ -78,63 +79,63 @@ class HomeFragment : Fragment() {
         binding.mealPlanCard.btnViewPlan.setOnClickListener {
             navigationViewModel.setTab(2)
         }
+
+        binding.btnResumeOngoing.setOnClickListener {
+            // FIX: Use activeWorkoutId instead of the currently loaded workout
+            val activeId = workoutViewModel.activeWorkoutId.value
+            if (activeId != -1) {
+                navigationViewModel.navigateToWorkoutDetail(activeId)
+            }
+        }
     }
 
     private fun setupRecyclerViews() {
-        // Instant data injection if available
-        val meals = homeViewModel.allMeals.value
-        if (meals.isNotEmpty()) {
-            mealAdapter.submitList(meals)
-            binding.mealsRecyclerView.visibility = View.VISIBLE
-            binding.mealsProgressBar.visibility = View.GONE
-        }
-        
         binding.mealsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            if (adapter != mealAdapter) adapter = mealAdapter
-        }
-
-        val workouts = homeViewModel.allWorkouts.value
-        if (workouts.isNotEmpty()) {
-            workoutAdapter.submitList(workouts)
-            binding.workoutsRecyclerView.visibility = View.VISIBLE
-            binding.workoutsIndicator.visibility = View.VISIBLE
-            binding.workoutsProgressBar.visibility = View.GONE
+            adapter = mealAdapter
         }
 
         binding.workoutsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            if (adapter != workoutAdapter) {
-                adapter = workoutAdapter
-                workoutSnapHelper.attachToRecyclerView(this)
-            }
+            adapter = workoutAdapter
+            workoutSnapHelper.attachToRecyclerView(this)
         }
 
         indicator = binding.workoutsIndicator
         indicator.attachToRecyclerView(binding.workoutsRecyclerView, workoutSnapHelper)
-        
-        try {
-            workoutAdapter.registerAdapterDataObserver(indicator.adapterDataObserver)
-        } catch (e: Exception) {}
-
-        val articles = homeViewModel.allArticles.value
-        if (articles.isNotEmpty()) {
-            articleAdapter.submitList(articles)
-            binding.articlesRecyclerView.visibility = View.VISIBLE
-            binding.articlesProgressBar.visibility = View.GONE
-        }
 
         binding.articlesRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            if (adapter != articleAdapter) adapter = articleAdapter
+            adapter = articleAdapter
         }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // OPTIMIZATION: Only collect data when the fragment is actually RESUMED (on screen)
-            // This prevents background fragments from using CPU power.
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Observe Active Workout State
+                launch {
+                    workoutViewModel.isWorkoutActive.collect { isActive ->
+                        binding.ongoingWorkoutCard.visibility = if (isActive) View.VISIBLE else View.GONE
+                    }
+                }
+
+                launch {
+                    workoutViewModel.completedExercisesCount.collect { completed ->
+                        // FIX: Logic to handle progress correctly
+                        val workout = workoutViewModel.workout.value ?: return@collect
+                        
+                        // We only want to update the subtitle if we are looking at the ACTIVE workout
+                        if (workout.workout.id == workoutViewModel.activeWorkoutId.value) {
+                            val total = workout.exerciseAssignments.size
+                            val progress = if (total > 0) (completed.toFloat() / total.toFloat()) * 100 else 0f
+                            binding.ongoingProgress.progress = progress
+                            binding.tvOngoingSubtitle.text = "$completed from $total exercises done"
+                        }
+                    }
+                }
+
+                // Existing observations
                 launch {
                     homeViewModel.allMeals.collect { meals ->
                         if (meals.isNotEmpty()) {
@@ -177,9 +178,6 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        try {
-            workoutAdapter.unregisterAdapterDataObserver(indicator.adapterDataObserver)
-        } catch (e: Exception) {}
         _binding = null
     }
 }

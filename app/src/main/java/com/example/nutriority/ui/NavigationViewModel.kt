@@ -62,6 +62,10 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
         setTab(10)
     }
 
+    fun navigateToWorkoutComplete() {
+        setTab(11) // New index for completion screen
+    }
+
     fun goBack(): Boolean {
         if (backStack.isNotEmpty()) {
             _currentTab.value = backStack.pop()

@@ -1,6 +1,7 @@
 package com.example.nutriority.ui.adapter
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.nutriority.R
 import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.databinding.ItemExerciseBinding
 import com.example.nutriority.databinding.ItemWorkoutDividerBinding
@@ -94,7 +96,6 @@ class ExerciseAdapter(
 
             binding.exerciseName.text = exercise.name
             
-            // LOGIC FIX: Check for category and timed exercises
             val isTimed = assignment.category.contains("Warm-up", true) || 
                           assignment.category.contains("Cool-down", true) ||
                           assignment.duration.isNotBlank()
@@ -110,12 +111,27 @@ class ExerciseAdapter(
                 binding.exerciseImage.setImageResource(exercise.imageResId)
             }
 
+            // COMPLETION DESIGN: Show checkmark and change appearance if done
+            if (assignment.isCompleted) {
+                binding.dragHandle.setImageResource(R.drawable.ic_check_circle)
+                binding.dragHandle.setColorFilter(binding.root.context.getColor(R.color.green))
+                binding.root.alpha = 0.7f
+                binding.exerciseName.setTextColor(binding.root.context.getColor(R.color.green))
+            } else {
+                binding.dragHandle.setImageResource(R.drawable.ic_drag_handle)
+                binding.dragHandle.setColorFilter(null)
+                binding.root.alpha = 1.0f
+                binding.exerciseName.setTextColor(Color.parseColor("#212121"))
+            }
+
             binding.dragHandle.visibility = if (showDragHandle) View.VISIBLE else View.GONE
-            if (showDragHandle) {
+            if (showDragHandle && !assignment.isCompleted) {
                 binding.dragHandle.setOnTouchListener { _, event ->
                     if (event.actionMasked == MotionEvent.ACTION_DOWN) onDragStart(this)
                     false
                 }
+            } else {
+                binding.dragHandle.setOnTouchListener(null)
             }
 
             binding.root.setOnClickListener {

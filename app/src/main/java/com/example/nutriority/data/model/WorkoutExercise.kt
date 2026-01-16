@@ -31,5 +31,6 @@ data class WorkoutExercise(
     var reps: String,
     var rest: String,
     var duration: String = "",
-    var order: Int = 0
+    var order: Int = 0,
+    var isCompleted: Boolean = false // Track completion status
 )

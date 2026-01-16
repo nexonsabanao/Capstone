@@ -27,10 +27,7 @@
             android:fontFamily="sans-serif-medium"
             android:text="Welcome back,"
             android:textColor="#757575"
-            android:textSize="16sp"
-            app:autoSizeTextType="uniform"
-            app:autoSizeMinTextSize="12sp"
-            app:autoSizeMaxTextSize="16sp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/homeTitle"
@@ -39,10 +36,7 @@
             android:text="Nutriority"
             android:textColor="#212121"
             android:textSize="32sp"
-            android:textStyle="bold"
-            app:autoSizeTextType="uniform"
-            app:autoSizeMinTextSize="24sp"
-            app:autoSizeMaxTextSize="32sp" />
+            android:textStyle="bold" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -61,6 +55,95 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingBottom="24dp">
+
+            <!-- CLEAN GREEN REDESIGN FOR ONGOING WORKOUT BANNER -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/ongoingWorkoutCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/green"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="12dp"
+                app:strokeWidth="0dp"
+                tools:visibility="visible">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp">
+
+                    <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                        android:id="@+id/ongoingProgress"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        app:cpb_background_progressbar_color="#4DFFFFFF"
+                        app:cpb_background_progressbar_width="4dp"
+                        app:cpb_progressbar_color="@android:color/white"
+                        app:cpb_progressbar_width="6dp"
+                        app:cpb_progress="0"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvOngoingStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:fontFamily="sans-serif"
+                        android:text="SESSION ACTIVE"
+                        android:textColor="#CCFFFFFF"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.15"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toEndOf="@id/ongoingProgress"
+                        app:layout_constraintTop_toTopOf="@id/ongoingProgress" />
+
+                    <TextView
+                        android:id="@+id/tvOngoingTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="sans-serif"
+                        android:text="Continue Training"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@id/btnResumeOngoing"
+                        app:layout_constraintStart_toStartOf="@id/tvOngoingStatus"
+                        app:layout_constraintTop_toBottomOf="@id/tvOngoingStatus" />
+
+                    <TextView
+                        android:id="@+id/tvOngoingSubtitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="3 from 8 exercises done"
+                        android:textColor="#E0F2F1"
+                        android:textSize="13sp"
+                        app:layout_constraintEnd_toStartOf="@id/btnResumeOngoing"
+                        app:layout_constraintStart_toStartOf="@id/tvOngoingTitle"
+                        app:layout_constraintTop_toBottomOf="@id/tvOngoingTitle" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnResumeOngoing"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@android:color/white"
+                        android:text="RESUME"
+                        android:textColor="@color/green"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        app:cornerRadius="12dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Hero Card Section -->
             <include
@@ -81,10 +164,7 @@
                 android:textStyle="bold"
                 android:text="Body Focus"
                 android:textColor="#212121"
-                android:textSize="20sp"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="16sp"
-                app:autoSizeMaxTextSize="20sp" />
+                android:textSize="20sp" />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -99,7 +179,6 @@
                     android:paddingHorizontal="20dp"
                     android:visibility="gone"
                     tools:visibility="visible"
-                    tools:itemCount="1"
                     tools:listitem="@layout/item_preview_workout" />
 
                 <ProgressBar
@@ -139,10 +218,7 @@
                 android:textStyle="bold"
                 android:text="Healthy Recipes"
                 android:textColor="#212121"
-                android:textSize="20sp"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="16sp"
-                app:autoSizeMaxTextSize="20sp" />
+                android:textSize="20sp" />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -158,7 +234,6 @@
                     android:orientation="horizontal"
                     android:visibility="gone"
                     tools:visibility="visible"
-                    tools:itemCount="1"
                     tools:listitem="@layout/item_preview_meal_card" />
 
                 <ProgressBar
@@ -181,10 +256,7 @@
                 android:textStyle="bold"
                 android:text="Wellness Articles"
                 android:textColor="#212121"
-                android:textSize="20sp"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="16sp"
-                app:autoSizeMaxTextSize="20sp" />
+                android:textSize="20sp" />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -198,7 +270,6 @@
                     android:layout_marginHorizontal="20dp"
                     android:visibility="gone"
                     tools:visibility="visible"
-                    tools:itemCount="3"
                     tools:listitem="@layout/item_article_preview" />
 
                 <ProgressBar

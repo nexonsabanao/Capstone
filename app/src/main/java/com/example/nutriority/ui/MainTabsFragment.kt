@@ -27,6 +27,7 @@ import com.example.nutriority.ui.workout.AllWorkoutsFragment
 import com.example.nutriority.ui.workout.ExerciseDetailFragment
 import com.example.nutriority.ui.workout.ExerciseLibraryFragment
 import com.example.nutriority.ui.workout.PersonalizedWorkoutFragment
+import com.example.nutriority.ui.workout.WorkoutCompleteFragment
 import com.example.nutriority.ui.workout.WorkoutDetailFragment
 import com.example.nutriority.ui.workout.WorkoutFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -67,13 +68,14 @@ class MainTabsFragment : Fragment() {
         val adapter = TabsAdapter(this)
         binding.viewPager.adapter = adapter
         
-        // keeps ALL fragments alive in memory for instant switching
-        binding.viewPager.offscreenPageLimit = 10 
+        // Keeps fragments alive for instant switching
+        binding.viewPager.offscreenPageLimit = 12 
         
         binding.viewPager.isUserInputEnabled = false
 
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
+                // Bottom nav only visible for primary tabs (0-3)
                 val isPrimaryTab = position < 4
                 binding.bottomNavigationView.isVisible = isPrimaryTab
                 binding.separator.isVisible = isPrimaryTab
@@ -134,7 +136,7 @@ class MainTabsFragment : Fragment() {
     }
 
     private inner class TabsAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
-        override fun getItemCount(): Int = 11
+        override fun getItemCount(): Int = 12
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
@@ -149,6 +151,7 @@ class MainTabsFragment : Fragment() {
                 8 -> ArticleDetailFragment()
                 9 -> WorkoutDetailFragment()
                 10 -> ExerciseDetailFragment()
+                11 -> WorkoutCompleteFragment()
                 else -> HomeFragment()
             }
         }

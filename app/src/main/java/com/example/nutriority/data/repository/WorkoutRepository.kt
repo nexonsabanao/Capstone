@@ -7,6 +7,7 @@ import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutLog
+import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.data.model.WorkoutWithExercises
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -27,7 +28,9 @@ class WorkoutRepository(
     }
 
     suspend fun getAllWorkoutsList(): List<WorkoutWithExercises> {
-        return workoutDao.getAllWorkoutsWithExercises().first().map { it.applyImages() }
+        return workoutDao.getAllWorkouts().first().map { workout ->
+            workoutDao.getWorkoutWithExercises(workout.id).first().applyImages()
+        }
     }
 
     fun getWorkoutWithExercises(workoutId: Int): Flow<WorkoutWithExercises> {
@@ -43,7 +46,11 @@ class WorkoutRepository(
     }
 
     val allWorkoutsWithExercises: Flow<List<WorkoutWithExercises>> = 
-        workoutDao.getAllWorkoutsWithExercises().map { list -> list.map { it.applyImages() } }
+        workoutDao.getAllWorkouts().map { list -> 
+            list.map { workout ->
+                workoutDao.getWorkoutWithExercises(workout.id).first().applyImages()
+            }
+        }
 
     suspend fun insertWorkout(workout: Workout) {
         workoutDao.insertWorkout(workout)
@@ -65,12 +72,28 @@ class WorkoutRepository(
         workoutDao.updateWorkout(workout)
     }
 
+    suspend fun updateExerciseCompletion(workoutId: Int, exerciseId: String, category: String, completed: Boolean) {
+        workoutDao.updateExerciseCompletion(workoutId, exerciseId, category, completed)
+    }
+
     suspend fun updateWorkoutWithExercises(workout: Workout, workoutExercises: List<WorkoutExercise>) {
         workoutDao.updateWorkoutWithExercises(workout, workoutExercises)
     }
 
     suspend fun insertWorkoutLog(log: WorkoutLog) {
         workoutLogDao.insertLog(log)
+    }
+
+    suspend fun insertSessionLog(log: WorkoutSessionLog) {
+        workoutDao.insertSessionLog(log)
+    }
+
+    fun getLatestSessionLog(): Flow<WorkoutSessionLog?> {
+        return workoutDao.getLatestSessionLog()
+    }
+
+    fun getAllSessionLogs(): Flow<List<WorkoutSessionLog>> {
+        return workoutDao.getAllSessionLogs()
     }
 
     fun getLogsForWorkout(workoutId: Int): Flow<List<WorkoutLog>> {
@@ -92,9 +115,9 @@ class WorkoutRepository(
     }
 
     fun getUniqueTargetMuscles(): Flow<List<String>> {
-        return workoutDao.getUniqueTargetMuscles().map { muscleList ->
-            muscleList
-                .flatMap { it.split(',') }
+        return workoutDao.getAllExercises().map { exercises ->
+            exercises
+                .flatMap { it.targetMuscle.split(',') }
                 .map { it.trim() }
                 .filter { it.isNotBlank() }
                 .distinct()

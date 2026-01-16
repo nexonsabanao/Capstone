@@ -55,7 +55,7 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:paddingBottom="100dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_bar"
+        app:layout_constraintBottom_toTopOf="@id/bottom_bar_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_container">
@@ -221,62 +221,178 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/bottom_bar"
+    <FrameLayout
+        android:id="@+id/bottom_bar_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@android:color/white"
-        app:cardCornerRadius="0dp"
-        app:cardElevation="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:strokeWidth="0dp">
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <LinearLayout
+        <!-- LOG SET BAR -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bottom_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="48dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="16dp"
+            app:strokeWidth="0dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCheck"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:padding="0dp"
-                app:cornerRadius="16dp"
-                app:backgroundTint="#F5F5F5"
-                app:strokeColor="#E0E0E0"
-                app:strokeWidth="1dp"
-                app:icon="@android:drawable/ic_media_next"
-                app:iconGravity="textStart"
-                app:iconPadding="0dp"
-                app:iconSize="28dp"
-                app:iconTint="@color/primary_dark" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="48dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLogSet"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                android:layout_weight="1"
-                android:layout_marginStart="16dp"
-                android:fontFamily="sans-serif"
-                android:textStyle="bold"
-                android:text="LOG SET 1"
-                android:textSize="16sp"
-                android:backgroundTint="@color/primary_dark"
-                android:textColor="@color/white"
-                app:cornerRadius="20dp"
-                app:icon="@android:drawable/ic_input_get"
-                app:iconTint="@color/white"
-                app:iconGravity="textStart"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="12sp"
-                app:autoSizeMaxTextSize="16sp" />
+                <!-- Updated Icon to Check All -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCheck"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:padding="0dp"
+                    app:cornerRadius="16dp"
+                    app:backgroundTint="#F5F5F5"
+                    app:strokeColor="#E0E0E0"
+                    app:strokeWidth="1dp"
+                    app:icon="@drawable/ic_check_circle"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="28dp"
+                    app:iconTint="@color/primary_dark" />
 
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLogSet"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold"
+                    android:text="LOG SET 1"
+                    android:textSize="16sp"
+                    android:backgroundTint="@color/primary_dark"
+                    android:textColor="@color/white"
+                    app:cornerRadius="20dp"
+                    app:icon="@android:drawable/ic_input_get"
+                    app:iconTint="@color/white"
+                    app:iconGravity="textStart"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="12sp"
+                    app:autoSizeMaxTextSize="16sp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- REST TIMER BAR -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/rest_timer_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="16dp"
+            app:strokeWidth="0dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="48dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <!-- Header: Close, Title -->
+                <ImageView
+                    android:id="@+id/btnCloseRest"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_margin="16dp"
+                    android:src="@drawable/ic_close"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#757575" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rest"
+                    android:textColor="#212121"
+                    android:textSize="20sp"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/btnCloseRest"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/btnCloseRest" />
+
+                <!-- Timer Section -->
+                <LinearLayout
+                    android:id="@+id/timer_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toBottomOf="@id/btnCloseRest">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnMinus5"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:text="-5"
+                        android:textColor="@color/green"
+                        android:fontFamily="sans-serif"
+                        android:textStyle="bold"
+                        app:cornerRadius="16dp"
+                        app:strokeColor="@color/green" />
+
+                    <TextView
+                        android:id="@+id/tvRestTimer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="24dp"
+                        android:fontFamily="sans-serif"
+                        android:text="00:36s"
+                        android:textColor="#212121"
+                        android:textSize="48sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPlus5"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:text="+5"
+                        android:textColor="@color/green"
+                        android:fontFamily="sans-serif"
+                        android:textStyle="bold"
+                        app:cornerRadius="16dp"
+                        app:strokeColor="@color/green" />
+                </LinearLayout>
+
+                <!-- Stop Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStopRest"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="32dp"
+                    android:backgroundTint="@color/primary_dark"
+                    android:text="STOP"
+                    android:textColor="#FFFFFF"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold"
+                    app:cornerRadius="20dp"
+                    app:icon="@drawable/dot_active"
+                    app:iconTint="#D32F2F"
+                    app:layout_constraintTop_toBottomOf="@id/timer_layout" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
