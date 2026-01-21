@@ -35,7 +35,8 @@ class ExerciseLibraryFragment : Fragment() {
                     .show(childFragmentManager, "AboutExerciseBottomSheet")
             },
             onListUpdated = { },
-            onDragStart = { }
+            onDragStart = { },
+            isLibraryView = true // FIX: Enable Library Mode to show target muscles and hide drag handles
         )
     }
 

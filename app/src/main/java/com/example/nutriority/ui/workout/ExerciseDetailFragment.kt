@@ -68,7 +68,16 @@ class ExerciseDetailFragment : Fragment() {
             if (!isProcessing) {
                 isProcessing = true
                 val lastSet = currentSets.lastOrNull()
-                val isDuration = lastSet?.isDuration ?: false
+                
+                // Determine if exercise is duration based from ViewModel if no sets exist
+                val isExerciseDurationBased = viewModel.exerciseWithDetail.value?.let { detail ->
+                    val assignment = detail.assignment
+                    assignment.category.contains("Warm-up", true) || 
+                    assignment.category.contains("Cool-down", true) ||
+                    assignment.duration.isNotBlank()
+                } ?: false
+
+                val isDuration = lastSet?.isDuration ?: isExerciseDurationBased
                 val newValue = lastSet?.value ?: if (isDuration) 30 else 10
                 val mutableList = currentSets.toMutableList()
                 val newSet = ExerciseSet(value = newValue, isDuration = isDuration)
@@ -205,7 +214,7 @@ class ExerciseDetailFragment : Fragment() {
             if (isChecked) {
                 startAutoLogTimerIfNeeded()
             } else {
-                viewModel.stopAutoLogTimer()
+                workoutViewModel.stopAutoLogTimer()
             }
         }
 
@@ -242,7 +251,7 @@ class ExerciseDetailFragment : Fragment() {
         val activeSet = currentSets.find { it.isActive && !it.isCompleted } ?: return
         val time = if (activeSet.isDuration) activeSet.value.toLong() else autoLogTimeSeconds
         
-        viewModel.startAutoLogTimer(time) {
+        workoutViewModel.startAutoLogTimer(time) {
             logSetAndAdvance()
         }
     }
@@ -276,6 +285,7 @@ class ExerciseDetailFragment : Fragment() {
                             assignment.reps.split(",").firstOrNull()?.trim()?.filter { it.isDigit() }?.toIntOrNull() ?: 10
                         }
 
+                        // Use actual completion status from assignment
                         val initialSets = List(setsCount) { 
                             ExerciseSet(value = initialValue, isDuration = isDuration, isCompleted = assignment.isCompleted) 
                         }
@@ -289,7 +299,7 @@ class ExerciseDetailFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isResting.collect { isResting ->
+                workoutViewModel.isResting.collect { isResting: Boolean ->
                     binding.restTimerBar.visibility = if (isResting) View.VISIBLE else View.GONE
                     binding.bottomBar.visibility = if (isResting) View.GONE else View.VISIBLE
                     
@@ -302,7 +312,7 @@ class ExerciseDetailFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.restTimeRemaining.collect { seconds ->
+                workoutViewModel.restTimeRemaining.collect { seconds: Long ->
                     val mins = seconds / 60
                     val secs = seconds % 60
                     binding.tvRestTimer.text = String.format("%02d:%02ds", mins, secs)
@@ -346,6 +356,7 @@ class ExerciseDetailFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.backButton.setOnClickListener {
+            workoutViewModel.stopRestTimer() // Explicitly stop rest timer on back
             navigationViewModel.goBack()
         }
 
@@ -363,10 +374,12 @@ class ExerciseDetailFragment : Fragment() {
         }
 
         binding.btnCheck.setOnClickListener {
+            ensureWorkoutStarted()
             completeAllSets()
         }
 
         binding.btnLogSet.setOnClickListener {
+            ensureWorkoutStarted()
             val allCompleted = currentSets.all { it.isCompleted }
             if (allCompleted) {
                 finishOrNext()
@@ -375,14 +388,24 @@ class ExerciseDetailFragment : Fragment() {
             }
         }
 
-        binding.btnCloseRest.setOnClickListener { viewModel.stopRestTimer() }
-        binding.btnStopRest.setOnClickListener { viewModel.stopRestTimer() }
-        binding.btnMinus5.setOnClickListener { viewModel.adjustRestTime(-5) }
-        binding.btnPlus5.setOnClickListener { viewModel.adjustRestTime(5) }
+        // Rest Bar Listeners
+        binding.btnCloseRest.setOnClickListener { workoutViewModel.stopRestTimer() }
+        binding.btnStopRest.setOnClickListener { workoutViewModel.stopRestTimer() }
+        binding.btnMinus5.setOnClickListener { workoutViewModel.adjustRestTime(-5) }
+        binding.btnPlus5.setOnClickListener { workoutViewModel.adjustRestTime(5) }
+    }
+
+    private fun ensureWorkoutStarted() {
+        if (!workoutViewModel.isWorkoutActive.value) {
+            val workoutId = navigationViewModel.selectedWorkoutId.value
+            if (workoutId != -1) {
+                workoutViewModel.startWorkout(workoutId)
+            }
+        }
     }
 
     private fun completeAllSets() {
-        viewModel.stopAutoLogTimer() 
+        workoutViewModel.stopAutoLogTimer() 
         val updatedList = currentSets.map { it.copy(isActive = false, isCompleted = true) }
         updateAndSubmitList(updatedList)
         
@@ -397,7 +420,9 @@ class ExerciseDetailFragment : Fragment() {
     }
 
     private fun finishOrNext() {
-        viewModel.stopAutoLogTimer()
+        workoutViewModel.stopAutoLogTimer()
+        workoutViewModel.stopRestTimer() // Ensure rest timer is stopped
+        
         viewLifecycleOwner.lifecycleScope.launch {
             val detail = viewModel.exerciseWithDetail.value ?: return@launch
             val workoutWithExercises = workoutViewModel.workout.first() ?: return@launch
@@ -408,6 +433,14 @@ class ExerciseDetailFragment : Fragment() {
                 detail.assignment.category,
                 true
             )
+
+            val valueString = currentSets.joinToString(", ") { it.value.toString() }
+            val log = WorkoutLog(
+                workoutId = detail.assignment.workoutId,
+                date = Date(),
+                reps = valueString
+            )
+            viewModel.logWorkout(log)
 
             val currentPos = navigationViewModel.exercisePosition.value
             val total = navigationViewModel.totalExercises.value
@@ -426,12 +459,10 @@ class ExerciseDetailFragment : Fragment() {
                         visibleAssignments.size
                     )
                 } else {
-                    // Logic fix: Ensure we save to Room before leaving
                     workoutViewModel.finishWorkout()
                     navigationViewModel.navigateToWorkoutComplete()
                 }
             } else {
-                // Logic fix: Final exercise done, save session to Room
                 workoutViewModel.finishWorkout()
                 navigationViewModel.navigateToWorkoutComplete()
             }
@@ -452,7 +483,7 @@ class ExerciseDetailFragment : Fragment() {
                 
                 if (isRestOn) {
                     val restTime = viewModel.exerciseWithDetail.value?.assignment?.rest?.filter { it.isDigit() }?.toLongOrNull() ?: 60L
-                    viewModel.startRestTimer(restTime)
+                    workoutViewModel.startRestTimer(restTime)
                 } else if (isAutoLogOn) {
                     startAutoLogTimerIfNeeded()
                 }
@@ -461,7 +492,7 @@ class ExerciseDetailFragment : Fragment() {
                 
                 if (isRestOn) {
                     val restTime = viewModel.exerciseWithDetail.value?.assignment?.rest?.filter { it.isDigit() }?.toLongOrNull() ?: 60L
-                    viewModel.startRestTimer(restTime)
+                    workoutViewModel.startRestTimer(restTime)
                 }
             }
         }
@@ -469,6 +500,8 @@ class ExerciseDetailFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        workoutViewModel.stopRestTimer() // Cleanup rest timer when fragment is destroyed
+        workoutViewModel.stopAutoLogTimer()
         _binding = null
     }
 }

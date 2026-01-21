@@ -55,10 +55,22 @@ class PersonalizedWorkoutFragment : Fragment() {
         workoutAdapter = PersonalizedWorkoutAdapter(
             emptyList(),
             0,
-            onStartWorkoutClicked = { dayIndex -> handleWorkoutStarted(dayIndex) },
+            onStartWorkoutClicked = { dayIndex -> 
+                // BUG FIX: Clicking "START" should navigate to workout details, not skip the day
+                val json = userViewModel.user.value?.personalizedPlanJson
+                val plan = Gson().fromJson(json, WorkoutPlan::class.java)
+                val session = plan?.sessions?.getOrNull(dayIndex)
+                val id = session?.unifiedWorkoutId ?: -1
+                
+                if (session?.focus == "Rest Day") {
+                    handleWorkoutStarted(dayIndex) // Rest days can be skipped
+                } else if (id > 0) {
+                    navigationViewModel.navigateToWorkoutDetail(id, isFromPersonalized = true, dayIndex = dayIndex)
+                }
+            },
             onRestartWorkoutClicked = { handleRestartWorkout() },
-            onWorkoutClicked = { workoutId ->
-                navigationViewModel.navigateToWorkoutDetail(workoutId)
+            onWorkoutClicked = { workoutId, dayIndex ->
+                navigationViewModel.navigateToWorkoutDetail(workoutId, isFromPersonalized = true, dayIndex = dayIndex)
             }
         )
         
@@ -73,7 +85,6 @@ class PersonalizedWorkoutFragment : Fragment() {
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // Lazy UI Fix: Only update when resumed to keep the app smooth
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 userViewModel.user.observe(viewLifecycleOwner) { user ->
                     user?.personalizedPlanJson?.let { jsonString ->

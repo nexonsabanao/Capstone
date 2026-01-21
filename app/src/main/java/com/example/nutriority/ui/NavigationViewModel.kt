@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @HiltViewModel
 class NavigationViewModel @Inject constructor() : ViewModel() {
+    
     private val _currentTab = MutableStateFlow(0)
     val currentTab: StateFlow<Int> = _currentTab
 
@@ -20,6 +21,12 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
 
     private val _selectedWorkoutId = MutableStateFlow(-1)
     val selectedWorkoutId: StateFlow<Int> = _selectedWorkoutId
+
+    private val _isPersonalizedFlow = MutableStateFlow(false)
+    val isPersonalizedFlow: StateFlow<Boolean> = _isPersonalizedFlow
+
+    private val _selectedDayIndex = MutableStateFlow(-1)
+    val selectedDayIndex: StateFlow<Int> = _selectedDayIndex
 
     private val _selectedExerciseId = MutableStateFlow("")
     val selectedExerciseId: StateFlow<String> = _selectedExerciseId
@@ -33,7 +40,8 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
     private val backStack = Stack<Int>()
 
     fun setTab(index: Int, addToBackStack: Boolean = true) {
-        if (addToBackStack && _currentTab.value != index) {
+        if (index == _currentTab.value) return
+        if (addToBackStack) {
             backStack.push(_currentTab.value)
         }
         _currentTab.value = index
@@ -49,8 +57,10 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
         setTab(8)
     }
 
-    fun navigateToWorkoutDetail(workoutId: Int) {
+    fun navigateToWorkoutDetail(workoutId: Int, isFromPersonalized: Boolean = false, dayIndex: Int = -1) {
         _selectedWorkoutId.value = workoutId
+        _isPersonalizedFlow.value = isFromPersonalized
+        _selectedDayIndex.value = dayIndex
         setTab(9)
     }
 
@@ -63,7 +73,7 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
     }
 
     fun navigateToWorkoutComplete() {
-        setTab(11) // New index for completion screen
+        setTab(11)
     }
 
     fun goBack(): Boolean {
@@ -72,5 +82,10 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
             return true
         }
         return false
+    }
+
+    fun resetToHome() {
+        backStack.clear()
+        _currentTab.value = 0
     }
 }

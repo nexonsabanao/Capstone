@@ -12,11 +12,14 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
+import com.example.nutriority.data.UserViewModel
+import com.example.nutriority.data.model.User
 import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.data.model.WorkoutWithExercises
 import com.example.nutriority.databinding.FragmentWorkoutDetailBinding
@@ -30,7 +33,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -44,6 +46,7 @@ class WorkoutDetailFragment : Fragment() {
     
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     private val viewModel: WorkoutDetailViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
     
     private lateinit var exerciseAdapter: ExerciseAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
@@ -195,7 +198,7 @@ class WorkoutDetailFragment : Fragment() {
     }
 
     private fun showEditWorkoutDialog() {
-        val dialog = Dialog(requireContext(), android.R.style. Theme_Material_Light_NoActionBar)
+        val dialog = Dialog(requireContext(), android.R.style.Theme_Material_Light_NoActionBar)
         val dialogBinding = DialogEditWorkoutBinding.inflate(LayoutInflater.from(requireContext()))
         dialog.setContentView(dialogBinding.root)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -208,7 +211,7 @@ class WorkoutDetailFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             val workoutWithExercises = viewModel.workout.filterNotNull().first()
-            val allExercises = viewModel.getAllExercises().filter { it.isNotEmpty() }.first()
+            val allExercisesList = viewModel.getAllExercises().first()
 
             val workoutName = workoutWithExercises.workout.name
             val isSystemWorkout = workoutWithExercises.workout.id <= 25
@@ -222,10 +225,11 @@ class WorkoutDetailFragment : Fragment() {
                 dialogBinding.btnReset.visibility = View.GONE
             }
 
+            // Map current assignments back to exercises for the selection UI
             val selectedExercises = workoutWithExercises.exerciseAssignments.map { assignment ->
                 assignment.exercise.copy(category = assignment.assignment.category)
             }
-            selectableAdapter.setData(allExercises, selectedExercises)
+            selectableAdapter.setData(allExercisesList, selectedExercises)
 
             dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
                 val category = when (checkedIds.firstOrNull()) {
@@ -241,9 +245,9 @@ class WorkoutDetailFragment : Fragment() {
                     val defaults = viewModel.getDefaultAssignmentsFromAssets(workoutWithExercises.workout.id, workoutName)
                     if (defaults.isNotEmpty()) {
                         val defaultExercises = defaults.mapNotNull { assignment ->
-                            allExercises.find { it.id == assignment.exerciseId }?.copy(category = assignment.category)
+                            allExercisesList.find { it.id == assignment.exerciseId }?.copy(category = assignment.category)
                         }
-                        selectableAdapter.setData(allExercises, defaultExercises)
+                        selectableAdapter.setData(allExercisesList, defaultExercises)
                     }
                 }
             }
@@ -253,14 +257,21 @@ class WorkoutDetailFragment : Fragment() {
                 if (finalName.isBlank()) return@setOnClickListener
 
                 val finalSelectedExercises = selectableAdapter.getSelectedExercises()
+                
+                // DATA RE-SYNC logic: Use existing assignments if they exist, otherwise use defaults
                 val newAssignments = finalSelectedExercises.mapIndexed { index, ex ->
+                    val existing = workoutWithExercises.exerciseAssignments.find { 
+                        it.assignment.exerciseId == ex.id && it.assignment.category == ex.category 
+                    }
+                    
                     com.example.nutriority.data.model.WorkoutExercise(
                         workoutId = workoutWithExercises.workout.id,
                         exerciseId = ex.id,
                         category = ex.category.ifBlank { "Exercise" },
-                        sets = 3,
-                        reps = "10",
-                        rest = "60s",
+                        sets = existing?.assignment?.sets ?: 3,
+                        reps = existing?.assignment?.reps ?: "10",
+                        rest = existing?.assignment?.rest ?: "60s",
+                        duration = existing?.assignment?.duration ?: "",
                         order = index
                     )
                 }
@@ -299,6 +310,9 @@ class WorkoutDetailFragment : Fragment() {
                 }
             },
             onListUpdated = { updatedList ->
+                // FIX: updatedList is List<WorkoutExerciseWithDetail>, so we map its assignments directly.
+                val assignments = updatedList.map { it.assignment }
+                viewModel.updateWorkout(viewModel.workout.value!!.workout, assignments)
             },
             onDragStart = { viewHolder ->
                 itemTouchHelper.startDrag(viewHolder)
@@ -342,15 +356,42 @@ class WorkoutDetailFragment : Fragment() {
                 combine(
                     viewModel.isWorkoutActive,
                     viewModel.activeWorkoutId,
-                    viewModel.workout
-                ) { isActive: Boolean, activeId: Int, current: WorkoutWithExercises? ->
-                    val isThisActive = isActive && activeId == current?.workout?.id
-                    isThisActive to isActive
-                }.collect { (isThisWorkoutActive, anyWorkoutActive) ->
-                    binding.startButton.visibility = if (isThisWorkoutActive || !anyWorkoutActive) View.VISIBLE else View.GONE
-                    binding.activeWorkoutBar.visibility = if (isThisWorkoutActive) View.VISIBLE else View.GONE
+                    viewModel.workout,
+                    userViewModel.user.asFlow(),
+                    navigationViewModel.isPersonalizedFlow,
+                    navigationViewModel.selectedDayIndex
+                ) { params -> 
+                    val isActive = params[0] as Boolean
+                    val activeId = params[1] as Int
+                    val current = params[2] as? WorkoutWithExercises
+                    val user = params[3] as? User
+                    val isPersonalized = params[4] as Boolean
+                    val dayIndex = params[5] as Int
                     
-                    binding.startButton.text = if (isThisWorkoutActive) "RESUME" else "START"
+                    val isThisActiveSession = isActive && activeId == current?.workout?.id
+                    
+                    var isLocked = false
+                    if (isPersonalized && dayIndex != -1) {
+                        val lastDayDone = user?.lastCompletedWorkoutDay ?: 0
+                        isLocked = dayIndex > lastDayDone
+                    }
+                    
+                    Triple(isThisActiveSession, isActive, isLocked)
+                }.collect { (isThisActive, anyActive, isLocked) ->
+                    
+                    if (isLocked) {
+                        binding.startButton.visibility = View.VISIBLE
+                        binding.startButton.text = "LOCKED"
+                        binding.startButton.isEnabled = false
+                        binding.startButton.alpha = 0.5f
+                        binding.activeWorkoutBar.visibility = View.GONE
+                    } else {
+                        binding.startButton.isEnabled = true
+                        binding.startButton.alpha = 1.0f
+                        binding.startButton.visibility = if (isThisActive || !anyActive) View.VISIBLE else View.GONE
+                        binding.activeWorkoutBar.visibility = if (isThisActive) View.VISIBLE else View.GONE
+                        binding.startButton.text = if (isThisActive) "RESUME" else "START"
+                    }
                 }
             }
         }
@@ -420,4 +461,7 @@ class WorkoutDetailFragment : Fragment() {
         currentToast?.cancel()
         _binding = null
     }
+    
+    // Helper for quadruple result flow
+    data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 }

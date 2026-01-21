@@ -62,9 +62,13 @@ interface WorkoutDao {
     @Query("UPDATE workout_exercises SET isCompleted = :completed WHERE workoutId = :workoutId AND exerciseId = :exerciseId AND category = :category")
     suspend fun updateExerciseCompletion(workoutId: Int, exerciseId: String, category: String, completed: Boolean)
 
+    @Query("DELETE FROM workout_exercises WHERE workoutId = :workoutId")
+    suspend fun deleteWorkoutExercises(workoutId: Int)
+
     @Transaction
     suspend fun updateWorkoutWithExercises(workout: Workout, workoutExercises: List<WorkoutExercise>) {
         updateWorkout(workout)
+        deleteWorkoutExercises(workout.id)
         workoutExercises.forEach { insertWorkoutExercise(it) }
     }
 }

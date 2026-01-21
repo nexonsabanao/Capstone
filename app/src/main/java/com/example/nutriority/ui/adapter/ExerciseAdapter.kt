@@ -25,7 +25,8 @@ class ExerciseAdapter(
     private val onItemClick: (WorkoutExerciseWithDetail, Int, Int) -> Unit,
     private val onListUpdated: (List<WorkoutExerciseWithDetail>) -> Unit,
     private val onDragStart: (RecyclerView.ViewHolder) -> Unit,
-    private val showDragHandle: Boolean = true
+    private val showDragHandle: Boolean = true,
+    private val isLibraryView: Boolean = false
 ) : ListAdapter<WorkoutItem, RecyclerView.ViewHolder>(WorkoutItemDiffCallback()), ItemMoveCallbackListener {
 
     companion object {
@@ -96,15 +97,19 @@ class ExerciseAdapter(
 
             binding.exerciseName.text = exercise.name
             
-            val isTimed = assignment.category.contains("Warm-up", true) || 
-                          assignment.category.contains("Cool-down", true) ||
-                          assignment.duration.isNotBlank()
-
-            if (isTimed && assignment.duration.isNotBlank()) {
-                binding.exerciseDuration.text = assignment.duration
+            if (isLibraryView) {
+                binding.exerciseDuration.text = exercise.targetMuscle
             } else {
-                val unit = if (assignment.sets == 1) "set" else "sets"
-                binding.exerciseDuration.text = "${assignment.sets} $unit"
+                val isTimed = assignment.category.contains("Warm-up", true) || 
+                              assignment.category.contains("Cool-down", true) ||
+                              assignment.duration.isNotBlank()
+
+                if (isTimed && assignment.duration.isNotBlank()) {
+                    binding.exerciseDuration.text = assignment.duration
+                } else {
+                    val unit = if (assignment.sets == 1) "set" else "sets"
+                    binding.exerciseDuration.text = "${assignment.sets} $unit"
+                }
             }
             
             if (exercise.imageResId != 0) {
@@ -124,8 +129,8 @@ class ExerciseAdapter(
                 binding.exerciseName.setTextColor(Color.parseColor("#212121"))
             }
 
-            binding.dragHandle.visibility = if (showDragHandle) View.VISIBLE else View.GONE
-            if (showDragHandle && !assignment.isCompleted) {
+            binding.dragHandle.visibility = if (showDragHandle && !isLibraryView) View.VISIBLE else View.GONE
+            if (showDragHandle && !assignment.isCompleted && !isLibraryView) {
                 binding.dragHandle.setOnTouchListener { _, event ->
                     if (event.actionMasked == MotionEvent.ACTION_DOWN) onDragStart(this)
                     false

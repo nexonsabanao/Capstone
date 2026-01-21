@@ -56,19 +56,14 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        // Find LOG button in calorie card by looking for the TextView with text "LOG"
-        // or using the specific IDs if they exist. Since IDs might be duplicated in includes,
-        // we use the binding if the include has an ID.
-        
-        // Calorie card LOG button
-        binding.calorieCard.root.findViewById<TextView>(R.id.btn_log_weight)?.setOnClickListener {
-            // This is actually in the weight card in your layout structure usually, 
-            // but let's look at where "LOG" is defined. 
-            // In item_preview_calorie_intake.xml, the "LOG" is next to "Macros"
+        // Safe navigation using binding for the included calorie card
+        binding.calorieCard.root.setOnClickListener {
+            // Optional: Show full nutrition breakdown
         }
-        
-        // Macro section LOG button
-        binding.calorieCard.root.findViewById<View>(R.id.macroCard)?.findViewById<TextView>(R.id.btn_log_weight)?.setOnClickListener {
+
+        // Access the LOG button specifically within the calorie card include
+        // Note: We access it through the binding object for the included layout
+        binding.calorieCard.root.findViewById<TextView>(R.id.btn_log_weight)?.setOnClickListener {
             navigationViewModel.setTab(2)
         }
     }
@@ -82,7 +77,7 @@ class ProfileFragment : Fragment() {
                         updateCalorieCard(it.weightKg, bmi)
                         updateWeightChartFromLogs(profileViewModel.sessionLogs.value ?: emptyList())
                         
-                        binding.root.findViewById<TextView>(R.id.tv_current_weight)?.text = String.format("%.1f kg", it.weightKg)
+                        binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", it.weightKg)
                     }
                 }
 
@@ -107,7 +102,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupCalendar(logs: List<WorkoutSessionLog>) {
-        val table = binding.root.findViewById<android.widget.TableLayout>(R.id.calendar_table) ?: return
+        val table = binding.historyCard.calendarTable
         
         if (table.childCount > 1) {
             table.removeViews(1, table.childCount - 1)
@@ -123,13 +118,13 @@ class ProfileFragment : Fragment() {
 
         val logDates = logs.map { 
             val cal = Calendar.getInstance().apply { timeInMillis = it.date }
-            "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}"
+            getDayKey(cal)
         }.toSet()
 
         for (i in 0..6) {
             val dateText = TextView(requireContext())
             val dayNum = calendar.get(Calendar.DAY_OF_MONTH)
-            val dateKey = "${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.DAY_OF_YEAR)}"
+            val dateKey = getDayKey(calendar)
             
             dateText.text = dayNum.toString()
             dateText.gravity = Gravity.CENTER
@@ -142,7 +137,7 @@ class ProfileFragment : Fragment() {
                     dateText.setTextColor(Color.WHITE)
                     dateText.setTypeface(null, Typeface.BOLD)
                 }
-                calendar.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) -> {
+                getDayKey(calendar) == getDayKey(today) -> {
                     dateText.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
                     dateText.setTypeface(null, Typeface.BOLD)
                 }
@@ -164,7 +159,7 @@ class ProfileFragment : Fragment() {
 
     private fun updateStreak(logs: List<WorkoutSessionLog>) {
         if (logs.isEmpty()) {
-            setStreakText(0)
+            binding.historyCard.tvStreakCount.text = "0"
             return
         }
 
@@ -179,34 +174,26 @@ class ProfileFragment : Fragment() {
         }.toSet()
 
         if (!logDates.contains(todayStr) && !logDates.contains(yesterdayStr)) {
-            setStreakText(0)
+            binding.historyCard.tvStreakCount.text = "0"
             return
         }
 
         var streak = 0
         val checkCal = Calendar.getInstance()
-        
-        if (!logDates.contains(todayStr)) {
-            checkCal.add(Calendar.DAY_OF_YEAR, -1)
-        }
+        if (!logDates.contains(todayStr)) checkCal.add(Calendar.DAY_OF_YEAR, -1)
 
         while (logDates.contains(getDayKey(checkCal))) {
             streak++
             checkCal.add(Calendar.DAY_OF_YEAR, -1)
         }
 
-        setStreakText(streak)
+        binding.historyCard.tvStreakCount.text = streak.toString()
     }
 
     private fun getDayKey(cal: Calendar) = "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}"
 
-    private fun setStreakText(streak: Int) {
-        // Use the ID I added to the layout directly
-        binding.root.findViewById<TextView>(R.id.tvStreakCount)?.text = streak.toString()
-    }
-
     private fun updateWeightChartFromLogs(logs: List<WorkoutSessionLog>) {
-        val chart = binding.root.findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.line_chart) ?: return
+        val chart = binding.weightCard.lineChart
         
         chart.description.isEnabled = false
         chart.legend.isEnabled = false
@@ -284,13 +271,13 @@ class ProfileFragment : Fragment() {
             chart.invalidate()
             
             val weights = weightEntries.map { it.y }
-            binding.root.findViewById<TextView>(R.id.tv_heaviest_weight)?.text = String.format("%.1f kg", weights.maxOrNull() ?: currentProfileWeight)
-            binding.root.findViewById<TextView>(R.id.tv_lightest_weight)?.text = String.format("%.1f kg", weights.minOrNull() ?: currentProfileWeight)
+            binding.weightCard.tvHeaviestWeight.text = String.format("%.1f kg", weights.maxOrNull() ?: currentProfileWeight)
+            binding.weightCard.tvLightestWeight.text = String.format("%.1f kg", weights.minOrNull() ?: currentProfileWeight)
         }
     }
 
     private fun updateCalorieCard(weight: Double, bmi: Double) {
-        binding.root.findViewById<TextView>(R.id.tvBmiValue)?.text = String.format("%.1f", bmi)
+        binding.calorieCard.root.findViewById<TextView>(R.id.tvBmiValue)?.text = String.format("%.1f", bmi)
     }
 
     override fun onDestroyView() {

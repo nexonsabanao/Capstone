@@ -22,7 +22,7 @@ class PersonalizedWorkoutAdapter(
     private var lastCompletedDay: Int,
     private val onStartWorkoutClicked: (dayIndex: Int) -> Unit,
     private val onRestartWorkoutClicked: () -> Unit,
-    private val onWorkoutClicked: (workoutId: Int) -> Unit
+    private val onWorkoutClicked: (workoutId: Int, dayIndex: Int) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -96,7 +96,7 @@ class PersonalizedWorkoutAdapter(
                     val session = workoutSessions[position]
                     val id = session.unifiedWorkoutId
                     if (id != null && id > 0) {
-                        onWorkoutClicked(id)
+                        onWorkoutClicked(id, position)
                     }
                 }
             }
