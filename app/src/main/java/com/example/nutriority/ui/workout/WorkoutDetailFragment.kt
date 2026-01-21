@@ -195,7 +195,7 @@ class WorkoutDetailFragment : Fragment() {
     }
 
     private fun showEditWorkoutDialog() {
-        val dialog = Dialog(requireContext(), android.R.style. Theme_Material_Light_NoActionBar)
+        val dialog = Dialog(requireContext(), android.R.style.Theme_Material_Light_NoActionBar)
         val dialogBinding = DialogEditWorkoutBinding.inflate(LayoutInflater.from(requireContext()))
         dialog.setContentView(dialogBinding.root)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -222,6 +222,7 @@ class WorkoutDetailFragment : Fragment() {
                 dialogBinding.btnReset.visibility = View.GONE
             }
 
+            // Map current assignments back to exercises for the selection UI
             val selectedExercises = workoutWithExercises.exerciseAssignments.map { assignment ->
                 assignment.exercise.copy(category = assignment.assignment.category)
             }
@@ -253,14 +254,21 @@ class WorkoutDetailFragment : Fragment() {
                 if (finalName.isBlank()) return@setOnClickListener
 
                 val finalSelectedExercises = selectableAdapter.getSelectedExercises()
+                
+                // DATA RE-SYNC logic: Use existing assignments if they exist, otherwise use defaults
                 val newAssignments = finalSelectedExercises.mapIndexed { index, ex ->
+                    val existing = workoutWithExercises.exerciseAssignments.find { 
+                        it.assignment.exerciseId == ex.id && it.assignment.category == ex.category 
+                    }
+                    
                     com.example.nutriority.data.model.WorkoutExercise(
                         workoutId = workoutWithExercises.workout.id,
                         exerciseId = ex.id,
                         category = ex.category.ifBlank { "Exercise" },
-                        sets = 3,
-                        reps = "10",
-                        rest = "60s",
+                        sets = existing?.assignment?.sets ?: 3,
+                        reps = existing?.assignment?.reps ?: "10",
+                        rest = existing?.assignment?.rest ?: "60s",
+                        duration = existing?.assignment?.duration ?: "",
                         order = index
                     )
                 }
@@ -299,6 +307,9 @@ class WorkoutDetailFragment : Fragment() {
                 }
             },
             onListUpdated = { updatedList ->
+                // Update order in DB
+                val assignments = updatedList.map { it.assignment }
+                viewModel.updateWorkout(viewModel.workout.value!!.workout, assignments)
             },
             onDragStart = { viewHolder ->
                 itemTouchHelper.startDrag(viewHolder)

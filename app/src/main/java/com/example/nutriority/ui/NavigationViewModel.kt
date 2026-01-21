@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @HiltViewModel
 class NavigationViewModel @Inject constructor() : ViewModel() {
+    
     private val _currentTab = MutableStateFlow(0)
     val currentTab: StateFlow<Int> = _currentTab
 
@@ -32,8 +33,14 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
 
     private val backStack = Stack<Int>()
 
+    /**
+     * Set the current visible tab/fragment index.
+     * @param index The target fragment index.
+     * @param addToBackStack Whether to remember the previous screen.
+     */
     fun setTab(index: Int, addToBackStack: Boolean = true) {
-        if (addToBackStack && _currentTab.value != index) {
+        if (index == _currentTab.value) return
+        if (addToBackStack) {
             backStack.push(_currentTab.value)
         }
         _currentTab.value = index
@@ -63,14 +70,26 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
     }
 
     fun navigateToWorkoutComplete() {
-        setTab(11) // New index for completion screen
+        setTab(11)
     }
 
+    /**
+     * Navigates back through the virtual backstack.
+     * @return true if navigation occurred, false if stack is empty.
+     */
     fun goBack(): Boolean {
         if (backStack.isNotEmpty()) {
             _currentTab.value = backStack.pop()
             return true
         }
         return false
+    }
+
+    /**
+     * Resets the entire navigation state to Home.
+     */
+    fun resetToHome() {
+        backStack.clear()
+        _currentTab.value = 0
     }
 }

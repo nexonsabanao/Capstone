@@ -51,11 +51,37 @@ class WorkoutDetailViewModel @Inject constructor(
     private val _completedExercisesCount = MutableStateFlow(0)
     val completedExercisesCount = _completedExercisesCount.asStateFlow()
 
-    // Persistent Session Summary from DB
-    val latestSessionLog = workoutRepository.getLatestSessionLog().asLiveData()
+    // SESSION SUMMARY (Snapshot)
+    data class SessionSummary(
+        val workoutName: String, 
+        val exercisesDone: Int, 
+        val totalExercises: Int,
+        val timeSeconds: Long, 
+        val metValue: Double
+    )
+    private val _sessionSummary = MutableStateFlow<SessionSummary?>(null)
+    val sessionSummary = _sessionSummary.asStateFlow()
+
+    // Rest/Auto Log Timer State
+    private val _isResting = MutableStateFlow(false)
+    val isResting = _isResting.asStateFlow()
+
+    private val _restTimeRemaining = MutableStateFlow(0L)
+    val restTimeRemaining = _restTimeRemaining.asStateFlow()
+
+    private val _isAutoLogActive = MutableStateFlow(false)
+    val isAutoLogActive = _isAutoLogActive.asStateFlow()
+
+    private val _autoLogSecondsRemaining = MutableStateFlow(0L)
+    val autoLogSecondsRemaining = _autoLogSecondsRemaining.asStateFlow()
 
     private var workoutJob: Job? = null
     private var timerJob: Job? = null
+    private var restTimerJob: Job? = null
+    private var autoLogTimerJob: Job? = null
+
+    // Persistent Session Summary from DB
+    val latestSessionLog = workoutRepository.getLatestSessionLog().asLiveData()
 
     private data class WorkoutExerciseJson(val exerciseId: String, val category: String?, val sets: Int, val reps: String, val rest: String, val duration: String?)
     private data class WorkoutJson(val id: Int, val name: String, val exercises: List<WorkoutExerciseJson>)
@@ -77,6 +103,7 @@ class WorkoutDetailViewModel @Inject constructor(
         _isWorkoutActive.value = true
         _activeWorkoutId.value = workoutId
         _elapsedTimeSeconds.value = 0
+        _sessionSummary.value = null
         startTimer()
     }
 
@@ -96,7 +123,6 @@ class WorkoutDetailViewModel @Inject constructor(
         val totalCount = current.exerciseAssignments.size
         
         viewModelScope.launch {
-            // 1. SAVE THE SESSION
             val sessionLog = WorkoutSessionLog(
                 workoutId = current.workout.id,
                 workoutName = current.workout.name,
@@ -108,30 +134,22 @@ class WorkoutDetailViewModel @Inject constructor(
                 difficulty = current.workout.difficulty
             )
             workoutRepository.insertSessionLog(sessionLog)
-            
-            // 2. DELAY RESET: Give the UI time to show the congratulatory screen before clearing
-            delay(100) 
-            
-            // 3. STOP THE WORKOUT
-            _isWorkoutActive.value = false
-            _activeWorkoutId.value = -1
-            timerJob?.cancel()
-            _elapsedTimeSeconds.value = 0
-            
-            // Reset DB completion flags
-            workoutRepository.updateWorkoutWithExercises(
-                current.workout,
-                current.exerciseAssignments.map { it.assignment.copy(isCompleted = false) }
-            )
-            _completedExercisesCount.value = 0
+            stopWorkout(save = true)
         }
     }
 
     fun stopWorkout(save: Boolean) {
+        val currentWorkoutId = _activeWorkoutId.value
+        if (currentWorkoutId == -1) return
+        
         _isWorkoutActive.value = false
         _activeWorkoutId.value = -1
         timerJob?.cancel()
         _elapsedTimeSeconds.value = 0
+        
+        // HIDE REST AND AUTO-LOG instantly when stopping
+        stopRestTimer()
+        stopAutoLogTimer()
         
         viewModelScope.launch {
             val currentWorkout = _workout.value ?: return@launch
@@ -143,6 +161,7 @@ class WorkoutDetailViewModel @Inject constructor(
         }
     }
 
+    // Timer Methods
     private fun startTimer() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
@@ -151,6 +170,49 @@ class WorkoutDetailViewModel @Inject constructor(
                 _elapsedTimeSeconds.value += 1
             }
         }
+    }
+
+    fun startRestTimer(seconds: Long) {
+        _restTimeRemaining.value = seconds
+        _isResting.value = true
+        restTimerJob?.cancel()
+        restTimerJob = viewModelScope.launch {
+            while (_restTimeRemaining.value > 0) {
+                delay(1000)
+                _restTimeRemaining.value -= 1
+            }
+            _isResting.value = false
+        }
+    }
+
+    fun adjustRestTime(seconds: Long) {
+        _restTimeRemaining.value = (_restTimeRemaining.value + seconds).coerceAtLeast(0)
+    }
+
+    fun stopRestTimer() {
+        restTimerJob?.cancel()
+        _isResting.value = false
+        _restTimeRemaining.value = 0
+    }
+
+    fun startAutoLogTimer(seconds: Long, onComplete: () -> Unit) {
+        _autoLogSecondsRemaining.value = seconds
+        _isAutoLogActive.value = true
+        autoLogTimerJob?.cancel()
+        autoLogTimerJob = viewModelScope.launch {
+            while (_autoLogSecondsRemaining.value > 0) {
+                delay(1000)
+                _autoLogSecondsRemaining.value -= 1
+            }
+            _isAutoLogActive.value = false
+            onComplete()
+        }
+    }
+
+    fun stopAutoLogTimer() {
+        autoLogTimerJob?.cancel()
+        _isAutoLogActive.value = false
+        _autoLogSecondsRemaining.value = 0
     }
 
     fun formatElapsedTime(seconds: Long): String {

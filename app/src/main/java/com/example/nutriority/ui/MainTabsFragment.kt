@@ -52,48 +52,48 @@ class MainTabsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigationView) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.updatePadding(bottom = systemBars.bottom)
-            insets
-        }
-
+        setupInsets()
         setupViewPager()
         setupBottomNavigation()
         observeNavigation()
         handleBackPress()
     }
 
+    private fun setupInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigationView) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(bottom = systemBars.bottom)
+            insets
+        }
+    }
+
     private fun setupViewPager() {
-        val adapter = TabsAdapter(this)
-        binding.viewPager.adapter = adapter
-        
-        // Keeps fragments alive for instant switching
-        binding.viewPager.offscreenPageLimit = 12 
-        
-        binding.viewPager.isUserInputEnabled = false
+        binding.viewPager.apply {
+            adapter = TabsAdapter(this@MainTabsFragment)
+            offscreenPageLimit = 1 // Balanced memory usage vs smoothness
+            isUserInputEnabled = false
+            
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    val isPrimaryTab = position < 4
+                    binding.bottomNavigationView.isVisible = isPrimaryTab
+                    binding.separator.isVisible = isPrimaryTab
 
-        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                // Bottom nav only visible for primary tabs (0-3)
-                val isPrimaryTab = position < 4
-                binding.bottomNavigationView.isVisible = isPrimaryTab
-                binding.separator.isVisible = isPrimaryTab
-
-                if (isPrimaryTab) {
-                    val itemId = when (position) {
-                        0 -> R.id.navigation_home
-                        1 -> R.id.navigation_workout
-                        2 -> R.id.navigation_meal
-                        3 -> R.id.navigation_profile
-                        else -> R.id.navigation_home
-                    }
-                    if (binding.bottomNavigationView.selectedItemId != itemId) {
-                        binding.bottomNavigationView.selectedItemId = itemId
+                    if (isPrimaryTab) {
+                        val itemId = when (position) {
+                            0 -> R.id.navigation_home
+                            1 -> R.id.navigation_workout
+                            2 -> R.id.navigation_meal
+                            3 -> R.id.navigation_profile
+                            else -> R.id.navigation_home
+                        }
+                        if (binding.bottomNavigationView.selectedItemId != itemId) {
+                            binding.bottomNavigationView.selectedItemId = itemId
+                        }
                     }
                 }
-            }
-        })
+            })
+        }
     }
 
     private fun setupBottomNavigation() {
@@ -105,9 +105,7 @@ class MainTabsFragment : Fragment() {
                 R.id.navigation_profile -> 3
                 else -> 0
             }
-            if (binding.viewPager.currentItem != page) {
-                navigationViewModel.setTab(page)
-            }
+            navigationViewModel.setTab(page)
             true
         }
     }
@@ -138,22 +136,20 @@ class MainTabsFragment : Fragment() {
     private inner class TabsAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
         override fun getItemCount(): Int = 12
 
-        override fun createFragment(position: Int): Fragment {
-            return when (position) {
-                0 -> HomeFragment()
-                1 -> WorkoutFragment()
-                2 -> MealFragment()
-                3 -> ProfileFragment()
-                4 -> PersonalizedWorkoutFragment()
-                5 -> ExerciseLibraryFragment()
-                6 -> AllWorkoutsFragment()
-                7 -> MealDetailFragment()
-                8 -> ArticleDetailFragment()
-                9 -> WorkoutDetailFragment()
-                10 -> ExerciseDetailFragment()
-                11 -> WorkoutCompleteFragment()
-                else -> HomeFragment()
-            }
+        override fun createFragment(position: Int): Fragment = when (position) {
+            0 -> HomeFragment()
+            1 -> WorkoutFragment()
+            2 -> MealFragment()
+            3 -> ProfileFragment()
+            4 -> PersonalizedWorkoutFragment()
+            5 -> ExerciseLibraryFragment()
+            6 -> AllWorkoutsFragment()
+            7 -> MealDetailFragment()
+            8 -> ArticleDetailFragment()
+            9 -> WorkoutDetailFragment()
+            10 -> ExerciseDetailFragment()
+            11 -> WorkoutCompleteFragment()
+            else -> HomeFragment()
         }
     }
 
