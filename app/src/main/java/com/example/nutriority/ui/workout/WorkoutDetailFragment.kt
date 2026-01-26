@@ -137,7 +137,9 @@ class WorkoutDetailFragment : Fragment() {
                 return@setOnClickListener
             }
             
-            viewModel.startWorkout(currentWorkoutId)
+            // FIX: Pass the dayIndex from navigation state to the workout session
+            val dayIndex = navigationViewModel.selectedDayIndex.value
+            viewModel.startWorkout(currentWorkoutId, dayIndex)
             navigateToCurrentExercise()
         }
 
@@ -225,7 +227,6 @@ class WorkoutDetailFragment : Fragment() {
                 dialogBinding.btnReset.visibility = View.GONE
             }
 
-            // Map current assignments back to exercises for the selection UI
             val selectedExercises = workoutWithExercises.exerciseAssignments.map { assignment ->
                 assignment.exercise.copy(category = assignment.assignment.category)
             }
@@ -258,7 +259,6 @@ class WorkoutDetailFragment : Fragment() {
 
                 val finalSelectedExercises = selectableAdapter.getSelectedExercises()
                 
-                // DATA RE-SYNC logic: Use existing assignments if they exist, otherwise use defaults
                 val newAssignments = finalSelectedExercises.mapIndexed { index, ex ->
                     val existing = workoutWithExercises.exerciseAssignments.find { 
                         it.assignment.exerciseId == ex.id && it.assignment.category == ex.category 
@@ -310,8 +310,7 @@ class WorkoutDetailFragment : Fragment() {
                 }
             },
             onListUpdated = { updatedList ->
-                // FIX: updatedList is List<WorkoutExerciseWithDetail>, so we map its assignments directly.
-                val assignments = updatedList.map { it.assignment }
+                val assignments = updatedList.map { item -> (item as WorkoutItem.ExerciseItem).detail.assignment }
                 viewModel.updateWorkout(viewModel.workout.value!!.workout, assignments)
             },
             onDragStart = { viewHolder ->

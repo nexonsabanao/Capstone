@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import nl.dionsegijn.konfetti.core.Party
 import nl.dionsegijn.konfetti.core.Position
 import nl.dionsegijn.konfetti.core.emitter.Emitter
+import nl.dionsegijn.konfetti.core.models.Size
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.pow
@@ -53,27 +54,30 @@ class WorkoutCompleteFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         observeSummary()
-        
-        viewLifecycleOwner.lifecycleScope.launch {
-            delay(800) 
-            startCelebration()
-        }
-        
         setupWeightLogging()
         
+        // Accurate real-time calendar
         profileViewModel.sessionLogs.observe(viewLifecycleOwner) { logs ->
             setupCalendar(logs)
         }
         
         binding.btnFinish.setOnClickListener {
-            // Clean up workout state before exiting
             viewModel.stopWorkout(save = true)
             navigationViewModel.setTab(0) 
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Trigger celebration on resume to ensure it shows up after transitions
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Wait for fragment transition to complete
+            delay(600)
+            startCelebration()
+        }
+    }
+
     private fun observeSummary() {
-        // Observe the real database log for accurate stats
         viewModel.latestSessionLog.observe(viewLifecycleOwner) { log: WorkoutSessionLog? ->
             log?.let {
                 binding.tvStatExercises.text = it.exercisesDone.toString()
@@ -86,15 +90,19 @@ class WorkoutCompleteFragment : Fragment() {
 
     private fun startCelebration() {
         if (_binding == null) return
+        
+        // Intensified celebration: more duration, bigger particles
         val party = Party(
-            speed = 0f,
-            maxSpeed = 30f,
+            speed = 15f,
+            maxSpeed = 45f,
             damping = 0.9f,
             spread = 360,
-            colors = listOf(0x00A78B, 0xFFD700, 0xFF5252, 0xFFFFFF),
-            position = Position.Relative(0.5, 0.3),
-            emitter = Emitter(duration = 100, TimeUnit.MILLISECONDS).max(100)
+            size = listOf(Size.SMALL, Size.MEDIUM, Size.LARGE, Size(12)), 
+            colors = listOf(0x00A78B, 0xFFD700, 0xFF5252, 0xFFFFFF, 0x00A4B9),
+            position = Position.Relative(0.5, 0.2), 
+            emitter = Emitter(duration = 3, TimeUnit.SECONDS).perSecond(100) 
         )
+        
         binding.konfettiView.start(party)
     }
 
@@ -180,7 +188,10 @@ class WorkoutCompleteFragment : Fragment() {
             if (isUpdatingWeight) return@observe
             user?.let {
                 userHeight = it.heightCm
-                val weightStr = String.format("%.1f", it.weightKg)
+                val isKg = binding.weightToggleGroup.checkedButtonId == R.id.btnKg
+                val weightToDisplay = if (isKg) it.weightKg else it.weightKg * 2.20462
+                val weightStr = String.format("%.1f", weightToDisplay)
+                
                 if (binding.etWeight.text.toString() != weightStr) {
                     binding.etWeight.setText(weightStr)
                 }
@@ -188,15 +199,35 @@ class WorkoutCompleteFragment : Fragment() {
             }
         }
 
+        binding.weightToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                isUpdatingWeight = true
+                val currentInput = binding.etWeight.text.toString().toDoubleOrNull() ?: 0.0
+                if (checkedId == R.id.btnLb) {
+                    // Switch to LB: multiply by 2.20462
+                    binding.etWeight.setText(String.format("%.1f", currentInput * 2.20462))
+                    binding.tvWeightUnitLabel.text = "lb"
+                } else {
+                    // Switch back to KG: divide by 2.20462
+                    binding.etWeight.setText(String.format("%.1f", currentInput / 2.20462))
+                    binding.tvWeightUnitLabel.text = "kg"
+                }
+                binding.etWeight.postDelayed({ isUpdatingWeight = false }, 100)
+            }
+        }
+
         binding.etWeight.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                val weight = s.toString().toDoubleOrNull() ?: return
-                isUpdatingWeight = true
-                updateBmi(weight)
-                profileViewModel.updateWeight(weight)
-                binding.etWeight.postDelayed({ isUpdatingWeight = false }, 1000)
+                if (isUpdatingWeight) return
+                val inputWeight = s.toString().toDoubleOrNull() ?: return
+                
+                val isKg = binding.weightToggleGroup.checkedButtonId == R.id.btnKg
+                val weightInKg = if (isKg) inputWeight else inputWeight / 2.20462
+                
+                updateBmi(weightInKg)
+                profileViewModel.updateWeight(weightInKg)
             }
         })
     }

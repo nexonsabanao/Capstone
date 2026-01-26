@@ -9,6 +9,7 @@ import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.data.model.WorkoutWithExercises
+import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WorkoutDetailViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
+    private val userRepository: UserRepository,
     private val application: Application
 ) : AndroidViewModel(application) {
 
@@ -44,6 +46,9 @@ class WorkoutDetailViewModel @Inject constructor(
 
     private val _activeWorkoutId = MutableStateFlow(-1)
     val activeWorkoutId = _activeWorkoutId.asStateFlow()
+
+    private val _activeDayIndex = MutableStateFlow(-1)
+    val activeDayIndex = _activeDayIndex.asStateFlow()
 
     private val _elapsedTimeSeconds = MutableStateFlow(0L)
     val elapsedTimeSeconds = _elapsedTimeSeconds.asStateFlow()
@@ -89,8 +94,10 @@ class WorkoutDetailViewModel @Inject constructor(
 
     fun getWorkoutById(workoutId: Int) {
         if (_workout.value?.workout?.id == workoutId) return
+        
         workoutJob?.cancel()
         _workout.value = null
+        
         workoutJob = viewModelScope.launch {
             workoutRepository.getWorkoutWithExercises(workoutId).collect {
                 _workout.value = it
@@ -99,9 +106,10 @@ class WorkoutDetailViewModel @Inject constructor(
         }
     }
 
-    fun startWorkout(workoutId: Int) {
+    fun startWorkout(workoutId: Int, dayIndex: Int = -1) {
         _isWorkoutActive.value = true
         _activeWorkoutId.value = workoutId
+        _activeDayIndex.value = dayIndex
         _elapsedTimeSeconds.value = 0
         _sessionSummary.value = null
         startTimer()
@@ -121,8 +129,10 @@ class WorkoutDetailViewModel @Inject constructor(
         val timeSecs = _elapsedTimeSeconds.value
         val doneCount = _completedExercisesCount.value
         val totalCount = current.exerciseAssignments.size
+        val dayIdx = _activeDayIndex.value
         
         viewModelScope.launch {
+            // 1. SAVE THE SESSION LOG
             val sessionLog = WorkoutSessionLog(
                 workoutId = current.workout.id,
                 workoutName = current.workout.name,
@@ -134,6 +144,25 @@ class WorkoutDetailViewModel @Inject constructor(
                 difficulty = current.workout.difficulty
             )
             workoutRepository.insertSessionLog(sessionLog)
+
+            // 2. UPDATE PERSONALIZED PROGRESS (CRITICAL)
+            if (dayIdx != -1) {
+                val user = userRepository.getInitialUser()
+                if (user != null && dayIdx == user.lastCompletedWorkoutDay) {
+                    userRepository.insertUser(user.copy(lastCompletedWorkoutDay = dayIdx + 1))
+                }
+            }
+            
+            // 3. CAPTURE SNAPSHOT for immediate UI use
+            _sessionSummary.value = SessionSummary(
+                workoutName = current.workout.name,
+                exercisesDone = doneCount,
+                totalExercises = totalCount,
+                timeSeconds = timeSecs,
+                metValue = current.workout.metValue
+            )
+
+            // 4. STOP SESSION
             stopWorkout(save = true)
         }
     }
@@ -144,10 +173,10 @@ class WorkoutDetailViewModel @Inject constructor(
         
         _isWorkoutActive.value = false
         _activeWorkoutId.value = -1
+        _activeDayIndex.value = -1
         timerJob?.cancel()
         _elapsedTimeSeconds.value = 0
         
-        // HIDE REST AND AUTO-LOG instantly when stopping
         stopRestTimer()
         stopAutoLogTimer()
         

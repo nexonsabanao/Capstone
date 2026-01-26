@@ -1,7 +1,6 @@
 package com.example.nutriority.data
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nutriority.data.model.User
@@ -17,48 +16,46 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val repository: UserRepository,
-    private val workoutPlanner: WorkoutPlanner, // Injected the planner
+    private val workoutPlanner: WorkoutPlanner,
     private val gson: Gson
 ) : ViewModel() {
 
-    private val _user = MutableLiveData<User>()
-    val user: LiveData<User> = _user
+    // Always observe the database directly for the strongest "Source of Truth"
+    val user: LiveData<User> = repository.getUser
 
-    init {
-        viewModelScope.launch {
-            val initialUser = repository.getInitialUser() ?: User(id = 1)
-            _user.postValue(initialUser)
-        }
-    }
-
+    /**
+     * Updates specific onboarding data points and saves them to the DB.
+     */
     fun updateOnboardingData(updateAction: (User) -> User) {
-        val updatedUser = updateAction(_user.value ?: User(id = 1))
-        _user.value = updatedUser
+        viewModelScope.launch {
+            val currentUser = repository.getInitialUser() ?: User(id = 1)
+            val updatedUser = updateAction(currentUser)
+            repository.insertUser(updatedUser)
+        }
     }
 
+    /**
+     * Helper for screens that perform multiple updates before triggering a save.
+     */
     fun saveOnboardingData() {
-        _user.value?.let { userToSave ->
-            viewModelScope.launch(Dispatchers.IO) {
-                repository.insertUser(userToSave)
-            }
-        }
+        // No-op in this new architecture as updateOnboardingData now saves instantly.
+        // Keeping it to resolve unresolved references in existing screen logic.
     }
 
     suspend fun savePersonalizedPlanAndAwait(planJson: String): Boolean {
         return withContext(Dispatchers.IO) {
-            _user.value?.let { currentUser ->
-                val updatedUser = currentUser.copy(personalizedPlanJson = planJson)
-                _user.postValue(updatedUser) // postValue to update LiveData from background thread
-                repository.insertUser(updatedUser)
-            } ?: false
+            val currentUser = repository.getInitialUser() ?: User(id = 1)
+            val updatedUser = currentUser.copy(personalizedPlanJson = planJson)
+            repository.insertUser(updatedUser)
         }
     }
 
     suspend fun completeWorkoutDay(dayIndex: Int) {
         withContext(Dispatchers.IO) {
-            _user.value?.let { currentUser ->
+            val currentUser = repository.getInitialUser() ?: return@withContext
+            // Only increment if we are completing the current active day
+            if (dayIndex == currentUser.lastCompletedWorkoutDay) {
                 val updatedUser = currentUser.copy(lastCompletedWorkoutDay = dayIndex + 1)
-                _user.postValue(updatedUser)
                 repository.insertUser(updatedUser)
             }
         }
@@ -66,23 +63,15 @@ class UserViewModel @Inject constructor(
 
     suspend fun restartWorkoutPlan() {
         withContext(Dispatchers.IO) {
-            _user.value?.let { currentUser ->
-                // 1. Generate a new plan using the genius planner
-                val newPlan = workoutPlanner.planWorkouts(currentUser)
-                val newPlanJson = gson.toJson(newPlan)
+            val currentUser = repository.getInitialUser() ?: return@withContext
+            val newPlan = workoutPlanner.planWorkouts(currentUser)
+            val newPlanJson = gson.toJson(newPlan)
 
-                // 2. Save the new plan and reset the completion day
-                val updatedUser = currentUser.copy(
-                    personalizedPlanJson = newPlanJson,
-                    lastCompletedWorkoutDay = 0
-                )
-                _user.postValue(updatedUser)
-                repository.insertUser(updatedUser)
-            }
+            val updatedUser = currentUser.copy(
+                personalizedPlanJson = newPlanJson,
+                lastCompletedWorkoutDay = 0
+            )
+            repository.insertUser(updatedUser)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
     }
 }

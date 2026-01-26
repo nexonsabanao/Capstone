@@ -152,8 +152,6 @@
                         android:layout_marginTop="20dp"
                         android:gravity="center"
                         android:orientation="horizontal">
-                        
-                        <!-- programmatically filled in WorkoutCompleteFragment -->
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -178,9 +176,8 @@
 
                 <EditText
                     android:id="@+id/etWeight"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:background="@android:color/transparent"
                     android:fontFamily="sans-serif"
                     android:hint="0.0"
@@ -188,6 +185,18 @@
                     android:paddingVertical="12dp"
                     android:textColor="#212121"
                     android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvWeightUnitLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:fontFamily="sans-serif"
+                    android:text="kg"
+                    android:textColor="#757575"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <com.google.android.material.button.MaterialButtonToggleGroup
