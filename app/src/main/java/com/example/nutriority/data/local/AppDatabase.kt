@@ -26,7 +26,7 @@ import java.io.BufferedReader
 
 @Database(
     entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class, WorkoutExercise::class, WorkoutSessionLog::class],
-    version = 32,
+    version = 33,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
