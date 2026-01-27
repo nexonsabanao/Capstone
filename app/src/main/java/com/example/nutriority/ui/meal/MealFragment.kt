@@ -10,9 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.nutriority.R
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.databinding.FragmentMealBinding
 import com.example.nutriority.ui.NavigationViewModel
@@ -29,13 +27,11 @@ class MealFragment : Fragment() {
     private var _binding: FragmentMealBinding? = null
     private val binding get() = _binding!!
 
-    // Scoped to Activity so SplashFragment can pre-load it
     private val mealViewModel: MealViewModel by activityViewModels()
     private val navigationViewModel: NavigationViewModel by activityViewModels()
 
     private val mealAdapter by lazy {
         GeneratedMealPlanAdapter { meal ->
-            // Use NavigationViewModel for instant tab switching
             val json = Gson().toJson(meal)
             navigationViewModel.navigateToMealDetail(json)
         }
@@ -56,10 +52,14 @@ class MealFragment : Fragment() {
         updateDateViews()
         setupClickListeners()
         
-        // UI Fix: Check if plan is already pre-loaded
+        // IMMEDIATE CHECK: If data is already in ViewModel, show it now
         val currentPlan = mealViewModel.mealPlan.value
         if (!currentPlan.isNullOrEmpty() && currentPlan.any { it.isNotEmpty() }) {
             updateMealPlanUI(currentPlan)
+        } else {
+            // Ensure generate screen is visible if no plan
+            binding.initialView.isVisible = true
+            binding.generatedMealPlanRecyclerView.isVisible = false
         }
         
         observeViewModel()
@@ -68,9 +68,7 @@ class MealFragment : Fragment() {
     private fun setupRecyclerView() {
         binding.generatedMealPlanRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            if (adapter != mealAdapter) {
-                adapter = mealAdapter
-            }
+            adapter = mealAdapter
         }
     }
 
@@ -85,8 +83,10 @@ class MealFragment : Fragment() {
     }
 
     private fun updateMealPlanUI(weeklyPlan: List<List<Meal>>) {
-        val hasPlan = weeklyPlan.any { it.isNotEmpty() }
-        binding.initialView.isVisible = !hasPlan && mealViewModel.isLoading.value == false
+        val hasPlan = weeklyPlan.isNotEmpty() && weeklyPlan.any { it.isNotEmpty() }
+        
+        // FIX: Toggle visibility immediately based on plan presence
+        binding.initialView.isVisible = !hasPlan
         binding.generatedMealPlanRecyclerView.isVisible = hasPlan
 
         if (hasPlan) {
@@ -101,7 +101,6 @@ class MealFragment : Fragment() {
             mealAdapter.submitList(emptyList())
         }
         
-        // Update expired state UI based on current plan
         val isExpired = mealViewModel.isPlanExpired.value ?: false
         binding.doneButton.isVisible = hasPlan && isExpired
         binding.nextButton.isVisible = !hasPlan || isExpired
@@ -109,22 +108,20 @@ class MealFragment : Fragment() {
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // OPTIMIZATION: Only update UI when fragment is RESUMED to avoid lag in other tabs
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     mealViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
                         binding.loadingProgressBar.isVisible = isLoading
                         if (isLoading) {
                             binding.initialView.isVisible = false
                             binding.generatedMealPlanRecyclerView.isVisible = false
-                            binding.doneButton.isVisible = false
                         }
                     }
                 }
 
                 launch {
                     mealViewModel.mealPlan.observe(viewLifecycleOwner) { weeklyPlan ->
-                        updateMealPlanUI(weeklyPlan)
+                        if (weeklyPlan != null) updateMealPlanUI(weeklyPlan)
                     }
                 }
 
@@ -142,7 +139,6 @@ class MealFragment : Fragment() {
     private fun updateDateViews() {
         val today = LocalDate.now()
         val endDate = today.plusDays(6)
-
         val monthDayFormatter = DateTimeFormatter.ofPattern("MMM d", Locale.getDefault())
         val dayNameFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())
 

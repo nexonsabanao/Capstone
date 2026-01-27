@@ -24,9 +24,14 @@ class UserRepository(private val userDao: UserDao) {
         return userDao.getUserById()
     }
 
+    /**
+     * Inserts user locally AND syncs to Firestore.
+     */
     suspend fun insertUser(user: User): Boolean {
+        // 1. Save locally to Room
         val localSuccess = userDao.insertUser(user) > 0
         
+        // 2. Sync to cloud if authenticated
         auth.currentUser?.uid?.let { uid ->
             val userMap = hashMapOf(
                 "id" to user.id,
@@ -40,18 +45,21 @@ class UserRepository(private val userDao: UserDao) {
                 "preferredDiet" to user.preferredDiet,
                 "excludedIngredients" to user.excludedIngredients,
                 "personalizedPlanJson" to user.personalizedPlanJson,
+                "mealPlanJson" to user.mealPlanJson, // Ensure meal plan is synced
                 "lastCompletedWorkoutDay" to user.lastCompletedWorkoutDay
             )
             try {
-                // ADDED .await() to ensure sync completes
                 db.collection("users").document(uid).set(userMap).await()
             } catch (e: Exception) {
-                // Silently handle offline or sync errors
+                // Background sync will handle it if offline
             }
         }
         return localSuccess
     }
 
+    /**
+     * Fetches user profile from Firestore and saves it to local Room DB.
+     */
     suspend fun restoreUserFromCloud(): Boolean {
         val uid = auth.currentUser?.uid ?: return false
         return try {
@@ -70,6 +78,7 @@ class UserRepository(private val userDao: UserDao) {
                     preferredDiet = data["preferredDiet"] as? String ?: "",
                     excludedIngredients = (data["excludedIngredients"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                     personalizedPlanJson = data["personalizedPlanJson"] as? String,
+                    mealPlanJson = data["mealPlanJson"] as? String, // Restore meal plan
                     lastCompletedWorkoutDay = (data["lastCompletedWorkoutDay"] as? Number)?.toInt() ?: 0
                 )
                 userDao.insertUser(restoredUser)

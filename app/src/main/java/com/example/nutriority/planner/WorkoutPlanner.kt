@@ -29,6 +29,10 @@ class WorkoutPlanner @Inject constructor(
 
     suspend fun planWorkouts(user: User): WorkoutPlan {
         Log.d("WorkoutPlanner", "Planning progressive workouts for user goal: ${user.goal}")
+        
+        // CRITICAL FIX: Ensure library is loaded before planning
+        workoutRepository.ensureLibraryIsLoaded()
+        
         val allWorkouts = workoutRepository.getAllWorkoutsList()
 
         if (allWorkouts.isEmpty()) {
@@ -75,8 +79,9 @@ class WorkoutPlanner @Inject constructor(
     private fun mapActivityLevelToDifficulty(activityLevel: String): String {
         return when (activityLevel) {
             "Sedentary" -> "Beginner"
-            "Lightly Active" -> "Intermediate"
-            "Active" -> "Advanced"
+            "Lightly Active", "Lightly active" -> "Beginner"
+            "Active" -> "Intermediate"
+            "Very active" -> "Advanced"
             else -> "Beginner"
         }
     }
@@ -139,20 +144,17 @@ class WorkoutPlanner @Inject constructor(
             if (workoutWithExercises != null) {
                 val workout = workoutWithExercises.workout
                 
-                // Calculate total duration from individual exercises
                 val totalDurationMinutes = workoutWithExercises.exerciseAssignments.sumOf { assignmentWithDetail ->
                     val durationStr = assignmentWithDetail.assignment.duration.lowercase()
                     if (durationStr.contains("s")) {
                         (durationStr.filter { it.isDigit() }.toIntOrNull() ?: 30) / 60.0
                     } else {
-                        // Estimate duration based on sets/reps: ~3 mins per set including rest
                         assignmentWithDetail.assignment.sets * 3.0
                     }
-                }.toInt().coerceAtLeast(workout.duration.filter { it.isDigit() }.toIntOrNull() ?: 20)
+                }.toInt().coerceAtLeast(20)
 
                 val caloriesBurned = ((workout.metValue * 3.5 * userWeight) / 200 * totalDurationMinutes).toInt()
 
-                // Summarize the workout (main exercises only)
                 val mainExercises = workoutWithExercises.exerciseAssignments
                     .filter { it.assignment.category == "Exercise" }
                 val sets = mainExercises.firstOrNull()?.assignment?.sets ?: config.sets
