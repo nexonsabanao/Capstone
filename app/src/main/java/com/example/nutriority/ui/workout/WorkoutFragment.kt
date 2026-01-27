@@ -1,20 +1,19 @@
 package com.example.nutriority.ui.workout
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentWorkoutBinding
 import com.example.nutriority.ui.NavigationViewModel
-import com.example.nutriority.ui.adapter.WorkoutAdapter
-import com.example.nutriority.ui.home.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class WorkoutFragment : Fragment() {
@@ -22,14 +21,7 @@ class WorkoutFragment : Fragment() {
     private var _binding: FragmentWorkoutBinding? = null
     private val binding get() = _binding!!
 
-    private val homeViewModel: HomeViewModel by activityViewModels()
     private val navigationViewModel: NavigationViewModel by activityViewModels()
-    
-    private val workoutAdapter by lazy {
-        WorkoutAdapter { workout ->
-            navigationViewModel.navigateToWorkoutDetail(workout.id)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,50 +34,48 @@ class WorkoutFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupRecyclerView()
-        setupClickListeners()
-        observeViewModel()
+        setupViewPager()
+        setupTabs()
     }
 
-    private fun setupClickListeners() {
-        binding.starterPlanCard.setOnClickListener {
-            navigationViewModel.setTab(4)
-        }
-
-        binding.exercisesLibraryCard.setOnClickListener {
-            navigationViewModel.setTab(5)
-        }
-
-        binding.showAllButton.setOnClickListener {
-            navigationViewModel.setTab(6)
-        }
-    }
-
-    private fun setupRecyclerView() {
-        // UI Fix: Immediately submit list if data is already in ViewModel (Pre-loaded)
-        val workouts = homeViewModel.allWorkouts.value
-        if (workouts.isNotEmpty()) {
-            workoutAdapter.submitList(workouts)
-        }
-
-        binding.bodyFocusRecyclerView.apply {
-            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-            if (adapter != workoutAdapter) {
-                adapter = workoutAdapter
+    private fun setupViewPager() {
+        val adapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount(): Int = 2
+            override fun createFragment(position: Int): Fragment {
+                return if (position == 0) TrainerWorkoutsFragment() else CustomWorkoutsFragment()
             }
         }
+
+        binding.workoutViewPager.adapter = adapter
+        
+        binding.workoutViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                updateTabUI(position == 0)
+            }
+        })
     }
 
-    private fun observeViewModel() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            // OPTIMIZATION: Only collect data when the fragment is actually RESUMED (on screen)
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                homeViewModel.allWorkouts.collect { workouts ->
-                    if (workouts.isNotEmpty()) {
-                        workoutAdapter.submitList(workouts)
-                    }
-                }
-            }
+    private fun setupTabs() {
+        binding.tabTrainer.setOnClickListener { binding.workoutViewPager.currentItem = 0 }
+        binding.tabCustom.setOnClickListener { binding.workoutViewPager.currentItem = 1 }
+    }
+
+    private fun updateTabUI(isTrainer: Boolean) {
+        val selectedBg = ContextCompat.getDrawable(requireContext(), R.drawable.rounded_chip_selected_dark)
+        val transparentBg = ContextCompat.getColor(requireContext(), android.R.color.transparent)
+        val whiteColor = ContextCompat.getColor(requireContext(), android.R.color.white)
+        val grayColor = Color.parseColor("#757575")
+
+        if (isTrainer) {
+            binding.tabTrainer.background = selectedBg
+            binding.tabTrainer.setTextColor(whiteColor)
+            binding.tabCustom.setBackgroundColor(transparentBg)
+            binding.tabCustom.setTextColor(grayColor)
+        } else {
+            binding.tabCustom.background = selectedBg
+            binding.tabCustom.setTextColor(whiteColor)
+            binding.tabTrainer.setBackgroundColor(transparentBg)
+            binding.tabTrainer.setTextColor(grayColor)
         }
     }
 

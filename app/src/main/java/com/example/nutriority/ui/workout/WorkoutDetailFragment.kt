@@ -137,7 +137,6 @@ class WorkoutDetailFragment : Fragment() {
                 return@setOnClickListener
             }
             
-            // FIX: Pass the dayIndex from navigation state to the workout session
             val dayIndex = navigationViewModel.selectedDayIndex.value
             viewModel.startWorkout(currentWorkoutId, dayIndex)
             navigateToCurrentExercise()
@@ -310,7 +309,8 @@ class WorkoutDetailFragment : Fragment() {
                 }
             },
             onListUpdated = { updatedList ->
-                val assignments = updatedList.map { item -> (item as WorkoutItem.ExerciseItem).detail.assignment }
+                // FIX: Support both system and custom updates
+                val assignments = updatedList.map { it.assignment }
                 viewModel.updateWorkout(viewModel.workout.value!!.workout, assignments)
             },
             onDragStart = { viewHolder ->
@@ -461,6 +461,5 @@ class WorkoutDetailFragment : Fragment() {
         _binding = null
     }
     
-    // Helper for quadruple result flow
     data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 }

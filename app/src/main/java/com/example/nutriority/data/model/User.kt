@@ -20,5 +20,6 @@ data class User(
     val preferredDiet: String = "",
     val excludedIngredients: List<String> = emptyList(),
     val personalizedPlanJson: String? = null,
-    val lastCompletedWorkoutDay: Int = 0 // Default to 0, meaning Day 1 is the first workout
+    val mealPlanJson: String? = null, // New field for Cloud Sync
+    val lastCompletedWorkoutDay: Int = 0 
 )

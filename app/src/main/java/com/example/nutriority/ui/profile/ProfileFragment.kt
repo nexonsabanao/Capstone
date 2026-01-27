@@ -1,5 +1,7 @@
 package com.example.nutriority.ui.profile
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -9,12 +11,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TableRow
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.nutriority.MainActivity
 import com.example.nutriority.R
 import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.databinding.FragmentProfileBinding
@@ -25,6 +29,8 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -56,16 +62,82 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        // Safe navigation using binding for the included calorie card
-        binding.calorieCard.root.setOnClickListener {
-            // Optional: Show full nutrition breakdown
-        }
-
-        // Access the LOG button specifically within the calorie card include
-        // Note: We access it through the binding object for the included layout
         binding.calorieCard.root.findViewById<TextView>(R.id.btn_log_weight)?.setOnClickListener {
             navigationViewModel.setTab(2)
         }
+
+        binding.headerContainer.setOnClickListener {
+            showAccountOptionsDialog()
+        }
+    }
+
+    private fun showAccountOptionsDialog() {
+        val options = arrayOf("Logout", "Delete Account")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Account Settings")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> logout()
+                    1 -> confirmDeleteAccount()
+                }
+            }
+            .show()
+    }
+
+    private fun logout() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            // CRITICAL: Wipe local data before logging out to prevent account leaking
+            profileViewModel.clearAllLocalData()
+            
+            FirebaseAuth.getInstance().signOut()
+            restartApp()
+        }
+    }
+
+    private fun confirmDeleteAccount() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Permanently Delete Account?")
+            .setMessage("This will erase ALL your progress from the cloud and this phone. This action cannot be undone.")
+            .setPositiveButton("DELETE EVERYTHING") { _, _ ->
+                performFullDataWipe()
+            }
+            .setNegativeButton("CANCEL", null)
+            .show()
+    }
+
+    private fun performFullDataWipe() {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val uid = user.uid
+        val db = FirebaseFirestore.getInstance()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // 1. Delete Cloud Data
+                db.collection("users").document(uid).delete()
+                
+                // 2. Wipe Local Phone Data (Room)
+                profileViewModel.clearAllLocalData()
+
+                // 3. Delete Login Credentials
+                user.delete().addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(requireContext(), "Account Wiped Successfully", Toast.LENGTH_SHORT).show()
+                        restartApp()
+                    } else {
+                        Toast.makeText(requireContext(), "Error: Re-login required to delete account.", Toast.LENGTH_LONG).show()
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Reset failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun restartApp() {
+        val intent = Intent(requireContext(), MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
+        requireActivity().finish()
     }
 
     private fun observeViewModel() {
@@ -76,7 +148,6 @@ class ProfileFragment : Fragment() {
                         val bmi = it.weightKg / (it.heightCm / 100.0).pow(2)
                         updateCalorieCard(it.weightKg, bmi)
                         updateWeightChartFromLogs(profileViewModel.sessionLogs.value ?: emptyList())
-                        
                         binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", it.weightKg)
                     }
                 }
@@ -103,54 +174,29 @@ class ProfileFragment : Fragment() {
 
     private fun setupCalendar(logs: List<WorkoutSessionLog>) {
         val table = binding.historyCard.calendarTable
-        
-        if (table.childCount > 1) {
-            table.removeViews(1, table.childCount - 1)
-        }
+        if (table.childCount > 1) table.removeViews(1, table.childCount - 1)
 
         val calendar = Calendar.getInstance()
         val today = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
         
         val row = TableRow(requireContext())
-        row.layoutParams = TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT)
-        row.setPadding(0, 16, 0, 0)
-
-        val logDates = logs.map { 
-            val cal = Calendar.getInstance().apply { timeInMillis = it.date }
-            getDayKey(cal)
-        }.toSet()
+        val logDates = logs.map { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }.toSet()
 
         for (i in 0..6) {
             val dateText = TextView(requireContext())
-            val dayNum = calendar.get(Calendar.DAY_OF_MONTH)
-            val dateKey = getDayKey(calendar)
-            
-            dateText.text = dayNum.toString()
+            dateText.text = calendar.get(Calendar.DAY_OF_MONTH).toString()
             dateText.gravity = Gravity.CENTER
-            dateText.typeface = Typeface.create("sans-serif", Typeface.NORMAL)
             dateText.textSize = 14f
             
-            when {
-                logDates.contains(dateKey) -> {
-                    dateText.setBackgroundResource(R.drawable.bg_circle_green)
-                    dateText.setTextColor(Color.WHITE)
-                    dateText.setTypeface(null, Typeface.BOLD)
-                }
-                getDayKey(calendar) == getDayKey(today) -> {
-                    dateText.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
-                    dateText.setTypeface(null, Typeface.BOLD)
-                }
-                calendar.after(today) -> {
-                    dateText.setTextColor(Color.parseColor("#BDBDBD"))
-                }
-                else -> {
-                    dateText.setTextColor(Color.parseColor("#212121"))
-                }
+            if (logDates.contains(getDayKey(calendar))) {
+                dateText.setBackgroundResource(R.drawable.ic_check_circle)
+                dateText.setTextColor(Color.WHITE)
+            } else if (getDayKey(calendar) == getDayKey(today)) {
+                dateText.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
             }
 
-            val params = TableRow.LayoutParams(0, 100, 1f)
-            dateText.layoutParams = params
+            dateText.layoutParams = TableRow.LayoutParams(0, 100, 1f)
             row.addView(dateText)
             calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
@@ -162,31 +208,13 @@ class ProfileFragment : Fragment() {
             binding.historyCard.tvStreakCount.text = "0"
             return
         }
-
-        val calendar = Calendar.getInstance()
-        val todayStr = getDayKey(calendar)
-        calendar.add(Calendar.DAY_OF_YEAR, -1)
-        val yesterdayStr = getDayKey(calendar)
-
-        val logDates = logs.map { 
-            val logCal = Calendar.getInstance().apply { timeInMillis = it.date }
-            getDayKey(logCal)
-        }.toSet()
-
-        if (!logDates.contains(todayStr) && !logDates.contains(yesterdayStr)) {
-            binding.historyCard.tvStreakCount.text = "0"
-            return
-        }
-
+        val logDates = logs.map { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }.toSet()
         var streak = 0
         val checkCal = Calendar.getInstance()
-        if (!logDates.contains(todayStr)) checkCal.add(Calendar.DAY_OF_YEAR, -1)
-
         while (logDates.contains(getDayKey(checkCal))) {
             streak++
             checkCal.add(Calendar.DAY_OF_YEAR, -1)
         }
-
         binding.historyCard.tvStreakCount.text = streak.toString()
     }
 
@@ -194,85 +222,22 @@ class ProfileFragment : Fragment() {
 
     private fun updateWeightChartFromLogs(logs: List<WorkoutSessionLog>) {
         val chart = binding.weightCard.lineChart
-        
         chart.description.isEnabled = false
         chart.legend.isEnabled = false
-        chart.setTouchEnabled(false)
-        chart.setScaleEnabled(false)
-        chart.setDrawGridBackground(false)
-        
-        val dateFormat = SimpleDateFormat("M/dd", Locale.getDefault())
-        val labels = mutableListOf<String>()
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_YEAR, -6)
-        
-        val lastSevenDaysKeys = mutableListOf<String>()
-        for (i in 0..6) {
-            labels.add(dateFormat.format(calendar.time))
-            lastSevenDaysKeys.add(getDayKey(calendar))
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
-        }
-
-        chart.xAxis.apply {
-            position = XAxis.XAxisPosition.BOTTOM
-            setDrawGridLines(false)
-            setDrawAxisLine(false)
-            granularity = 1f
-            textColor = Color.parseColor("#9E9E9E")
-            valueFormatter = IndexAxisValueFormatter(labels)
-        }
-        
-        chart.axisLeft.apply {
-            setDrawGridLines(true)
-            gridColor = Color.parseColor("#F5F5F5")
-            setDrawAxisLine(false)
-            textColor = Color.parseColor("#9E9E9E")
-            valueFormatter = object : ValueFormatter() {
-                override fun getFormattedValue(value: Float): String = value.toInt().toString()
-            }
-        }
-        chart.axisRight.isEnabled = false
-
         val weightEntries = ArrayList<Entry>()
-        val currentProfileWeight = profileViewModel.getUser.value?.weightKg ?: 0.0
-        
-        lastSevenDaysKeys.forEachIndexed { index, dateKey ->
-            val logForDay = logs.find { 
-                val logCal = Calendar.getInstance().apply { timeInMillis = it.date }
-                getDayKey(logCal) == dateKey 
-            }
-            
-            if (logForDay != null && logForDay.weightKg > 0) {
-                weightEntries.add(Entry(index.toFloat(), logForDay.weightKg.toFloat()))
-            } else if (index == 6) {
-                weightEntries.add(Entry(index.toFloat(), currentProfileWeight.toFloat()))
-            }
+        logs.takeLast(7).forEachIndexed { i, log -> 
+            if (log.weightKg > 0) weightEntries.add(Entry(i.toFloat(), log.weightKg.toFloat())) 
         }
-
         if (weightEntries.isNotEmpty()) {
             val dataSet = LineDataSet(weightEntries, "Weight").apply {
                 color = ContextCompat.getColor(requireContext(), R.color.green)
                 lineWidth = 3f
                 mode = LineDataSet.Mode.CUBIC_BEZIER
-                setDrawValues(false)
-                setDrawHighlightIndicators(false)
-                setDrawCircles(true)
-                circleColors = weightEntries.mapIndexed { index, _ -> 
-                    if (index == weightEntries.size - 1) ContextCompat.getColor(requireContext(), R.color.green) 
-                    else Color.TRANSPARENT 
-                }
-                circleRadius = 5f
-                circleHoleRadius = 3f
-                setCircleColor(ContextCompat.getColor(requireContext(), R.color.green))
                 setDrawFilled(true)
                 fillDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.chart_gradient_fill)
             }
             chart.data = LineData(dataSet)
             chart.invalidate()
-            
-            val weights = weightEntries.map { it.y }
-            binding.weightCard.tvHeaviestWeight.text = String.format("%.1f kg", weights.maxOrNull() ?: currentProfileWeight)
-            binding.weightCard.tvLightestWeight.text = String.format("%.1f kg", weights.minOrNull() ?: currentProfileWeight)
         }
     }
 

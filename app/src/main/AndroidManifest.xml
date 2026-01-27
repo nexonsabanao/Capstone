@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Add queries for Google Sign-In package visibility -->
+    <queries>
+        <package android:name="com.google.android.gms" />
+    </queries>
+
     <application
         android:name=".NutriorityApp"
         android:allowBackup="true"

@@ -1,6 +1,7 @@
 package com.example.nutriority.data.local
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -25,8 +26,11 @@ interface WorkoutDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWorkoutExercise(workoutExercise: WorkoutExercise)
 
+    @Update
+    suspend fun updateWorkoutExercise(workoutExercise: WorkoutExercise)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSessionLog(log: WorkoutSessionLog)
+    suspend fun insertSessionLog(log: WorkoutSessionLog): Long
 
     @Query("SELECT * FROM workout_session_logs ORDER BY date DESC LIMIT 1")
     fun getLatestSessionLog(): Flow<WorkoutSessionLog?>
@@ -37,8 +41,15 @@ interface WorkoutDao {
     @Query("SELECT COUNT(id) FROM workouts")
     suspend fun getWorkoutCount(): Int
 
+    @Query("SELECT COUNT(id) FROM exercises")
+    suspend fun getExerciseCount(): Int
+
     @Query("SELECT * FROM workouts ORDER BY name ASC")
     fun getAllWorkouts(): Flow<List<Workout>>
+
+    @Transaction
+    @Query("SELECT * FROM workouts")
+    fun getAllWorkoutsWithExercises(): Flow<List<WorkoutWithExercises>>
 
     @Query("SELECT * FROM exercises ORDER BY name ASC")
     fun getAllExercises(): Flow<List<Exercise>>
@@ -65,10 +76,22 @@ interface WorkoutDao {
     @Query("DELETE FROM workout_exercises WHERE workoutId = :workoutId")
     suspend fun deleteWorkoutExercises(workoutId: Int)
 
+    @Delete
+    suspend fun deleteWorkout(workout: Workout)
+
+    @Query("DELETE FROM workout_session_logs")
+    suspend fun deleteAllSessionLogs()
+
     @Transaction
     suspend fun updateWorkoutWithExercises(workout: Workout, workoutExercises: List<WorkoutExercise>) {
-        updateWorkout(workout)
+        insertWorkout(workout)
         deleteWorkoutExercises(workout.id)
         workoutExercises.forEach { insertWorkoutExercise(it) }
+    }
+
+    @Transaction
+    suspend fun deleteFullWorkout(workout: Workout) {
+        deleteWorkoutExercises(workout.id)
+        deleteWorkout(workout)
     }
 }

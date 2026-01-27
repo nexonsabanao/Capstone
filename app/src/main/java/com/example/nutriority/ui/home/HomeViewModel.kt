@@ -28,7 +28,8 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     val allMeals: StateFlow<List<Meal>>
-    val allWorkouts: StateFlow<List<Workout>>
+    val allWorkouts: StateFlow<List<Workout>> // This remains the recommended list for Home
+    val unfilteredWorkouts: StateFlow<List<Workout>> // Raw list for tabs to filter
     val allArticles: StateFlow<List<Article>>
     val isDataReady: StateFlow<Boolean>
     val calorieGoal: StateFlow<String>
@@ -46,14 +47,25 @@ class HomeViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+        unfilteredWorkouts = workoutRepository.allWorkouts.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
         val recommendedWorkouts = combine(workoutRepository.allWorkouts, userRepository.getUser.asFlow()) { workouts, user ->
+            if (user == null) return@combine emptyList()
+
+            // Only recommend official trainer workouts
+            val trainerOnly = workouts.filter { it.id <= 25 }
+            
             val desiredDifficulties = when (user.activityLevel) {
                 "Sedentary" -> listOf("Beginner")
                 "Lightly active" -> listOf("Beginner", "Intermediate")
                 else -> listOf("Intermediate", "Advanced")
             }
 
-            val filteredWorkouts = workouts.filter { it.difficulty in desiredDifficulties }
+            val filteredWorkouts = trainerOnly.filter { it.difficulty in desiredDifficulties }
 
             if (filteredWorkouts.isEmpty()) {
                 emptyList()
@@ -77,6 +89,8 @@ class HomeViewModel @Inject constructor(
         )
 
         calorieGoal = userRepository.getUser.asFlow().map { user ->
+            if (user == null) return@map "1800-2200 kcal / day"
+            
             NutritionCalculator.getCalorieRangeForDisplay(
                 user.weightKg,
                 user.heightCm,

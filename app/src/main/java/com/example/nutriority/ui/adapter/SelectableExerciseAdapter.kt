@@ -34,13 +34,11 @@ class SelectableExerciseAdapter(
 
     private fun updateDisplayList() {
         val filtered = allExercises.filter { exercise ->
-            // If the exercise is already selected in THIS category, we show it
-            // Or if it's available in the library for this category
-            val isMatch = when (currentFilter) {
-                "Exercise" -> !exercise.category.contains("Warm-up", true) && !exercise.category.contains("Cool-down", true)
-                else -> exercise.category.equals(currentFilter, true)
+            when (currentFilter) {
+                "Warm-up" -> exercise.category.contains("Warm-up", true)
+                "Cool-down" -> exercise.category.contains("Cool-down", true)
+                else -> !exercise.category.contains("Warm-up", true) && !exercise.category.contains("Cool-down", true)
             }
-            isMatch
         }
 
         displayList = filtered.sortedWith(
@@ -51,6 +49,7 @@ class SelectableExerciseAdapter(
     }
 
     private fun isSelected(exercise: Exercise): Boolean {
+        // Match by ID AND the specific category of the current tab
         return selectedExercises.any { it.id == exercise.id && it.category.equals(currentFilter, true) }
     }
 
@@ -82,8 +81,10 @@ class SelectableExerciseAdapter(
 
             binding.root.setOnClickListener {
                 if (isSelected) {
+                    // Remove specifically from the current tab's category
                     selectedExercises.removeAll { it.id == exercise.id && it.category.equals(currentFilter, true) }
                 } else {
+                    // Add specifically to the current tab's category
                     selectedExercises.add(exercise.copy(category = currentFilter))
                 }
                 onExerciseSelected(exercise, !isSelected)

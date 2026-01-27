@@ -64,7 +64,9 @@ class AllWorkoutsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.allWorkouts.collect { workouts ->
-                    workoutAdapter.submitList(workouts)
+                    // FIX: Filter out custom workouts (ID > 25) to keep "Show All" exclusive to trainers
+                    val officialWorkouts = workouts.filter { it.id <= 25 }
+                    workoutAdapter.submitList(officialWorkouts)
                 }
             }
         }

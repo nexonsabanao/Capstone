@@ -56,6 +56,7 @@ class ExerciseDetailFragment : Fragment() {
                     if (mutableList.size > 1) {
                         mutableList.removeAt(position)
                         updateAndSubmitList(mutableList)
+                        saveChangesToDatabase(mutableList)
                     }
                     binding.root.postDelayed({ isProcessing = false }, 150)
                 }
@@ -68,21 +69,13 @@ class ExerciseDetailFragment : Fragment() {
             if (!isProcessing) {
                 isProcessing = true
                 val lastSet = currentSets.lastOrNull()
-                
-                // Determine if exercise is duration based from ViewModel if no sets exist
-                val isExerciseDurationBased = viewModel.exerciseWithDetail.value?.let { detail ->
-                    val assignment = detail.assignment
-                    assignment.category.contains("Warm-up", true) || 
-                    assignment.category.contains("Cool-down", true) ||
-                    assignment.duration.isNotBlank()
-                } ?: false
-
-                val isDuration = lastSet?.isDuration ?: isExerciseDurationBased
+                val isDuration = lastSet?.isDuration ?: false
                 val newValue = lastSet?.value ?: if (isDuration) 30 else 10
                 val mutableList = currentSets.toMutableList()
                 val newSet = ExerciseSet(value = newValue, isDuration = isDuration)
                 mutableList.add(newSet)
                 updateAndSubmitList(mutableList)
+                saveChangesToDatabase(mutableList)
                 binding.root.postDelayed({ isProcessing = false }, 150)
             }
         }
@@ -190,6 +183,7 @@ class ExerciseDetailFragment : Fragment() {
                     val updatedSet = mutableList[position].copy(value = newValue)
                     mutableList[position] = updatedSet
                     updateAndSubmitList(mutableList)
+                    saveChangesToDatabase(mutableList)
                 }
             }
             currentDialog?.dismiss()
@@ -199,6 +193,23 @@ class ExerciseDetailFragment : Fragment() {
             currentDialog?.dismiss()
         }
         currentDialog?.show()
+    }
+
+    private fun saveChangesToDatabase(updatedSets: List<ExerciseSet>) {
+        val detail = viewModel.exerciseWithDetail.value ?: return
+        val isDuration = updatedSets.firstOrNull()?.isDuration ?: false
+        
+        val valueString = updatedSets.joinToString(",") { it.value.toString() }
+        
+        val updatedAssignment = detail.assignment.copy(
+            sets = updatedSets.size,
+            reps = if (isDuration) "1" else valueString, // reps field used for sets distribution
+            duration = if (isDuration) valueString else "" // duration field used for seconds distribution
+        )
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            workoutViewModel.updateWorkoutExercise(updatedAssignment)
+        }
     }
 
     private fun showAutoLogBottomSheet() {
@@ -269,25 +280,28 @@ class ExerciseDetailFragment : Fragment() {
                 viewModel.exerciseWithDetail.collect { detail ->
                     if (detail != null && !isInitialized) {
                         isInitialized = true
-                        val exercise = detail.exercise
                         val assignment = detail.assignment
                         
-                        binding.exerciseTitle.text = exercise.name
+                        binding.exerciseTitle.text = detail.exercise.name
                         
                         val isDuration = assignment.category.contains("Warm-up", true) || 
                                          assignment.category.contains("Cool-down", true) ||
                                          assignment.duration.isNotBlank()
 
                         val setsCount = assignment.sets.coerceAtLeast(1)
-                        val initialValue = if (isDuration) {
-                            assignment.duration.filter { it.isDigit() }.toIntOrNull() ?: 30
+                        
+                        // FIX: Pull multiple values correctly from reps or duration fields
+                        val valueStrings = if (isDuration) {
+                            assignment.duration.split(",")
                         } else {
-                            assignment.reps.split(",").firstOrNull()?.trim()?.filter { it.isDigit() }?.toIntOrNull() ?: 10
+                            assignment.reps.split(",")
                         }
 
-                        // Use actual completion status from assignment
-                        val initialSets = List(setsCount) { 
-                            ExerciseSet(value = initialValue, isDuration = isDuration, isCompleted = assignment.isCompleted) 
+                        val initialSets = List(setsCount) { i ->
+                            val value = valueStrings.getOrNull(i)?.trim()?.toIntOrNull() 
+                                ?: valueStrings.firstOrNull()?.trim()?.toIntOrNull() 
+                                ?: 10
+                            ExerciseSet(value = value, isDuration = isDuration, isCompleted = assignment.isCompleted) 
                         }
                         updateAndSubmitList(initialSets)
                         
@@ -299,7 +313,7 @@ class ExerciseDetailFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                workoutViewModel.isResting.collect { isResting: Boolean ->
+                workoutViewModel.isResting.collect { isResting ->
                     binding.restTimerBar.visibility = if (isResting) View.VISIBLE else View.GONE
                     binding.bottomBar.visibility = if (isResting) View.GONE else View.VISIBLE
                     
@@ -312,7 +326,7 @@ class ExerciseDetailFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                workoutViewModel.restTimeRemaining.collect { seconds: Long ->
+                workoutViewModel.restTimeRemaining.collect { seconds ->
                     val mins = seconds / 60
                     val secs = seconds % 60
                     binding.tvRestTimer.text = String.format("%02d:%02ds", mins, secs)
@@ -356,7 +370,7 @@ class ExerciseDetailFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.backButton.setOnClickListener {
-            workoutViewModel.stopRestTimer() // Explicitly stop rest timer on back
+            workoutViewModel.stopRestTimer()
             navigationViewModel.goBack()
         }
 
@@ -388,7 +402,6 @@ class ExerciseDetailFragment : Fragment() {
             }
         }
 
-        // Rest Bar Listeners
         binding.btnCloseRest.setOnClickListener { workoutViewModel.stopRestTimer() }
         binding.btnStopRest.setOnClickListener { workoutViewModel.stopRestTimer() }
         binding.btnMinus5.setOnClickListener { workoutViewModel.adjustRestTime(-5) }
@@ -399,7 +412,7 @@ class ExerciseDetailFragment : Fragment() {
         if (!workoutViewModel.isWorkoutActive.value) {
             val workoutId = navigationViewModel.selectedWorkoutId.value
             if (workoutId != -1) {
-                workoutViewModel.startWorkout(workoutId)
+                workoutViewModel.startWorkout(workoutId, navigationViewModel.selectedDayIndex.value)
             }
         }
     }
@@ -421,7 +434,7 @@ class ExerciseDetailFragment : Fragment() {
 
     private fun finishOrNext() {
         workoutViewModel.stopAutoLogTimer()
-        workoutViewModel.stopRestTimer() // Ensure rest timer is stopped
+        workoutViewModel.stopRestTimer()
         
         viewLifecycleOwner.lifecycleScope.launch {
             val detail = viewModel.exerciseWithDetail.value ?: return@launch
@@ -433,14 +446,6 @@ class ExerciseDetailFragment : Fragment() {
                 detail.assignment.category,
                 true
             )
-
-            val valueString = currentSets.joinToString(", ") { it.value.toString() }
-            val log = WorkoutLog(
-                workoutId = detail.assignment.workoutId,
-                date = Date(),
-                reps = valueString
-            )
-            viewModel.logWorkout(log)
 
             val currentPos = navigationViewModel.exercisePosition.value
             val total = navigationViewModel.totalExercises.value
@@ -500,7 +505,7 @@ class ExerciseDetailFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        workoutViewModel.stopRestTimer() // Cleanup rest timer when fragment is destroyed
+        workoutViewModel.stopRestTimer()
         workoutViewModel.stopAutoLogTimer()
         _binding = null
     }

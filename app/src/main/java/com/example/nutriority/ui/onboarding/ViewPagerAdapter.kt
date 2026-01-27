@@ -13,13 +13,14 @@ import com.example.nutriority.ui.onboarding.screens.SeventhScreen
 import com.example.nutriority.ui.onboarding.screens.SixthScreen
 import com.example.nutriority.ui.onboarding.screens.ThirdScreen
 import com.example.nutriority.ui.onboarding.screens.WelcomeFragment
+import com.example.nutriority.ui.onboarding.screens.LoginFragment
 
 class ViewPagerAdapter(
     fm: FragmentManager,
     lifecycle: Lifecycle
 ) : FragmentStateAdapter(fm, lifecycle) {
 
-    private val totalPages = 9
+    private val totalPages = 10 // Increased to 10 to accommodate Login
 
     override fun getItemCount(): Int {
         return totalPages
@@ -27,15 +28,16 @@ class ViewPagerAdapter(
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
-            0 -> WelcomeFragment()
-            1 -> FirstScreen()
-            2 -> SecondScreen()
-            3 -> AgeFragment()
-            4 -> ThirdScreen()
-            5 -> FourthScreen()
-            6 -> FifthScreen()
-            7 -> SixthScreen()
-            8 -> SeventhScreen()
+            0 -> LoginFragment() // NEW: Enforce student email first
+            1 -> WelcomeFragment()
+            2 -> FirstScreen()
+            3 -> SecondScreen()
+            4 -> AgeFragment()
+            5 -> ThirdScreen()
+            6 -> FourthScreen()
+            7 -> FifthScreen()
+            8 -> SixthScreen()
+            9 -> SeventhScreen()
             else -> throw IllegalStateException("Requested a fragment for an invalid position: $position")
         }
     }

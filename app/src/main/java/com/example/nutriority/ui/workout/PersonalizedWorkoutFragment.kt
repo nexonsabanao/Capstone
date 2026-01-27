@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,6 +20,7 @@ import com.example.nutriority.ui.adapter.PersonalizedWorkoutAdapter
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -56,16 +58,22 @@ class PersonalizedWorkoutFragment : Fragment() {
             emptyList(),
             0,
             onStartWorkoutClicked = { dayIndex -> 
-                // BUG FIX: Clicking "START" should navigate to workout details, not skip the day
-                val json = userViewModel.user.value?.personalizedPlanJson
-                val plan = Gson().fromJson(json, WorkoutPlan::class.java)
-                val session = plan?.sessions?.getOrNull(dayIndex)
-                val id = session?.unifiedWorkoutId ?: -1
-                
-                if (session?.focus == "Rest Day") {
-                    handleWorkoutStarted(dayIndex) // Rest days can be skipped
-                } else if (id > 0) {
-                    navigationViewModel.navigateToWorkoutDetail(id, isFromPersonalized = true, dayIndex = dayIndex)
+                val user = userViewModel.user.value
+                val json = user?.personalizedPlanJson
+                if (!json.isNullOrBlank()) {
+                    try {
+                        val plan = Gson().fromJson(json, WorkoutPlan::class.java)
+                        val session = plan?.sessions?.getOrNull(dayIndex)
+                        val id = session?.unifiedWorkoutId ?: -1
+                        
+                        if (session?.focus == "Rest Day") {
+                            handleWorkoutStarted(dayIndex)
+                        } else if (id > 0) {
+                            navigationViewModel.navigateToWorkoutDetail(id, isFromPersonalized = true, dayIndex = dayIndex)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("Workout", "Navigation error", e)
+                    }
                 }
             },
             onRestartWorkoutClicked = { handleRestartWorkout() },
@@ -76,26 +84,29 @@ class PersonalizedWorkoutFragment : Fragment() {
         
         binding.rvWorkoutPlan.apply {
             layoutManager = LinearLayoutManager(context)
-            if (adapter != workoutAdapter) {
-                adapter = workoutAdapter
-            }
+            adapter = workoutAdapter
             itemAnimator = null 
         }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                userViewModel.user.observe(viewLifecycleOwner) { user ->
-                    user?.personalizedPlanJson?.let { jsonString ->
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Use asFlow() for more reliable real-time updates during restoration
+                userViewModel.user.asFlow().collectLatest { user ->
+                    if (user != null && !user.personalizedPlanJson.isNullOrBlank()) {
                         try {
-                            val workoutPlan = Gson().fromJson(jsonString, WorkoutPlan::class.java)
+                            val workoutPlan = Gson().fromJson(user.personalizedPlanJson, WorkoutPlan::class.java)
                             if (workoutPlan?.sessions != null) {
+                                binding.rvWorkoutPlan.visibility = View.VISIBLE
                                 updateUI(workoutPlan, user.lastCompletedWorkoutDay)
                             }
                         } catch (e: JsonSyntaxException) {
-                            Log.e("WorkoutDebug", "JSON Syntax Error in plan", e)
+                            Log.e("WorkoutDebug", "JSON Syntax Error", e)
                         }
+                    } else {
+                        // Empty state handling
+                        binding.rvWorkoutPlan.visibility = View.GONE
                     }
                 }
             }

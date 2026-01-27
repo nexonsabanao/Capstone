@@ -2,6 +2,7 @@ package com.example.nutriority.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,13 +15,21 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
+import com.example.nutriority.data.model.Article
+import com.example.nutriority.data.model.Meal
+import com.example.nutriority.data.model.User
+import com.example.nutriority.data.model.Workout
+import com.example.nutriority.data.repository.MealRepository
+import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.databinding.FragmentSplashBinding
 import com.example.nutriority.ui.home.HomeViewModel
 import com.example.nutriority.ui.meal.MealViewModel
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SplashFragment : Fragment() {
@@ -28,9 +37,10 @@ class SplashFragment : Fragment() {
     private var _binding: FragmentSplashBinding? = null
     private val binding get() = _binding!!
 
-    // Scoping ViewModels to Activity so data persists into the fragments
+    @Inject lateinit var workoutRepository: WorkoutRepository
+    @Inject lateinit var mealRepository: MealRepository
+    
     private val homeViewModel: HomeViewModel by activityViewModels()
-    private val mealViewModel: MealViewModel by activityViewModels()
     private val userViewModel: UserViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -45,45 +55,59 @@ class SplashFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (onBoardingIsFinished()) {
-            // Pre-load data while the splash screen is visible
-            observeAndPreload()
-        } else {
-            // Onboarding not finished, just wait and go to onboarding
-            viewLifecycleOwner.lifecycleScope.launch {
-                kotlinx.coroutines.delay(2000)
+        // Force library load on app start using fragment scope to ensure persistence
+        lifecycleScope.launch {
+            try {
+                // 1. Wait for library initialization to FINISH
+                workoutRepository.ensureLibraryIsLoaded()
+                mealRepository.ensureLibraryIsLoaded()
+                
+                // 2. Determine Navigation Path
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                if (currentUser != null) {
+                    observeAndPreload(true)
+                } else if (onBoardingIsFinished()) {
+                    observeAndPreload(false)
+                } else {
+                    kotlinx.coroutines.delay(1500)
+                    findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
+                }
+            } catch (e: Exception) {
+                Log.e("Splash", "Library load failed", e)
                 findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
             }
         }
     }
 
-    private fun observeAndPreload() {
+    private fun observeAndPreload(isAuth: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Combine multiple state flows/livedata to wait for all critical data across ALL 4 tabs
                 combine(
-                    homeViewModel.allWorkouts,
+                    homeViewModel.unfilteredWorkouts,
                     homeViewModel.allMeals,
                     homeViewModel.allArticles,
-                    mealViewModel.mealPlan.asFlow(), // Tab 3: Meal Plan
-                    userViewModel.user.asFlow()      // Tab 4: Profile/User Data
-                ) { workouts, meals, articles, plan, user ->
-                    // Data is "Ready" when library content and user profile are loaded
+                    userViewModel.user.asFlow()
+                ) { workouts: List<Workout>, meals: List<Meal>, articles: List<Article>, user: User? ->
                     workouts.isNotEmpty() && meals.isNotEmpty() && articles.isNotEmpty() && user != null
                 }.collectLatest { isDataReady ->
                     if (isDataReady) {
-                        // All data is cached in ViewModels, safe to navigate
-                        findNavController().navigate(R.id.action_splashFragment_to_mainTabsFragment)
+                        val user = userViewModel.user.value
+                        val hasPlan = !user?.personalizedPlanJson.isNullOrBlank()
+                        
+                        if (isAuth && hasPlan) {
+                            findNavController().navigate(R.id.action_splashFragment_to_mainTabsFragment)
+                        } else {
+                            findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
+                        }
                     }
                 }
             }
         }
         
-        // Safety timeout: navigate anyway after 5 seconds to avoid getting stuck
         viewLifecycleOwner.lifecycleScope.launch {
-            kotlinx.coroutines.delay(5000)
+            kotlinx.coroutines.delay(6000)
             if (findNavController().currentDestination?.id == R.id.splashFragment) {
-                findNavController().navigate(R.id.action_splashFragment_to_mainTabsFragment)
+                findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
             }
         }
     }

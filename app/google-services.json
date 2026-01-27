@@ -12,7 +12,20 @@
           "package_name": "com.example.nutriority"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "427591895572-3cnolcp6l3hfq8pjtum1irt0rmdhte28.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nutriority",
+            "certificate_hash": "4974dd3e495699c1fb67c675bc9cea373c5c756e"
+          }
+        },
+        {
+          "client_id": "427591895572-fhjmalivcah90fl9q4p6ri65tc1pc85e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA7ML7csl8bwO_n1EWtYSscPlcZ7KS0gCY"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "427591895572-fhjmalivcah90fl9q4p6ri65tc1pc85e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

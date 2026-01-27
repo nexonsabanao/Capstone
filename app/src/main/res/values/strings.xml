@@ -20,5 +20,7 @@
     <string name="age_error_invalid">Please enter a valid age</string>
     <string name="age_error_underage">You must be at least 15 years old</string>
     <string name="age_error_over_limit">We don\'t recommend you to use the app</string>
+
+    <!-- Firebase/Google Web Client ID from google-services.json -->
+    <string name="default_web_client_id">427591895572-fhjmalivcah90fl9q4p6ri65tc1pc85e.apps.googleusercontent.com</string>
 </resources>
-    

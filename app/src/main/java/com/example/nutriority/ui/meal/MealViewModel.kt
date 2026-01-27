@@ -49,19 +49,6 @@ class MealViewModel @Inject constructor(
     }
 
     fun generateMealPlan() {
-        val startMillis = sharedPreferences.getLong(MEAL_PLAN_START_DATE_KEY, -1)
-        if (startMillis != -1L) {
-            val startDate = Instant.ofEpochMilli(startMillis).atZone(ZoneId.systemDefault()).toLocalDate()
-            val today = LocalDate.now()
-            if (ChronoUnit.DAYS.between(startDate, today) < 7) {
-                Log.d("MealViewModel", "Valid meal plan exists. Skipping generation.")
-                if (_mealPlan.value.isNullOrEmpty()) {
-                    loadMealPlan()
-                }
-                return
-            }
-        }
-
         viewModelScope.launch {
             _isLoading.postValue(true)
             try {
@@ -76,7 +63,6 @@ class MealViewModel @Inject constructor(
                         user.goal
                     )
                 } else {
-                    Log.w("MealViewModel", "User not found, using default calories.")
                     2000
                 }
 
@@ -89,53 +75,71 @@ class MealViewModel @Inject constructor(
                 }
 
                 _mealPlan.postValue(weeklyPlan)
-                saveMealPlan(weeklyPlan)
-
-                sharedPreferences.edit()
-                    .putLong(MEAL_PLAN_START_DATE_KEY, System.currentTimeMillis())
-                    .apply()
+                saveMealPlanToLocalAndCloud(weeklyPlan)
                 _isPlanExpired.postValue(false)
             } catch (e: Exception) {
                 Log.e("MealViewModel", "Error generating meal plan", e)
-                // Potentially post an error state to the UI
             } finally {
                 _isLoading.postValue(false)
             }
         }
     }
 
-    private fun saveMealPlan(weeklyPlan: List<List<Meal>>) {
+    private fun saveMealPlanToLocalAndCloud(weeklyPlan: List<List<Meal>>) {
         try {
             val json = gson.toJson(weeklyPlan)
+            
+            // 1. Save to Local Prefs for instant access
             sharedPreferences.edit()
                 .putString(MEAL_PLAN_KEY, json)
+                .putLong(MEAL_PLAN_START_DATE_KEY, System.currentTimeMillis())
                 .apply()
+
+            // 2. Save to Cloud User Profile
+            viewModelScope.launch {
+                userRepository.getInitialUser()?.let { user ->
+                    userRepository.insertUser(user.copy(mealPlanJson = json))
+                }
+            }
         } catch (e: Exception) {
             Log.e("MealViewModel", "Error saving meal plan", e)
         }
     }
 
     fun loadMealPlan() {
-        val json = sharedPreferences.getString(MEAL_PLAN_KEY, null)
-        val startMillis = sharedPreferences.getLong(MEAL_PLAN_START_DATE_KEY, -1)
+        viewModelScope.launch {
+            val localJson = sharedPreferences.getString(MEAL_PLAN_KEY, null)
+            val startMillis = sharedPreferences.getLong(MEAL_PLAN_START_DATE_KEY, -1)
 
-        if (json != null && startMillis != -1L) {
-            try {
-                val type = object : TypeToken<List<List<Meal>>>() {}.type
-                val weeklyPlan: List<List<Meal>> = gson.fromJson(json, type)
-                _mealPlan.postValue(weeklyPlan)
-
-                val startDate = Instant.ofEpochMilli(startMillis).atZone(ZoneId.systemDefault()).toLocalDate()
-                val today = LocalDate.now()
-                val daysPassed = ChronoUnit.DAYS.between(startDate, today)
-                _isPlanExpired.postValue(daysPassed >= 7)
-            } catch (e: JsonSyntaxException) {
-                Log.e("MealViewModel", "Error parsing meal plan from JSON", e)
-                completeMealPlan() // Clear corrupted data
+            if (localJson != null && startMillis != -1L) {
+                displayJsonPlan(localJson, startMillis)
+            } else {
+                // CLOUD RESTORE FALLBACK
+                val user = userRepository.getInitialUser()
+                val cloudJson = user?.mealPlanJson
+                
+                if (!cloudJson.isNullOrBlank()) {
+                    displayJsonPlan(cloudJson, System.currentTimeMillis())
+                } else {
+                    _mealPlan.postValue(emptyList())
+                    _isPlanExpired.postValue(false)
+                }
             }
-        } else {
+        }
+    }
+
+    private fun displayJsonPlan(json: String, startMillis: Long) {
+        try {
+            val type = object : TypeToken<List<List<Meal>>>() {}.type
+            val weeklyPlan: List<List<Meal>> = gson.fromJson(json, type)
+            _mealPlan.postValue(weeklyPlan)
+
+            val startDate = Instant.ofEpochMilli(startMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+            val today = LocalDate.now()
+            val daysPassed = ChronoUnit.DAYS.between(startDate, today)
+            _isPlanExpired.postValue(daysPassed >= 7)
+        } catch (e: Exception) {
             _mealPlan.postValue(emptyList())
-            _isPlanExpired.postValue(false)
         }
     }
 
@@ -144,37 +148,22 @@ class MealViewModel @Inject constructor(
             .remove(MEAL_PLAN_KEY)
             .remove(MEAL_PLAN_START_DATE_KEY)
             .apply()
+        
+        viewModelScope.launch {
+            userRepository.getInitialUser()?.let { user ->
+                userRepository.insertUser(user.copy(mealPlanJson = null))
+            }
+        }
+        
         _mealPlan.postValue(emptyList())
         _isPlanExpired.postValue(false)
     }
 
     fun getDayLabel(dayIndex: Int): String {
-        val startMillis = sharedPreferences.getLong(MEAL_PLAN_START_DATE_KEY, -1)
-        if (startMillis == -1L) return "Day ${dayIndex + 1}"
-
-        val startDate = Instant.ofEpochMilli(startMillis)
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
-
+        val startMillis = sharedPreferences.getLong(MEAL_PLAN_START_DATE_KEY, System.currentTimeMillis())
+        val startDate = Instant.ofEpochMilli(startMillis).atZone(ZoneId.systemDefault()).toLocalDate()
         val targetDate = startDate.plusDays(dayIndex.toLong())
-        val today = LocalDate.now()
-        val daysBetween = ChronoUnit.DAYS.between(today, targetDate)
-        val dateFormatter = DateTimeFormatter.ofPattern("MMM d")
-
-        return when (daysBetween) {
-            0L -> "Today, ${targetDate.format(dateFormatter)}"
-            -1L -> "Yesterday, ${targetDate.format(dateFormatter)}"
-            1L -> "Tomorrow, ${targetDate.format(dateFormatter)}"
-            else -> {
-                if (daysBetween > 1) { // Future days
-                    val futureFormatter = DateTimeFormatter.ofPattern("EEEE, MMM d")
-                    targetDate.format(futureFormatter)
-                } else { // Past days (older than yesterday)
-                    val daysAgo = -daysBetween
-                    "$daysAgo days ago, ${targetDate.format(dateFormatter)}"
-                }
-            }
-        }
+        return targetDate.format(DateTimeFormatter.ofPattern("EEEE, MMM d"))
     }
 
     companion object {

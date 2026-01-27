@@ -19,4 +19,6 @@ interface WorkoutLogDao {
     @Query("SELECT * FROM workout_logs")
     fun getWorkoutLogs(): Flow<List<WorkoutLog>>
 
+    @Query("DELETE FROM workout_logs")
+    suspend fun deleteAll()
 }

@@ -132,7 +132,6 @@ class WorkoutDetailViewModel @Inject constructor(
         val dayIdx = _activeDayIndex.value
         
         viewModelScope.launch {
-            // 1. SAVE THE SESSION LOG
             val sessionLog = WorkoutSessionLog(
                 workoutId = current.workout.id,
                 workoutName = current.workout.name,
@@ -145,7 +144,6 @@ class WorkoutDetailViewModel @Inject constructor(
             )
             workoutRepository.insertSessionLog(sessionLog)
 
-            // 2. UPDATE PERSONALIZED PROGRESS (CRITICAL)
             if (dayIdx != -1) {
                 val user = userRepository.getInitialUser()
                 if (user != null && dayIdx == user.lastCompletedWorkoutDay) {
@@ -153,7 +151,6 @@ class WorkoutDetailViewModel @Inject constructor(
                 }
             }
             
-            // 3. CAPTURE SNAPSHOT for immediate UI use
             _sessionSummary.value = SessionSummary(
                 workoutName = current.workout.name,
                 exercisesDone = doneCount,
@@ -162,7 +159,6 @@ class WorkoutDetailViewModel @Inject constructor(
                 metValue = current.workout.metValue
             )
 
-            // 4. STOP SESSION
             stopWorkout(save = true)
         }
     }
@@ -182,11 +178,19 @@ class WorkoutDetailViewModel @Inject constructor(
         
         viewModelScope.launch {
             val currentWorkout = _workout.value ?: return@launch
-            workoutRepository.updateWorkoutWithExercises(
-                currentWorkout.workout,
-                currentWorkout.exerciseAssignments.map { it.assignment.copy(isCompleted = false) }
-            )
+            
+            val resetAssignments = currentWorkout.exerciseAssignments.map { 
+                it.assignment.copy(isCompleted = false) 
+            }
+            workoutRepository.updateWorkoutWithExercises(currentWorkout.workout, resetAssignments)
+            
             _completedExercisesCount.value = 0
+        }
+    }
+
+    fun deleteWorkout(workout: Workout) {
+        viewModelScope.launch {
+            workoutRepository.deleteFullWorkout(workout)
         }
     }
 
@@ -272,6 +276,15 @@ class WorkoutDetailViewModel @Inject constructor(
         viewModelScope.launch {
             workoutRepository.updateWorkoutWithExercises(workout, workoutExercises)
             _onWorkoutUpdated.emit(Unit)
+        }
+    }
+
+    /**
+     * NEW: Method to update a single workout exercise row in the database.
+     */
+    fun updateWorkoutExercise(workoutExercise: WorkoutExercise) {
+        viewModelScope.launch {
+            workoutRepository.updateWorkoutExercise(workoutExercise)
         }
     }
 

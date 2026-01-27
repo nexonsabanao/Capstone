@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.databinding.FragmentHomeBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.MealAdapter
@@ -52,7 +53,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private lateinit var indicator: CircleIndicator2
     private val workoutSnapHelper = PagerSnapHelper()
 
     override fun onCreateView(
@@ -71,24 +71,6 @@ class HomeFragment : Fragment() {
         observeViewModel()
     }
 
-    private fun setupClickListeners() {
-        binding.sevenDaysWorkoutCard.btnStart.setOnClickListener {
-            navigationViewModel.setTab(4)
-        }
-
-        binding.mealPlanCard.btnViewPlan.setOnClickListener {
-            navigationViewModel.setTab(2)
-        }
-
-        binding.btnResumeOngoing.setOnClickListener {
-            // FIX: Use activeWorkoutId instead of the currently loaded workout
-            val activeId = workoutViewModel.activeWorkoutId.value
-            if (activeId != -1) {
-                navigationViewModel.navigateToWorkoutDetail(activeId)
-            }
-        }
-    }
-
     private fun setupRecyclerViews() {
         binding.mealsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -98,11 +80,12 @@ class HomeFragment : Fragment() {
         binding.workoutsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = workoutAdapter
-            workoutSnapHelper.attachToRecyclerView(this)
+            if (onFlingListener == null) {
+                workoutSnapHelper.attachToRecyclerView(this)
+            }
         }
 
-        indicator = binding.workoutsIndicator
-        indicator.attachToRecyclerView(binding.workoutsRecyclerView, workoutSnapHelper)
+        binding.workoutsIndicator.attachToRecyclerView(binding.workoutsRecyclerView, workoutSnapHelper)
 
         binding.articlesRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -113,7 +96,6 @@ class HomeFragment : Fragment() {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Observe Active Workout State
                 launch {
                     workoutViewModel.isWorkoutActive.collect { isActive ->
                         binding.ongoingWorkoutCard.visibility = if (isActive) View.VISIBLE else View.GONE
@@ -122,10 +104,7 @@ class HomeFragment : Fragment() {
 
                 launch {
                     workoutViewModel.completedExercisesCount.collect { completed ->
-                        // FIX: Logic to handle progress correctly
                         val workout = workoutViewModel.workout.value ?: return@collect
-                        
-                        // We only want to update the subtitle if we are looking at the ACTIVE workout
                         if (workout.workout.id == workoutViewModel.activeWorkoutId.value) {
                             val total = workout.exerciseAssignments.size
                             val progress = if (total > 0) (completed.toFloat() / total.toFloat()) * 100 else 0f
@@ -135,7 +114,6 @@ class HomeFragment : Fragment() {
                     }
                 }
 
-                // Existing observations
                 launch {
                     homeViewModel.allMeals.collect { meals ->
                         if (meals.isNotEmpty()) {
@@ -147,11 +125,14 @@ class HomeFragment : Fragment() {
                 }
 
                 launch {
+                    // RESTORED: Observe SMART list (allWorkouts) instead of raw database (unfilteredWorkouts)
                     homeViewModel.allWorkouts.collect { workouts ->
                         if (workouts.isNotEmpty()) {
-                            workoutAdapter.submitList(workouts)
+                            workoutAdapter.submitList(workouts) {
+                                binding.workoutsIndicator.attachToRecyclerView(binding.workoutsRecyclerView, workoutSnapHelper)
+                                binding.workoutsIndicator.visibility = View.VISIBLE
+                            }
                             binding.workoutsRecyclerView.visibility = View.VISIBLE
-                            binding.workoutsIndicator.visibility = View.VISIBLE
                             binding.workoutsProgressBar.visibility = View.GONE
                         }
                     }
@@ -173,6 +154,21 @@ class HomeFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
+
+    private fun setupClickListeners() {
+        binding.sevenDaysWorkoutCard.btnStart.setOnClickListener {
+            navigationViewModel.setTab(4)
+        }
+
+        binding.mealPlanCard.btnViewPlan.setOnClickListener {
+            navigationViewModel.setTab(2)
+        }
+        
+        binding.btnResumeOngoing.setOnClickListener {
+            val activeId = workoutViewModel.activeWorkoutId.value
+            if (activeId != -1) navigationViewModel.navigateToWorkoutDetail(activeId)
         }
     }
 

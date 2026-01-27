@@ -1,13 +1,23 @@
 package com.example.nutriority.data.repository
 
 import android.app.Application
+import android.util.Log
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.data.local.MealDao
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
+import java.io.BufferedReader
 
 class MealRepository(private val mealDao: MealDao, private val application: Application) {
+
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     val allMeals: Flow<List<Meal>> = mealDao.getAllMeals().map { meals ->
         meals.map {
@@ -27,16 +37,51 @@ class MealRepository(private val mealDao: MealDao, private val application: Appl
         return mealDao.getMealById(mealId)
     }
 
+    /**
+     * MANDATORY RESTORE: Loads official meals from assets if database is empty.
+     */
+    suspend fun ensureLibraryIsLoaded() {
+        if (mealDao.getAllMeals().first().isNotEmpty()) return
+        
+        try {
+            val gson = Gson()
+            val mealsJson = application.assets.open("meals.json").bufferedReader().use(BufferedReader::readText)
+            val meals: List<Meal> = gson.fromJson(mealsJson, object : TypeToken<List<Meal>>() {}.type)
+            mealDao.insertAllMeals(meals)
+            Log.d("Restore", "Meal Library Loaded")
+        } catch (e: Exception) {
+            Log.e("Restore", "Failed to load meal library", e)
+        }
+    }
+
     suspend fun insert(meal: Meal) {
         mealDao.insertMeal(meal)
+        auth.currentUser?.uid?.let { uid ->
+            db.collection("users").document(uid).collection("meal_logs").document(meal.id.toString()).set(meal)
+        }
     }
 
     suspend fun update(meal: Meal) {
         mealDao.updateMeal(meal)
+        auth.currentUser?.uid?.let { uid ->
+            db.collection("users").document(uid).collection("meal_logs").document(meal.id.toString()).set(meal)
+        }
     }
 
     suspend fun delete(meal: Meal) {
         mealDao.deleteMeal(meal)
+        auth.currentUser?.uid?.let { uid ->
+            db.collection("users").document(uid).collection("meal_logs").document(meal.id.toString()).delete()
+        }
+    }
+
+    suspend fun restoreMealsFromCloud() {
+        val uid = auth.currentUser?.uid ?: return
+        try {
+            val snapshot = db.collection("users").document(uid).collection("meal_logs").get().await()
+            val meals = snapshot.toObjects(Meal::class.java)
+            meals.forEach { mealDao.insertMeal(it) }
+        } catch (e: Exception) { }
     }
 
     suspend fun deleteAll() {

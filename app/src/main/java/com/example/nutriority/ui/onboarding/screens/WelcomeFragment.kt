@@ -7,15 +7,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
+import androidx.navigation.fragment.findNavController
 import com.example.nutriority.R
+import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentWelcomeBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class WelcomeFragment : Fragment() {
 
     private var _binding: FragmentWelcomeBinding? = null
     private val binding get() = _binding!!
+    
+    private val userViewModel: UserViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,7 +48,15 @@ class WelcomeFragment : Fragment() {
         }
 
         binding.acceptButton.setOnClickListener {
-            setFragmentResult("navigationRequestNext", Bundle())
+            // Check if user has already completed onboarding (has a plan)
+            val user = userViewModel.user.value
+            if (user != null && !user.personalizedPlanJson.isNullOrBlank()) {
+                // RETURNER: Skip onboarding and go straight to the main app dashboard
+                findNavController().navigate(R.id.action_viewPagerFragment_to_mainTabsFragment)
+            } else {
+                // NEW USER: Continue with the onboarding flow
+                setFragmentResult("navigationRequestNext", Bundle())
+            }
         }
     }
 

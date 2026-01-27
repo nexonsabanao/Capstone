@@ -26,7 +26,7 @@ import java.io.BufferedReader
 
 @Database(
     entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class, WorkoutExercise::class, WorkoutSessionLog::class],
-    version = 32, // Incremented version
+    version = 32,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -36,6 +36,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun workoutDao(): WorkoutDao
     abstract fun articlesDao(): ArticlesDao
     abstract fun workoutLogDao(): WorkoutLogDao
+
+    fun clearAllData() {
+        this.clearAllTables()
+    }
 
     companion object {
         @Volatile
@@ -65,7 +69,10 @@ abstract class AppDatabase : RoomDatabase() {
                 super.onOpen(db)
                 INSTANCE?.let { database ->
                     scope.launch(Dispatchers.IO) {
+                        // FIX: Check if database is empty every time it opens. 
+                        // If it was wiped by Logout/Delete, we MUST reload the library.
                         if (database.workoutDao().getWorkoutCount() == 0) {
+                            Log.d("AppDatabase", "Database is empty. Re-populating library...")
                             database.withTransaction {
                                 prePopulateDatabase(context, database)
                             }
@@ -87,24 +94,18 @@ abstract class AppDatabase : RoomDatabase() {
                     }
 
                     // Pre-populate Articles
-                    val articleType = object : TypeToken<List<Article>>() {}.type
                     val articlesJson = context.assets.open("articles.json").bufferedReader().use(BufferedReader::readText)
-                    val articles: List<Article> = gson.fromJson(articlesJson, articleType)
+                    val articles: List<Article> = gson.fromJson(articlesJson, object : TypeToken<List<Article>>() {}.type)
                     articles.forEach { it.imageResId = getSafeImageResId(it.imageName) }
                     db.articlesDao().insertAllArticles(articles)
 
                     // Pre-populate Meals
-                    val mealType = object : TypeToken<List<Meal>>() {}.type
                     val mealsJson = context.assets.open("meals.json").bufferedReader().use(BufferedReader::readText)
-                    val meals: List<Meal> = gson.fromJson(mealsJson, mealType)
+                    val meals: List<Meal> = gson.fromJson(mealsJson, object : TypeToken<List<Meal>>() {}.type)
                     meals.forEach { it.imageResId = getSafeImageResId(it.imageName) }
                     db.mealDao().insertAllMeals(meals)
 
-                    // Pre-populate New Workouts structure
-                    data class WorkoutExerciseJson(val exerciseId: String, val category: String?, val sets: Int, val reps: String, val rest: String, val duration: String?)
-                    data class WorkoutJson(val id: Int, val name: String, val description: String, val category: String, val targetMuscle: String, val imageName: String, val difficulty: String, val duration: String, val exercises: List<WorkoutExerciseJson>)
-                    data class RootJson(val exercises: List<Exercise>, val workouts: List<WorkoutJson>)
-
+                    // Pre-populate Workouts
                     val rootJsonStr = context.assets.open("workouts.json").bufferedReader().use(BufferedReader::readText)
                     val rootData: RootJson = gson.fromJson(rootJsonStr, RootJson::class.java)
 
@@ -114,13 +115,6 @@ abstract class AppDatabase : RoomDatabase() {
                     }
 
                     rootData.workouts.forEach { wJson ->
-                        val met = when (wJson.category.lowercase()) {
-                            "cardio", "hiit" -> 8.0
-                            "strength", "core" -> 5.0
-                            "recovery", "flexibility" -> 2.5
-                            else -> 5.0
-                        }
-                        
                         val workout = Workout(
                             id = wJson.id,
                             name = wJson.name,
@@ -130,7 +124,7 @@ abstract class AppDatabase : RoomDatabase() {
                             imageName = wJson.imageName,
                             difficulty = wJson.difficulty,
                             duration = wJson.duration,
-                            metValue = met
+                            metValue = if (wJson.category.lowercase().contains("cardio")) 8.0 else 5.0
                         )
                         db.workoutDao().insertWorkout(workout)
 
@@ -154,4 +148,8 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
     }
+
+    private data class WorkoutExerciseJson(val exerciseId: String, val category: String?, val sets: Int, val reps: String, val rest: String, val duration: String?)
+    private data class WorkoutJson(val id: Int, val name: String, val description: String, val category: String, val targetMuscle: String, val imageName: String, val difficulty: String, val duration: String, val exercises: List<WorkoutExerciseJson>)
+    private data class RootJson(val exercises: List<Exercise>, val workouts: List<WorkoutJson>)
 }
