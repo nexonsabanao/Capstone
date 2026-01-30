@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.meal
 
+import android.app.Application
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -13,9 +14,9 @@ import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.planner.MealPlanner
 import com.example.nutriority.planner.NutritionCalculator
 import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -30,10 +31,12 @@ class MealViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val mealPlanner: MealPlanner,
     private val sharedPreferences: SharedPreferences,
-    private val gson: Gson
+    private val gson: Gson,
+    private val application: Application
 ) : ViewModel() {
 
     val allMeals: LiveData<List<Meal>> = mealRepository.allMeals.asLiveData()
+    private var cachedMeals: List<Meal> = emptyList()
 
     private val _mealPlan = MutableLiveData<List<List<Meal>>>()
     val mealPlan: LiveData<List<List<Meal>>> = _mealPlan
@@ -45,6 +48,12 @@ class MealViewModel @Inject constructor(
     val isPlanExpired: LiveData<Boolean> = _isPlanExpired
 
     init {
+        viewModelScope.launch {
+            mealRepository.allMeals.collectLatest {
+                cachedMeals = it
+                Log.d("MealViewModel", "Library meals cached: ${it.size}")
+            }
+        }
         loadMealPlan()
     }
 
@@ -85,17 +94,47 @@ class MealViewModel @Inject constructor(
         }
     }
 
+    fun swapMeal(dayIndex: Int, mealToReplace: Meal, newMeal: Meal) {
+        val currentPlan = _mealPlan.value?.toMutableList() ?: return
+        if (dayIndex >= currentPlan.size) return
+        
+        val dailyMeals = currentPlan[dayIndex].toMutableList()
+        val indexInDay = dailyMeals.indexOfFirst { it.time == mealToReplace.time && it.name == mealToReplace.name }
+        
+        if (indexInDay != -1) {
+            dailyMeals[indexInDay] = newMeal.copy(time = mealToReplace.time)
+            currentPlan[dayIndex] = dailyMeals
+            _mealPlan.postValue(currentPlan)
+            saveMealPlanToLocalAndCloud(currentPlan)
+        }
+    }
+
+    fun getSwapOptions(mealToReplace: Meal): List<Meal> {
+        val mealType = mealToReplace.time
+        
+        // Use allMeals.value as primary source if available, otherwise cachedMeals
+        val source = allMeals.value ?: cachedMeals
+        
+        val options = source.filter { 
+            it.time.equals(mealType, ignoreCase = true) && 
+            it.name != mealToReplace.name 
+        }.shuffled().take(10)
+        
+        Log.d("MealViewModel", "Swap options for $mealType: ${options.size} found in ${source.size} total meals")
+        return options
+    }
+
     private fun saveMealPlanToLocalAndCloud(weeklyPlan: List<List<Meal>>) {
         try {
             val json = gson.toJson(weeklyPlan)
             
-            // 1. Save to Local Prefs for instant access
+            // 1. Save to Local Prefs
             sharedPreferences.edit()
                 .putString(MEAL_PLAN_KEY, json)
                 .putLong(MEAL_PLAN_START_DATE_KEY, System.currentTimeMillis())
                 .apply()
 
-            // 2. Save to Cloud User Profile
+            // 2. Save to Cloud
             viewModelScope.launch {
                 userRepository.getInitialUser()?.let { user ->
                     userRepository.insertUser(user.copy(mealPlanJson = json))
@@ -114,10 +153,8 @@ class MealViewModel @Inject constructor(
             if (localJson != null && startMillis != -1L) {
                 displayJsonPlan(localJson, startMillis)
             } else {
-                // CLOUD RESTORE FALLBACK
                 val user = userRepository.getInitialUser()
                 val cloudJson = user?.mealPlanJson
-                
                 if (!cloudJson.isNullOrBlank()) {
                     displayJsonPlan(cloudJson, System.currentTimeMillis())
                 } else {
@@ -132,6 +169,18 @@ class MealViewModel @Inject constructor(
         try {
             val type = object : TypeToken<List<List<Meal>>>() {}.type
             val weeklyPlan: List<List<Meal>> = gson.fromJson(json, type)
+            
+            // Resolve imageResIds for the plan
+            val resources = application.resources
+            val packageName = application.packageName
+            weeklyPlan.forEach { daily ->
+                daily.forEach { meal ->
+                    if (meal.imageResId == 0) {
+                        meal.imageResId = resources.getIdentifier(meal.imageName, "drawable", packageName)
+                    }
+                }
+            }
+            
             _mealPlan.postValue(weeklyPlan)
 
             val startDate = Instant.ofEpochMilli(startMillis).atZone(ZoneId.systemDefault()).toLocalDate()

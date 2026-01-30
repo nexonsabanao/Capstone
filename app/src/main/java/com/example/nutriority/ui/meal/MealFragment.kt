@@ -31,10 +31,15 @@ class MealFragment : Fragment() {
     private val navigationViewModel: NavigationViewModel by activityViewModels()
 
     private val mealAdapter by lazy {
-        GeneratedMealPlanAdapter { meal ->
-            val json = Gson().toJson(meal)
-            navigationViewModel.navigateToMealDetail(json)
-        }
+        GeneratedMealPlanAdapter(
+            onMealClick = { meal ->
+                val json = Gson().toJson(meal)
+                navigationViewModel.navigateToMealDetail(json)
+            },
+            onSwapClick = { mealToReplace, dayIndex ->
+                showSwapBottomSheet(mealToReplace, dayIndex)
+            }
+        )
     }
 
     override fun onCreateView(
@@ -52,12 +57,10 @@ class MealFragment : Fragment() {
         updateDateViews()
         setupClickListeners()
         
-        // IMMEDIATE CHECK: If data is already in ViewModel, show it now
         val currentPlan = mealViewModel.mealPlan.value
         if (!currentPlan.isNullOrEmpty() && currentPlan.any { it.isNotEmpty() }) {
             updateMealPlanUI(currentPlan)
         } else {
-            // Ensure generate screen is visible if no plan
             binding.initialView.isVisible = true
             binding.generatedMealPlanRecyclerView.isVisible = false
         }
@@ -82,18 +85,29 @@ class MealFragment : Fragment() {
         }
     }
 
+    private fun showSwapBottomSheet(mealToReplace: Meal, dayIndex: Int) {
+        val options = mealViewModel.getSwapOptions(mealToReplace)
+        val bottomSheet = MealSwapBottomSheetFragment(
+            mealType = mealToReplace.time,
+            options = options,
+            onMealSwapped = { newMeal ->
+                mealViewModel.swapMeal(dayIndex, mealToReplace, newMeal)
+            }
+        )
+        bottomSheet.show(childFragmentManager, "MealSwapBottomSheet")
+    }
+
     private fun updateMealPlanUI(weeklyPlan: List<List<Meal>>) {
         val hasPlan = weeklyPlan.isNotEmpty() && weeklyPlan.any { it.isNotEmpty() }
         
-        // FIX: Toggle visibility immediately based on plan presence
         binding.initialView.isVisible = !hasPlan
         binding.generatedMealPlanRecyclerView.isVisible = hasPlan
 
         if (hasPlan) {
             val mealListItems = weeklyPlan.mapIndexed { index, dailyMeals ->
                 val dayLabel = mealViewModel.getDayLabel(index)
-                listOf(MealListItem.HeaderItem(dayLabel)) + dailyMeals.map { meal ->
-                    MealListItem.MealItem(meal)
+                listOf(MealListItem.HeaderItem(dayLabel, index)) + dailyMeals.map { meal ->
+                    MealListItem.MealItem(meal, index)
                 }
             }.flatten()
             mealAdapter.submitList(mealListItems)
@@ -131,6 +145,11 @@ class MealFragment : Fragment() {
                         binding.doneButton.isVisible = hasPlan && isExpired
                         binding.nextButton.isVisible = !hasPlan || isExpired
                     }
+                }
+
+                launch {
+                    // Critical: Keep allMeals observed to ensure cached data is always fresh
+                    mealViewModel.allMeals.observe(viewLifecycleOwner) { }
                 }
             }
         }

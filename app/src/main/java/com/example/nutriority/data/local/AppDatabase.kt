@@ -17,6 +17,7 @@ import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.data.model.WorkoutSessionLog
+import com.example.nutriority.data.model.DailyMealLog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
@@ -25,8 +26,8 @@ import kotlinx.coroutines.launch
 import java.io.BufferedReader
 
 @Database(
-    entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class, WorkoutExercise::class, WorkoutSessionLog::class],
-    version = 33,
+    entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class, WorkoutExercise::class, WorkoutSessionLog::class, DailyMealLog::class],
+    version = 34,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -36,6 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun workoutDao(): WorkoutDao
     abstract fun articlesDao(): ArticlesDao
     abstract fun workoutLogDao(): WorkoutLogDao
+    abstract fun dailyMealLogDao(): DailyMealLogDao
 
     fun clearAllData() {
         this.clearAllTables()
@@ -69,8 +71,6 @@ abstract class AppDatabase : RoomDatabase() {
                 super.onOpen(db)
                 INSTANCE?.let { database ->
                     scope.launch(Dispatchers.IO) {
-                        // FIX: Check if database is empty every time it opens. 
-                        // If it was wiped by Logout/Delete, we MUST reload the library.
                         if (database.workoutDao().getWorkoutCount() == 0) {
                             Log.d("AppDatabase", "Database is empty. Re-populating library...")
                             database.withTransaction {

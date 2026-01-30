@@ -126,9 +126,9 @@
                             android:paddingHorizontal="0dp"
                             android:minWidth="0dp"
                             android:text="cm"
-                            android:textColor="@color/toggle_button_text_color"
                             android:textSize="12sp"
-                            app:backgroundTint="@color/toggle_button_background_color" />
+                            app:backgroundTint="@color/toggle_button_background_color"
+                            android:textColor="@color/toggle_button_text_color"/>
 
                         <Button
                             android:id="@+id/btnFt"

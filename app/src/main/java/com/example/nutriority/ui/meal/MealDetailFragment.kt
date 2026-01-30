@@ -5,14 +5,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.nutriority.R
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.databinding.FragmentMealDetailBinding
 import com.example.nutriority.ui.NavigationViewModel
+import com.example.nutriority.ui.profile.ProfileViewModel
 import com.google.android.material.appbar.AppBarLayout
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +29,7 @@ class MealDetailFragment : Fragment() {
     private val binding get() = _binding!!
     
     private val navigationViewModel: NavigationViewModel by activityViewModels()
+    private val profileViewModel: ProfileViewModel by activityViewModels()
     private var currentMeal: Meal? = null
 
     override fun onCreateView(
@@ -74,7 +78,26 @@ class MealDetailFragment : Fragment() {
         })
 
         setupToggleGroup()
+        setupLogButton()
         observeMealData()
+    }
+
+    private fun setupLogButton() {
+        binding.btnLogMeal.setOnClickListener {
+            currentMeal?.let { meal ->
+                profileViewModel.logMeal(meal)
+                
+                // Show indicator that it was logged
+                binding.btnLogMeal.apply {
+                    text = "LOGGED"
+                    isEnabled = false
+                    alpha = 0.7f
+                    setIconResource(R.drawable.ic_check_circle)
+                }
+                
+                Toast.makeText(requireContext(), "${meal.name} added to profile", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun observeMealData() {
@@ -84,6 +107,15 @@ class MealDetailFragment : Fragment() {
                     if (json != null) {
                         currentMeal = Gson().fromJson(json, Meal::class.java)
                         displayMealDetails()
+                        
+                        // Reset log button when new meal is loaded
+                        binding.btnLogMeal.apply {
+                            text = "LOG MEAL"
+                            isEnabled = true
+                            alpha = 1.0f
+                            setIconResource(R.drawable.ic_fire)
+                        }
+                        
                         // Scroll to top when new data loaded
                         binding.nestedScrollView.scrollTo(0, 0)
                         binding.appBarLayout.setExpanded(true)
@@ -100,11 +132,16 @@ class MealDetailFragment : Fragment() {
             binding.mealCalories.text = "${meal.calories} kcal"
             binding.mealTime.text = meal.time ?: "30 min"
             
-            if (meal.imageResId != 0) {
-                binding.mealImage.setImageResource(meal.imageResId)
+            val context = requireContext()
+            val packageName = context.packageName
+            val resId = context.resources.getIdentifier(meal.imageName, "drawable", packageName)
+            
+            if (resId != 0) {
+                binding.mealImage.setImageResource(resId)
+            } else {
+                binding.mealImage.setImageResource(R.drawable.img_balanced_diet)
             }
 
-            // Fix: Use checkedButtonId from the toggle group instead of isChecked on the button
             if (binding.toggleGroup.checkedButtonId == binding.btnIngredients.id) {
                 showIngredients()
             } else {
@@ -126,12 +163,12 @@ class MealDetailFragment : Fragment() {
 
     private fun showInstructions() {
         binding.sectionTitle.text = "Instructions"
-        // Update content_recycler_view with instructions
+        // Update content_recycler_view with instructions if applicable
     }
 
     private fun showIngredients() {
         binding.sectionTitle.text = "Ingredients"
-        // Update content_recycler_view with ingredients
+        // Update content_recycler_view with ingredients if applicable
     }
 
     override fun onDestroyView() {

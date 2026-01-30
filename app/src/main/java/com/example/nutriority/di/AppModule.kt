@@ -7,6 +7,7 @@ import androidx.room.Room
 import com.example.nutriority.data.UserDatabase
 import com.example.nutriority.data.local.AppDatabase
 import com.example.nutriority.data.local.ArticlesDao
+import com.example.nutriority.data.local.DailyMealLogDao
 import com.example.nutriority.data.local.MealDao
 import com.example.nutriority.data.local.UserDao
 import com.example.nutriority.data.local.WorkoutDao
@@ -71,8 +72,17 @@ object AppModule {
     }
 
     @Provides
-    fun provideMealRepository(mealDao: MealDao, application: Application): MealRepository {
-        return MealRepository(mealDao, application)
+    fun provideDailyMealLogDao(database: AppDatabase): DailyMealLogDao {
+        return database.dailyMealLogDao()
+    }
+
+    @Provides
+    fun provideMealRepository(
+        mealDao: MealDao, 
+        dailyMealLogDao: DailyMealLogDao, 
+        application: Application
+    ): MealRepository {
+        return MealRepository(mealDao, dailyMealLogDao, application)
     }
 
     @Provides

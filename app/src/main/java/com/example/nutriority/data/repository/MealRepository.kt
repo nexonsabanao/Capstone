@@ -4,6 +4,8 @@ import android.app.Application
 import android.util.Log
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.data.local.MealDao
+import com.example.nutriority.data.local.DailyMealLogDao
+import com.example.nutriority.data.model.DailyMealLog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
@@ -13,8 +15,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import java.io.BufferedReader
+import java.util.Calendar
 
-class MealRepository(private val mealDao: MealDao, private val application: Application) {
+class MealRepository(
+    private val mealDao: MealDao, 
+    private val dailyMealLogDao: DailyMealLogDao,
+    private val application: Application
+) {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -37,9 +44,6 @@ class MealRepository(private val mealDao: MealDao, private val application: Appl
         return mealDao.getMealById(mealId)
     }
 
-    /**
-     * MANDATORY RESTORE: Loads official meals from assets if database is empty.
-     */
     suspend fun ensureLibraryIsLoaded() {
         if (mealDao.getAllMeals().first().isNotEmpty()) return
         
@@ -53,6 +57,48 @@ class MealRepository(private val mealDao: MealDao, private val application: Appl
             Log.e("Restore", "Failed to load meal library", e)
         }
     }
+
+    // --- DAILY LOGGING ---
+
+    suspend fun logMeal(meal: Meal) {
+        val log = DailyMealLog(
+            mealId = meal.id,
+            name = meal.name,
+            calories = meal.calories,
+            protein = (meal.calories * 0.15 / 4).toInt(), 
+            carbs = (meal.calories * 0.50 / 4).toInt(),
+            fats = (meal.calories * 0.35 / 9).toInt(),
+            time = meal.time ?: "Snack",
+            date = System.currentTimeMillis(),
+            imageName = meal.imageName
+        )
+        dailyMealLogDao.insertLog(log)
+        
+        // Sync to cloud
+        auth.currentUser?.uid?.let { uid ->
+            db.collection("users").document(uid).collection("daily_meal_logs").add(log)
+        }
+    }
+
+    fun getLogsForToday(): Flow<List<DailyMealLog>> {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val start = calendar.timeInMillis
+        
+        calendar.add(Calendar.DAY_OF_MONTH, 1)
+        val end = calendar.timeInMillis
+        
+        return dailyMealLogDao.getLogsForDay(start, end)
+    }
+
+    suspend fun deleteMealLog(logId: Int) {
+        dailyMealLogDao.deleteLog(logId)
+    }
+
+    // --- CRUD ---
 
     suspend fun insert(meal: Meal) {
         mealDao.insertMeal(meal)

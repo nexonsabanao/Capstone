@@ -1,0 +1,74 @@
+package com.example.nutriority.ui.profile
+
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.nutriority.R
+import com.example.nutriority.data.model.DailyMealLog
+
+class LoggedFoodAdapter(
+    private val onDeleteClick: (DailyMealLog) -> Unit
+) : ListAdapter<DailyMealLog, LoggedFoodAdapter.ViewHolder>(DiffCallback()) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_logged_food, parent, false)
+        return ViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val log = getItem(position)
+        holder.bind(log, onDeleteClick)
+    }
+
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val mealTime: TextView = view.findViewById(R.id.tv_meal_time_label)
+        private val foodImage: ImageView = view.findViewById(R.id.iv_food_image)
+        private val foodName: TextView = view.findViewById(R.id.tv_food_name)
+        private val protein: TextView = view.findViewById(R.id.tv_protein)
+        private val fats: TextView = view.findViewById(R.id.tv_fats)
+        private val carbs: TextView = view.findViewById(R.id.tv_carbs)
+        private val calories: TextView = view.findViewById(R.id.tv_calories)
+        private val deleteBtn: ImageView = view.findViewById(R.id.btn_delete)
+
+        fun bind(log: DailyMealLog, onDelete: (DailyMealLog) -> Unit) {
+            foodName.text = log.name
+            protein.text = "${log.protein} g"
+            fats.text = "${log.fats} g"
+            carbs.text = "${log.carbs} g"
+            calories.text = "${log.calories} kcal"
+            mealTime.text = log.time
+
+            val context = itemView.context
+            val packageName = context.packageName
+            val resId = context.resources.getIdentifier(log.imageName, "drawable", packageName)
+            
+            Glide.with(context)
+                .load(if (resId != 0) resId else R.drawable.img_balanced_diet)
+                .into(foodImage)
+
+            val timeColor = when (log.time.lowercase()) {
+                "breakfast" -> Color.parseColor("#EBB861")
+                "lunch" -> Color.parseColor("#F2994A")
+                "dinner" -> Color.parseColor("#416491")
+                else -> Color.parseColor("#888888")
+            }
+            val drawable = mealTime.background.mutate() as? GradientDrawable
+            drawable?.setColor(timeColor)
+
+            deleteBtn.setOnClickListener { onDelete(log) }
+        }
+    }
+
+    class DiffCallback : DiffUtil.ItemCallback<DailyMealLog>() {
+        override fun areItemsTheSame(oldItem: DailyMealLog, newItem: DailyMealLog) = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: DailyMealLog, newItem: DailyMealLog) = oldItem == newItem
+    }
+}

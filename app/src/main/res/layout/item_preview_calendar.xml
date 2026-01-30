@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
+    android:layout_marginTop="8dp"
     app:cardBackgroundColor="@android:color/white"
     app:cardCornerRadius="24dp"
     app:cardElevation="2dp"
@@ -16,62 +16,85 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:padding="20dp">
+        android:padding="24dp">
 
         <TextView
             android:id="@+id/text_history_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
             android:textStyle="bold"
             android:text="History"
             android:textColor="#212121"
             android:textSize="20sp"
+            app:layout_constraintEnd_toStartOf="@+id/layout_nav_month"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <LinearLayout
+            android:id="@+id/layout_nav_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/text_history_title"
+            app:layout_constraintEnd_toStartOf="@+id/btn_show_records"
+            app:layout_constraintTop_toTopOf="@+id/text_history_title">
+
+            <ImageView
+                android:id="@+id/btn_prev_month"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="6dp"
+                android:src="@drawable/ic_back_boxed"
+                app:tint="@color/green" />
+
+            <ImageView
+                android:id="@+id/btn_next_month"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:rotation="180"
+                android:padding="6dp"
+                android:src="@drawable/ic_back_boxed"
+                app:tint="@color/green" />
+        </LinearLayout>
+
         <TextView
+            android:id="@+id/btn_show_records"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
             android:textStyle="bold"
-            android:text="RECORDS"
+            android:text="CALENDAR"
             android:textColor="@color/green"
             android:textSize="12sp"
+            android:padding="8dp"
             android:letterSpacing="0.05"
-            app:layout_constraintBaseline_toBaselineOf="@+id/text_history_title"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintBottom_toBottomOf="@+id/text_history_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/text_history_title" />
 
         <TableLayout
             android:id="@+id/calendar_table"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:stretchColumns="*"
             app:layout_constraintTop_toBottomOf="@+id/text_history_title">
 
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="12dp">
 
-                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="S" />
-                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="M" />
-                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="T" />
-                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="W" />
-                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="T" />
-                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="F" />
-                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="S" />
-            </TableRow>
-
-            <TableRow android:layout_width="match_parent" android:layout_height="wrap_content">
-                <TextView style="@style/CalendarDate.Faded" android:fontFamily="sans-serif" android:text="30" />
-                <TextView style="@style/CalendarDate" android:fontFamily="sans-serif" android:text="1" />
-                <TextView style="@style/CalendarDate" android:fontFamily="sans-serif" android:text="2" />
-                <TextView style="@style/CalendarDate.Selected" android:fontFamily="sans-serif" android:text="3" />
-                <TextView style="@style/CalendarDate" android:fontFamily="sans-serif" android:text="4" />
-                <TextView style="@style/CalendarDate" android:fontFamily="sans-serif" android:text="5" />
-                <TextView style="@style/CalendarDate.Faded" android:fontFamily="sans-serif" android:text="6" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="S" android:textSize="11sp" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="M" android:textSize="11sp" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="T" android:textSize="11sp" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="W" android:textSize="11sp" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="T" android:textSize="11sp" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="F" android:textSize="11sp" />
+                <TextView style="@style/DayLabel" android:fontFamily="sans-serif-medium" android:text="S" android:textSize="11sp" />
             </TableRow>
         </TableLayout>
 
@@ -79,7 +102,7 @@
             android:id="@+id/divider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:background="#F5F5F5"
             app:layout_constraintTop_toBottomOf="@id/calendar_table" />
 
@@ -87,11 +110,11 @@
             android:id="@+id/text_day_streak_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:fontFamily="sans-serif-medium"
             android:text="STREAK"
             android:textColor="#757575"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:letterSpacing="0.05"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/divider" />
@@ -99,15 +122,15 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/text_day_streak_label">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:importantForAccessibility="no"
                 android:src="@drawable/ic_fire"
                 app:tint="@color/green" />
@@ -121,7 +144,7 @@
                 android:textStyle="bold"
                 android:text="0"
                 android:textColor="#212121"
-                android:textSize="18sp" />
+                android:textSize="22sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -130,7 +153,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:text="days"
                 android:textColor="#757575"
-                android:textSize="14sp" />
+                android:textSize="12sp" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
