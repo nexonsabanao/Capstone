@@ -61,14 +61,16 @@ class SeventhScreen : Fragment() {
         
         startDoublePulseAnimation()
 
+        // Corrected index check for SeventhScreen (position 10 in the new 11-page flow)
         val parentVp = parentFragment?.view?.findViewById<ViewPager2>(R.id.viewPager)
-        if (parentVp?.currentItem == 8) {
+        if (parentVp?.currentItem == 10) {
             startRecapIfNeeded()
         }
 
         parentFragmentManager.setFragmentResultListener("pageSelected", this) { _, bundle ->
             val position = bundle.getInt("position", -1)
-            if (position == 8) startRecapIfNeeded()
+            // Position 10 is the SeventhScreen in the updated ViewPagerAdapter
+            if (position == 10) startRecapIfNeeded()
         }
     }
 

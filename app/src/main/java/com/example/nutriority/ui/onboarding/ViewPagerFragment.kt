@@ -68,9 +68,6 @@ class ViewPagerFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        // Notify child fragments which page is selected. We use a fragment-result so that
-        // children can decide whether to start expensive work only when they become visible.
-        // Register the callback once and keep a reference so it can be removed onDestroyView.
         if (pageChangeCallback == null) {
             pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
@@ -80,14 +77,12 @@ class ViewPagerFragment : Fragment() {
                 }
 
                 override fun onPageScrollStateChanged(state: Int) {
-                    // Temporarily enable hardware acceleration when dragging/settling
                     val layerType = if (state == ViewPager2.SCROLL_STATE_IDLE) {
                         View.LAYER_TYPE_NONE
                     } else {
                         View.LAYER_TYPE_HARDWARE
                     }
 
-                    // ViewPager2 has one child, a RecyclerView. We want to accelerate its drawing cache.
                     if (binding.viewPager.childCount > 0) {
                         binding.viewPager.getChildAt(0).setLayerType(layerType, null)
                     }
@@ -104,6 +99,27 @@ class ViewPagerFragment : Fragment() {
 
         childFragmentManager.setFragmentResultListener("navigationRequestPrevious", this) { _, _ ->
             navigateToPreviousScreen()
+        }
+
+        // Jump directly to Login (Position 0)
+        childFragmentManager.setFragmentResultListener("navigationRequestLogin", this) { _, _ ->
+            if (canNavigate()) {
+                binding.viewPager.setCurrentItem(0, false)
+            }
+        }
+
+        // Jump directly to ForgotPassword (Position 2)
+        childFragmentManager.setFragmentResultListener("navigationRequestForgotPassword", this) { _, _ ->
+            if (canNavigate()) {
+                binding.viewPager.setCurrentItem(2, false)
+            }
+        }
+
+        // Jump directly to Welcome (Position 3), skipping SignUp and ForgotPassword
+        childFragmentManager.setFragmentResultListener("navigationRequestWelcome", this) { _, _ ->
+            if (canNavigate()) {
+                binding.viewPager.setCurrentItem(3, false)
+            }
         }
     }
 
