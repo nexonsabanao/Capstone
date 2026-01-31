@@ -28,7 +28,20 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-dark); display: flex; min-height: 100vh; overflow-x: hidden; }
 
         /* Sidebar Navigation */
-        .sidebar { width: var(--sidebar-width); background: var(--secondary); color: white; position: fixed; height: 100vh; padding: 35px 20px; display: flex; flex-direction: column; z-index: 1000; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        .sidebar { 
+            width: var(--sidebar-width); 
+            background: var(--secondary); 
+            color: white; 
+            position: fixed; 
+            height: 100vh; 
+            padding: 35px 20px; 
+            display: flex; 
+            flex-direction: column; 
+            z-index: 1000; 
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1); 
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
         .sidebar-brand { display: flex; align-items: center; gap: 15px; margin-bottom: 45px; padding: 0 10px; }
         .sidebar-brand i { color: var(--primary); font-size: 28px; }
         .sidebar-brand h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
@@ -41,10 +54,21 @@
         .nav-item.active { background: var(--primary); color: white; box-shadow: 0 10px 15px -3px rgba(0, 167, 139, 0.4); transform: translateX(5px); }
 
         /* Content Area */
-        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; transition: margin-left 0.3s ease; width: calc(100% - var(--sidebar-width)); }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; gap: 20px; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-toggle { display: none; background: var(--white); border: none; width: 44px; height: 44px; border-radius: 12px; cursor: pointer; color: var(--secondary); font-size: 20px; box-shadow: var(--shadow); align-items: center; justify-content: center; }
+        
         .welcome-msg h1 { font-size: 28px; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
         .welcome-msg p { color: var(--text-gray); font-weight: 500; }
+
+        /* Connection Indicator */
+        .connection-status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; background: var(--white); box-shadow: var(--shadow); margin-left: 10px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; position: relative; }
+        .status-dot.connected { background: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+        .status-dot.connected::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
 
         /* Statistics Cards */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 40px; }
@@ -62,17 +86,19 @@
 
         /* Table Design */
         .data-card { background: var(--white); border-radius: 24px; padding: 32px; box-shadow: var(--shadow); border: 1px solid #f1f5f9; }
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; gap: 15px; flex-wrap: wrap; }
         .table-header h2 { font-size: 20px; font-weight: 800; }
 
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .table-wrapper { overflow-x: auto; margin: 0 -32px; padding: 0 32px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 800px; }
         th { text-align: left; padding: 16px; background: #f8fafc; color: var(--text-gray); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e2e8f0; }
         td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; font-weight: 500; vertical-align: middle; }
         tr:hover td { background: #f8fafc; }
 
         .avatar { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; background: #edf2f7; }
-        .progress-pill { padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+        .badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge-primary { background: var(--primary-soft); color: var(--primary); }
+        .cat-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; white-space: nowrap; }
 
         /* Modals & Inputs */
         .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
@@ -83,7 +109,7 @@
         .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft); }
 
         /* Buttons */
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; font-size: 14px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; font-size: 14px; white-space: nowrap; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 167, 139, 0.4); }
         .btn-danger { background: #fef2f2; color: var(--danger); }
@@ -95,11 +121,79 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .console { background: #0f172a; color: #10b981; padding: 24px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; max-height: 300px; overflow-y: auto; margin-top: 20px; border: 1px solid #334155; }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; width: 100%; padding: 25px; }
+            .menu-toggle { display: flex; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 999; }
+            .sidebar-overlay.show { display: block; }
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; align-items: flex-start; }
+            .btn-primary#timeDisplay { width: 100%; order: -1; margin-bottom: 10px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .modal-content { padding: 25px; border-radius: 20px; }
+            .welcome-msg h1 { font-size: 24px; }
+            .stat-value { font-size: 26px; }
+            .input-group { margin-bottom: 16px; }
+            .header-left { width: 100%; justify-content: space-between; }
+
+            /* Modern Mobile Table (Card Layout) */
+            .table-wrapper { margin: 0; padding: 0; overflow: visible; }
+            table { min-width: 100%; border: none; }
+            thead { display: none; }
+            tbody { display: block; width: 100%; }
+            tr { 
+                display: block; 
+                width: 100%; 
+                background: var(--white); 
+                border: 1px solid #e2e8f0; 
+                border-radius: 20px; 
+                padding: 20px; 
+                margin-bottom: 20px; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            }
+            td { 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                padding: 10px 0; 
+                border-bottom: 1px solid #f1f5f9; 
+                font-size: 13px;
+                text-align: right;
+            }
+            td:last-child { border-bottom: none; padding-top: 15px; justify-content: center; gap: 10px; }
+            td::before { 
+                content: attr(data-label); 
+                font-weight: 700; 
+                color: var(--text-gray); 
+                text-transform: uppercase; 
+                font-size: 11px; 
+                text-align: left;
+            }
+            /* Visual/Img Handling */
+            td:first-child { justify-content: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 10px; }
+            td:first-child::before { display: none; }
+            td .avatar { width: 60px; height: 60px; border-radius: 15px; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .data-card { padding: 20px; }
+            .stat-card { padding: 20px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
     <div class="sidebar-brand">
         <i class="fas fa-microchip"></i>
         <h2>Nutriority</h2>
@@ -107,28 +201,39 @@
 
     <div class="nav-section">
         <div class="nav-label">Dashboard</div>
-        <div class="nav-item active" onclick="switchTab('overview')"><i class="fas fa-chart-pie"></i> Overview</div>
-        <div class="nav-item" onclick="switchTab('students')"><i class="fas fa-users-viewfinder"></i> Students</div>
+        <div class="nav-item active" onclick="switchTab('overview'); toggleSidebar(false)"><i class="fas fa-chart-pie"></i> Overview</div>
+        <div class="nav-item" onclick="switchTab('students'); toggleSidebar(false)"><i class="fas fa-users-viewfinder"></i> Students</div>
     </div>
 
     <div class="nav-section">
         <div class="nav-label">Data Management</div>
-        <div class="nav-item" onclick="switchTab('exercises')"><i class="fas fa-dumbbell"></i> Exercises</div>
-        <div class="nav-item" onclick="switchTab('meals')"><i class="fas fa-utensils"></i> Meal Library</div>
-        <div class="nav-item" onclick="switchTab('articleLib')"><i class="fas fa-newspaper"></i> Article Hub</div>
+        <div class="nav-item" onclick="switchTab('exercises'); toggleSidebar(false)"><i class="fas fa-dumbbell"></i> Exercises</div>
+        <div class="nav-item" onclick="switchTab('meals'); toggleSidebar(false)"><i class="fas fa-utensils"></i> Meal Library</div>
+        <div class="nav-item" onclick="switchTab('articleLib'); toggleSidebar(false)"><i class="fas fa-newspaper"></i> Article Hub</div>
     </div>
 
     <div class="nav-section">
         <div class="nav-label">Automation</div>
-        <div class="nav-item" onclick="switchTab('syncEng')"><i class="fas fa-bolt-lightning"></i> Sync Center</div>
+        <div class="nav-item" onclick="switchTab('syncEng'); toggleSidebar(false)"><i class="fas fa-bolt-lightning"></i> Sync Center</div>
     </div>
 </div>
 
 <div class="main-content">
     <header>
-        <div class="welcome-msg">
-            <h1 id="tabTitle">Overview</h1>
-            <p id="tabSubtitle">App analytics and student tracking</p>
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="welcome-msg">
+                <div style="display: flex; align-items: center;">
+                    <h1 id="tabTitle">Overview</h1>
+                    <div class="connection-status" id="dbStatus">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="statusText">Connecting...</span>
+                    </div>
+                </div>
+                <p id="tabSubtitle">App analytics and student tracking</p>
+            </div>
         </div>
         <div class="btn btn-primary" id="timeDisplay"><i class="far fa-clock"></i> 00:00:00</div>
     </header>
@@ -199,7 +304,7 @@
             </div>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>Visual</th><th>Title</th><th>Target</th><th>Diff</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Visual</th><th>Title</th><th>Target (Primary/Sec)</th><th>Category</th><th>Diff</th><th>Actions</th></tr></thead>
                     <tbody id="exerciseBody"></tbody>
                 </table>
             </div>
@@ -215,7 +320,7 @@
             </div>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>Img</th><th>Recipe Name</th><th>Dietary Type</th><th>Macros (P/C/F)</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Img</th><th>Recipe Name</th><th>Time & Duration</th><th>Calories</th><th>Dietary Type</th><th>Macros (P/C/F)</th><th>Actions</th></tr></thead>
                     <tbody id="mealBody"></tbody>
                 </table>
             </div>
@@ -231,7 +336,7 @@
             </div>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>Preview</th><th>Headline</th><th>Category</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Preview</th><th>Headline</th><th>Author</th><th>Category</th><th>Action</th></tr></thead>
                     <tbody id="articleBody"></tbody>
                 </table>
             </div>
@@ -242,7 +347,7 @@
     <div id="syncEng" class="tab-content">
         <div class="data-card">
             <div class="card-header"><h2>Universal Sync HUB</h2></div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:25px; margin-top: 20px;">
                 <div>
                     <label style="font-size:12px; font-weight:700; color:var(--text-gray);">THENEWSAPI TOKEN</label>
                     <input type="password" id="newsToken" style="width:100%; padding:12px; border-radius:12px; border:2px solid #eee; margin-top:8px;">
@@ -266,11 +371,15 @@
         <input type="hidden" id="editExId">
         <div class="input-group"><label>Title</label><input type="text" id="exName" required></div>
         <div class="input-group"><label>GIF Link</label><input type="text" id="exGif" required></div>
-        <div class="input-group"><label>Primary Muscle</label><input type="text" id="exTarget" required></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="input-group"><label>Primary Muscle</label><input type="text" id="exTarget" required></div>
+            <div class="input-group"><label>Secondary Muscle</label><input type="text" id="exSecondary"></div>
+        </div>
+        <div class="input-group"><label>Category</label><select id="exCategory"><option>warmup</option><option>main exercise</option><option>cooldown</option></select></div>
         <div class="input-group"><label>Level</label><select id="exDiff"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
         <div class="input-group"><label>Execution Steps</label><textarea id="exSteps" style="height:120px;"></textarea></div>
         <div style="display:flex; gap:15px; justify-content:flex-end;">
-            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
     </form>
@@ -282,8 +391,13 @@
         <input type="hidden" id="editMealId">
         <div class="input-group"><label>Recipe Name</label><input type="text" id="mName" required></div>
         <div class="input-group"><label>Image URL</label><input type="text" id="mImg" required></div>
-        <div class="input-group"><label>Diet Preference</label><select id="mDiet"><option>Balanced</option><option>Vegetarian</option><option>Low Carb</option></select></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;" class="form-row-3">
+            <div class="input-group"><label>Prep Duration (min)</label><input type="number" id="mDuration" required></div>
+            <div class="input-group"><label>Meal Time</label><select id="mTime"><option>Breakfast</option><option>Lunch</option><option>Dinner</option></select></div>
+            <div class="input-group"><label>Diet Preference</label><select id="mDiet"><option>Balanced</option><option>Vegetarian</option><option>Low Carb</option></select></div>
+        </div>
+        <div class="input-group"><label>Total Calories</label><input type="number" id="mCalories" required></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;" class="form-row-3">
             <div class="input-group"><label>Protein (g)</label><input type="number" id="mP"></div>
             <div class="input-group"><label>Carbs (g)</label><input type="number" id="mC"></div>
             <div class="input-group"><label>Fats (g)</label><input type="number" id="mF"></div>
@@ -291,7 +405,7 @@
         <div class="input-group"><label>Ingredients (Comma separated)</label><textarea id="mIng" style="height:80px;"></textarea></div>
         <div class="input-group"><label>Directions</label><textarea id="mInst" style="height:120px;"></textarea></div>
         <div style="display:flex; gap:15px; justify-content:flex-end;">
-            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
             <button type="submit" class="btn btn-primary">Save Recipe</button>
         </div>
     </form>
@@ -302,11 +416,12 @@
     <form id="artForm">
         <input type="hidden" id="editArtId">
         <div class="input-group"><label>Headline</label><input type="text" id="aTitle" required></div>
+        <div class="input-group"><label>Author</label><input type="text" id="aAuthor" required></div>
         <div class="input-group"><label>Cover Image URL</label><input type="text" id="aImg" required></div>
         <div class="input-group"><label>Category</label><input type="text" id="aCat" value="Wellness"></div>
         <div class="input-group"><label>Full Content</label><textarea id="aContent" style="height:200px;"></textarea></div>
         <div style="display:flex; gap:15px; justify-content:flex-end;">
-            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
             <button type="submit" class="btn btn-primary">Publish Article</button>
         </div>
     </form>
@@ -328,6 +443,21 @@
         c.scrollTop = c.scrollHeight;
     };
 
+    // Sidebar toggle for mobile
+    window.toggleSidebar = (force) => {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const isShowing = force !== undefined ? !force : sidebar.classList.contains('show');
+        
+        if (!isShowing) {
+            sidebar.classList.add('show');
+            overlay.classList.add('show');
+        } else {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+    };
+
     // Clock display
     setInterval(() => { document.getElementById('timeDisplay').innerHTML = `<i class="far fa-clock"></i> ${new Date().toLocaleTimeString()}`; }, 1000);
 
@@ -338,6 +468,9 @@
 
         const mapping = { overview: 'Overview', students: 'Students', exercises: 'Exercises', meals: 'Meal Library', articleLib: 'Article Hub', syncEng: 'Sync Center' };
         Array.from(document.querySelectorAll('.nav-item')).find(x => x.textContent.includes(mapping[t]))?.classList.add('active');
+        
+        document.getElementById('tabTitle').innerText = mapping[t];
+        document.getElementById('tabSubtitle').innerText = t === 'overview' ? 'App analytics and student tracking' : `Managing ${mapping[t]} records`;
 
         if(t==='students') loadStudents();
         if(t==='exercises') loadExercises();
@@ -347,14 +480,24 @@
     };
 
     async function updateStats() {
-        const u = await getCountFromServer(collection(db,"users")), e = await getCountFromServer(collection(db,"exercises")), m = await getCountFromServer(collection(db,"meals")), a = await getCountFromServer(collection(db,"articles"));
-        document.getElementById("statStudents").innerText = u.data().count;
-        document.getElementById("statExercises").innerText = e.data().count;
-        document.getElementById("statMeals").innerText = m.data().count;
-        document.getElementById("statArticles").innerText = a.data().count;
+        try {
+            const u = await getCountFromServer(collection(db,"users")), e = await getCountFromServer(collection(db,"exercises")), m = await getCountFromServer(collection(db,"meals")), a = await getCountFromServer(collection(db,"articles"));
+            document.getElementById("statStudents").innerText = u.data().count;
+            document.getElementById("statExercises").innerText = e.data().count;
+            document.getElementById("statMeals").innerText = m.data().count;
+            document.getElementById("statArticles").innerText = a.data().count;
 
-        const us = await getDocs(collection(db,"users")), ms = await getDocs(collection(db,"meals")), as = await getDocs(collection(db,"articles"));
-        renderCharts(us.docs.map(d=>d.data()), ms.docs.map(d=>d.data()), as.docs.map(d=>d.data()));
+            const us = await getDocs(collection(db,"users")), ms = await getDocs(collection(db,"meals")), as = await getDocs(collection(db,"articles"));
+            renderCharts(us.docs.map(d=>d.data()), ms.docs.map(d=>d.data()), as.docs.map(d=>d.data()));
+            
+            // Connection indicator update
+            document.getElementById('statusDot').classList.add('connected');
+            document.getElementById('statusText').innerText = 'Connected';
+        } catch (error) {
+            console.error("Connection failed: ", error);
+            document.getElementById('statusDot').classList.remove('connected');
+            document.getElementById('statusText').innerText = 'Disconnected';
+        }
     }
 
     function renderCharts(users, meals, articles) {
@@ -365,7 +508,7 @@
 
         // 2. Weight Distribution (Bar)
         const goals = {}; users.forEach(u=>{ if(!goals[u.goal]) goals[u.goal]=[]; goals[u.goal].push(u.weightKg); });
-        charts.weight = new Chart(document.getElementById('weightGoalChart'), { type:'bar', data:{ labels:Object.keys(goals), datasets:[{label:'Avg Weight (kg)', data:Object.values(goals).map(arr=>arr.reduce((a,b)=>a+b,0)/arr.length), backgroundColor:['#00A78B','#1e293b','#f97316']}] } });
+        charts.weight = new Chart(document.getElementById('weightGoalChart'), { type:'bar', data:{ labels:Object.keys(goals), datasets:[{label:'Avg Weight (kg)', data:Object.values(goals).length > 0 ? Object.values(goals).map(arr=>arr.reduce((a,b)=>a+b,0)/arr.length) : [], backgroundColor:['#00A78B','#1e293b','#f97316']}] } });
 
         // 3. Diet Types (Pie)
         const diets = {}; meals.forEach(m=>{ diets[m.preferredDiet||'Balanced'] = (diets[m.preferredDiet||'Balanced']||0)+1; });
@@ -378,22 +521,72 @@
 
     async function loadStudents() {
         const b = document.getElementById("studentBody"); const s = await getDocs(collection(db,"users")); b.innerHTML = "";
-        s.forEach(d => { const u=d.data(); b.innerHTML += `<tr><td><div style="font-weight:700">${u.email}</div><div style="font-size:11px;color:#64748b">ID: ${d.id.substring(0,8)}</div></td><td><span class="badge" style="background:#f1f5f9">${u.goal}</span></td><td>${u.activityLevel}</td><td style="color:var(--primary); font-weight:800">Day ${u.lastCompletedWorkoutDay||0}</td><td>${parseFloat(u.weightKg || 0).toFixed(1)}kg</td></tr>`; });
+        s.forEach(d => { 
+            const u=d.data(); 
+            b.innerHTML += `<tr>
+                <td data-label="Student"><div style="font-weight:700">${u.email}</div><div style="font-size:11px;color:#64748b">ID: ${d.id.substring(0,8)}</div></td>
+                <td data-label="Fitness Goal"><span class="badge" style="background:#f1f5f9">${u.goal}</span></td>
+                <td data-label="Difficulty">${u.activityLevel}</td>
+                <td data-label="Progress" style="color:var(--primary); font-weight:800">Day ${u.lastCompletedWorkoutDay||0}</td>
+                <td data-label="Weight">${parseFloat(u.weightKg || 0).toFixed(1)}kg</td>
+            </tr>`; 
+        });
     }
 
     async function loadExercises() {
         const b = document.getElementById("exerciseBody"); const s = await getDocs(query(collection(db,"exercises"), limit(100))); b.innerHTML = ""; cacheEx=[];
-        s.forEach(d => { const e={...d.data(), id: d.id}; cacheEx.push(e); b.innerHTML += `<tr><td><img src="${e.gifUrl}" class="avatar"></td><td style="font-weight:700">${e.name}</td><td>${e.target}</td><td><span class="badge badge-primary">${e.difficulty}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openExModal('${e.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteRecord('exercises','${d.id}')"><i class="fas fa-trash"></i></button></td></tr>`; });
+        s.forEach(d => { 
+            const e={...d.data(), id: d.id}; cacheEx.push(e); 
+            const catColors = { warmup: ['#fef9c3', '#eab308'], 'main exercise': ['#dcfce7', '#10b981'], cooldown: ['#e0f2fe', '#0ea5e9'] };
+            const [bg, fg] = catColors[e.category] || ['#f1f5f9', '#64748b'];
+            b.innerHTML += `<tr>
+                <td><img src="${e.gifUrl}" class="avatar"></td>
+                <td data-label="Title" style="font-weight:700">${e.name}</td>
+                <td data-label="Target"><div style="font-weight:600">${e.target}</div><div style="font-size:11px; color:#94a3b8">${e.secondary || '-'}</div></td>
+                <td data-label="Category"><span class="cat-tag" style="background:${bg}; color:${fg}">${e.category || 'main'}</span></td>
+                <td data-label="Level"><span class="badge badge-primary">${e.difficulty}</span></td>
+                <td data-label="Actions">
+                    <button class="btn btn-secondary btn-sm" onclick="openExModal('${e.id}')"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteRecord('exercises','${d.id}')"><i class="fas fa-trash"></i> Delete</button>
+                </td>
+            </tr>`; 
+        });
     }
 
     async function loadMeals() {
         const b = document.getElementById("mealBody"); const s = await getDocs(query(collection(db,"meals"), limit(50))); b.innerHTML = ""; cacheMl=[];
-        s.forEach(d => { const m={...d.data(), id: d.id}; cacheMl.push(m); b.innerHTML += `<tr><td><img src="${m.imageName}" class="avatar"></td><td style="font-weight:700">${m.name}</td><td><span class="badge">${m.preferredDiet||'Balanced'}</span></td><td><div style="font-size:11px">P: ${m.macros?.protein}g / C: ${m.macros?.carbs}g</div></td><td><button class="btn btn-secondary btn-sm" onclick="openMealModal('${m.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteRecord('meals','${d.id}')"><i class="fas fa-trash"></i></button></td></tr>`; });
+        s.forEach(d => { 
+            const m={...d.data(), id: d.id}; cacheMl.push(m); 
+            b.innerHTML += `<tr>
+                <td><img src="${m.imageName}" class="avatar"></td>
+                <td data-label="Recipe Name" style="font-weight:700">${m.name}</td>
+                <td data-label="Time & Duration"><div style="font-weight:600">${m.mealTime || 'Any'}</div><div style="font-size:11px; color:var(--text-gray)">${m.duration || 0} mins</div></td>
+                <td data-label="Calories" style="font-weight:700; color:var(--primary)">${m.calories || 0} kcal</td>
+                <td data-label="Dietary Type"><span class="badge">${m.preferredDiet||'Balanced'}</span></td>
+                <td data-label="Macros"><div style="font-size:11px">P: ${m.macros?.protein}g / C: ${m.macros?.carbs}g / F: ${m.macros?.fats}g</div></td>
+                <td data-label="Actions">
+                    <button class="btn btn-secondary btn-sm" onclick="openMealModal('${m.id}')"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteRecord('meals','${d.id}')"><i class="fas fa-trash"></i> Delete</button>
+                </td>
+            </tr>`; 
+        });
     }
 
     async function loadArticles() {
         const b = document.getElementById("articleBody"); const s = await getDocs(query(collection(db,"articles"), limit(50))); b.innerHTML = ""; cacheArt=[];
-        s.forEach(d => { const a={...d.data(), id: d.id}; cacheArt.push(a); b.innerHTML += `<tr><td><img src="${a.imageName}" class="avatar"></td><td style="font-weight:700">${a.title.substring(0,40)}...</td><td><span class="badge">${a.category}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openArtModal('${a.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteRecord('articles','${d.id}')"><i class="fas fa-trash"></i></button></td></tr>`; });
+        s.forEach(d => { 
+            const a={...d.data(), id: d.id}; cacheArt.push(a); 
+            b.innerHTML += `<tr>
+                <td><img src="${a.imageName}" class="avatar"></td>
+                <td data-label="Headline" style="font-weight:700">${a.title.substring(0,40)}...</td>
+                <td data-label="Author" style="font-size:12px">${a.author || 'Admin'}</td>
+                <td data-label="Category"><span class="badge">${a.category}</span></td>
+                <td data-label="Actions">
+                    <button class="btn btn-secondary btn-sm" onclick="openArtModal('${a.id}')"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteRecord('articles','${d.id}')"><i class="fas fa-trash"></i> Delete</button>
+                </td>
+            </tr>`; 
+        });
     }
 
     window.deleteRecord = async (coll, id) => {
@@ -417,6 +610,8 @@
                 document.getElementById('exName').value = data.name || "";
                 document.getElementById('exGif').value = data.gifUrl || "";
                 document.getElementById('exTarget').value = data.target || "";
+                document.getElementById('exSecondary').value = data.secondary || "";
+                document.getElementById('exCategory').value = data.category || "warmup";
                 document.getElementById('exDiff').value = data.difficulty || "Beginner";
                 document.getElementById('exSteps').value = Array.isArray(data.instructions) ? data.instructions.join('\n') : (data.instructions || "");
             }
@@ -432,7 +627,10 @@
             if(data) {
                 document.getElementById('mName').value = data.name || "";
                 document.getElementById('mImg').value = data.imageName || "";
+                document.getElementById('mDuration').value = data.duration || 0;
+                document.getElementById('mTime').value = data.mealTime || "Breakfast";
                 document.getElementById('mDiet').value = data.preferredDiet || "Balanced";
+                document.getElementById('mCalories').value = data.calories || 0;
                 document.getElementById('mP').value = data.macros?.protein || 0;
                 document.getElementById('mC').value = data.macros?.carbs || 0;
                 document.getElementById('mF').value = data.macros?.fats || 0;
@@ -450,6 +648,7 @@
             const data = cacheArt.find(x => x.id === id);
             if(data) {
                 document.getElementById('aTitle').value = data.title || "";
+                document.getElementById('aAuthor').value = data.author || "";
                 document.getElementById('aImg').value = data.imageName || "";
                 document.getElementById('aCat').value = data.category || "Wellness";
                 document.getElementById('aContent').value = data.content || "";
@@ -459,7 +658,6 @@
     };
 
     window.closeModal = () => { document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); };
-    window.closeExModal = window.closeMealModal = window.closeArtModal = window.closeModal;
 
     document.getElementById('exForm').onsubmit = async (e) => {
         e.preventDefault();
@@ -470,6 +668,8 @@
             name: document.getElementById('exName').value, 
             gifUrl: document.getElementById('exGif').value, 
             target: document.getElementById('exTarget').value, 
+            secondary: document.getElementById('exSecondary').value,
+            category: document.getElementById('exCategory').value,
             difficulty: document.getElementById('exDiff').value, 
             instructions: document.getElementById('exSteps').value.split('\n') 
         });
@@ -480,7 +680,15 @@
         e.preventDefault();
         const existingId = document.getElementById('editArtId').value;
         const id = existingId || ("art_" + Date.now());
-        await setDoc(doc(db, "articles", id), { id, title: document.getElementById('aTitle').value, imageName: document.getElementById('aImg').value, category: document.getElementById('aCat').value, content: document.getElementById('aContent').value, date: new Date().toISOString() });
+        await setDoc(doc(db, "articles", id), { 
+            id, 
+            title: document.getElementById('aTitle').value, 
+            author: document.getElementById('aAuthor').value,
+            imageName: document.getElementById('aImg').value, 
+            category: document.getElementById('aCat').value, 
+            content: document.getElementById('aContent').value, 
+            date: new Date().toISOString() 
+        });
         window.closeModal(); loadArticles(); updateStats();
     };
 
@@ -489,7 +697,20 @@
         const existingId = document.getElementById('editMealId').value;
         const id = existingId || ("manual_" + Date.now());
         const p=parseInt(document.getElementById('mP').value)||0, c=parseInt(document.getElementById('mC').value)||0, f=parseInt(document.getElementById('mF').value)||0;
-        await setDoc(doc(db, "meals", id), { id, name: document.getElementById('mName').value, imageName: document.getElementById('mImg').value, preferredDiet: document.getElementById('mDiet').value, macros: {protein:p, carbs:c, fats:f}, calories: (p*4 + c*4 + f*9), ingredients: document.getElementById('mIng').value.split(','), instructions: document.getElementById('mInst').value, category: "Filipino" });
+        const cal = parseInt(document.getElementById('mCalories').value) || (p*4 + c*4 + f*9);
+        await setDoc(doc(db, "meals", id), { 
+            id, 
+            name: document.getElementById('mName').value, 
+            imageName: document.getElementById('mImg').value, 
+            duration: parseInt(document.getElementById('mDuration').value) || 0,
+            mealTime: document.getElementById('mTime').value,
+            preferredDiet: document.getElementById('mDiet').value, 
+            macros: {protein:p, carbs:c, fats:f}, 
+            calories: cal, 
+            ingredients: document.getElementById('mIng').value.split(','), 
+            instructions: document.getElementById('mInst').value, 
+            category: "Filipino" 
+        });
         window.closeModal(); loadMeals(); updateStats();
     };
 
@@ -506,7 +727,10 @@
                     const ing = [];
                     for(let i=1; i<=20; i++) { if(fM[`strIngredient${i}`]) ing.push(fM[`strIngredient${i}`]); }
                     const p = Math.floor(Math.random()*20)+10, c = Math.floor(Math.random()*30)+20, f = Math.floor(Math.random()*15)+5;
-                    await setDoc(doc(db, "meals", m.idMeal), { id: m.idMeal, name: fM.strMeal, imageName: fM.strMealThumb, preferredDiet: "Balanced", macros: {protein:p, carbs:c, fats:f}, calories: (p*4 + c*4 + f*9), ingredients: ing, instructions: fM.strInstructions, category: "Filipino" });
+                    const duration = Math.floor(Math.random()*45)+15;
+                    const mealTimes = ["Breakfast", "Lunch", "Dinner"];
+                    const mTime = mealTimes[Math.floor(Math.random()*3)];
+                    await setDoc(doc(db, "meals", m.idMeal), { id: m.idMeal, name: fM.strMeal, imageName: fM.strMealThumb, duration: duration, mealTime: mTime, preferredDiet: "Balanced", macros: {protein:p, carbs:c, fats:f}, calories: (p*4 + c*4 + f*9), ingredients: ing, instructions: fM.strInstructions, category: "Filipino" });
                     log(`Imported: ${fM.strMeal}`);
                 }
                 log("Meal database updated.");
@@ -525,7 +749,7 @@
             if(data.data) {
                 for(const art of data.data) {
                     const id = "news_" + art.uuid;
-                    await setDoc(doc(db, "articles", id), { id, title: art.title, imageName: art.image_url || "https://images.unsplash.com/photo-1498837167922-ddd27525d352", category: "Wellness", content: art.description + "\n\n" + (art.snippet || ""), date: art.published_at || new Date().toISOString() });
+                    await setDoc(doc(db, "articles", id), { id, title: art.title, author: art.source || "External API", imageName: art.image_url || "https://images.unsplash.com/photo-1498837167922-ddd27525d352", category: "Wellness", content: art.description + "\n\n" + (art.snippet || ""), date: art.published_at || new Date().toISOString() });
                     log(`Synced: ${art.title.substring(0,30)}...`);
                 }
                 log("News sync completed.");
