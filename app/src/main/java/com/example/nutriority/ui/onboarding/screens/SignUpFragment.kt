@@ -1,6 +1,7 @@
 package com.example.nutriority.ui.onboarding.screens
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,11 +15,8 @@ import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.databinding.FragmentSignUpBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.functions.FirebaseFunctions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.util.Random
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -30,12 +28,9 @@ class SignUpFragment : Fragment() {
     @Inject lateinit var userRepository: UserRepository
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-    private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
-    private val functions: FirebaseFunctions by lazy { FirebaseFunctions.getInstance() }
 
     private var pendingEmail: String? = null
     private var pendingPass: String? = null
-    private var pendingPin: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,19 +56,23 @@ class SignUpFragment : Fragment() {
         binding.etConfirmPassword.doAfterTextChanged { binding.tvError.isVisible = false }
 
         binding.btnSignUp.setOnClickListener { validateInputsAndProceed() }
-        binding.btnSendCode.setOnClickListener { pendingEmail?.let { sendVerificationPin(it) } }
-        binding.btnVerify.setOnClickListener { verifyPinAndRegister() }
+        
+        // This button now triggers the official Firebase Verification Link
+        binding.btnSendCode.setOnClickListener { performRegistrationAndSendLink() }
+        
+        binding.btnVerify.setOnClickListener {
+            // After sending link, user just needs to go to login
+            parentFragmentManager.setFragmentResult("navigationRequestLogin", Bundle())
+        }
     }
 
     private fun resetState() {
         pendingEmail = null
         pendingPass = null
-        pendingPin = null
         if (_binding != null) {
             binding.etEmail.text?.clear()
             binding.etPassword.text?.clear()
             binding.etConfirmPassword.text?.clear()
-            binding.etPin.text?.clear()
             binding.tvError.isVisible = false
             binding.layoutVerification.isVisible = false
             binding.inputContainer.isVisible = true
@@ -108,11 +107,11 @@ class SignUpFragment : Fragment() {
             !password.any { it.isUpperCase() } -> showError("Password must contain an upper case character")
             !password.any { it.isDigit() } -> showError("Password must contain a numeric character")
             password != confirmPass -> showError("Passwords do not match")
-            else -> checkEmailAndTransition(email, password)
+            else -> checkEmailAvailability(email, password)
         }
     }
 
-    private fun checkEmailAndTransition(email: String, pass: String) {
+    private fun checkEmailAvailability(email: String, pass: String) {
         binding.btnSignUp.isEnabled = false
         binding.btnSignUp.text = "CHECKING EMAIL..."
 
@@ -127,12 +126,19 @@ class SignUpFragment : Fragment() {
                 if (methods.isEmpty()) {
                     pendingEmail = email
                     pendingPass = pass
+                    
+                    // Switch to Verification Link View
                     binding.inputContainer.isVisible = false
                     binding.layoutVerification.isVisible = true
-                    binding.tvTitle.text = "Verification"
+                    binding.tvTitle.text = "Verify Email"
                     binding.tvSubtitle.isVisible = false
                     binding.tvError.isVisible = false
-                    binding.btnSendCode.text = "SEND"
+                    
+                    // UI adjustment for Link Flow
+                    binding.pinInputLayout.isVisible = false
+                    binding.tvVerifySubtitle.text = "Click below to register and send a verification link to your student email."
+                    binding.btnSendCode.text = "SEND VERIFICATION LINK"
+                    binding.btnVerify.isVisible = false
                 } else {
                     showError("Email is already registered. Please login.")
                 }
@@ -142,86 +148,49 @@ class SignUpFragment : Fragment() {
         }
     }
 
-    private fun sendVerificationPin(email: String) {
+    private fun performRegistrationAndSendLink() {
+        val email = pendingEmail ?: return
+        val pass = pendingPass ?: return
+
         binding.btnSendCode.isEnabled = false
-        binding.btnSendCode.text = "..."
-
-        // Generate 6-digit PIN
-        val pin = String.format("%06d", Random().nextInt(999999))
-        pendingPin = pin
-
-        val data = hashMapOf(
-            "email" to email,
-            "pin" to pin
-        )
-
-        // Call Firebase Cloud Function
-        functions.getHttpsCallable("sendVerificationPin")
-            .call(data)
-            .addOnSuccessListener { result ->
-                Toast.makeText(requireContext(), "Verification code sent!", Toast.LENGTH_SHORT).show()
-                binding.tvVerifySubtitle.text = "Verification code sent to $email (Valid for 5 min)"
-                binding.btnSendCode.isEnabled = true
-                binding.btnSendCode.text = "RESEND"
-            }
-            .addOnFailureListener { e ->
-                showError("Failed to send PIN: ${e.message}")
-                binding.btnSendCode.isEnabled = true
-                binding.btnSendCode.text = "SEND"
-            }
-    }
-
-    private fun verifyPinAndRegister() {
-        val enteredPin = binding.etPin.text.toString().trim()
-        val email = pendingEmail ?: return
-        val pass = pendingPass ?: return
-        val pin = pendingPin ?: return
-
-        if (enteredPin.isEmpty()) {
-            showError("Please enter the verification code")
-            return
-        }
-
-        binding.btnVerify.isEnabled = false
-        binding.btnVerify.text = "VERIFYING..."
-
-        when {
-            enteredPin != pin -> {
-                showError("Incorrect verification code")
-                binding.btnVerify.isEnabled = true
-                binding.btnVerify.text = "VERIFY & REGISTER"
-            }
-            else -> {
-                performRegistration()
-            }
-        }
-    }
-
-    private fun performRegistration() {
-        val email = pendingEmail ?: return
-        val pass = pendingPass ?: return
-
-        binding.btnVerify.text = "REGISTERING..."
+        binding.btnSendCode.text = "REGISTERING..."
 
         auth.createUserWithEmailAndPassword(email, pass)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        val newUser = User(
-                            id = 1,
-                            gender = "",
-                            age = null,
-                            heightCm = 0.0,
-                            weightKg = 0.0,
-                            unitSystem = "METRIC",
-                            activityLevel = "",
-                            goal = "",
-                            preferredDiet = "",
-                            excludedIngredients = emptyList(),
-                            lastCompletedWorkoutDay = 0
-                        )
-                        userRepository.insertUser(newUser)
-                        parentFragmentManager.setFragmentResult("navigationRequestLogin", Bundle())
+                    val firebaseUser = auth.currentUser
+                    firebaseUser?.sendEmailVerification()?.addOnCompleteListener { verifyTask ->
+                        if (_binding == null) return@addOnCompleteListener
+                        
+                        if (verifyTask.isSuccessful) {
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                val newUser = User(
+                                    id = 1,
+                                    gender = "",
+                                    age = null,
+                                    heightCm = 0.0,
+                                    weightKg = 0.0,
+                                    unitSystem = "METRIC",
+                                    activityLevel = "",
+                                    goal = "",
+                                    preferredDiet = "",
+                                    excludedIngredients = emptyList(),
+                                    lastCompletedWorkoutDay = 0
+                                )
+                                userRepository.insertUser(newUser)
+                                
+                                // Show Success UI
+                                binding.tvVerifySubtitle.text = "A verification link has been sent to $email. Please check your inbox and verify your account before logging in."
+                                binding.btnSendCode.isVisible = false
+                                binding.btnVerify.isVisible = true
+                                binding.btnVerify.text = "GO TO LOGIN"
+                                Toast.makeText(requireContext(), "Verification email sent!", Toast.LENGTH_LONG).show()
+                            }
+                        } else {
+                            showError("Failed to send link: ${verifyTask.exception?.message}")
+                            binding.btnSendCode.isEnabled = true
+                            binding.btnSendCode.text = "RETRY"
+                        }
                     }
                 } else {
                     val exception = task.exception
@@ -230,8 +199,8 @@ class SignUpFragment : Fragment() {
                     } else {
                         showError("Registration failed: ${exception?.message}")
                     }
-                    binding.btnVerify.isEnabled = true
-                    binding.btnVerify.text = "VERIFY & REGISTER"
+                    binding.btnSendCode.isEnabled = true
+                    binding.btnSendCode.text = "SEND VERIFICATION LINK"
                 }
             }
     }

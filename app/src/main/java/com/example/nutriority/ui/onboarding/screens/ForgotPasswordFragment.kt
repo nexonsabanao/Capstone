@@ -5,18 +5,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentForgotPasswordBinding
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.util.Random
 
 @AndroidEntryPoint
 class ForgotPasswordFragment : Fragment() {
@@ -25,7 +22,6 @@ class ForgotPasswordFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-    private var generatedPin: String? = null
     private var targetEmail: String? = null
 
     override fun onCreateView(
@@ -39,13 +35,11 @@ class ForgotPasswordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Reset state whenever the view is created
         resetState()
 
-        // Also reset state whenever this page is selected in the ViewPager
         parentFragmentManager.setFragmentResultListener("pageSelected", viewLifecycleOwner) { _, bundle ->
             val position = bundle.getInt("position", -1)
-            if (position == 2) { // Position of ForgotPasswordFragment
+            if (position == 2) { 
                 resetState()
             }
         }
@@ -55,24 +49,9 @@ class ForgotPasswordFragment : Fragment() {
         }
 
         binding.etEmail.doAfterTextChanged { hideError() }
-        binding.etPin.doAfterTextChanged { hideError() }
 
         binding.btnSendCodeInitial.setOnClickListener {
-            validateEmailAndProceed()
-        }
-
-        binding.btnVerifyPin.setOnClickListener {
-            val enteredPin = binding.etPin.text.toString().trim()
-            if (generatedPin != null && enteredPin == generatedPin) {
-                // Pin is correct, trigger the official Firebase password reset
-                triggerOfficialReset()
-            } else {
-                showError("Incorrect verification code")
-            }
-        }
-
-        binding.btnSendCode.setOnClickListener {
-            targetEmail?.let { sendResetPin(it) }
+            validateEmailAndSendLink()
         }
 
         binding.btnDone.setOnClickListener {
@@ -81,96 +60,62 @@ class ForgotPasswordFragment : Fragment() {
     }
 
     private fun resetState() {
-        generatedPin = null
         targetEmail = null
         if (_binding != null) {
             binding.etEmail.text?.clear()
-            binding.etPin.text?.clear()
             hideError()
             showStepEmail()
         }
     }
 
     private fun handleBackAction() {
-        when {
-            binding.layoutStepPin.isVisible -> showStepEmail()
-            binding.layoutStepSuccess.isVisible -> resetState()
-            else -> parentFragmentManager.setFragmentResult("navigationRequestLogin", Bundle())
+        if (binding.layoutStepSuccess.isVisible) {
+            resetState()
+        } else {
+            parentFragmentManager.setFragmentResult("navigationRequestLogin", Bundle())
         }
     }
 
-    private fun validateEmailAndProceed() {
+    private fun validateEmailAndSendLink() {
         val email = binding.etEmail.text.toString().lowercase().trim()
         if (email.isEmpty() || !isValidStudentEmail(email)) {
             showError("Please enter a valid CVSU student email")
             return
         }
 
-        targetEmail = email
-        sendResetPin(email)
-        showStepPin()
-    }
-
-    private fun sendResetPin(email: String) {
-        binding.btnSendCode.isEnabled = false
-        binding.btnSendCode.text = "WAIT"
-        
-        generatedPin = String.format("%06d", Random().nextInt(999999))
-        Log.d("ForgotPassword", "Reset PIN for $email: $generatedPin")
-        
-        binding.tvSubtitle.text = "A verification code has been generated for $email"
-        
-        lifecycleScope.launch {
-            delay(2000)
-            if (_binding != null) {
-                binding.btnSendCode.isEnabled = true
-                binding.btnSendCode.text = "RESEND"
-            }
-        }
-    }
-
-    private fun triggerOfficialReset() {
-        val email = targetEmail ?: return
-        
-        binding.btnVerifyPin.isEnabled = false
-        binding.btnVerifyPin.text = "VERIFYING..."
+        binding.btnSendCodeInitial.isEnabled = false
+        binding.btnSendCodeInitial.text = "SENDING..."
 
         auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
+            if (_binding == null) return@addOnCompleteListener
+            
             if (task.isSuccessful) {
-                showStepSuccess()
+                targetEmail = email
+                showStepSuccess(email)
             } else {
                 val errorMsg = task.exception?.message ?: "Unknown error"
                 showError("Firebase Error: $errorMsg")
-                Log.e("ForgotPassword", "Reset failed: $errorMsg")
-                binding.btnVerifyPin.isEnabled = true
-                binding.btnVerifyPin.text = "VERIFY PIN"
+                binding.btnSendCodeInitial.isEnabled = true
+                binding.btnSendCodeInitial.text = "SEND RESET LINK"
             }
         }
     }
 
     private fun showStepEmail() {
         binding.layoutStepEmail.isVisible = true
-        binding.layoutStepPin.isVisible = false
         binding.layoutStepSuccess.isVisible = false
         binding.tvTitle.text = "Reset Password"
-        binding.tvSubtitle.text = "Enter your CVSU email to receive a reset code"
+        binding.tvSubtitle.text = "Enter your CVSU email to receive a reset link"
         binding.tvSubtitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_gray))
+        binding.btnSendCodeInitial.isEnabled = true
+        binding.btnSendCodeInitial.text = "SEND RESET LINK"
     }
 
-    private fun showStepPin() {
+    private fun showStepSuccess(email: String) {
         binding.layoutStepEmail.isVisible = false
-        binding.layoutStepPin.isVisible = true
-        binding.layoutStepSuccess.isVisible = false
-        binding.tvTitle.text = "Verification"
-        binding.btnSendCode.text = "SEND"
-    }
-
-    private fun showStepSuccess() {
-        binding.layoutStepEmail.isVisible = false
-        binding.layoutStepPin.isVisible = false
         binding.layoutStepSuccess.isVisible = true
         binding.tvTitle.text = "Success!"
-        binding.tvSubtitle.text = "Identity verified"
+        binding.tvSubtitle.text = "A password reset link has been sent to $email. Please check your inbox."
         binding.tvSubtitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
     }
 

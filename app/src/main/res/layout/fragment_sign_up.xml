@@ -192,69 +192,54 @@
             android:id="@+id/tvVerifySubtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Enter the 6-digit code sent to your student email. Please check your inbox and SPAM folder."
+            android:layout_marginTop="16dp"
+            android:lineSpacingExtra="4dp"
+            android:text="Click below to register and send a verification link to your CVSU email."
             android:textColor="#757575"
-            android:textSize="13sp" />
+            android:textSize="14sp" />
 
-        <LinearLayout
+        <!-- PIN Input Hidden for Link Flow -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/pinInputLayout"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:visibility="gone"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/pinInputLayout"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPin"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="6-Digit PIN"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusTopStart="16dp"
-                app:boxStrokeColor="@color/green"
-                app:hintTextColor="@color/green">
+                android:inputType="number"
+                android:maxLength="6" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPin"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
-                    android:gravity="center"
-                    android:inputType="number"
-                    android:letterSpacing="0.5"
-                    android:maxLength="6"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#212121" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSendCode"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:minHeight="56dp"
-                android:text="SEND"
-                android:textSize="12sp"
-                android:textColor="@color/primary_dark"
-                app:backgroundTint="#E0E0E0"
-                app:cornerRadius="12dp" />
-        </LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSendCode"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="32dp"
+            android:backgroundTint="@color/primary_dark"
+            android:text="SEND VERIFICATION LINK"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:cornerRadius="16dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnVerify"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:backgroundTint="@color/green"
-            android:text="VERIFY &amp; REGISTER"
+            android:text="GO TO LOGIN"
             android:textColor="@color/white"
             android:textStyle="bold"
+            android:visibility="gone"
             app:cornerRadius="16dp" />
     </LinearLayout>
 
