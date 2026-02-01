@@ -19,6 +19,7 @@
             --text-dark: #0f172a;
             --text-gray: #64748b;
             --danger: #ef4444;
+            --warning: #f59e0b;
             --sidebar-width: 280px;
             --radius: 16px;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -85,20 +86,48 @@
         .chart-card h3 i { color: var(--primary); }
 
         /* Table Design */
-        .data-card { background: var(--white); border-radius: 24px; padding: 32px; box-shadow: var(--shadow); border: 1px solid #f1f5f9; }
+        .data-card { background: var(--white); border-radius: 24px; padding: 32px; box-shadow: var(--shadow); border: 1px solid #f1f5f9; margin-bottom: 20px; }
         .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; gap: 15px; flex-wrap: wrap; }
         .table-header h2 { font-size: 20px; font-weight: 800; }
 
         .table-wrapper { overflow-x: auto; margin: 0 -32px; padding: 0 32px; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 800px; }
-        th { text-align: left; padding: 16px; background: #f8fafc; color: var(--text-gray); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; font-weight: 500; vertical-align: middle; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 800px; table-layout: fixed; }
+        th { text-align: left; padding: 16px; background: #f8fafc; color: var(--text-gray); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        th:hover { background: #f1f5f9; color: var(--primary); }
+        th i { margin-left: 8px; font-size: 10px; opacity: 0.5; }
+        td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; font-weight: 500; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         tr:hover td { background: #f8fafc; }
 
+        /* Column width overrides */
+        .col-visual { width: 80px; }
+        .col-actions { width: 200px; }
+        .col-badge { width: 140px; } /* Increased width for category/difficulty badges */
+
         .avatar { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; background: #edf2f7; }
-        .badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
         .badge-primary { background: var(--primary-soft); color: var(--primary); }
-        .cat-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; white-space: nowrap; }
+        .cat-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; white-space: nowrap; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Search & Pagination */
+        .table-controls { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-box { position: relative; flex: 1; min-width: 250px; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-gray); }
+        .search-box input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 2px solid #e2e8f0; outline: none; transition: 0.2s; }
+        .search-box input:focus { border-color: var(--primary); }
+
+        .pagination { display: flex; align-items: center; gap: 10px; margin-top: 20px; justify-content: center; }
+        .page-info { font-size: 14px; color: var(--text-gray); font-weight: 600; }
+
+        /* Sync Hub Specific Styles */
+        .sync-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 20px; }
+        .sync-card { background: var(--white); padding: 24px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 15px; position: relative; overflow: hidden; }
+        .sync-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); opacity: 0.5; }
+        .sync-card.news::before { background: #3b82f6; }
+        .sync-card.meal::before { background: #f97316; }
+
+        .sync-card h3 { font-size: 17px; display: flex; align-items: center; gap: 10px; color: var(--secondary); font-weight: 700; }
+        .sync-card p { font-size: 13px; color: var(--text-gray); line-height: 1.6; }
+        .sync-actions { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
 
         /* Modals & Inputs */
         .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
@@ -112,15 +141,22 @@
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; font-size: 14px; white-space: nowrap; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 167, 139, 0.4); }
+        .btn-secondary { background: #f1f5f9; color: var(--secondary); }
+        .btn-secondary:hover { background: #e2e8f0; }
         .btn-danger { background: #fef2f2; color: var(--danger); }
         .btn-danger:hover { background: var(--danger); color: white; }
+        .btn-warning { background: #fffbeb; color: var(--warning); }
+        .btn-warning:hover { background: var(--warning); color: white; }
         .btn-sm { padding: 10px 16px; font-size: 12px; border-radius: 10px; }
 
         .tab-content { display: none; animation: slideUp 0.4s ease-out; }
         .tab-content.active { display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .console { background: #0f172a; color: #10b981; padding: 24px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; max-height: 300px; overflow-y: auto; margin-top: 20px; border: 1px solid #334155; }
+        .console { background: #0f172a; color: #10b981; padding: 24px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; max-height: 400px; overflow-y: auto; margin-top: 25px; border: 1px solid #334155; line-height: 1.8; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
+        .console span.timestamp { color: #64748b; font-size: 11px; margin-right: 10px; }
+        .console div.err { color: #f87171; }
+        .console div.success { color: #4ade80; font-weight: 600; }
 
         /* Responsive Breakpoints */
         @media (max-width: 1024px) {
@@ -133,13 +169,15 @@
         }
 
         @media (max-width: 768px) {
+            table { table-layout: auto; }
+            td { white-space: normal; overflow: visible; text-overflow: clip; }
+            
             header { flex-direction: column; align-items: center; text-align: center; }
             .btn-primary#timeDisplay { width: 100%; order: 3; margin-top: 15px; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .charts-grid { grid-template-columns: 1fr; }
             .modal-content { padding: 25px; border-radius: 20px; }
             
-            /* Centered tabTitle redesign for phone */
             .header-left { width: 100%; flex-direction: column; align-items: center; position: relative; padding-top: 10px; }
             .menu-toggle { position: absolute; left: 0; top: 0; }
             
@@ -152,9 +190,6 @@
             }
             .connection-status { margin-left: 0; padding: 6px 14px; }
             .tab-subtitle-p { font-size: 13px; margin-top: 8px; }
-
-            .stat-value { font-size: 26px; }
-            .input-group { margin-bottom: 16px; }
 
             /* Modern Mobile Table (Card Layout) */
             .table-wrapper { margin: 0; padding: 0; overflow: visible; }
@@ -193,12 +228,6 @@
             td:first-child { justify-content: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 10px; }
             td:first-child::before { display: none; }
             td .avatar { width: 60px; height: 60px; border-radius: 15px; }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid { grid-template-columns: 1fr; }
-            .data-card { padding: 20px; }
-            .stat-card { padding: 20px; }
         }
     </style>
 </head>
@@ -299,11 +328,31 @@
     <!-- STUDENTS -->
     <div id="students" class="tab-content">
         <div class="data-card">
+            <div class="table-header">
+                <h2>Active Students</h2>
+            </div>
+            <div class="table-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="stSearch" placeholder="Search students by email or goal..." oninput="handleSearch('st')">
+                </div>
+            </div>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>Student</th><th>Fitness Goal</th><th>Difficulty</th><th>Progress</th><th>Weight</th></tr></thead>
+                    <thead><tr>
+                        <th onclick="sortData('students', 'email')">Student <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('students', 'goal')">Fitness Goal <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('students', 'activityLevel')">Difficulty <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('students', 'lastCompletedWorkoutDay')">Progress <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('students', 'weightKg')">Weight <i class="fas fa-sort"></i></th>
+                    </tr></thead>
                     <tbody id="studentBody"></tbody>
                 </table>
+            </div>
+            <div class="pagination" id="stPagination">
+                <button class="btn btn-secondary btn-sm" onclick="changePage('st', 'prev')"><i class="fas fa-chevron-left"></i> Previous</button>
+                <span class="page-info" id="stPageInfo">Page 1 of 1</span>
+                <button class="btn btn-secondary btn-sm" onclick="changePage('st', 'next')">Next <i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
     </div>
@@ -315,11 +364,32 @@
                 <h2>Exercise Global Database</h2>
                 <button class="btn btn-primary" onclick="openExModal()"><i class="fas fa-plus"></i> Add New</button>
             </div>
+            
+            <div class="table-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="exSearch" placeholder="Search exercises..." oninput="handleSearch('ex')">
+                </div>
+            </div>
+
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>Visual</th><th>Title</th><th>Target (Primary/Sec)</th><th>Category</th><th>Diff</th><th>Actions</th></tr></thead>
+                    <thead><tr>
+                        <th class="col-visual">Visual</th>
+                        <th onclick="sortData('exercises', 'name')">Title <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('exercises', 'target')">Target <i class="fas fa-sort"></i></th>
+                        <th class="col-badge" onclick="sortData('exercises', 'category')">Category <i class="fas fa-sort"></i></th>
+                        <th class="col-badge" onclick="sortData('exercises', 'difficulty')">Diff <i class="fas fa-sort"></i></th>
+                        <th class="col-actions">Actions</th>
+                    </tr></thead>
                     <tbody id="exerciseBody"></tbody>
                 </table>
+            </div>
+
+            <div class="pagination" id="exPagination">
+                <button class="btn btn-secondary btn-sm" onclick="changePage('ex', 'prev')"><i class="fas fa-chevron-left"></i> Previous</button>
+                <span class="page-info" id="exPageInfo">Page 1 of 1</span>
+                <button class="btn btn-secondary btn-sm" onclick="changePage('ex', 'next')">Next <i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
     </div>
@@ -331,11 +401,33 @@
                 <h2>Meal & Recipe Library</h2>
                 <button class="btn btn-primary" onclick="openMealModal()"><i class="fas fa-plus"></i> Add New</button>
             </div>
+
+            <div class="table-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="mealSearch" placeholder="Search meals..." oninput="handleSearch('meal')">
+                </div>
+            </div>
+
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>Img</th><th>Recipe Name</th><th>Time & Duration</th><th>Calories</th><th>Dietary Type</th><th>Macros (P/C/F)</th><th>Actions</th></tr></thead>
+                    <thead><tr>
+                        <th class="col-visual">Img</th>
+                        <th onclick="sortData('meals', 'name')">Recipe Name <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('meals', 'mealTime')">Time/Dur <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('meals', 'calories')">Calories <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('meals', 'preferredDiet')">Diet <i class="fas fa-sort"></i></th>
+                        <th>Macros</th>
+                        <th class="col-actions">Actions</th>
+                    </tr></thead>
                     <tbody id="mealBody"></tbody>
                 </table>
+            </div>
+
+            <div class="pagination" id="mealPagination">
+                <button class="btn btn-secondary btn-sm" onclick="changePage('meal', 'prev')"><i class="fas fa-chevron-left"></i> Previous</button>
+                <span class="page-info" id="mealPageInfo">Page 1 of 1</span>
+                <button class="btn btn-secondary btn-sm" onclick="changePage('meal', 'next')">Next <i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
     </div>
@@ -347,11 +439,28 @@
                 <h2>Content Hub: Articles</h2>
                 <button class="btn btn-primary" onclick="openArtModal()"><i class="fas fa-plus"></i> Add New</button>
             </div>
+            <div class="table-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="artSearch" placeholder="Search articles by headline or category..." oninput="handleSearch('art')">
+                </div>
+            </div>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>Preview</th><th>Headline</th><th>Author</th><th>Category</th><th>Action</th></tr></thead>
+                    <thead><tr>
+                        <th class="col-visual">Preview</th>
+                        <th onclick="sortData('articleLib', 'title')">Headline <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('articleLib', 'author')">Author <i class="fas fa-sort"></i></th>
+                        <th class="col-badge" onclick="sortData('articleLib', 'category')">Category <i class="fas fa-sort"></i></th>
+                        <th class="col-actions">Action</th>
+                    </tr></thead>
                     <tbody id="articleBody"></tbody>
                 </table>
+            </div>
+            <div class="pagination" id="artPagination">
+                <button class="btn btn-secondary btn-sm" onclick="changePage('art', 'prev')"><i class="fas fa-chevron-left"></i> Previous</button>
+                <span class="page-info" id="artPageInfo">Page 1 of 1</span>
+                <button class="btn btn-secondary btn-sm" onclick="changePage('art', 'next')">Next <i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
     </div>
@@ -359,20 +468,47 @@
     <!-- SYNC CENTER -->
     <div id="syncEng" class="tab-content">
         <div class="data-card">
-            <div class="card-header"><h2>Universal Sync HUB</h2></div>
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:25px; margin-top: 20px;">
-                <div>
-                    <label style="font-size:12px; font-weight:700; color:var(--text-gray);">NEWSAPI KEY</label>
-                    <input type="password" id="newsToken" placeholder="Enter your API key here" style="width:100%; padding:12px; border-radius:12px; border:2px solid #eee; margin-top:8px;">
-                    <button class="btn btn-primary" onclick="startNewsSync()" style="width:100%; margin-top:15px;"><i class="fas fa-newspaper"></i> SYNC RECENT ARTICLES</button>
+            <div class="table-header">
+                <h2>Universal Sync & Automation HUB</h2>
+                <button class="btn btn-danger btn-sm" onclick="clearConsole()"><i class="fas fa-eraser"></i> Clear Log</button>
+            </div>
+            
+            <div class="sync-grid">
+                <!-- NEWS SYNC -->
+                <div class="sync-card news">
+                    <h3><i class="fas fa-newspaper" style="color:#3b82f6"></i> Health News Engine</h3>
+                    <p>Fetches the latest health and fitness articles from NewsAPI. Requires a valid API key.</p>
+                    <div class="input-group" style="margin-bottom:0">
+                        <input type="password" id="newsToken" placeholder="Enter NewsAPI Key">
+                    </div>
+                    <div class="sync-actions">
+                        <button class="btn btn-primary" onclick="startNewsSync()"><i class="fas fa-rotate"></i> Sync Articles</button>
+                        <button class="btn btn-warning" onclick="confirmWipe('articles')"><i class="fas fa-trash-can"></i> Wipe Articles</button>
+                    </div>
                 </div>
-                <div>
-                    <label style="font-size:12px; font-weight:700; color:var(--text-gray);">DATABASE MAINTENANCE</label>
-                    <button class="btn btn-primary" onclick="startMealSync()" style="width:100%; margin-top:8px;"><i class="fas fa-utensils"></i> SYNC FILIPINO MEALS</button>
-                    <button class="btn btn-danger" onclick="confirmWipe('meals')" style="width:100%; margin-top:10px;"><i class="fas fa-trash-can"></i> WIPE MEALS</button>
+
+                <!-- EXERCISE SYNC -->
+                <div class="sync-card">
+                    <h3><i class="fas fa-dumbbell" style="color:#10b981"></i> Exercise Dataset Sync</h3>
+                    <p>Imports a comprehensive list of exercises, targets, and GIFs from the global open dataset.</p>
+                    <div class="sync-actions">
+                        <button class="btn btn-primary" onclick="startExerciseSync()"><i class="fas fa-cloud-arrow-down"></i> Sync All Exercises</button>
+                        <button class="btn btn-warning" onclick="confirmWipe('exercises')"><i class="fas fa-trash-can"></i> Wipe Exercises</button>
+                    </div>
+                </div>
+
+                <!-- MEAL SYNC -->
+                <div class="sync-card meal">
+                    <h3><i class="fas fa-utensils" style="color:#f97316"></i> Meal DB Importer</h3>
+                    <p>Syncs local and international cuisine (Filipino specialized) with macros and instructions.</p>
+                    <div class="sync-actions">
+                        <button class="btn btn-primary" onclick="startMealSync()"><i class="fas fa-bowl-food"></i> Import Recipes</button>
+                        <button class="btn btn-warning" onclick="confirmWipe('meals')"><i class="fas fa-trash-can"></i> Wipe Meals</button>
+                    </div>
                 </div>
             </div>
-            <div id="syncConsole" class="console">System ready for commands...</div>
+
+            <div id="syncConsole" class="console">System ready. Waiting for task initialization...</div>
         </div>
     </div>
 </div>
@@ -450,377 +586,281 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, getCountFromServer, query, limit, writeBatch, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyBplbyJNhA0l7m9r02-RlNeszjrKAj3AaE", authDomain: "nutriority.firebaseapp.com", projectId: "nutriority", storageBucket: "nutriority.firebasestorage.app", messagingSenderId: "427591895572", appId: "1:427591895572:web:f907e5f61025fc6666f501" };
+    const firebaseConfig = { apiKey: "AIzaSyA7ML7csl8bwO_n1EWtYSscPlcZ7KS0gCY", authDomain: "nutriority.firebaseapp.com", projectId: "nutriority", storageBucket: "nutriority.firebasestorage.app", messagingSenderId: "427591895572", appId: "1:427591895572:android:51325c2cba9e47b666f501" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let cacheEx = [], cacheMl = [], cacheArt = [], charts = {};
+    let cacheEx = [], cacheMl = [], cacheArt = [], cacheSt = [], charts = {};
+    let sortConfig = { type: '', field: '', dir: 'asc' };
+    
+    // Pagination/Filtered states
+    let exFilteredData = [], mlFilteredData = [], stFilteredData = [], artFilteredData = [];
+    let exPage = 1, mlPage = 1, stPage = 1, artPage = 1;
+    const limitVal = 20;
 
-    const log = (msg) => {
+    const log = (msg, type = '') => {
         const c = document.getElementById('syncConsole');
-        c.innerHTML += `<div>> ${msg}</div>`;
+        const entry = document.createElement('div');
+        if (type) entry.className = type;
+        entry.innerHTML = `<span class="timestamp">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+        c.appendChild(entry);
         c.scrollTop = c.scrollHeight;
     };
+    window.clearConsole = () => document.getElementById('syncConsole').innerHTML = "Console cleared...";
 
-    // Sidebar toggle for mobile
     window.toggleSidebar = (force) => {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const isShowing = force !== undefined ? !force : sidebar.classList.contains('show');
-        
-        if (!isShowing) {
-            sidebar.classList.add('show');
-            overlay.classList.add('show');
-        } else {
-            sidebar.classList.remove('show');
-            overlay.classList.remove('show');
-        }
+        const s = document.getElementById('sidebar'), o = document.getElementById('sidebarOverlay');
+        const show = force !== undefined ? !force : s.classList.contains('show');
+        if (!show) { s.classList.add('show'); o.classList.add('show'); } 
+        else { s.classList.remove('show'); o.classList.remove('show'); }
     };
 
-    // Clock display
     setInterval(() => { document.getElementById('timeDisplay').innerHTML = `<i class="far fa-clock"></i> ${new Date().toLocaleTimeString()}`; }, 1000);
 
     window.switchTab = (t) => {
         document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
         document.getElementById(t).classList.add('active');
-
         const mapping = { overview: 'Overview', students: 'Students', exercises: 'Exercises', meals: 'Meal Library', articleLib: 'Article Hub', syncEng: 'Sync Center' };
-        Array.from(document.querySelectorAll('.nav-item')).find(x => x.textContent.includes(mapping[t]))?.classList.add('active');
-        
+        Array.from(document.querySelectorAll('.nav-item')).find(x => x.textContent.trim().includes(mapping[t]))?.classList.add('active');
         document.getElementById('tabTitle').innerText = mapping[t];
         document.getElementById('tabSubtitle').innerText = t === 'overview' ? 'App analytics and student tracking' : `Managing ${mapping[t]} records`;
-
-        if(t==='students') loadStudents();
-        if(t==='exercises') loadExercises();
-        if(t==='meals') loadMeals();
-        if(t==='articleLib') loadArticles();
-        if(t==='overview') updateStats();
+        if(t==='students') loadStudents(); if(t==='exercises') loadExercises(); if(t==='meals') loadMeals(); if(t==='articleLib') loadArticles(); if(t==='overview') updateStats();
     };
 
     async function updateStats() {
         try {
-            const u = await getCountFromServer(collection(db,"users")), e = await getCountFromServer(collection(db,"exercises")), m = await getCountFromServer(collection(db,"meals")), a = await getCountFromServer(collection(db,"articles"));
-            document.getElementById("statStudents").innerText = u.data().count;
-            document.getElementById("statExercises").innerText = e.data().count;
-            document.getElementById("statMeals").innerText = m.data().count;
-            document.getElementById("statArticles").innerText = a.data().count;
-
-            const us = await getDocs(collection(db,"users")), ms = await getDocs(collection(db,"meals")), as = await getDocs(collection(db,"articles"));
+            const [u, e, m, a] = await Promise.all([getCountFromServer(collection(db,"users")), getCountFromServer(collection(db,"exercises")), getCountFromServer(collection(db,"meals")), getCountFromServer(collection(db,"articles"))]);
+            document.getElementById("statStudents").innerText = u.data().count; document.getElementById("statExercises").innerText = e.data().count; document.getElementById("statMeals").innerText = m.data().count; document.getElementById("statArticles").innerText = a.data().count;
+            const [us, ms, as] = await Promise.all([getDocs(collection(db,"users")), getDocs(collection(db,"meals")), getDocs(collection(db,"articles"))]);
             renderCharts(us.docs.map(d=>d.data()), ms.docs.map(d=>d.data()), as.docs.map(d=>d.data()));
-            
-            // Connection indicator update
-            document.getElementById('statusDot').classList.add('connected');
-            document.getElementById('statusText').innerText = 'Connected';
-        } catch (error) {
-            console.error("Connection failed: ", error);
-            document.getElementById('statusDot').classList.remove('connected');
-            document.getElementById('statusText').innerText = 'Disconnected';
-        }
+            document.getElementById('statusDot').classList.add('connected'); document.getElementById('statusText').innerText = 'Connected';
+        } catch (e) { document.getElementById('statusDot').classList.remove('connected'); }
     }
 
     function renderCharts(users, meals, articles) {
         Object.values(charts).forEach(c=>c.destroy());
-
-        // 1. User Growth (Line)
         charts.growth = new Chart(document.getElementById('userTrendChart'), { type:'line', data:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets:[{label:'Active Users', data:[12, 19, 15, 25, 32, 28, users.length], borderColor:'#00A78B', backgroundColor:'rgba(0,167,139,0.1)', fill:true, tension:0.4}] }, options:{ responsive:true, plugins:{legend:{display:false}} } });
-
-        // 2. Weight Distribution (Bar)
         const goals = {}; users.forEach(u=>{ if(!goals[u.goal]) goals[u.goal]=[]; goals[u.goal].push(u.weightKg); });
         charts.weight = new Chart(document.getElementById('weightGoalChart'), { type:'bar', data:{ labels:Object.keys(goals), datasets:[{label:'Avg Weight (kg)', data:Object.values(goals).length > 0 ? Object.values(goals).map(arr=>arr.reduce((a,b)=>a+b,0)/arr.length) : [], backgroundColor:['#00A78B','#1e293b','#f97316']}] } });
-
-        // 3. Diet Types (Pie)
         const diets = {}; meals.forEach(m=>{ diets[m.preferredDiet||'Balanced'] = (diets[m.preferredDiet||'Balanced']||0)+1; });
         charts.diet = new Chart(document.getElementById('mealDietChart'), { type:'doughnut', data:{ labels:Object.keys(diets), datasets:[{data:Object.values(diets), backgroundColor:['#00A78B','#10b981','#eab308']}] }, options:{ cutout:'70%' } });
-
-        // 4. Training stages (Radar or Polar)
         const stages = [0,0,0,0,0,0,0,0]; users.forEach(u=>stages[u.lastCompletedWorkoutDay||0]++);
         charts.stage = new Chart(document.getElementById('trainingStageChart'), { type:'bar', data:{ labels:['D0','D1','D2','D3','D4','D5','D6','D7'], datasets:[{label:'Student Count', data:stages, backgroundColor:'#0ea5e9'}] } });
     }
 
-    async function loadStudents() {
-        const b = document.getElementById("studentBody"); const s = await getDocs(collection(db,"users")); b.innerHTML = "";
-        s.forEach(d => { 
-            const u=d.data(); 
-            b.innerHTML += `<tr>
-                <td data-label="Student"><div style="font-weight:700">${u.email}</div><div style="font-size:11px;color:#64748b">ID: ${d.id.substring(0,8)}</div></td>
-                <td data-label="Fitness Goal"><span class="badge" style="background:#f1f5f9">${u.goal}</span></td>
-                <td data-label="Difficulty">${u.activityLevel}</td>
-                <td data-label="Progress" style="color:var(--primary); font-weight:800">Day ${u.lastCompletedWorkoutDay||0}</td>
-                <td data-label="Weight">${parseFloat(u.weightKg || 0).toFixed(1)}kg</td>
-            </tr>`; 
+    // --- RENDER FUNCTIONS ---
+
+    window.renderStudents = () => {
+        const b = document.getElementById("studentBody"); b.innerHTML = "";
+        const start = (stPage - 1) * limitVal, end = start + limitVal;
+        const pData = stFilteredData.slice(start, end);
+        pData.forEach(u => { b.innerHTML += `<tr><td data-label="Student"><div style="font-weight:700">${u.email}</div><div style="font-size:11px;color:#64748b">ID: ${u.id.substring(0,8)}</div></td><td data-label="Fitness Goal"><span class="badge" style="background:#f1f5f9">${u.goal}</span></td><td data-label="Difficulty">${u.activityLevel}</td><td data-label="Progress" style="color:var(--primary); font-weight:800">Day ${u.lastCompletedWorkoutDay||0}</td><td data-label="Weight">${parseFloat(u.weightKg || 0).toFixed(1)}kg</td></tr>`; });
+        document.getElementById('stPageInfo').innerText = `Page ${stPage} of ${Math.ceil(stFilteredData.length / limitVal) || 1} (${stFilteredData.length} records)`;
+    }
+
+    window.renderExercises = () => {
+        const b = document.getElementById("exerciseBody"); b.innerHTML = "";
+        const start = (exPage - 1) * limitVal, end = start + limitVal;
+        const pData = exFilteredData.slice(start, end);
+        pData.forEach(e => { const [bg, fg] = (e.category === 'warmup' ? ['#fef9c3', '#eab308'] : e.category === 'cooldown' ? ['#e0f2fe', '#0ea5e9'] : ['#dcfce7', '#10b981']); b.innerHTML += `<tr><td data-label="Visual"><img src="${e.gifUrl}" class="avatar"></td><td data-label="Title" style="font-weight:700">${e.name}</td><td data-label="Target"><div style="font-weight:600">${e.target}</div><div style="font-size:11px; color:#94a3b8">${e.secondary || '-'}</div></td><td data-label="Category"><span class="cat-tag" style="background:${bg}; color:${fg}">${e.category || 'main'}</span></td><td data-label="Level"><span class="badge badge-primary">${e.difficulty}</span></td><td data-label="Actions"><div style="display: flex; gap: 8px; justify-content: flex-end; width: 100%;"><button class="btn btn-secondary btn-sm" onclick="openExModal('${e.id}')"><i class="fas fa-edit"></i> Edit</button><button class="btn btn-danger btn-sm" onclick="deleteRecord('exercises','${e.id}')"><i class="fas fa-trash"></i> Delete</button></div></td></tr>`; });
+        document.getElementById('exPageInfo').innerText = `Page ${exPage} of ${Math.ceil(exFilteredData.length / limitVal) || 1} (${exFilteredData.length} records)`;
+    }
+
+    window.renderMeals = () => {
+        const b = document.getElementById("mealBody"); b.innerHTML = "";
+        const start = (mlPage - 1) * limitVal, end = start + limitVal;
+        const pData = mlFilteredData.slice(start, end);
+        pData.forEach(m => { b.innerHTML += `<tr><td data-label="Img"><img src="${m.imageName}" class="avatar"></td><td data-label="Recipe Name" style="font-weight:700">${m.name}</td><td data-label="Time & Duration"><div style="font-weight:600">${m.mealTime || 'Any'}</div><div style="font-size:11px; color:var(--text-gray)">${m.duration || 0} mins</div></td><td data-label="Calories" style="font-weight:700; color:var(--primary)">${m.calories || 0} kcal</td><td data-label="Dietary Type"><span class="badge">${m.preferredDiet||'Balanced'}</span></td><td data-label="Macros"><div style="font-size:11px">P: ${m.macros?.protein}g / C: ${m.macros?.carbs}g / F: ${m.macros?.fats}g</div></td><td data-label="Actions"><div style="display: flex; gap: 8px; justify-content: flex-end; width: 100%;"><button class="btn btn-secondary btn-sm" onclick="openMealModal('${m.id}')"><i class="fas fa-edit"></i> Edit</button><button class="btn btn-danger btn-sm" onclick="deleteRecord('meals','${m.id}')"><i class="fas fa-trash"></i> Delete</button></div></td></tr>`; });
+        document.getElementById('mealPageInfo').innerText = `Page ${mlPage} of ${Math.ceil(mlFilteredData.length / limitVal) || 1} (${mlFilteredData.length} records)`;
+    }
+
+    window.renderArticles = () => {
+        const b = document.getElementById("articleBody"); b.innerHTML = "";
+        const start = (artPage - 1) * limitVal, end = start + limitVal;
+        const pData = artFilteredData.slice(start, end);
+        pData.forEach(a => { b.innerHTML += `<tr><td data-label="Preview"><img src="${a.imageName}" class="avatar"></td><td data-label="Headline" style="font-weight:700">${a.title.substring(0,40)}...</td><td data-label="Author" style="font-size:12px">${a.author || 'Admin'}</td><td data-label="Category"><span class="badge">${a.category}</span></td><td data-label="Actions"><div style="display: flex; gap: 8px; justify-content: flex-end; width: 100%;"><button class="btn btn-secondary btn-sm" onclick="openArtModal('${a.id}')"><i class="fas fa-edit"></i> Edit</button><button class="btn btn-danger btn-sm" onclick="deleteRecord('articles','${a.id}')"><i class="fas fa-trash"></i> Delete</button></div></td></tr>`; });
+        document.getElementById('artPageInfo').innerText = `Page ${artPage} of ${Math.ceil(artFilteredData.length / limitVal) || 1} (${artFilteredData.length} records)`;
+    }
+
+    // --- SEARCH & PAGINATION ---
+
+    window.handleSearch = (type) => {
+        const q = document.getElementById(`${type}Search`).value.toLowerCase();
+        if(type === 'ex') { exFilteredData = cacheEx.filter(e => e.name.toLowerCase().includes(q) || e.target.toLowerCase().includes(q)); exPage = 1; renderExercises(); }
+        else if(type === 'meal') { mlFilteredData = cacheMl.filter(m => m.name.toLowerCase().includes(q) || (m.mealTime||'').toLowerCase().includes(q)); mlPage = 1; renderMeals(); }
+        else if(type === 'st') { stFilteredData = cacheSt.filter(u => u.email.toLowerCase().includes(q) || (u.goal||'').toLowerCase().includes(q)); stPage = 1; renderStudents(); }
+        else if(type === 'art') { artFilteredData = cacheArt.filter(a => a.title.toLowerCase().includes(q) || a.category.toLowerCase().includes(q)); artPage = 1; renderArticles(); }
+    };
+
+    window.changePage = (type, dir) => {
+        const getPage = () => (type === 'ex' ? exPage : type === 'meal' ? mlPage : type === 'st' ? stPage : artPage);
+        const getTotal = () => Math.ceil((type === 'ex' ? exFilteredData : type === 'meal' ? mlFilteredData : type === 'st' ? stFilteredData : artFilteredData).length / limitVal);
+        let p = getPage(); const total = getTotal();
+        if(dir === 'next' && p < total) p++; if(dir === 'prev' && p > 1) p--;
+        if(type === 'ex') { exPage = p; renderExercises(); } else if(type === 'meal') { mlPage = p; renderMeals(); } else if(type === 'st') { stPage = p; renderStudents(); } else { artPage = p; renderArticles(); }
+        document.querySelector('.main-content').scrollTop = 0;
+    };
+
+    window.sortData = (type, field) => {
+        if (sortConfig.field === field) sortConfig.dir = sortConfig.dir === 'asc' ? 'desc' : 'asc';
+        else { sortConfig.field = field; sortConfig.dir = 'asc'; }
+        let target = (type === 'students' ? stFilteredData : type === 'exercises' ? exFilteredData : type === 'meals' ? mlFilteredData : artFilteredData);
+        target.sort((a, b) => {
+            let valA = a[field], valB = b[field];
+            if (field === 'lastCompletedWorkoutDay' || field === 'weightKg' || field === 'calories') { valA = parseFloat(valA || 0); valB = parseFloat(valB || 0); }
+            if (typeof valA === 'string') return sortConfig.dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            return sortConfig.dir === 'asc' ? valA - valB : valB - valA;
         });
-    }
+        if (type === 'students') renderStudents(); if (type === 'exercises') renderExercises(); if (type === 'meals') renderMeals(); if (type === 'articleLib') renderArticles();
+        const icons = document.querySelectorAll(`[onclick*="sortData('${type}'"] i`);
+        icons.forEach(i => { i.className = 'fas fa-sort'; i.style.opacity = '0.5'; });
+        const active = document.querySelector(`[onclick="sortData('${type}', '${field}')"] i`);
+        if (active) { active.className = sortConfig.dir === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'; active.style.opacity = '1'; }
+    };
 
-    async function loadExercises() {
-        const b = document.getElementById("exerciseBody"); const s = await getDocs(query(collection(db,"exercises"), limit(100))); b.innerHTML = ""; cacheEx=[];
-        s.forEach(d => { 
-            const e={...d.data(), id: d.id}; cacheEx.push(e); 
-            const catColors = { warmup: ['#fef9c3', '#eab308'], 'main exercise': ['#dcfce7', '#10b981'], cooldown: ['#e0f2fe', '#0ea5e9'] };
-            const [bg, fg] = catColors[e.category] || ['#f1f5f9', '#64748b'];
-            b.innerHTML += `<tr>
-                <td><img src="${e.gifUrl}" class="avatar"></td>
-                <td data-label="Title" style="font-weight:700">${e.name}</td>
-                <td data-label="Target"><div style="font-weight:600">${e.target}</div><div style="font-size:11px; color:#94a3b8">${e.secondary || '-'}</div></td>
-                <td data-label="Category"><span class="cat-tag" style="background:${bg}; color:${fg}">${e.category || 'main'}</span></td>
-                <td data-label="Level"><span class="badge badge-primary">${e.difficulty}</span></td>
-                <td data-label="Actions">
-                    <div style="display: flex; gap: 8px; justify-content: flex-end; width: 100%;">
-                        <button class="btn btn-secondary btn-sm" onclick="openExModal('${e.id}')"><i class="fas fa-edit"></i> Edit</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteRecord('exercises','${d.id}')"><i class="fas fa-trash"></i> Delete</button>
-                    </div>
-                </td>
-            </tr>`; 
-        });
-    }
-
-    async function loadMeals() {
-        const b = document.getElementById("mealBody"); const s = await getDocs(query(collection(db,"meals"), limit(50))); b.innerHTML = ""; cacheMl=[];
-        s.forEach(d => { const m={...d.data(), id: d.id}; cacheMl.push(m); 
-            b.innerHTML += `<tr>
-                <td><img src="${m.imageName}" class="avatar"></td>
-                <td data-label="Recipe Name" style="font-weight:700">${m.name}</td>
-                <td data-label="Time & Duration"><div style="font-weight:600">${m.mealTime || 'Any'}</div><div style="font-size:11px; color:var(--text-gray)">${m.duration || 0} mins</div></td>
-                <td data-label="Calories" style="font-weight:700; color:var(--primary)">${m.calories || 0} kcal</td>
-                <td data-label="Dietary Type"><span class="badge">${m.preferredDiet||'Balanced'}</span></td>
-                <td data-label="Macros"><div style="font-size:11px">P: ${m.macros?.protein}g / C: ${m.macros?.carbs}g / F: ${m.macros?.fats}g</div></td>
-                <td data-label="Actions">
-                    <div style="display: flex; gap: 8px; justify-content: flex-end; width: 100%;">
-                        <button class="btn btn-secondary btn-sm" onclick="openMealModal('${m.id}')"><i class="fas fa-edit"></i> Edit</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteRecord('meals','${d.id}')"><i class="fas fa-trash"></i> Delete</button>
-                    </div>
-                </td>
-            </tr>`; });
-    }
-
-    async function loadArticles() {
-        const b = document.getElementById("articleBody"); const s = await getDocs(query(collection(db,"articles"), limit(50))); b.innerHTML = ""; cacheArt=[];
-        s.forEach(d => { const a={...d.data(), id: d.id}; cacheArt.push(a); b.innerHTML += `<tr>
-                <td><img src="${a.imageName}" class="avatar"></td>
-                <td data-label="Headline" style="font-weight:700">${a.title.substring(0,40)}...</td>
-                <td data-label="Author" style="font-size:12px">${a.author || 'Admin'}</td>
-                <td data-label="Category"><span class="badge">${a.category}</span></td>
-                <td data-label="Actions">
-                    <div style="display: flex; gap: 8px; justify-content: flex-end; width: 100%;">
-                        <button class="btn btn-secondary btn-sm" onclick="openArtModal('${a.id}')"><i class="fas fa-edit"></i> Edit</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteRecord('articles','${d.id}')"><i class="fas fa-trash"></i> Delete</button>
-                    </div>
-                </td>
-            </tr>`; });
-    }
+    async function loadStudents() { if(cacheSt.length === 0) { const s = await getDocs(collection(db,"users")); s.forEach(d => cacheSt.push({ ...d.data(), id: d.id })); } stFilteredData = [...cacheSt]; renderStudents(); }
+    async function loadExercises() { if(cacheEx.length === 0) { const s = await getDocs(collection(db,"exercises")); s.forEach(d => cacheEx.push({ ...d.data(), id: d.id })); } exFilteredData = [...cacheEx]; renderExercises(); }
+    async function loadMeals() { if(cacheMl.length === 0) { const s = await getDocs(collection(db,"meals")); s.forEach(d => cacheMl.push({ ...d.data(), id: d.id })); } mlFilteredData = [...cacheMl]; renderMeals(); }
+    async function loadArticles() { if(cacheArt.length === 0) { const s = await getDocs(collection(db,"articles")); s.forEach(d => cacheArt.push({ ...d.data(), id: d.id })); } artFilteredData = [...cacheArt]; renderArticles(); }
 
     window.deleteRecord = async (coll, id) => {
-        if(confirm("Are you sure you want to delete this?")) {
-            try {
-                await deleteDoc(doc(db, coll, id));
-                if(coll === 'exercises') loadExercises();
-                if(coll === 'meals') loadMeals();
-                if(coll === 'articles') loadArticles();
-                updateStats();
-            } catch (e) { alert("Delete failed: " + e.message); }
+        if(confirm("Delete this?")) {
+            try { 
+                await deleteDoc(doc(db, coll, id)); 
+                if(coll === 'exercises') { cacheEx = cacheEx.filter(x => x.id !== id); exFilteredData = exFilteredData.filter(x => x.id !== id); renderExercises(); }
+                else if(coll === 'meals') { cacheMl = cacheMl.filter(x => x.id !== id); mlFilteredData = mlFilteredData.filter(x => x.id !== id); renderMeals(); }
+                else if(coll === 'users') { cacheSt = cacheSt.filter(x => x.id !== id); stFilteredData = stFilteredData.filter(x => x.id !== id); renderStudents(); }
+                else if(coll === 'articles') { cacheArt = cacheArt.filter(x => x.id !== id); artFilteredData = artFilteredData.filter(x => x.id !== id); renderArticles(); }
+                updateStats(); 
+            } catch (e) { alert("Fail: " + e.message); }
         }
     };
 
     window.openExModal = (id=null) => { 
-        document.getElementById('exForm').reset();
-        document.getElementById('editExId').value = id || "";
-        if(id) {
-            const data = cacheEx.find(x => x.id === id);
-            if(data) {
-                document.getElementById('exName').value = data.name || "";
-                document.getElementById('exGif').value = data.gifUrl || "";
-                document.getElementById('exTarget').value = data.target || "";
-                document.getElementById('exSecondary').value = data.secondary || "";
-                document.getElementById('exCategory').value = data.category || "warmup";
-                document.getElementById('exDiff').value = data.difficulty || "Beginner";
-                document.getElementById('exSteps').value = Array.isArray(data.instructions) ? data.instructions.join('\n') : (data.instructions || "");
-            }
-        }
-        document.getElementById('exModal').style.display='flex'; 
+        document.getElementById('exForm').reset(); document.getElementById('editExId').value = id || "";
+        if(id) { const d = cacheEx.find(x => x.id === id); if(d) {
+            document.getElementById('exName').value = d.name || ""; document.getElementById('exGif').value = d.gifUrl || ""; document.getElementById('exTarget').value = d.target || ""; document.getElementById('exSecondary').value = d.secondary || ""; document.getElementById('exCategory').value = d.category || "warmup"; document.getElementById('exDiff').value = d.difficulty || "Beginner"; document.getElementById('exSteps').value = Array.isArray(d.instructions) ? d.instructions.join('\n') : (d.instructions || "");
+        }} document.getElementById('exModal').style.display='flex'; 
     };
 
     window.openMealModal = (id=null) => { 
-        document.getElementById('mealForm').reset();
-        document.getElementById('editMealId').value = id || "";
-        if(id) {
-            const data = cacheMl.find(x => x.id === id);
-            if(data) {
-                document.getElementById('mName').value = data.name || "";
-                document.getElementById('mImg').value = data.imageName || "";
-                document.getElementById('mDuration').value = data.duration || 0;
-                document.getElementById('mTime').value = data.mealTime || "Breakfast";
-                document.getElementById('mDiet').value = data.preferredDiet || "Balanced";
-                document.getElementById('mCalories').value = data.calories || 0;
-                document.getElementById('mP').value = data.macros?.protein || 0;
-                document.getElementById('mC').value = data.macros?.carbs || 0;
-                document.getElementById('mF').value = data.macros?.fats || 0;
-                document.getElementById('mIng').value = Array.isArray(data.ingredients) ? data.ingredients.join(',') : (data.ingredients || "");
-                document.getElementById('mInst').value = data.instructions || "";
-            }
-        }
-        document.getElementById('mealModal').style.display='flex'; 
+        document.getElementById('mealForm').reset(); document.getElementById('editMealId').value = id || "";
+        if(id) { const d = cacheMl.find(x => x.id === id); if(d) {
+            document.getElementById('mName').value = d.name || ""; document.getElementById('mImg').value = d.imageName || ""; document.getElementById('mDuration').value = d.duration || 0; document.getElementById('mTime').value = d.mealTime || "Breakfast"; document.getElementById('mDiet').value = d.preferredDiet || "Balanced"; document.getElementById('mCalories').value = d.calories || 0; document.getElementById('mP').value = d.macros?.protein || 0; document.getElementById('mC').value = d.macros?.carbs || 0; document.getElementById('mF').value = d.macros?.fats || 0; document.getElementById('mIng').value = Array.isArray(d.ingredients) ? d.ingredients.join(',') : (d.ingredients || ""); document.getElementById('mInst').value = d.instructions || "";
+        }} document.getElementById('mealModal').style.display='flex'; 
     };
 
     window.openArtModal = (id=null) => { 
-        document.getElementById('artForm').reset();
-        document.getElementById('editArtId').value = id || "";
-        if(id) {
-            const data = cacheArt.find(x => x.id === id);
-            if(data) {
-                document.getElementById('aTitle').value = data.title || "";
-                document.getElementById('aAuthor').value = data.author || "";
-                document.getElementById('aUrl').value = data.articleUrl || "";
-                document.getElementById('aSource').value = data.source || "";
-                document.getElementById('aDate').value = data.date || "";
-                document.getElementById('aImg').value = data.imageName || "";
-                document.getElementById('aCat').value = data.category || "Wellness";
-                document.getElementById('aDesc').value = data.description || "";
-                document.getElementById('aContent').value = data.content || "";
-            }
-        }
-        document.getElementById('artModal').style.display='flex'; 
+        document.getElementById('artForm').reset(); document.getElementById('editArtId').value = id || "";
+        if(id) { const d = cacheArt.find(x => x.id === id); if(d) {
+            document.getElementById('aTitle').value = d.title || ""; document.getElementById('aAuthor').value = d.author || ""; document.getElementById('aUrl').value = d.articleUrl || ""; document.getElementById('aSource').value = d.source || ""; document.getElementById('aDate').value = d.date || ""; document.getElementById('aImg').value = d.imageName || ""; document.getElementById('aCat').value = d.category || "Wellness"; document.getElementById('aDesc').value = d.description || ""; document.getElementById('aContent').value = d.content || "";
+        }} document.getElementById('artModal').style.display='flex'; 
     };
 
     window.closeModal = () => { document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); };
 
     document.getElementById('exForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const existingId = document.getElementById('editExId').value;
-        const id = existingId || ("ex_" + Date.now());
-        await setDoc(doc(db, "exercises", id), { 
-            id, 
-            name: document.getElementById('exName').value, 
-            gifUrl: document.getElementById('exGif').value, 
-            target: document.getElementById('exTarget').value, 
-            secondary: document.getElementById('exSecondary').value,
-            category: document.getElementById('exCategory').value,
-            difficulty: document.getElementById('exDiff').value, 
-            instructions: document.getElementById('exSteps').value.split('\n') 
-        });
-        window.closeModal(); loadExercises(); updateStats();
+        e.preventDefault(); const existingId = document.getElementById('editExId').value; const id = existingId || ("ex_" + Date.now());
+        const exData = { id, name: document.getElementById('exName').value, gifUrl: document.getElementById('exGif').value, target: document.getElementById('exTarget').value, secondary: document.getElementById('exSecondary').value, category: document.getElementById('exCategory').value, difficulty: document.getElementById('exDiff').value, instructions: document.getElementById('exSteps').value.split('\n') };
+        await setDoc(doc(db, "exercises", id), exData);
+        if(!existingId) cacheEx.unshift(exData); else { const idx = cacheEx.findIndex(x=>x.id===id); if(idx!==-1) cacheEx[idx] = exData; }
+        exFilteredData = [...cacheEx]; window.closeModal(); renderExercises(); updateStats();
     };
 
     document.getElementById('artForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const existingId = document.getElementById('editArtId').value;
-        const id = existingId || ("art_" + Date.now());
-        await setDoc(doc(db, "articles", id), { 
-            id, 
-            title: document.getElementById('aTitle').value, 
-            author: document.getElementById('aAuthor').value,
-            articleUrl: document.getElementById('aUrl').value,
-            source: document.getElementById('aSource').value,
-            date: document.getElementById('aDate').value || new Date().toISOString(),
-            imageName: document.getElementById('aImg').value, 
-            category: document.getElementById('aCat').value, 
-            description: document.getElementById('aDesc').value,
-            content: document.getElementById('aContent').value
-        });
-        window.closeModal(); loadArticles(); updateStats();
+        e.preventDefault(); const existingId = document.getElementById('editArtId').value; const id = existingId || ("art_" + Date.now());
+        const artData = { id, title: document.getElementById('aTitle').value, author: document.getElementById('aAuthor').value, articleUrl: document.getElementById('aUrl').value, source: document.getElementById('aSource').value, date: document.getElementById('aDate').value || new Date().toISOString(), imageName: document.getElementById('aImg').value, category: document.getElementById('aCat').value, description: document.getElementById('aDesc').value, content: document.getElementById('aContent').value };
+        await setDoc(doc(db, "articles", id), artData);
+        if(!existingId) cacheArt.unshift(artData); else { const idx = cacheArt.findIndex(x=>x.id===id); if(idx!==-1) cacheArt[idx] = artData; }
+        artFilteredData = [...cacheArt]; window.closeModal(); renderArticles(); updateStats();
     };
 
     document.getElementById('mealForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const existingId = document.getElementById('editMealId').value;
-        const id = existingId || ("manual_" + Date.now());
-        const p=parseInt(document.getElementById('mP').value)||0, c=parseInt(document.getElementById('mC').value)||0, f=parseInt(document.getElementById('mF').value)||0;
-        const cal = parseInt(document.getElementById('mCalories').value) || (p*4 + c*4 + f*9);
-        await setDoc(doc(db, "meals", id), { 
-            id, 
-            name: document.getElementById('mName').value, 
-            imageName: document.getElementById('mImg').value, 
-            duration: parseInt(document.getElementById('mDuration').value) || 0,
-            mealTime: document.getElementById('mTime').value,
-            preferredDiet: document.getElementById('mDiet').value, 
-            macros: {protein:p, carbs:c, fats:f}, 
-            calories: cal, 
-            ingredients: document.getElementById('mIng').value.split(','), 
-            instructions: document.getElementById('mInst').value, 
-            category: "Filipino" 
-        });
-        window.closeModal(); loadMeals(); updateStats();
+        e.preventDefault(); const existingId = document.getElementById('editMealId').value; const id = existingId || ("manual_" + Date.now());
+        const p=parseInt(document.getElementById('mP').value)||0, c=parseInt(document.getElementById('mC').value)||0, f=parseInt(document.getElementById('mF').value)||0, cal = parseInt(document.getElementById('mCalories').value) || (p*4 + c*4 + f*9);
+        const mData = { id, name: document.getElementById('mName').value, imageName: document.getElementById('mImg').value, duration: parseInt(document.getElementById('mDuration').value) || 0, mealTime: document.getElementById('mTime').value, preferredDiet: document.getElementById('mDiet').value, macros: {protein:p, carbs:c, fats:f}, calories: cal, ingredients: document.getElementById('mIng').value.split(','), instructions: document.getElementById('mInst').value, category: "Filipino" };
+        await setDoc(doc(db, "meals", id), mData);
+        if(!existingId) cacheMl.unshift(mData); else { const idx = cacheMl.findIndex(x=>x.id===id); if(idx!==-1) cacheMl[idx] = mData; }
+        mlFilteredData = [...cacheMl]; window.closeModal(); renderMeals(); updateStats();
+    };
+
+    // SYNC LOGIC
+    window.startExerciseSync = async () => {
+        log("🚀 Starting Full Exercise Dataset Sync...");
+        try {
+            const res = await fetch("https://raw.githubusercontent.com/azilRababe/Exercises_Dataset/main/data/gifs.csv");
+            const text = await res.text(); const lines = text.split(/\r?\n/);
+            if (lines.length < 2) { log("❌ CSV empty.", "err"); return; }
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            const rows = lines.slice(1);
+            const titleIdx = headers.indexOf('title'), targetIdx = headers.indexOf('targetMuscle'), srcIdx = headers.indexOf('src');
+            const finalTitleIdx = titleIdx !== -1 ? titleIdx : (headers.indexOf('name') !== -1 ? headers.indexOf('name') : 1);
+            const finalTargetIdx = targetIdx !== -1 ? targetIdx : (headers.indexOf('bodyPart') !== -1 ? headers.indexOf('bodyPart') : 0);
+            const finalSrcIdx = srcIdx !== -1 ? srcIdx : (headers.indexOf('gifUrl') !== -1 ? headers.indexOf('gifUrl') : 2);
+            let batch = writeBatch(db), count = 0, total = 0;
+            for (const row of rows) {
+                if (!row.trim()) continue;
+                const cols = []; let curr = '', inQ = false;
+                for (let char of row) { if (char === '"') inQ = !inQ; else if (char === ',' && !inQ) { cols.push(curr.trim()); curr = ''; } else curr += char; }
+                cols.push(curr.trim());
+                if (cols.length <= Math.max(finalTitleIdx, finalTargetIdx, finalSrcIdx)) continue;
+                const name = cols[finalTitleIdx].replace(/^"|"$/g, ''), target = cols[finalTargetIdx].replace(/^"|"$/g, ''), gifUrl = cols[finalSrcIdx].replace(/^"|"$/g, '');
+                if (!name || !gifUrl) continue;
+                const safeName = name.toLowerCase().replace(/[^a-z0-9]/g, ''), safeTarget = target.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const exId = "ex_" + safeName.substring(0, 15) + "_" + safeTarget.substring(0, 10);
+                batch.set(doc(db, "exercises", exId), { id: exId, name, target, bodyPart: target, gifUrl, secondary: "", category: "main exercise", difficulty: "Intermediate", instructions: ["Keep form", "Breathe", "Control"] });
+                count++; total++;
+                if (count === 25) { await batch.commit(); log(`Imported ${total} / ${rows.length}...`, 'success'); batch = writeBatch(db); count = 0; }
+            }
+            if (count > 0) await batch.commit(); log(`✅ SUCCESS. Sync complete.`, 'success');
+            cacheEx = []; loadExercises(); updateStats();
+        } catch (e) { log("❌ Error: " + e.message, 'err'); }
     };
 
     window.startMealSync = async () => {
-        log("Contacting Meal DB for Filipino Cuisine...");
+        log("🍲 Contacting Meal DB...");
         try {
             const resp = await fetch("https://www.themealdb.com/api/json/v1/1/filter.php?a=Filipino");
             const data = await resp.json();
             if(data.meals) {
                 for(const m of data.meals.slice(0, 10)) {
-                    const detailResp = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${m.idMeal}`);
-                    const detailData = await detailResp.json();
-                    const fM = detailData.meals[0];
-                    const ing = [];
+                    const dR = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${m.idMeal}`);
+                    const dD = await dR.json(); const fM = dD.meals[0]; const ing = [];
                     for(let i=1; i<=20; i++) { if(fM[`strIngredient${i}`]) ing.push(fM[`strIngredient${i}`]); }
-                    const p = Math.floor(Math.random()*20)+10, c = Math.floor(Math.random()*30)+20, f = Math.floor(Math.random()*15)+5;
-                    const duration = Math.floor(Math.random()*45)+15;
-                    const mealTimes = ["Breakfast", "Lunch", "Dinner"];
-                    const mTime = mealTimes[Math.floor(Math.random()*3)];
-                    await setDoc(doc(db, "meals", m.idMeal), { id: m.idMeal, name: fM.strMeal, imageName: fM.strMealThumb, duration: duration, mealTime: mTime, preferredDiet: "Balanced", macros: {protein:p, carbs:c, fats:f}, calories: (p*4 + c*4 + f*9), ingredients: ing, instructions: fM.strInstructions, category: "Filipino" });
-                    log(`Imported: ${fM.strMeal}`);
+                    const p = Math.floor(Math.random()*20)+10, c = Math.floor(Math.random()*30)+20, f = Math.floor(Math.random()*15)+5, dur = Math.floor(Math.random()*45)+15;
+                    const mTime = ["Breakfast", "Lunch", "Dinner"][Math.floor(Math.random()*3)];
+                    await setDoc(doc(db, "meals", m.idMeal), { id: m.idMeal, name: fM.strMeal, imageName: fM.strMealThumb, duration: dur, mealTime: mTime, preferredDiet: "Balanced", macros: {protein:p, carbs:c, fats:f}, calories: (p*4 + c*4 + f*9), ingredients: ing, instructions: fM.strInstructions, category: "Filipino" });
+                    log(`✅ Imported: ${fM.strMeal}`, 'success');
                 }
-                log("Meal database updated.");
-                loadMeals(); updateStats();
+                log("Meal database updated."); cacheMl = []; loadMeals(); updateStats();
             }
-        } catch (e) { log("Meal sync failed: " + e.message); }
+        } catch (e) { log("❌ Meal sync failed: " + e.message, 'err'); }
     };
 
     window.startNewsSync = async () => {
-        const token = document.getElementById('newsToken').value;
-        if(!token) return alert("Please enter API Token");
-        log("Initializing News Sync Engine...");
-        
-        const KEYWORDS = ["fitness","exercise","workout","gym","training","wellness","health","healthy","nutrition","diet","protein","vitamin","meal"];
-        const url = `https://newsapi.org/v2/everything?q=fitness+OR+nutrition+OR+wellness&language=en&sortBy=publishedAt&pageSize=50&apiKey=${token}`;
-
+        const token = document.getElementById('newsToken').value; if(!token) return alert("Enter Token"); log("📰 Syncing News...");
         try {
-            const res = await fetch(url);
-            const data = await res.json();
-
-            if (!data.articles) {
-                log("❌ Error: " + (data.message || "Failed to fetch articles"));
-                return;
-            }
-
+            const res = await fetch(`https://newsapi.org/v2/everything?q=fitness+OR+nutrition+OR+wellness&language=en&sortBy=publishedAt&pageSize=50&apiKey=${token}`);
+            const data = await res.json(); if (!data.articles) throw new Error(data.message);
             let savedCount = 0;
             for (const article of data.articles) {
                 if (!article.urlToImage || article.title === "[Removed]") continue;
-
-                const text = ((article.title || "") + " " + (article.description || "")).toLowerCase();
-                if (!KEYWORDS.some(k => text.includes(k))) continue;
-
                 const id = btoa(article.url).replace(/\//g, '_').replace(/\+/g, '-').replace(/=/g, '');
-                const ref = doc(db, "articles", id);
-                
-                const snap = await getDoc(ref);
-                if (snap.exists()) continue;
-
-                await setDoc(ref, {
-                    id: id,
-                    title: article.title,
-                    description: article.description || "",
-                    content: article.content || "",
-                    imageName: article.urlToImage,
-                    articleUrl: article.url,
-                    author: article.author || article.source.name || "External API",
-                    source: article.source.name,
-                    date: article.publishedAt,
-                    category: "Wellness"
-                });
-
-                savedCount++;
-                log(`✅ Synced: ${article.title.substring(0, 30)}...`);
+                await setDoc(doc(db, "articles", id), { id: id, title: article.title, description: article.description || "", content: article.content || "", imageName: article.urlToImage, articleUrl: article.url, author: article.author || "External", source: article.source.name, date: article.publishedAt, category: "Wellness" });
+                savedCount++; log(`✅ Synced: ${article.title.substring(0, 30)}...`, 'success');
             }
-
-            log(`Sync Complete. Saved ${savedCount} new articles.`);
-            loadArticles(); updateStats();
-        } catch (error) {
-            log("❌ Sync failed: " + error.message);
-        }
+            log(`Sync Complete. Saved ${savedCount} articles.`); cacheArt = []; loadArticles(); updateStats();
+        } catch (error) { log("❌ Sync failed: " + error.message, 'err'); }
     };
 
-    window.confirmWipe = async (c) => { if(confirm("Wipe all "+c+"?")) { const s=await getDocs(collection(db,c)); const b=writeBatch(db); s.forEach(d=>b.delete(d.ref)); await b.commit(); updateStats(); if(c==='meals') loadMeals(); if(c==='articles') loadArticles(); } };
+    window.confirmWipe = async (c) => { 
+        if(confirm("WIPE all " + c + "?")) { 
+            log(`⚠️ Wiping ${c}...`); const s = await getDocs(collection(db,c)); const b = writeBatch(db); s.forEach(d=>b.delete(d.ref)); await b.commit(); 
+            log(`✨ Collection wiped.`, 'success'); updateStats(); 
+            if(c==='meals') { cacheMl = []; loadMeals(); } else if(c==='articles') { cacheArt = []; loadArticles(); } else if(c==='exercises') { cacheEx = []; loadExercises(); }
+        } 
+    };
 
     updateStats();
 </script>
