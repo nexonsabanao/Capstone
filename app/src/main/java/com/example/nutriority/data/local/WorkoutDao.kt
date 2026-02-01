@@ -82,6 +82,9 @@ interface WorkoutDao {
     @Query("DELETE FROM workout_session_logs")
     suspend fun deleteAllSessionLogs()
 
+    @Query("DELETE FROM workouts")
+    suspend fun deleteAllWorkouts()
+
     @Transaction
     suspend fun updateWorkoutWithExercises(workout: Workout, workoutExercises: List<WorkoutExercise>) {
         insertWorkout(workout)
@@ -94,4 +97,17 @@ interface WorkoutDao {
         deleteWorkoutExercises(workout.id)
         deleteWorkout(workout)
     }
+
+    @Transaction
+    suspend fun deleteAllCustomWorkouts() {
+        // Assuming custom workouts have IDs > 25
+        val customWorkouts = getWorkoutsWithIdGreaterThan(25)
+        customWorkouts.forEach { workout ->
+            deleteWorkoutExercises(workout.id)
+            deleteWorkout(workout)
+        }
+    }
+
+    @Query("SELECT * FROM workouts WHERE id > :id")
+    suspend fun getWorkoutsWithIdGreaterThan(id: Int): List<Workout>
 }

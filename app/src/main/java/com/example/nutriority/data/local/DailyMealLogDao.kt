@@ -20,4 +20,7 @@ interface DailyMealLogDao {
 
     @Query("DELETE FROM daily_meal_logs WHERE id = :logId")
     suspend fun deleteLog(logId: Int)
+
+    @Query("DELETE FROM daily_meal_logs")
+    suspend fun deleteAll()
 }

@@ -143,6 +143,12 @@ class ProfileFragment : Fragment() {
 
                 profileViewModel.todayMealLogs.observe(viewLifecycleOwner) { logs ->
                     loggedFoodAdapter.submitList(logs)
+                    
+                    // Show/Hide "Today's Meals" header based on data
+                    val hasLogs = logs.isNotEmpty()
+                    binding.tvFoodTitle.isVisible = hasLogs
+                    binding.rvLoggedFood.isVisible = hasLogs
+                    
                     profileViewModel.getUser.value?.let { user ->
                         updateCalorieCard(user, logs)
                     }
@@ -152,9 +158,10 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateActivityStats(logs: List<WorkoutSessionLog>) {
-        val totalWorkouts = logs.filter { it.workoutId != 0 }.size
-        val totalCalories = logs.sumOf { it.caloriesBurned }
-        val totalMinutes = logs.sumOf { it.durationSeconds } / 60
+        val workoutLogs = logs.filter { it.workoutId > 0 }
+        val totalWorkouts = workoutLogs.size
+        val totalCalories = workoutLogs.sumOf { it.caloriesBurned }
+        val totalMinutes = workoutLogs.sumOf { it.durationSeconds } / 60
 
         binding.tvWorkoutsCount.text = totalWorkouts.toString()
         binding.tvKcalCount.text = totalCalories.toString()
@@ -167,7 +174,11 @@ class ProfileFragment : Fragment() {
 
         val calendar = currentDisplayDate.clone() as Calendar
         val today = Calendar.getInstance()
-        val logDates = logs.filter { it.workoutId != 0 }.map { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }.toSet()
+        
+        // EXCLUDE weight logs (workoutId == 0) from calendar highlighting
+        val logDates = logs.filter { it.workoutId != 0 }
+            .map { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }
+            .toSet()
 
         if (isFullMonthView) {
             val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
@@ -249,12 +260,16 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateStreak(logs: List<WorkoutSessionLog>) {
-        val workoutLogs = logs.filter { it.workoutId != 0 }
-        if (workoutLogs.isEmpty()) {
+        if (logs.isEmpty()) {
             binding.historyCard.tvStreakCount.text = "0"
             return
         }
-        val logDates = workoutLogs.map { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }.toSet()
+        
+        // EXCLUDE weight logs (workoutId == 0) from streak calculation
+        val logDates = logs.filter { it.workoutId != 0 }
+            .map { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }
+            .toSet()
+            
         var streak = 0
         val checkCal = Calendar.getInstance()
         while (logDates.contains(getDayKey(checkCal))) {
@@ -309,8 +324,8 @@ class ProfileFragment : Fragment() {
         if (weightEntries.isNotEmpty()) {
             val maxWeight = weightLogs.maxOf { it.weightKg }
             val minWeight = weightLogs.minOf { it.weightKg }
-            binding.weightCard.tvHeaviestWeight.text = String.format("%.0f", maxWeight)
-            binding.weightCard.tvLightestWeight.text = String.format("%.0f", minWeight)
+            binding.weightCard.tvHeaviestWeight.text = String.format("%.1f", maxWeight)
+            binding.weightCard.tvLightestWeight.text = String.format("%.1f", minWeight)
 
             val dataSet = LineDataSet(weightEntries, "Weight").apply {
                 color = ContextCompat.getColor(requireContext(), R.color.green)

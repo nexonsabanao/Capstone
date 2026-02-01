@@ -124,13 +124,20 @@ class MealRepository(
     suspend fun restoreMealsFromCloud() {
         val uid = auth.currentUser?.uid ?: return
         try {
+            // Restore library/favorites
             val snapshot = db.collection("users").document(uid).collection("meal_logs").get().await()
             val meals = snapshot.toObjects(Meal::class.java)
             meals.forEach { mealDao.insertMeal(it) }
+            
+            // Restore daily logging history
+            val logSnapshot = db.collection("users").document(uid).collection("daily_meal_logs").get().await()
+            val logs = logSnapshot.toObjects(DailyMealLog::class.java)
+            logs.forEach { dailyMealLogDao.insertLog(it) }
         } catch (e: Exception) { }
     }
 
     suspend fun deleteAll() {
         mealDao.deleteAllMeals()
+        dailyMealLogDao.deleteAll()
     }
 }

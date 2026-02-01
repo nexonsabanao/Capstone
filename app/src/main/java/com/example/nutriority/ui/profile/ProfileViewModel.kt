@@ -38,7 +38,6 @@ class ProfileViewModel @Inject constructor(
 
     fun logWeight(weightKg: Double, dateMillis: Long) {
         viewModelScope.launch {
-            // Only update current user profile weight if the logged date is today or newer
             val today = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
@@ -69,6 +68,33 @@ class ProfileViewModel @Inject constructor(
     fun logMeal(meal: Meal) {
         viewModelScope.launch {
             mealRepository.logMeal(meal)
+            ensureActiveSessionLogged()
+        }
+    }
+
+    private suspend fun ensureActiveSessionLogged() {
+        val logs = workoutRepository.getAllSessionLogs().asLiveData().value ?: emptyList()
+        val hasTodayLog = logs.any { 
+            val cal = Calendar.getInstance().apply { timeInMillis = it.date }
+            val today = Calendar.getInstance()
+            cal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) &&
+            cal.get(Calendar.YEAR) == today.get(Calendar.YEAR)
+        }
+
+        if (!hasTodayLog) {
+            workoutRepository.insertSessionLog(
+                WorkoutSessionLog(
+                    workoutId = -1,
+                    workoutName = "Daily Activity",
+                    caloriesBurned = 0,
+                    durationSeconds = 0,
+                    date = System.currentTimeMillis(),
+                    exercisesDone = 0,
+                    totalExercises = 0,
+                    difficulty = "N/A",
+                    weightKg = userRepository.getInitialUser()?.weightKg ?: 0.0
+                )
+            )
         }
     }
 

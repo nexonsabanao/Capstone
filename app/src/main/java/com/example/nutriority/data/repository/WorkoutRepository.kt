@@ -216,11 +216,9 @@ class WorkoutRepository(
     }
 
     suspend fun deleteAllHistory() {
-        workoutDao.getAllWorkouts().first().forEach {
-            workoutDao.deleteFullWorkout(it)
-        }
         workoutLogDao.deleteAll()
         workoutDao.deleteAllSessionLogs()
+        workoutDao.deleteAllCustomWorkouts()
     }
 
     private data class RootJson(val exercises: List<Exercise>, val workouts: List<WorkoutJson>)
