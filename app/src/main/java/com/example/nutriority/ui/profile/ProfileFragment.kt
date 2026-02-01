@@ -262,6 +262,7 @@ class ProfileFragment : Fragment() {
     private fun updateStreak(logs: List<WorkoutSessionLog>) {
         if (logs.isEmpty()) {
             binding.historyCard.tvStreakCount.text = "0"
+            binding.historyCard.tvStreakLabel.text = "day"
             return
         }
         
@@ -277,6 +278,7 @@ class ProfileFragment : Fragment() {
             checkCal.add(Calendar.DAY_OF_YEAR, -1)
         }
         binding.historyCard.tvStreakCount.text = streak.toString()
+        binding.historyCard.tvStreakLabel.text = if (streak <= 1) "day" else "days"
     }
 
     private fun getDayKey(cal: Calendar) = "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}"

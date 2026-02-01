@@ -52,6 +52,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
+            android:layout_marginTop="15dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_settings"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -231,7 +232,6 @@
 
             <!-- Daily Meal Log List -->
             <TextView
-                android:id="@+id/tvFoodTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
