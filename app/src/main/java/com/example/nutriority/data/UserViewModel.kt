@@ -28,6 +28,15 @@ class UserViewModel @Inject constructor(
      */
     fun updateOnboardingData(updateAction: (User) -> User) {
         viewModelScope.launch {
+            updateOnboardingDataSuspend(updateAction)
+        }
+    }
+
+    /**
+     * Suspend version to allow sequential operations.
+     */
+    suspend fun updateOnboardingDataSuspend(updateAction: (User) -> User) {
+        withContext(Dispatchers.IO) {
             val currentUser = repository.getInitialUser() ?: User(id = 1)
             val updatedUser = updateAction(currentUser)
             repository.insertUser(updatedUser)
@@ -39,7 +48,6 @@ class UserViewModel @Inject constructor(
      */
     fun saveOnboardingData() {
         // No-op in this new architecture as updateOnboardingData now saves instantly.
-        // Keeping it to resolve unresolved references in existing screen logic.
     }
 
     suspend fun savePersonalizedPlanAndAwait(planJson: String): Boolean {

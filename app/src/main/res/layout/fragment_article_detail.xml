@@ -114,7 +114,7 @@
                 android:textStyle="bold"
                 android:textSize="10sp"
                 android:letterSpacing="0.1"
-                tools:text="NUTRITION" />
+                tools:text="WELLNESS" />
 
             <TextView
                 android:id="@+id/article_title"
@@ -129,7 +129,7 @@
                 app:autoSizeTextType="uniform"
                 app:autoSizeMinTextSize="20sp"
                 app:autoSizeMaxTextSize="28sp"
-                tools:text="The Benefits of a High-Protein Diet" />
+                tools:text="A dietitian explains how flexibility can be healthier than only dieting" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -159,24 +159,46 @@
                         android:textStyle="bold"
                         android:textColor="#212121"
                         android:textSize="14sp"
-                        tools:text="Nutriority Editorial" />
+                        tools:text="Charlotte Carlson" />
 
                     <TextView
-                        android:id="@+id/article_reading_time"
+                        android:id="@+id/article_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:fontFamily="sans-serif-medium"
                         android:textColor="#757575"
                         android:textSize="12sp"
-                        tools:text="5 min read" />
+                        tools:text="Jan 30, 2026" />
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/article_source"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/green"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    tools:text="Source" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/article_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif"
+                android:fontStyle="italic"
+                android:lineSpacingExtra="6dp"
+                android:textColor="#616161"
+                android:textSize="16sp"
+                tools:text="Eat this, not that. This one food will cure everything. That food is poison..." />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginVertical="32dp"
+                android:layout_marginVertical="24dp"
                 android:background="#F0F0F0" />
 
             <TextView
@@ -187,7 +209,28 @@
                 android:lineSpacingExtra="10dp"
                 android:textColor="#424242"
                 android:textSize="16sp"
-                tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." />
+                tools:text="It might come as a surprise to learn that the brain responds to training..." />
+
+            <TextView
+                android:id="@+id/article_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/green"
+                android:textSize="14sp"
+                android:paddingVertical="8dp"
+                android:drawableStart="@drawable/ic_library_books_24"
+                android:drawablePadding="8dp"
+                app:drawableTint="@color/green"
+                tools:text="Read full article on GOOD Magazine" />
+
+            <!-- Hidden field for compatibility -->
+            <TextView
+                android:id="@+id/article_reading_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

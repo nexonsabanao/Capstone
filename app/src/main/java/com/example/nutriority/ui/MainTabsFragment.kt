@@ -22,6 +22,7 @@ import com.example.nutriority.ui.home.ArticleDetailFragment
 import com.example.nutriority.ui.home.HomeFragment
 import com.example.nutriority.ui.meal.MealDetailFragment
 import com.example.nutriority.ui.meal.MealFragment
+import com.example.nutriority.ui.profile.EditProfileFragment
 import com.example.nutriority.ui.profile.ProfileFragment
 import com.example.nutriority.ui.workout.AllWorkoutsFragment
 import com.example.nutriority.ui.workout.ExerciseDetailFragment
@@ -134,7 +135,7 @@ class MainTabsFragment : Fragment() {
     }
 
     private inner class TabsAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
-        override fun getItemCount(): Int = 12
+        override fun getItemCount(): Int = 13
 
         override fun createFragment(position: Int): Fragment = when (position) {
             0 -> HomeFragment()
@@ -149,6 +150,7 @@ class MainTabsFragment : Fragment() {
             9 -> WorkoutDetailFragment()
             10 -> ExerciseDetailFragment()
             11 -> WorkoutCompleteFragment()
+            12 -> EditProfileFragment()
             else -> HomeFragment()
         }
     }

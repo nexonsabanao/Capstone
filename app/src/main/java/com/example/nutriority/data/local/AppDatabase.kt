@@ -27,7 +27,7 @@ import java.io.BufferedReader
 
 @Database(
     entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class, WorkoutExercise::class, WorkoutSessionLog::class, DailyMealLog::class],
-    version = 34,
+    version = 36,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -93,11 +93,8 @@ abstract class AppDatabase : RoomDatabase() {
                         return if (resId != 0) resId else R.drawable.img_balanced_diet
                     }
 
-                    // Pre-populate Articles
-                    val articlesJson = context.assets.open("articles.json").bufferedReader().use(BufferedReader::readText)
-                    val articles: List<Article> = gson.fromJson(articlesJson, object : TypeToken<List<Article>>() {}.type)
-                    articles.forEach { it.imageResId = getSafeImageResId(it.imageName) }
-                    db.articlesDao().insertAllArticles(articles)
+                    // REMOVED: Article pre-population from JSON. 
+                    // Articles are now synced from Firestore in HomeViewModel via ArticleRepository.
 
                     // Pre-populate Meals
                     val mealsJson = context.assets.open("meals.json").bufferedReader().use(BufferedReader::readText)

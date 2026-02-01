@@ -35,6 +35,7 @@ class UserRepository(private val userDao: UserDao) {
         auth.currentUser?.uid?.let { uid ->
             val userMap = hashMapOf(
                 "id" to user.id,
+                "name" to user.name, // Added name sync
                 "gender" to user.gender,
                 "age" to user.age,
                 "heightCm" to user.heightCm,
@@ -68,6 +69,7 @@ class UserRepository(private val userDao: UserDao) {
             if (data != null) {
                 val restoredUser = User(
                     id = 1,
+                    name = data["name"] as? String ?: "", // Restore name
                     gender = data["gender"] as? String ?: "",
                     age = (data["age"] as? Number)?.toInt(),
                     heightCm = (data["heightCm"] as? Number)?.toDouble() ?: 0.0,

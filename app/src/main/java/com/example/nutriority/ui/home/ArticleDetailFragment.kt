@@ -1,6 +1,8 @@
 package com.example.nutriority.ui.home
 
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +12,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.bumptech.glide.Glide
+import com.example.nutriority.R
 import com.example.nutriority.data.model.Article
 import com.example.nutriority.databinding.FragmentArticleDetailBinding
 import com.example.nutriority.ui.NavigationViewModel
@@ -17,6 +21,8 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlin.math.abs
 
 @AndroidEntryPoint
@@ -39,33 +45,23 @@ class ArticleDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set up custom back button listener
         binding.btnBack.setOnClickListener {
             navigationViewModel.goBack()
         }
 
-        // Initially hide the toolbar title and background
         binding.tvToolbarTitle.alpha = 0f
         binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
 
-        // Handle app bar collapse state with a smooth fade effect
         binding.appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
             val totalScrollRange = appBarLayout.totalScrollRange
             if (totalScrollRange == 0) return@OnOffsetChangedListener
 
             val percentage = abs(verticalOffset).toFloat() / totalScrollRange
-
-            // Start fading in the background and title during the last 20% of scroll
             val startFadeAt = 0.8f
             if (percentage > startFadeAt) {
-                // Map the 0.8 -> 1.0 range to 0.0 -> 1.0
                 val alphaProgress = (percentage - startFadeAt) / (1f - startFadeAt)
                 val alphaInt = (alphaProgress * 255).toInt().coerceIn(0, 255)
-
-                // Set white background with calculated alpha
                 binding.toolbar.setBackgroundColor(Color.argb(alphaInt, 255, 255, 255))
-
-                // Fade in the title
                 binding.tvToolbarTitle.alpha = alphaProgress
             } else {
                 binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
@@ -83,7 +79,6 @@ class ArticleDetailFragment : Fragment() {
                     if (json != null) {
                         currentArticle = Gson().fromJson(json, Article::class.java)
                         displayArticleDetails()
-                        // Scroll to top and ensure app bar is expanded
                         binding.nestedScrollView.scrollTo(0, 0)
                         binding.appBarLayout.setExpanded(true)
                     }
@@ -96,13 +91,47 @@ class ArticleDetailFragment : Fragment() {
         currentArticle?.let { article ->
             binding.articleTitle.text = article.title
             binding.tvToolbarTitle.text = article.title
-            binding.articleCategory.text = article.category
+            binding.articleCategory.text = article.category.uppercase()
             binding.articleAuthor.text = article.author
-            binding.articleReadingTime.text = article.readingTime
-            binding.articleContent.text = article.content
-            if (article.imageResId != 0) {
-                binding.articleImage.setImageResource(article.imageResId)
+            binding.articleSource.text = article.source.ifEmpty { "Wellness" }
+            
+            // Format the date string (e.g., "2026-01-30T00:53:23Z" -> "Jan 30, 2026")
+            if (article.date.isNotEmpty()) {
+                try {
+                    val sdfIn = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+                    val sdfOut = SimpleDateFormat("MMM dd, yyyy", Locale.US)
+                    val date = sdfIn.parse(article.date)
+                    binding.articleDate.text = if (date != null) sdfOut.format(date) else article.date
+                } catch (e: Exception) {
+                    binding.articleDate.text = article.date
+                }
             }
+
+            binding.articleDescription.text = article.description
+            binding.articleContent.text = article.content
+
+            // Make the source/URL link clickable
+            if (article.articleUrl.isNotEmpty()) {
+                binding.articleUrl.text = "Read full article on ${article.source.ifEmpty { "Source" }}"
+                binding.articleUrl.setOnClickListener {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.articleUrl))
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        // Handle error
+                    }
+                }
+                binding.articleUrl.visibility = View.VISIBLE
+            } else {
+                binding.articleUrl.visibility = View.GONE
+            }
+
+            Glide.with(this)
+                .load(article.imageName)
+                .centerCrop()
+                .placeholder(R.drawable.img_balanced_diet)
+                .error(R.drawable.img_balanced_diet)
+                .into(binding.articleImage)
         }
     }
 

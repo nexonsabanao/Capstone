@@ -6,10 +6,7 @@ import android.view.*
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import com.example.nutriority.data.UserViewModel
-import com.example.nutriority.data.model.User
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
@@ -29,7 +26,6 @@ class LoginFragment : Fragment() {
     @Inject lateinit var workoutRepository: WorkoutRepository
     @Inject lateinit var mealRepository: MealRepository
 
-    private val userViewModel: UserViewModel by activityViewModels()
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -78,11 +74,10 @@ class LoginFragment : Fragment() {
     private fun restoreAndProceed() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                withTimeout(15000) {
-                    userRepository.restoreUserFromCloud()
-                }
+                // Restore profile, workout, and meal history from cloud
                 coroutineScope {
                     awaitAll(
+                        async { userRepository.restoreUserFromCloud() },
                         async { workoutRepository.restoreHistoryFromCloud() },
                         async { mealRepository.restoreMealsFromCloud() }
                     )

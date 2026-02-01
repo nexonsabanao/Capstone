@@ -17,14 +17,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    mealRepository: MealRepository,
-    workoutRepository: WorkoutRepository,
-    articleRepository: ArticleRepository,
-    userRepository: UserRepository
+    private val mealRepository: MealRepository,
+    private val workoutRepository: WorkoutRepository,
+    private val articleRepository: ArticleRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     val allMeals: StateFlow<List<Meal>>
@@ -35,6 +36,11 @@ class HomeViewModel @Inject constructor(
     val calorieGoal: StateFlow<String>
 
     init {
+        // Automatically sync articles from Firestore when Home is opened
+        viewModelScope.launch {
+            articleRepository.syncArticlesFromCloud()
+        }
+
         allMeals = mealRepository.allMeals.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

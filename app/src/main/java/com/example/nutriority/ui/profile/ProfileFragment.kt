@@ -1,7 +1,5 @@
 package com.example.nutriority.ui.profile
 
-import android.app.AlertDialog
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -12,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TableRow
 import android.widget.TextView
-import android.widget.Toast
 import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -22,7 +19,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.nutriority.MainActivity
 import com.example.nutriority.R
 import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.data.model.DailyMealLog
@@ -30,17 +26,13 @@ import com.example.nutriority.databinding.FragmentProfileBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.custom.WeightMarkerView
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.pow
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment() {
@@ -84,12 +76,12 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        binding.weightCard.root.findViewById<View>(R.id.btn_log_weight)?.setOnClickListener {
-            showWeightLogBottomSheet()
+        binding.btnSettings.setOnClickListener {
+            navigationViewModel.navigateToEditProfile()
         }
 
-        binding.headerContainer.setOnClickListener {
-            showAccountOptionsDialog()
+        binding.weightCard.root.findViewById<View>(R.id.btn_log_weight)?.setOnClickListener {
+            showWeightLogBottomSheet()
         }
         
         binding.historyCard.btnShowRecords.setOnClickListener {
@@ -131,74 +123,11 @@ class ProfileFragment : Fragment() {
         bottomSheet.show(childFragmentManager, "WeightLogBottomSheet")
     }
 
-    private fun showAccountOptionsDialog() {
-        val options = arrayOf("Logout", "Delete Account")
-        AlertDialog.Builder(requireContext())
-            .setTitle("Account Settings")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> logout()
-                    1 -> confirmDeleteAccount()
-                }
-            }
-            .show()
-    }
-
-    private fun logout() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            profileViewModel.clearAllLocalData()
-            FirebaseAuth.getInstance().signOut()
-            restartApp()
-        }
-    }
-
-    private fun confirmDeleteAccount() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Permanently Delete Account?")
-            .setMessage("This will erase ALL your progress from the cloud and this phone. This action cannot be undone.")
-            .setPositiveButton("DELETE EVERYTHING") { _, _ ->
-                performFullDataWipe()
-            }
-            .setNegativeButton("CANCEL", null)
-            .show()
-    }
-
-    private fun performFullDataWipe() {
-        val user = FirebaseAuth.getInstance().currentUser ?: return
-        val uid = user.uid
-        val db = FirebaseFirestore.getInstance()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                db.collection("users").document(uid).delete()
-                profileViewModel.clearAllLocalData()
-                user.delete().addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(requireContext(), "Account Wiped Successfully", Toast.LENGTH_SHORT).show()
-                        restartApp()
-                    } else {
-                        Toast.makeText(requireContext(), "Error: Re-login required to delete account.", Toast.LENGTH_LONG).show()
-                    }
-                }
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Reset failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun restartApp() {
-        val intent = Intent(requireContext(), MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        startActivity(intent)
-        requireActivity().finish()
-    }
-
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 profileViewModel.getUser.observe(viewLifecycleOwner) { user ->
                     user?.let {
-                        val bmi = it.weightKg / (it.heightCm / 100.0).pow(2)
                         updateWeightChartFromLogs(profileViewModel.sessionLogs.value ?: emptyList())
                         binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", it.weightKg)
                         profileViewModel.todayMealLogs.value?.let { logs -> updateCalorieCard(it, logs) }
