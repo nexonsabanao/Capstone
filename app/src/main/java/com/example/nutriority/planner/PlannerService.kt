@@ -42,7 +42,7 @@ class PlannerService @Inject constructor(
         sb.append("Daily Calories: ${plan.nutritionPlan.dailyCalories} kcal\n")
         sb.append("Macros: P ${plan.nutritionPlan.macroTargets.proteinGrams}g | C ${plan.nutritionPlan.macroTargets.carbsGrams}g | F ${plan.nutritionPlan.macroTargets.fatGrams}g\n")
         sb.append("Meals:\n")
-        plan.nutritionPlan.meals.forEach { m -> sb.append(" - ${m.name} (${m.calories} kcal) - ${m.description}\n") }
+        plan.nutritionPlan.meals.forEach { m -> sb.append(" - ${m.name} (${m.calories} kcal) - ${m.mealTime}\n") }
         sb.append("\nWorkout Plan (weekly burn estimate ${plan.workoutPlan.weeklyCaloriesBurn} kcal):\n")
         plan.workoutPlan.sessions.forEach { s -> sb.append(" - ${s.day}: ${s.focus} (${s.durationMinutes} min)\n") }
 

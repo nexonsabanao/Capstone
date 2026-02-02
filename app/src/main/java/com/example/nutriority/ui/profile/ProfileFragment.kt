@@ -83,6 +83,10 @@ class ProfileFragment : Fragment() {
         binding.weightCard.root.findViewById<View>(R.id.btn_log_weight)?.setOnClickListener {
             showWeightLogBottomSheet()
         }
+
+        binding.calorieCard.root.findViewById<View>(R.id.btnLogFood)?.setOnClickListener {
+            navigationViewModel.navigateToLogManual()
+        }
         
         binding.historyCard.btnShowRecords.setOnClickListener {
             isFullMonthView = !isFullMonthView
@@ -244,7 +248,7 @@ class ProfileFragment : Fragment() {
         when {
             hasLog -> {
                 tv.setBackgroundResource(R.drawable.bg_calendar_active)
-                tv.setTextColor(Color.WHITE)
+                tv.setTextColor(Color.parseColor("#757575"))
             }
             isToday -> {
                 tv.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
@@ -260,23 +264,32 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateStreak(logs: List<WorkoutSessionLog>) {
-        if (logs.isEmpty()) {
-            binding.historyCard.tvStreakCount.text = "0"
-            binding.historyCard.tvStreakLabel.text = "day"
-            return
-        }
-        
         // EXCLUDE weight logs (workoutId == 0) from streak calculation
         val logDates = logs.filter { it.workoutId != 0 }
             .map { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }
             .toSet()
+
+        if (logDates.isEmpty()) {
+            binding.historyCard.tvStreakCount.text = "0"
+            binding.historyCard.tvStreakLabel.text = "day"
+            return
+        }
             
         var streak = 0
         val checkCal = Calendar.getInstance()
+        val todayKey = getDayKey(checkCal)
+        
+        // Check yesterday if nothing today yet
+        if (!logDates.contains(todayKey)) {
+            checkCal.add(Calendar.DAY_OF_YEAR, -1)
+        }
+
+        // Count back from today (or yesterday if today is empty)
         while (logDates.contains(getDayKey(checkCal))) {
             streak++
             checkCal.add(Calendar.DAY_OF_YEAR, -1)
         }
+        
         binding.historyCard.tvStreakCount.text = streak.toString()
         binding.historyCard.tvStreakLabel.text = if (streak <= 1) "day" else "days"
     }

@@ -1,17 +1,24 @@
 package com.example.nutriority.ui.profile
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.example.nutriority.MainActivity
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
@@ -25,7 +32,12 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class EditProfileFragment : Fragment() {
@@ -38,6 +50,13 @@ class EditProfileFragment : Fragment() {
     private val navigationViewModel: NavigationViewModel by activityViewModels()
 
     private var currentUser: User? = null
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri = result.data?.data ?: return@registerForActivityResult
+            processAndSaveProfileImage(uri)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -81,7 +100,8 @@ class EditProfileFragment : Fragment() {
         }
 
         binding.btnEditProfileImage.setOnClickListener {
-            Toast.makeText(requireContext(), "Image picker coming soon!", Toast.LENGTH_SHORT).show()
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            pickImageLauncher.launch(intent)
         }
 
         binding.rowName.setOnClickListener { 
@@ -135,6 +155,43 @@ class EditProfileFragment : Fragment() {
 
         binding.btnDeleteAccount.setOnClickListener {
             showDeleteAccountConfirmation()
+        }
+    }
+
+    private fun processAndSaveProfileImage(uri: Uri) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val bitmap = withContext(Dispatchers.IO) {
+                try {
+                    val inputStream = requireContext().contentResolver.openInputStream(uri)
+                    BitmapFactory.decodeStream(inputStream)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
+            bitmap?.let {
+                val path = convertToWebP(it)
+                if (path != null) {
+                    updateUserField { user -> user.copy(profileImageUrl = path) }
+                    Toast.makeText(requireContext(), "Profile image updated", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private suspend fun convertToWebP(bitmap: Bitmap): String? = withContext(Dispatchers.IO) {
+        try {
+            val fileName = "profile_${System.currentTimeMillis()}.webp"
+            val file = File(requireContext().filesDir, fileName)
+            val out = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.WEBP, 80, out)
+            out.flush()
+            out.close()
+            file.absolutePath
+        } catch (e: Exception) {
+            null
         }
     }
 
@@ -206,6 +263,14 @@ class EditProfileFragment : Fragment() {
                 binding.rowGoal.tvValue.text = it.goal
                 binding.rowDiet.tvValue.text = it.preferredDiet
                 binding.tvGenderValue.text = it.gender
+
+                if (it.profileImageUrl.isNotEmpty()) {
+                    Glide.with(this)
+                        .load(File(it.profileImageUrl))
+                        .placeholder(R.drawable.logo)
+                        .circleCrop()
+                        .into(binding.profileImage)
+                }
             }
         }
     }

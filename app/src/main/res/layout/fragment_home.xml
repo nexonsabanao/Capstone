@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
-            android:text="Welcome back,"
+            android:text="Welcome to,"
             android:textColor="#757575"
             android:textSize="16sp" />
 

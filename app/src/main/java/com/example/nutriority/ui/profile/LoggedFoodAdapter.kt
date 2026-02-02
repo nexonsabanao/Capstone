@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.nutriority.R
 import com.example.nutriority.data.model.DailyMealLog
+import java.io.File
 
 class LoggedFoodAdapter(
     private val onDeleteClick: (DailyMealLog) -> Unit
@@ -44,17 +45,37 @@ class LoggedFoodAdapter(
             fats.text = "${log.fats} g"
             carbs.text = "${log.carbs} g"
             calories.text = "${log.calories} kcal"
-            mealTime.text = log.time
+            mealTime.text = log.mealTime
 
             val context = itemView.context
-            val packageName = context.packageName
-            val resId = context.resources.getIdentifier(log.imageName, "drawable", packageName)
-            
-            Glide.with(context)
-                .load(if (resId != 0) resId else R.drawable.img_balanced_diet)
+            val requestBuilder = Glide.with(context).asDrawable().centerCrop()
+
+            when {
+                // If it's a local WebP file path (from manual logging)
+                log.imageName.startsWith("/") -> {
+                    requestBuilder.load(File(log.imageName))
+                }
+                // If it's a URL
+                log.imageName.startsWith("http") -> {
+                    requestBuilder.load(log.imageName)
+                }
+                // If it's a drawable resource name
+                else -> {
+                    val resId = context.resources.getIdentifier(log.imageName, "drawable", context.packageName)
+                    if (resId != 0) {
+                        requestBuilder.load(resId)
+                    } else {
+                        requestBuilder.load(R.drawable.bg_meal_placeholder)
+                    }
+                }
+            }
+
+            requestBuilder
+                .placeholder(R.drawable.bg_meal_placeholder)
+                .error(R.drawable.bg_meal_placeholder)
                 .into(foodImage)
 
-            val timeColor = when (log.time.lowercase()) {
+            val timeColor = when (log.mealTime.lowercase()) {
                 "breakfast" -> Color.parseColor("#EBB861")
                 "lunch" -> Color.parseColor("#F2994A")
                 "dinner" -> Color.parseColor("#416491")

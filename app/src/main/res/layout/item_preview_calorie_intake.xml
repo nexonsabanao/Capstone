@@ -131,6 +131,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:id="@+id/btnLogFood"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
@@ -139,6 +140,8 @@
                 android:textColor="@color/green"
                 android:textSize="12sp"
                 android:letterSpacing="0.05"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 app:layout_constraintBaseline_toBaselineOf="@id/macroTitle"
                 app:layout_constraintEnd_toEndOf="parent" />
 

@@ -73,11 +73,15 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
     }
 
     fun navigateToEditProfile() {
-        setTab(12) // Assuming 12 is the index for EditProfileFragment
+        setTab(12) 
     }
 
     fun navigateToWorkoutComplete() {
         setTab(11)
+    }
+
+    fun navigateToLogManual() {
+        setTab(13)
     }
 
     fun goBack(): Boolean {

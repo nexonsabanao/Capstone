@@ -23,7 +23,7 @@ sealed class MealListItem {
     }
 
     data class MealItem(val meal: Meal, val dayIndex: Int) : MealListItem() {
-        override val id: String = meal.name + meal.time + dayIndex
+        override val id: String = meal.name + meal.mealTime + dayIndex
     }
 }
 
@@ -84,15 +84,15 @@ class GeneratedMealPlanAdapter(
         fun bind(item: MealListItem.MealItem) {
             val meal = item.meal
             mealName.text = meal.name
-            mealTime.text = meal.time
+            mealTime.text = meal.mealTime
             Glide.with(itemView.context)
                 .load(meal.imageName)
-                .placeholder(R.mipmap.ic_launcher)
+                .placeholder(R.drawable.bg_meal_placeholder)
                 .into(mealImage)
 
             val mealTimeDrawable = mealTime.background.mutate() as? GradientDrawable
             mealTimeDrawable?.let { drawable ->
-                val color = when (meal.time) {
+                val color = when (meal.mealTime) {
                     "Breakfast" -> Color.parseColor("#537770")
                     "Lunch"     -> Color.parseColor("#c27d36")
                     "Dinner"    -> Color.parseColor("#416491")

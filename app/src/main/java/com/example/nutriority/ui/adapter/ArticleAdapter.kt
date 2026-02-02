@@ -10,6 +10,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.example.nutriority.R
 import com.example.nutriority.data.model.Article
 import com.example.nutriority.databinding.ItemArticlePreviewBinding
+import java.io.File
 
 class ArticleAdapter(
     private val onArticleClick: (Article) -> Unit
@@ -31,16 +32,32 @@ class ArticleAdapter(
             articleAuthor.text = "by ${currentArticle.author}"
             articleCategory.text = currentArticle.category
             
-            // Format or display the date if needed
             articleReadingTime.text = "Read Article"
 
-            // Loading image from URL with a light gray placeholder
-            Glide.with(articleImage.context)
-                .load(currentArticle.imageName)
+            val context = articleImage.context
+            val requestBuilder = Glide.with(context)
+                .asDrawable()
                 .centerCrop()
                 .transition(DrawableTransitionOptions.withCrossFade())
-                .placeholder(R.drawable.bg_image_placeholder)
-                .error(R.drawable.bg_image_placeholder)
+
+            when {
+                // If it's a local WebP file path
+                currentArticle.imageName.startsWith("/") -> {
+                    requestBuilder.load(File(currentArticle.imageName))
+                }
+                // If it's a URL
+                currentArticle.imageName.startsWith("http") -> {
+                    requestBuilder.load(currentArticle.imageName)
+                }
+                // Fallback to placeholder
+                else -> {
+                    requestBuilder.load(R.drawable.bg_article_placeholder)
+                }
+            }
+
+            requestBuilder
+                .placeholder(R.drawable.bg_article_placeholder)
+                .error(R.drawable.bg_article_placeholder)
                 .into(articleImage)
 
             root.setOnClickListener {

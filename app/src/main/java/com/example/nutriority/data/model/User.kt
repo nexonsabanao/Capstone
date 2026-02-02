@@ -11,6 +11,7 @@ data class User(
     @PrimaryKey(autoGenerate = false)
     val id: Int = 1,
     val name: String = "",
+    val profileImageUrl: String = "",
     val gender: String = "",
     val age: Int? = null,
     val heightCm: Double = 0.0,

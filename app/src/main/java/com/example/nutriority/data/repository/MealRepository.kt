@@ -31,7 +31,9 @@ class MealRepository(
             it.apply {
                 val resources = application.resources
                 val packageName = application.packageName
-                imageResId = resources.getIdentifier(it.imageName, "drawable", packageName)
+                if (imageName.isNotEmpty() && !imageName.startsWith("http")) {
+                    imageResId = resources.getIdentifier(imageName, "drawable", packageName)
+                }
             }
         }
     }
@@ -40,21 +42,41 @@ class MealRepository(
         return allMeals.first()
     }
 
-    fun getMealById(mealId: Int): Flow<Meal?> {
+    fun getMealById(mealId: String): Flow<Meal?> {
         return mealDao.getMealById(mealId)
     }
 
-    suspend fun ensureLibraryIsLoaded() {
-        if (mealDao.getAllMeals().first().isNotEmpty()) return
-        
+    /**
+     * Synchronizes the global meal library from Firestore to the local database.
+     */
+    suspend fun syncMealsFromCloud() {
         try {
-            val gson = Gson()
-            val mealsJson = application.assets.open("meals.json").bufferedReader().use(BufferedReader::readText)
-            val meals: List<Meal> = gson.fromJson(mealsJson, object : TypeToken<List<Meal>>() {}.type)
-            mealDao.insertAllMeals(meals)
-            Log.d("Restore", "Meal Library Loaded")
+            val snapshot = db.collection("meals").get().await()
+            val cloudMeals = snapshot.toObjects(Meal::class.java)
+            if (cloudMeals.isNotEmpty()) {
+                mealDao.insertAllMeals(cloudMeals)
+                Log.d("MealRepo", "Synced ${cloudMeals.size} meals from Firestore")
+            }
         } catch (e: Exception) {
-            Log.e("Restore", "Failed to load meal library", e)
+            Log.e("MealRepo", "Error syncing meals: ${e.message}")
+        }
+    }
+
+    suspend fun ensureLibraryIsLoaded() {
+        // First try to sync from cloud
+        syncMealsFromCloud()
+        
+        // If still empty, fallback to local assets
+        if (mealDao.getAllMeals().first().isEmpty()) {
+            try {
+                val gson = Gson()
+                val mealsJson = application.assets.open("meals.json").bufferedReader().use(BufferedReader::readText)
+                val meals: List<Meal> = gson.fromJson(mealsJson, object : TypeToken<List<Meal>>() {}.type)
+                mealDao.insertAllMeals(meals)
+                Log.d("Restore", "Meal Library Loaded from Assets")
+            } catch (e: Exception) {
+                Log.e("Restore", "Failed to load meal library from assets", e)
+            }
         }
     }
 
@@ -65,18 +87,54 @@ class MealRepository(
             mealId = meal.id,
             name = meal.name,
             calories = meal.calories,
-            protein = (meal.calories * 0.15 / 4).toInt(), 
-            carbs = (meal.calories * 0.50 / 4).toInt(),
-            fats = (meal.calories * 0.35 / 9).toInt(),
-            time = meal.time ?: "Snack",
+            protein = meal.macros.protein, 
+            carbs = meal.macros.carbs,
+            fats = meal.macros.fats,
+            mealTime = meal.mealTime ?: "Snack",
             date = System.currentTimeMillis(),
             imageName = meal.imageName
         )
+        insertDailyLog(log)
+    }
+
+    suspend fun logManualMeal(
+        name: String,
+        protein: Int,
+        carbs: Int,
+        fats: Int,
+        time: String,
+        ingredients: List<String>,
+        manualCalories: Int = 0
+    ) {
+        val finalCalories = if (manualCalories > 0) {
+            manualCalories
+        } else {
+            (protein * 4) + (carbs * 4) + (fats * 9)
+        }
+
+        val log = DailyMealLog(
+            mealId = "-1", 
+            name = name,
+            calories = finalCalories,
+            protein = protein,
+            carbs = carbs,
+            fats = fats,
+            mealTime = time,
+            date = System.currentTimeMillis(),
+            imageName = "bg_image_placeholder" 
+        )
+        insertDailyLog(log)
+    }
+
+    private suspend fun insertDailyLog(log: DailyMealLog) {
         dailyMealLogDao.insertLog(log)
         
-        // Sync to cloud
         auth.currentUser?.uid?.let { uid ->
-            db.collection("users").document(uid).collection("daily_meal_logs").add(log)
+            try {
+                db.collection("users").document(uid).collection("daily_meal_logs").add(log).await()
+            } catch (e: Exception) {
+                Log.e("Sync", "Failed to sync meal log", e)
+            }
         }
     }
 
@@ -103,21 +161,21 @@ class MealRepository(
     suspend fun insert(meal: Meal) {
         mealDao.insertMeal(meal)
         auth.currentUser?.uid?.let { uid ->
-            db.collection("users").document(uid).collection("meal_logs").document(meal.id.toString()).set(meal)
+            db.collection("users").document(uid).collection("meal_logs").document(meal.id).set(meal)
         }
     }
 
     suspend fun update(meal: Meal) {
         mealDao.updateMeal(meal)
         auth.currentUser?.uid?.let { uid ->
-            db.collection("users").document(uid).collection("meal_logs").document(meal.id.toString()).set(meal)
+            db.collection("users").document(uid).collection("meal_logs").document(meal.id).set(meal)
         }
     }
 
     suspend fun delete(meal: Meal) {
         mealDao.deleteMeal(meal)
         auth.currentUser?.uid?.let { uid ->
-            db.collection("users").document(uid).collection("meal_logs").document(meal.id.toString()).delete()
+            db.collection("users").document(uid).collection("meal_logs").document(meal.id).delete()
         }
     }
 

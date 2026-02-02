@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -11,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.nutriority.R
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.databinding.FragmentMealBinding
 import com.example.nutriority.ui.NavigationViewModel
@@ -37,7 +40,7 @@ class MealFragment : Fragment() {
                 navigationViewModel.navigateToMealDetail(json)
             },
             onSwapClick = { mealToReplace, dayIndex ->
-                showSwapBottomSheet(mealToReplace, dayIndex)
+                mealViewModel.swapMeal(mealToReplace, dayIndex)
             }
         )
     }
@@ -56,15 +59,6 @@ class MealFragment : Fragment() {
         setupRecyclerView()
         updateDateViews()
         setupClickListeners()
-        
-        val currentPlan = mealViewModel.mealPlan.value
-        if (!currentPlan.isNullOrEmpty() && currentPlan.any { it.isNotEmpty() }) {
-            updateMealPlanUI(currentPlan)
-        } else {
-            binding.initialView.isVisible = true
-            binding.generatedMealPlanRecyclerView.isVisible = false
-        }
-        
         observeViewModel()
     }
 
@@ -77,79 +71,69 @@ class MealFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.nextButton.setOnClickListener {
-            mealViewModel.generateMealPlan()
+            mealViewModel.generateNewMealPlan()
         }
 
         binding.doneButton.setOnClickListener {
-            mealViewModel.completeMealPlan()
+            navigationViewModel.resetToHome()
         }
-    }
 
-    private fun showSwapBottomSheet(mealToReplace: Meal, dayIndex: Int) {
-        val options = mealViewModel.getSwapOptions(mealToReplace)
-        val bottomSheet = MealSwapBottomSheetFragment(
-            mealType = mealToReplace.time,
-            options = options,
-            onMealSwapped = { newMeal ->
-                mealViewModel.swapMeal(dayIndex, mealToReplace, newMeal)
-            }
-        )
-        bottomSheet.show(childFragmentManager, "MealSwapBottomSheet")
-    }
-
-    private fun updateMealPlanUI(weeklyPlan: List<List<Meal>>) {
-        val hasPlan = weeklyPlan.isNotEmpty() && weeklyPlan.any { it.isNotEmpty() }
-        
-        binding.initialView.isVisible = !hasPlan
-        binding.generatedMealPlanRecyclerView.isVisible = hasPlan
-
-        if (hasPlan) {
-            val mealListItems = weeklyPlan.mapIndexed { index, dailyMeals ->
-                val dayLabel = mealViewModel.getDayLabel(index)
-                listOf(MealListItem.HeaderItem(dayLabel, index)) + dailyMeals.map { meal ->
-                    MealListItem.MealItem(meal, index)
+        binding.btnMenu.setOnClickListener { view ->
+            val popup = PopupMenu(requireContext(), view)
+            popup.menuInflater.inflate(R.menu.menu_meal_plan, popup.menu)
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_delete_plan -> {
+                        deleteMealPlan()
+                        true
+                    }
+                    else -> false
                 }
-            }.flatten()
-            mealAdapter.submitList(mealListItems)
-        } else {
-            mealAdapter.submitList(emptyList())
+            }
+            popup.show()
         }
-        
-        val isExpired = mealViewModel.isPlanExpired.value ?: false
-        binding.doneButton.isVisible = hasPlan && isExpired
-        binding.nextButton.isVisible = !hasPlan || isExpired
+    }
+
+    private fun deleteMealPlan() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val user = mealViewModel.userRepository.getInitialUser()
+            if (user != null) {
+                mealViewModel.userRepository.insertUser(user.copy(mealPlanJson = null))
+                Toast.makeText(requireContext(), "Meal plan deleted", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    mealViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-                        binding.loadingProgressBar.isVisible = isLoading
-                        if (isLoading) {
+                    mealViewModel.isGenerating.observe(viewLifecycleOwner) { isGenerating ->
+                        binding.loadingProgressBar.isVisible = isGenerating
+                        if (isGenerating) {
                             binding.initialView.isVisible = false
                             binding.generatedMealPlanRecyclerView.isVisible = false
+                            binding.btnMenu.isVisible = false
                         }
                     }
                 }
 
                 launch {
-                    mealViewModel.mealPlan.observe(viewLifecycleOwner) { weeklyPlan ->
-                        if (weeklyPlan != null) updateMealPlanUI(weeklyPlan)
+                    mealViewModel.currentMealPlan.collect { planItems ->
+                        val hasPlan = planItems.isNotEmpty()
+                        binding.initialView.isVisible = !hasPlan
+                        binding.generatedMealPlanRecyclerView.isVisible = hasPlan
+                        binding.btnMenu.isVisible = hasPlan
+                        mealAdapter.submitList(planItems)
                     }
                 }
 
                 launch {
                     mealViewModel.isPlanExpired.observe(viewLifecycleOwner) { isExpired ->
-                        val hasPlan = mealViewModel.mealPlan.value?.any { it.isNotEmpty() } == true
+                        val hasPlan = mealViewModel.currentMealPlan.value.isNotEmpty()
                         binding.doneButton.isVisible = hasPlan && isExpired
                         binding.nextButton.isVisible = !hasPlan || isExpired
                     }
-                }
-
-                launch {
-                    // Critical: Keep allMeals observed to ensure cached data is always fresh
-                    mealViewModel.allMeals.observe(viewLifecycleOwner) { }
                 }
             }
         }

@@ -35,7 +35,8 @@ class UserRepository(private val userDao: UserDao) {
         auth.currentUser?.uid?.let { uid ->
             val userMap = hashMapOf(
                 "id" to user.id,
-                "name" to user.name, // Added name sync
+                "name" to user.name,
+                "profileImageUrl" to user.profileImageUrl, // Added to sync
                 "gender" to user.gender,
                 "age" to user.age,
                 "heightCm" to user.heightCm,
@@ -46,14 +47,12 @@ class UserRepository(private val userDao: UserDao) {
                 "preferredDiet" to user.preferredDiet,
                 "excludedIngredients" to user.excludedIngredients,
                 "personalizedPlanJson" to user.personalizedPlanJson,
-                "mealPlanJson" to user.mealPlanJson, // Ensure meal plan is synced
+                "mealPlanJson" to user.mealPlanJson,
                 "lastCompletedWorkoutDay" to user.lastCompletedWorkoutDay
             )
             try {
                 db.collection("users").document(uid).set(userMap).await()
-            } catch (e: Exception) {
-                // Background sync will handle it if offline
-            }
+            } catch (e: Exception) { }
         }
         return localSuccess
     }
@@ -69,7 +68,8 @@ class UserRepository(private val userDao: UserDao) {
             if (data != null) {
                 val restoredUser = User(
                     id = 1,
-                    name = data["name"] as? String ?: "", // Restore name
+                    name = data["name"] as? String ?: "",
+                    profileImageUrl = data["profileImageUrl"] as? String ?: "", // Restore image path
                     gender = data["gender"] as? String ?: "",
                     age = (data["age"] as? Number)?.toInt(),
                     heightCm = (data["heightCm"] as? Number)?.toDouble() ?: 0.0,
@@ -80,7 +80,7 @@ class UserRepository(private val userDao: UserDao) {
                     preferredDiet = data["preferredDiet"] as? String ?: "",
                     excludedIngredients = (data["excludedIngredients"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                     personalizedPlanJson = data["personalizedPlanJson"] as? String,
-                    mealPlanJson = data["mealPlanJson"] as? String, // Restore meal plan
+                    mealPlanJson = data["mealPlanJson"] as? String,
                     lastCompletedWorkoutDay = (data["lastCompletedWorkoutDay"] as? Number)?.toInt() ?: 0
                 )
                 userDao.insertUser(restoredUser)

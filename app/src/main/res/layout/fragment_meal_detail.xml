@@ -99,141 +99,88 @@
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
             android:paddingTop="32dp"
-            android:paddingBottom="40dp">
+            android:paddingBottom="120dp">
 
             <TextView
                 android:id="@+id/mealName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textStyle="bold"
+                android:fontFamily="sans-serif-black"
                 android:textColor="#212121"
-                android:textSize="28sp"
+                android:textSize="26sp"
                 android:lineSpacingExtra="4dp"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="20sp"
-                app:autoSizeMaxTextSize="28sp"
-                tools:text="Hoisin Pork and Snap Pea Stir-Fry" />
+                tools:text="Avocado Toast with Poached Egg" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="20dp"
                 android:orientation="horizontal">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    app:cardBackgroundColor="@android:color/white"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="2dp"
-                    app:cardPreventCornerOverlap="false"
-                    app:cardUseCompatPadding="true"
-                    app:strokeWidth="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_time"
+                        app:tint="@color/green" />
+                    <TextView
+                        android:id="@+id/mealTime"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:background="@android:color/transparent"
-                        android:padding="16dp">
+                        android:layout_marginStart="6dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:textColor="#757575"
+                        android:textSize="14sp"
+                        tools:text="10 min" />
+                </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/mealTime"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif"
-                            android:textStyle="bold"
-                            android:textColor="@color/green"
-                            android:textSize="20sp"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="14sp"
-                            app:autoSizeMaxTextSize="20sp"
-                            tools:text="35 min" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:text="TIME"
-                            android:textColor="#757575"
-                            android:textSize="12sp"
-                            android:letterSpacing="0.1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="8sp"
-                            app:autoSizeMaxTextSize="12sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    app:cardBackgroundColor="@android:color/white"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="2dp"
-                    app:cardPreventCornerOverlap="false"
-                    app:cardUseCompatPadding="true"
-                    app:strokeWidth="0dp">
+                    android:layout_marginHorizontal="12dp"
+                    android:text="•"
+                    android:textColor="#BDBDBD" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_fire"
+                        app:tint="@color/green" />
+                    <TextView
+                        android:id="@+id/mealCalories"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:background="@android:color/transparent"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/mealCalories"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif"
-                            android:textStyle="bold"
-                            android:textColor="@color/green"
-                            android:textSize="20sp"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="14sp"
-                            app:autoSizeMaxTextSize="20sp"
-                            tools:text="860 kcal" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:text="CALORIES"
-                            android:textColor="#757575"
-                            android:textSize="12sp"
-                            android:letterSpacing="0.1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="8sp"
-                            app:autoSizeMaxTextSize="12sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
+                        android:layout_marginStart="6dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:textColor="#757575"
+                        android:textSize="14sp"
+                        tools:text="320 kcal" />
+                </LinearLayout>
             </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:fontFamily="sans-serif"
-                android:textStyle="bold"
-                android:text="Nutrition info"
+                android:fontFamily="sans-serif-bold"
+                android:text="Nutrition Breakdown"
                 android:textColor="#212121"
-                android:textSize="20sp"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="16sp"
-                app:autoSizeMaxTextSize="20sp" />
+                android:textSize="18sp" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@android:color/white"
+                app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="2dp"
                 app:cardPreventCornerOverlap="false"
@@ -245,18 +192,12 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:background="@android:color/transparent"
                     android:padding="20dp">
 
-                    <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                    <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/nutrition_chart"
-                        android:layout_width="90dp"
-                        android:layout_height="90dp"
-                        app:cpb_background_progressbar_color="#F5F5F5"
-                        app:cpb_background_progressbar_width="8dp"
-                        app:cpb_progressbar_color="@color/green"
-                        app:cpb_progressbar_width="8dp"
-                        app:cpb_progress="65" />
+                        android:layout_width="110dp"
+                        android:layout_height="110dp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -264,9 +205,32 @@
                         android:layout_marginStart="24dp"
                         android:orientation="vertical">
                         
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="15% Protein" android:textSize="14sp" android:textColor="#212121" android:fontFamily="sans-serif-medium" android:layout_marginBottom="4dp" app:autoSizeTextType="uniform" app:autoSizeMinTextSize="10sp" app:autoSizeMaxTextSize="14sp"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="35% Fat" android:textSize="14sp" android:textColor="#212121" android:fontFamily="sans-serif-medium" android:layout_marginBottom="4dp" app:autoSizeTextType="uniform" app:autoSizeMinTextSize="10sp" app:autoSizeMaxTextSize="14sp"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50% Carb" android:textSize="14sp" android:textColor="#212121" android:fontFamily="sans-serif-medium" app:autoSizeTextType="uniform" app:autoSizeMinTextSize="10sp" app:autoSizeMaxTextSize="14sp"/>
+                        <TextView 
+                            android:id="@+id/tvProteinPercent"
+                            android:layout_width="wrap_content" 
+                            android:layout_height="wrap_content" 
+                            android:text="Protein: 14g" 
+                            android:textSize="14sp" 
+                            android:textColor="#212121" 
+                            android:fontFamily="sans-serif-medium" 
+                            android:layout_marginBottom="8dp"/>
+                        <TextView 
+                            android:id="@+id/tvFatPercent"
+                            android:layout_width="wrap_content" 
+                            android:layout_height="wrap_content" 
+                            android:text="Fat: 18g" 
+                            android:textSize="14sp" 
+                            android:textColor="#212121" 
+                            android:fontFamily="sans-serif-medium" 
+                            android:layout_marginBottom="8dp"/>
+                        <TextView 
+                            android:id="@+id/tvCarbPercent"
+                            android:layout_width="wrap_content" 
+                            android:layout_height="wrap_content" 
+                            android:text="Carb: 28g" 
+                            android:textSize="14sp" 
+                            android:textColor="#212121" 
+                            android:fontFamily="sans-serif-medium"/>
                         
                     </LinearLayout>
                 </LinearLayout>
@@ -281,33 +245,29 @@
                 app:selectionRequired="true"
                 app:checkedButton="@+id/btn_instructions">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_instructions"
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="0dp"
-                    android:layout_height="54dp"
+                    android:layout_height="52dp"
                     android:layout_weight="1"
                     android:text="Instructions"
-                    android:fontFamily="sans-serif"
-                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-bold"
                     app:cornerRadius="16dp"
-                    app:autoSizeTextType="uniform"
-                    app:autoSizeMinTextSize="10sp"
-                    app:autoSizeMaxTextSize="14sp" />
+                    app:backgroundTint="#F2F2F2"
+                    android:textColor="#212121" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_ingredients"
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="0dp"
-                    android:layout_height="54dp"
+                    android:layout_height="52dp"
                     android:layout_weight="1"
                     android:text="Ingredients"
-                    android:fontFamily="sans-serif"
-                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-bold"
                     app:cornerRadius="16dp"
-                    app:autoSizeTextType="uniform"
-                    app:autoSizeMinTextSize="10sp"
-                    app:autoSizeMaxTextSize="14sp" />
+                    app:backgroundTint="#F2F2F2"
+                    android:textColor="#212121" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <TextView
@@ -315,14 +275,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:fontFamily="sans-serif"
-                android:textStyle="bold"
+                android:fontFamily="sans-serif-black"
                 android:text="Instructions"
                 android:textColor="#212121"
-                android:textSize="20sp"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="16sp"
-                app:autoSizeMaxTextSize="20sp" />
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/tvMealInstructions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif"
+                android:textColor="#424242"
+                android:textSize="16sp"
+                android:lineSpacingExtra="6dp"
+                tools:text="Toast the bread. Mash avocado with lemon juice and spread on toast. Poach the egg in simmering water for 3 minutes and place on top." />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/content_recycler_view"
@@ -330,7 +297,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:nestedScrollingEnabled="false"
-                tools:itemCount="5"
+                android:visibility="gone"
                 tools:listitem="@layout/item_meal_instruction" />
 
         </LinearLayout>
@@ -342,19 +309,14 @@
         android:layout_height="64dp"
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="40dp"
         android:backgroundTint="@color/primary_dark"
         android:text="LOG MEAL"
-        android:fontFamily="sans-serif"
-        android:textStyle="bold"
+        android:fontFamily="sans-serif-black"
         android:textColor="@color/white"
         app:cornerRadius="32dp"
         app:icon="@drawable/ic_fire"
         app:iconTint="@color/white"
-        app:elevation="8dp"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="12sp"
-        app:autoSizeMaxTextSize="16sp" />
+        app:elevation="8dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

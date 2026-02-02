@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 import com.example.nutriority.R
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.databinding.ItemPreviewMealCardBinding
+import java.io.File
 
 class MealAdapter(private val onItemClick: (Meal) -> Unit) : ListAdapter<Meal, MealAdapter.MealViewHolder>(MealDiffCallback()) {
 
@@ -19,16 +20,34 @@ class MealAdapter(private val onItemClick: (Meal) -> Unit) : ListAdapter<Meal, M
             binding.mealName.text = meal.name
             binding.mealCalories.text = "${meal.calories} kcal"
 
-            // Use Glide for efficient image loading from resources
-            if (meal.imageResId != 0) {
-                Glide.with(binding.mealImage.context)
-                    .load(meal.imageResId)
-                    .centerCrop()
-                    .placeholder(R.drawable.img_balanced_diet)
-                    .into(binding.mealImage)
-            } else {
-                binding.mealImage.setImageResource(R.drawable.img_balanced_diet)
+            val context = binding.mealImage.context
+            
+            // Check if the imageName refers to a local WebP file path, a URL, or a drawable resource
+            val requestBuilder = Glide.with(context).asDrawable().centerCrop()
+            
+            when {
+                // If it's a local file path (from manual logging)
+                meal.imageName.startsWith("/") -> {
+                    requestBuilder.load(File(meal.imageName))
+                }
+                // If it's a URL (from cloud sync)
+                meal.imageName.startsWith("http") -> {
+                    requestBuilder.load(meal.imageName)
+                }
+                // If it's a drawable resource ID (from library)
+                meal.imageResId != 0 -> {
+                    requestBuilder.load(meal.imageResId)
+                }
+                // Fallback to placeholder
+                else -> {
+                    requestBuilder.load(R.drawable.bg_meal_placeholder)
+                }
             }
+            
+            requestBuilder
+                .placeholder(R.drawable.bg_meal_placeholder)
+                .error(R.drawable.bg_meal_placeholder)
+                .into(binding.mealImage)
 
             binding.root.setOnClickListener {
                 onItemClick(meal)
