@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.nutriority.R
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.databinding.ItemSelectableExerciseBinding
@@ -34,10 +35,11 @@ class SelectableExerciseAdapter(
 
     private fun updateDisplayList() {
         val filtered = allExercises.filter { exercise ->
-            when (currentFilter) {
-                "Warm-up" -> exercise.category.contains("Warm-up", true)
-                "Cool-down" -> exercise.category.contains("Cool-down", true)
-                else -> !exercise.category.contains("Warm-up", true) && !exercise.category.contains("Cool-down", true)
+            when (currentFilter.lowercase()) {
+                "warmup" -> exercise.category.lowercase().contains("warmup")
+                "cooldown" -> exercise.category.lowercase().contains("cooldown")
+                else -> !exercise.category.lowercase().contains("warmup") && 
+                        !exercise.category.lowercase().contains("cooldown")
             }
         }
 
@@ -49,7 +51,6 @@ class SelectableExerciseAdapter(
     }
 
     private fun isSelected(exercise: Exercise): Boolean {
-        // Match by ID AND the specific category of the current tab
         return selectedExercises.any { it.id == exercise.id && it.category.equals(currentFilter, true) }
     }
 
@@ -68,23 +69,20 @@ class SelectableExerciseAdapter(
     inner class ViewHolder(private val binding: ItemSelectableExerciseBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(exercise: Exercise, isSelected: Boolean) {
             binding.tvExerciseName.text = exercise.name
-            binding.tvTargetMuscle.text = exercise.targetMuscle
+            binding.tvTargetMuscle.text = exercise.target
             binding.rbSelect.isChecked = isSelected
             
-            if (exercise.imageResId != 0) {
-                Glide.with(binding.ivExerciseImage.context)
-                    .load(exercise.imageResId)
-                    .centerCrop()
-                    .placeholder(R.drawable.img_balanced_diet)
-                    .into(binding.ivExerciseImage)
-            }
+            // Fixed Glide loading for Selectable items
+            Glide.with(binding.ivExerciseImage.context)
+                .load(exercise.gifUrl)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .into(binding.ivExerciseImage)
 
             binding.root.setOnClickListener {
                 if (isSelected) {
-                    // Remove specifically from the current tab's category
                     selectedExercises.removeAll { it.id == exercise.id && it.category.equals(currentFilter, true) }
                 } else {
-                    // Add specifically to the current tab's category
                     selectedExercises.add(exercise.copy(category = currentFilter))
                 }
                 onExerciseSelected(exercise, !isSelected)

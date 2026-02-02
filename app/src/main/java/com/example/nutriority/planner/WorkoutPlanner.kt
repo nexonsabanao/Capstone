@@ -1,14 +1,11 @@
 package com.example.nutriority.planner
 
 import android.app.Application
-import android.util.Log
 import com.example.nutriority.data.model.User
-import com.example.nutriority.data.model.WorkoutLog
-import com.example.nutriority.data.model.WorkoutWithExercises
+import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.pow
@@ -16,80 +13,77 @@ import kotlin.math.pow
 @Singleton
 class WorkoutPlanner @Inject constructor(
     private val workoutRepository: WorkoutRepository,
+    private val workoutGenerator: WorkoutGenerator,
     private val application: Application,
     private val gson: Gson
 ) {
 
-    data class PlanConfig(
-        val goal: String,
-        val schedule: Map<String, List<String?>>,
-        val sets: Int,
-        val reps: String
+    // Fixed 7-day schedule with recovery
+    private val weeklySchedule = listOf(
+        WorkoutGenerator.MovementType.PUSH,
+        WorkoutGenerator.MovementType.UNKNOWN, // Rest
+        WorkoutGenerator.MovementType.PULL,
+        WorkoutGenerator.MovementType.UNKNOWN, // Rest
+        WorkoutGenerator.MovementType.LEGS,
+        WorkoutGenerator.MovementType.UNKNOWN, // Rest
+        WorkoutGenerator.MovementType.CORE
     )
 
     suspend fun planWorkouts(user: User): WorkoutPlan {
-        Log.d("WorkoutPlanner", "Planning progressive workouts for user goal: ${user.goal}")
-        
-        // CRITICAL FIX: Ensure library is loaded before planning
         workoutRepository.ensureLibraryIsLoaded()
-        
-        val allWorkouts = workoutRepository.getAllWorkoutsList()
-
-        if (allWorkouts.isEmpty()) {
-            return createErrorPlan()
+        val allExercises = workoutRepository.getAllExercises().first()
+        if (allExercises.isEmpty()) {
+            return createErrorPlan("No exercises found in the database.")
         }
 
         val userDifficulty = mapActivityLevelToDifficulty(user.activityLevel)
-        var suitableWorkouts = allWorkouts.filter { it.workout.difficulty.equals(userDifficulty, ignoreCase = true) }
 
-        if (suitableWorkouts.isEmpty()) {
-            suitableWorkouts = allWorkouts.filter { it.workout.difficulty.equals(fallbackDifficulty(userDifficulty), ignoreCase = true) }
+        val sessions = weeklySchedule.mapIndexed { index, movementType ->
+            if (movementType == WorkoutGenerator.MovementType.UNKNOWN) {
+                createRestDay(index)
+            } else {
+                val workoutWithExercises = workoutGenerator.generateStructuredWorkout(
+                    movementType = movementType,
+                    difficulty = userDifficulty,
+                    allExercises = allExercises
+                )
+                
+                val workout = workoutWithExercises.workout
+                val totalDuration = (workoutWithExercises.exerciseAssignments.size * 6).coerceAtLeast(15)
+                val caloriesBurned = ((workout.metValue * 3.5 * user.weightKg) / 200 * totalDuration).toInt()
+
+                WorkoutSession(
+                    day = "Day ${index + 1}",
+                    focus = workout.name,
+                    durationMinutes = totalDuration,
+                    description = workout.description,
+                    caloriesBurned = caloriesBurned,
+                    workoutDetails = WorkoutDetails(id = workout.id, sets = null, reps = null),
+                    sets = null,
+                    reps = null
+                )
+            }
         }
 
-        val bmi = calculateBmi(user.weightKg, user.heightCm)
-        val workoutHistory = workoutRepository.getWorkoutLogs().firstOrNull() ?: emptyList()
-
-        val plans: List<PlanConfig> = loadPlansFromJson()
-        val config = plans.find { it.goal.equals(user.goal, ignoreCase = true) } ?: plans.first()
-
-        val schedule = if (bmi > 25 && config.schedule.containsKey("bmi_high")) {
-            config.schedule["bmi_high"]!!
-        } else {
-            config.schedule["default"]!!
-        }
-
-        val plan = buildWeeklyPlan(schedule, suitableWorkouts, workoutHistory)
-        val sessions = createSessionsFromPlan(plan, config, workoutHistory, user.weightKg)
-
-        val refinedWeeklyCalories = sessions.sumOf { it.caloriesBurned }
-
-        return WorkoutPlan(refinedWeeklyCalories, sessions)
+        val totalWeeklyCalories = sessions.sumOf { it.caloriesBurned }
+        return WorkoutPlan(totalWeeklyCalories, sessions)
     }
 
-    private fun loadPlansFromJson(): List<PlanConfig> {
-        return try {
-            val jsonString = application.assets.open("plans.json").bufferedReader().use { it.readText() }
-            val type = object : TypeToken<List<PlanConfig>>() {}.type
-            gson.fromJson(jsonString, type)
-        } catch (e: Exception) {
-            emptyList()
-        }
+    private fun createRestDay(index: Int): WorkoutSession {
+        return WorkoutSession(
+            day = "Day ${index + 1}",
+            focus = "Rest Day",
+            durationMinutes = 0,
+            description = "A day to recover and let your muscles rebuild. Recovery is where the growth happens!",
+            caloriesBurned = 0
+        )
     }
 
     private fun mapActivityLevelToDifficulty(activityLevel: String): String {
         return when (activityLevel) {
-            "Sedentary" -> "Beginner"
-            "Lightly Active", "Lightly active" -> "Beginner"
+            "Sedentary", "Lightly Active", "Lightly active" -> "Beginner"
             "Active" -> "Intermediate"
             "Very active" -> "Advanced"
-            else -> "Beginner"
-        }
-    }
-
-    private fun fallbackDifficulty(current: String): String {
-        return when(current) {
-            "Advanced" -> "Intermediate"
-            "Intermediate" -> "Beginner"
             else -> "Beginner"
         }
     }
@@ -99,96 +93,13 @@ class WorkoutPlanner @Inject constructor(
         return weightKg / (heightCm / 100).pow(2)
     }
 
-    private fun buildWeeklyPlan(
-        schedule: List<String?>,
-        allSuitableWorkouts: List<WorkoutWithExercises>,
-        history: List<WorkoutLog>
-    ): List<WorkoutWithExercises?> {
-        val weeklyPlan = mutableListOf<WorkoutWithExercises?>()
-        val usedWorkoutIds = mutableSetOf<Int>()
-
-        val completionCounts = history.groupBy { it.workoutId }.mapValues { it.value.size }
-
-        val availablePool = allSuitableWorkouts.sortedBy { completionCounts[it.workout.id] ?: 0 }
-            .toMutableList()
-
-        for (focusMuscle in schedule) {
-            if (focusMuscle == null) {
-                weeklyPlan.add(null)
-                continue
-            }
-
-            var chosen = availablePool.firstOrNull { workout ->
-                val muscles = workout.workout.targetMuscle.lowercase()
-                workout.workout.id !in usedWorkoutIds &&
-                        muscles.contains(focusMuscle.lowercase())
-            }
-
-            if (chosen == null) {
-                chosen = availablePool.firstOrNull { it.workout.id !in usedWorkoutIds }
-            }
-
-            weeklyPlan.add(chosen)
-            chosen?.let { usedWorkoutIds.add(it.workout.id) }
-        }
-        return weeklyPlan
-    }
-
-    private fun createSessionsFromPlan(
-        plan: List<WorkoutWithExercises?>,
-        config: PlanConfig,
-        history: List<WorkoutLog>,
-        userWeight: Double
-    ): List<WorkoutSession> {
-        return plan.mapIndexed { index, workoutWithExercises ->
-            if (workoutWithExercises != null) {
-                val workout = workoutWithExercises.workout
-                
-                val totalDurationMinutes = workoutWithExercises.exerciseAssignments.sumOf { assignmentWithDetail ->
-                    val durationStr = assignmentWithDetail.assignment.duration.lowercase()
-                    if (durationStr.contains("s")) {
-                        (durationStr.filter { it.isDigit() }.toIntOrNull() ?: 30) / 60.0
-                    } else {
-                        assignmentWithDetail.assignment.sets * 3.0
-                    }
-                }.toInt().coerceAtLeast(20)
-
-                val caloriesBurned = ((workout.metValue * 3.5 * userWeight) / 200 * totalDurationMinutes).toInt()
-
-                val mainExercises = workoutWithExercises.exerciseAssignments
-                    .filter { it.assignment.category == "Exercise" }
-                val sets = mainExercises.firstOrNull()?.assignment?.sets ?: config.sets
-                val reps = mainExercises.firstOrNull()?.assignment?.reps ?: config.reps
-
-                WorkoutSession(
-                    day = "Day ${index + 1}",
-                    focus = workout.name,
-                    durationMinutes = totalDurationMinutes,
-                    description = workout.description,
-                    caloriesBurned = caloriesBurned,
-                    workoutDetails = WorkoutDetails(id = workout.id, sets = sets, reps = reps),
-                    sets = sets,
-                    reps = reps
-                )
-            } else {
-                WorkoutSession(
-                    day = "Day ${index + 1}",
-                    focus = "Rest Day",
-                    durationMinutes = 0,
-                    description = "A day to recover and let your muscles rebuild.",
-                    caloriesBurned = 0
-                )
-            }
-        }
-    }
-
-    private fun createErrorPlan(): WorkoutPlan {
+    private fun createErrorPlan(message: String): WorkoutPlan {
         val errorSessions = List(7) { index ->
             WorkoutSession(
                 day = "Day ${index + 1}",
                 focus = "Error",
                 durationMinutes = 0,
-                description = "Could not load workout data.",
+                description = message,
                 caloriesBurned = 0
             )
         }

@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.nutriority.R
 import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.databinding.ItemExerciseBinding
@@ -98,10 +100,10 @@ class ExerciseAdapter(
             binding.exerciseName.text = exercise.name
             
             if (isLibraryView) {
-                binding.exerciseDuration.text = exercise.targetMuscle
+                binding.exerciseDuration.text = exercise.target
             } else {
-                val isTimed = assignment.category.contains("Warm-up", true) || 
-                              assignment.category.contains("Cool-down", true) ||
+                val isTimed = assignment.category.contains("warmup", true) || 
+                              assignment.category.contains("cooldown", true) ||
                               assignment.duration.isNotBlank()
 
                 if (isTimed && assignment.duration.isNotBlank()) {
@@ -112,9 +114,12 @@ class ExerciseAdapter(
                 }
             }
             
-            if (exercise.imageResId != 0) {
-                binding.exerciseImage.setImageResource(exercise.imageResId)
-            }
+            // Load Exercise GIF/Image from URL - Removed placeholder
+            Glide.with(binding.exerciseImage.context)
+                .load(exercise.gifUrl)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .into(binding.exerciseImage)
 
             // COMPLETION DESIGN: Show checkmark and change appearance if done
             if (assignment.isCompleted) {

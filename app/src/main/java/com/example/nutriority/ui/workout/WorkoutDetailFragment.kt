@@ -215,9 +215,10 @@ class WorkoutDetailFragment : Fragment() {
             val allExercisesList = viewModel.getAllExercises().first()
 
             val workoutName = workoutWithExercises.workout.name
-            val isSystemWorkout = workoutWithExercises.workout.id <= 25
+            // UPDATED APPROACH: Treat negative IDs (Generated) and IDs <= 25 (System) as non-editable/resettable
+            val isEditableName = workoutWithExercises.workout.id > 25
 
-            if (isSystemWorkout) {
+            if (!isEditableName) {
                 dialogBinding.workoutNameLayout.visibility = View.GONE
                 dialogBinding.btnReset.visibility = View.VISIBLE
             } else {
@@ -233,8 +234,8 @@ class WorkoutDetailFragment : Fragment() {
 
             dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
                 val category = when (checkedIds.firstOrNull()) {
-                    R.id.chip_warmup -> "Warm-up"
-                    R.id.chip_cooldown -> "Cool-down"
+                    R.id.chip_warmup -> "warmup"
+                    R.id.chip_cooldown -> "cooldown"
                     else -> "Exercise"
                 }
                 selectableAdapter.setFilter(category)
@@ -253,7 +254,7 @@ class WorkoutDetailFragment : Fragment() {
             }
 
             dialogBinding.btnSave.setOnClickListener {
-                val finalName = if (isSystemWorkout) workoutName else dialogBinding.etWorkoutName.text.toString()
+                val finalName = if (!isEditableName) workoutName else dialogBinding.etWorkoutName.text.toString()
                 if (finalName.isBlank()) return@setOnClickListener
 
                 val finalSelectedExercises = selectableAdapter.getSelectedExercises()
@@ -418,8 +419,8 @@ class WorkoutDetailFragment : Fragment() {
         val displayList = mutableListOf<WorkoutItem>()
         val assignments = workout.exerciseAssignments.sortedBy { it.assignment.order }
 
-        val warmup = assignments.filter { it.assignment.category.equals("Warm-up", ignoreCase = true) }
-        val cooldown = assignments.filter { it.assignment.category.equals("Cool-down", ignoreCase = true) }
+        val warmup = assignments.filter { it.assignment.category.equals("warmup", ignoreCase = true) }
+        val cooldown = assignments.filter { it.assignment.category.equals("cooldown", ignoreCase = true) }
         val main = assignments.filter { it.assignment.category.equals("Exercise", ignoreCase = true) }
 
         binding.workoutExerciseCount.text = main.size.toString()

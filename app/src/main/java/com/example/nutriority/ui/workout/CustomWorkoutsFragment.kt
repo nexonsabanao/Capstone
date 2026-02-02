@@ -68,6 +68,7 @@ class CustomWorkoutsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 homeViewModel.unfilteredWorkouts.collect { workouts ->
+                    // FIX: Personalized workouts use negative IDs. User-created use positive IDs > 25.
                     val customOnes = workouts.filter { it.id > 25 }
                     customAdapter.submitList(customOnes)
                     
@@ -108,8 +109,8 @@ class CustomWorkoutsFragment : Fragment() {
 
         dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
             val category = when (checkedIds.firstOrNull()) {
-                R.id.chip_warmup -> "Warm-up"
-                R.id.chip_cooldown -> "Cool-down"
+                R.id.chip_warmup -> "warmup"
+                R.id.chip_cooldown -> "cooldown"
                 else -> "Exercise"
             }
             selectableAdapter.setFilter(category)

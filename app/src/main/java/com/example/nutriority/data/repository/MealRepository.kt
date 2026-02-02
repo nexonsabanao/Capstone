@@ -8,13 +8,10 @@ import com.example.nutriority.data.local.DailyMealLogDao
 import com.example.nutriority.data.model.DailyMealLog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import java.io.BufferedReader
 import java.util.Calendar
 
 class MealRepository(
@@ -63,21 +60,8 @@ class MealRepository(
     }
 
     suspend fun ensureLibraryIsLoaded() {
-        // First try to sync from cloud
+        // Only sync from cloud as per user request to stop using meals.json
         syncMealsFromCloud()
-        
-        // If still empty, fallback to local assets
-        if (mealDao.getAllMeals().first().isEmpty()) {
-            try {
-                val gson = Gson()
-                val mealsJson = application.assets.open("meals.json").bufferedReader().use(BufferedReader::readText)
-                val meals: List<Meal> = gson.fromJson(mealsJson, object : TypeToken<List<Meal>>() {}.type)
-                mealDao.insertAllMeals(meals)
-                Log.d("Restore", "Meal Library Loaded from Assets")
-            } catch (e: Exception) {
-                Log.e("Restore", "Failed to load meal library from assets", e)
-            }
-        }
     }
 
     // --- DAILY LOGGING ---

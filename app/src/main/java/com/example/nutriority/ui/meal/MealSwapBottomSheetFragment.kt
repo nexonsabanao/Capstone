@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.meal
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 
 class MealSwapBottomSheetFragment(
     private val mealType: String,
@@ -38,7 +40,13 @@ class MealSwapBottomSheetFragment(
         
         val adapter = MealOptionAdapter(options) { meal ->
             selectedMeal = meal
+            binding.btnDone.isEnabled = true
+            binding.btnDone.alpha = 1.0f
         }
+        
+        // Initial state for Done button
+        binding.btnDone.isEnabled = false
+        binding.btnDone.alpha = 0.5f
         
         binding.rvMealOptions.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvMealOptions.adapter = adapter
@@ -77,23 +85,34 @@ class MealSwapBottomSheetFragment(
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val meal = meals[position]
             holder.name.text = meal.name
-            holder.time.text = "25 min" // Defaulting since your model might not have prep time
+            holder.time.text = "25 min"
             
             Glide.with(holder.itemView.context)
                 .load(meal.imageName)
+                .placeholder(R.drawable.bg_meal_placeholder)
                 .into(holder.image)
             
             val isSelected = position == selectedPosition
-            holder.overlay.visibility = if (isSelected) View.VISIBLE else View.GONE
+            
+            // Set icon color based on selection
+            val iconColor = if (isSelected) {
+                ContextCompat.getColor(holder.itemView.context, R.color.green)
+            } else {
+                ContextCompat.getColor(holder.itemView.context, android.R.color.darker_gray)
+            }
+            holder.overlay.imageTintList = ColorStateList.valueOf(iconColor)
+            
             holder.card.strokeWidth = if (isSelected) 4 else 0
-            holder.card.strokeColor = holder.itemView.context.getColor(R.color.green)
+            holder.card.strokeColor = ContextCompat.getColor(holder.itemView.context, R.color.green)
 
             holder.itemView.setOnClickListener {
-                val previous = selectedPosition
-                selectedPosition = holder.adapterPosition
-                notifyItemChanged(previous)
-                notifyItemChanged(selectedPosition)
-                onMealSelected(meal)
+                if (selectedPosition != holder.adapterPosition) {
+                    val previous = selectedPosition
+                    selectedPosition = holder.adapterPosition
+                    notifyItemChanged(previous)
+                    notifyItemChanged(selectedPosition)
+                    onMealSelected(meal)
+                }
             }
         }
 

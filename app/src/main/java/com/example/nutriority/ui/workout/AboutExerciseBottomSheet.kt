@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.nutriority.R
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.databinding.DialogAboutExerciseBinding
@@ -69,17 +71,26 @@ class AboutExerciseBottomSheet : BottomSheetDialogFragment() {
 
     private fun setupData(exercise: Exercise) {
         binding.tvExerciseName.text = exercise.name.uppercase()
-        binding.tvInstructions.text = exercise.description
         
-        // Setup Target Muscle Chips
+        // Display Instructions from Array
+        if (exercise.instructions.isNotEmpty()) {
+            binding.tvInstructions.text = exercise.instructions.joinToString("\n") { it.trim() }
+        } else {
+            binding.tvInstructions.text = exercise.description
+        }
+        
+        // Setup Target and Secondary Muscle Chips
         binding.cgTargetMuscle.removeAllViews()
-        val muscles = exercise.targetMuscle.split(",").filter { it.isNotBlank() }
-        
         val primaryDark = ContextCompat.getColor(requireContext(), R.color.primary_dark)
         
-        muscles.forEach { muscle ->
+        // Combine target and secondary for chip display
+        val muscleTags = mutableListOf<String>()
+        if (exercise.target.isNotBlank()) muscleTags.addAll(exercise.target.split(",").map { it.trim() })
+        if (exercise.secondary.isNotBlank()) muscleTags.addAll(exercise.secondary.split(",").map { it.trim() })
+        
+        muscleTags.filter { it.isNotBlank() }.distinct().forEach { tag ->
             val chip = Chip(requireContext()).apply {
-                text = muscle.trim()
+                text = tag
                 chipBackgroundColor = ColorStateList.valueOf(primaryDark)
                 setTextColor(Color.WHITE)
                 chipStrokeWidth = 0f
@@ -87,18 +98,17 @@ class AboutExerciseBottomSheet : BottomSheetDialogFragment() {
             binding.cgTargetMuscle.addView(chip)
         }
 
-        // Set visual if available
-        if (exercise.imageResId != 0) {
+        // Load GIF using Glide from URL
+        if (exercise.gifUrl.isNotBlank()) {
+            Glide.with(this)
+                .asGif()
+                .load(exercise.gifUrl)
+                .placeholder(R.drawable.img_balanced_diet)
+                .error(R.drawable.img_balanced_diet)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(binding.ivExerciseVisual)
+        } else if (exercise.imageResId != 0) {
             binding.ivExerciseVisual.setImageResource(exercise.imageResId)
-        }
-
-        // Display Tips
-        binding.tvTips.text = if (exercise.tips.isNotBlank()) {
-            exercise.tips.split("\n")
-                .filter { it.isNotBlank() }
-                .joinToString("\n") { "• ${it.trim()}" }
-        } else {
-            "• Keep your core tight throughout the exercise."
         }
     }
 

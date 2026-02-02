@@ -101,7 +101,7 @@ class WorkoutDetailViewModel @Inject constructor(
         workoutJob = viewModelScope.launch {
             workoutRepository.getWorkoutWithExercises(workoutId).collect {
                 _workout.value = it
-                _completedExercisesCount.value = it.exerciseAssignments.count { it.assignment.isCompleted }
+                _completedExercisesCount.value = it?.exerciseAssignments?.count { it.assignment.isCompleted } ?: 0
             }
         }
     }

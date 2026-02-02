@@ -17,6 +17,7 @@ import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.planner.MealPlanner
+import com.example.nutriority.planner.WorkoutGenerator
 import com.example.nutriority.planner.WorkoutPlanner
 import com.google.gson.Gson
 import dagger.Module
@@ -118,12 +119,19 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideWorkoutGenerator(): WorkoutGenerator {
+        return WorkoutGenerator()
+    }
+
+    @Provides
+    @Singleton
     fun provideWorkoutPlanner(
         workoutRepository: WorkoutRepository,
+        workoutGenerator: WorkoutGenerator,
         application: Application,
         gson: Gson
     ): WorkoutPlanner {
-        return WorkoutPlanner(workoutRepository, application, gson)
+        return WorkoutPlanner(workoutRepository, workoutGenerator, application, gson)
     }
 
     @Provides

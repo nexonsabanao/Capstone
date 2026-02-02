@@ -19,7 +19,6 @@ import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.data.model.DailyMealLog
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -69,84 +68,8 @@ abstract class AppDatabase : RoomDatabase() {
 
             override fun onOpen(db: SupportSQLiteDatabase) {
                 super.onOpen(db)
-                INSTANCE?.let { database ->
-                    scope.launch(Dispatchers.IO) {
-                        if (database.workoutDao().getWorkoutCount() == 0) {
-                            Log.d("AppDatabase", "Database is empty. Re-populating library...")
-                            database.withTransaction {
-                                prePopulateDatabase(context, database)
-                            }
-                        }
-                    }
-                }
-            }
-
-            @SuppressLint("DiscouragedApi")
-            private suspend fun prePopulateDatabase(context: Context, db: AppDatabase) {
-                val gson = Gson()
-                try {
-                    val packageName = context.packageName
-
-                    fun getSafeImageResId(imageName: String?): Int {
-                        if (imageName.isNullOrEmpty()) return R.drawable.img_balanced_diet
-                        val resId = context.resources.getIdentifier(imageName, "drawable", packageName)
-                        return if (resId != 0) resId else R.drawable.img_balanced_diet
-                    }
-
-                    // REMOVED: Article pre-population from JSON. 
-                    // Articles are now synced from Firestore in HomeViewModel via ArticleRepository.
-
-                    // Pre-populate Meals
-                    val mealsJson = context.assets.open("meals.json").bufferedReader().use(BufferedReader::readText)
-                    val meals: List<Meal> = gson.fromJson(mealsJson, object : TypeToken<List<Meal>>() {}.type)
-                    meals.forEach { it.imageResId = getSafeImageResId(it.imageName) }
-                    db.mealDao().insertAllMeals(meals)
-
-                    // Pre-populate Workouts
-                    val rootJsonStr = context.assets.open("workouts.json").bufferedReader().use(BufferedReader::readText)
-                    val rootData: RootJson = gson.fromJson(rootJsonStr, RootJson::class.java)
-
-                    rootData.exercises.forEach { exercise ->
-                        exercise.imageResId = getSafeImageResId(exercise.imageName)
-                        db.workoutDao().insertExercise(exercise)
-                    }
-
-                    rootData.workouts.forEach { wJson ->
-                        val workout = Workout(
-                            id = wJson.id,
-                            name = wJson.name,
-                            description = wJson.description,
-                            category = wJson.category,
-                            targetMuscle = wJson.targetMuscle,
-                            imageName = wJson.imageName,
-                            difficulty = wJson.difficulty,
-                            duration = wJson.duration,
-                            metValue = if (wJson.category.lowercase().contains("cardio")) 8.0 else 5.0
-                        )
-                        db.workoutDao().insertWorkout(workout)
-
-                        wJson.exercises.forEachIndexed { index, weJson ->
-                            val workoutExercise = WorkoutExercise(
-                                workoutId = wJson.id,
-                                exerciseId = weJson.exerciseId,
-                                category = weJson.category ?: "Exercise",
-                                sets = weJson.sets,
-                                reps = weJson.reps,
-                                rest = weJson.rest,
-                                duration = weJson.duration ?: "",
-                                order = index
-                            )
-                            db.workoutDao().insertWorkoutExercise(workoutExercise)
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e("AppDatabase", "Failed to pre-populate database: ", e)
-                }
+                // No more pre-population from assets as per user request to move to online data
             }
         }
     }
-
-    private data class WorkoutExerciseJson(val exerciseId: String, val category: String?, val sets: Int, val reps: String, val rest: String, val duration: String?)
-    private data class WorkoutJson(val id: Int, val name: String, val description: String, val category: String, val targetMuscle: String, val imageName: String, val difficulty: String, val duration: String, val exercises: List<WorkoutExerciseJson>)
-    private data class RootJson(val exercises: List<Exercise>, val workouts: List<WorkoutJson>)
 }

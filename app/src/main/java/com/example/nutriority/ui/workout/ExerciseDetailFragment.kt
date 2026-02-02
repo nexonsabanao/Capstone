@@ -14,6 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.nutriority.R
 import com.example.nutriority.data.model.ExerciseSet
 import com.example.nutriority.data.model.WorkoutLog
@@ -203,8 +205,8 @@ class ExerciseDetailFragment : Fragment() {
         
         val updatedAssignment = detail.assignment.copy(
             sets = updatedSets.size,
-            reps = if (isDuration) "1" else valueString, // reps field used for sets distribution
-            duration = if (isDuration) valueString else "" // duration field used for seconds distribution
+            reps = if (isDuration) "1" else valueString,
+            duration = if (isDuration) valueString else ""
         )
         
         viewLifecycleOwner.lifecycleScope.launch {
@@ -277,20 +279,34 @@ class ExerciseDetailFragment : Fragment() {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.exercise.collect { exercise ->
+                    if (exercise != null) {
+                        binding.exerciseTitle.text = exercise.name
+                        
+                        // Removed placeholder for cleaner loading
+                        Glide.with(requireContext())
+                            .asGif()
+                            .load(exercise.gifUrl)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(binding.imgExercise)
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.exerciseWithDetail.collect { detail ->
                     if (detail != null && !isInitialized) {
                         isInitialized = true
                         val assignment = detail.assignment
                         
-                        binding.exerciseTitle.text = detail.exercise.name
-                        
-                        val isDuration = assignment.category.contains("Warm-up", true) || 
-                                         assignment.category.contains("Cool-down", true) ||
+                        val isDuration = assignment.category.contains("warmup", true) || 
+                                         assignment.category.contains("cooldown", true) ||
                                          assignment.duration.isNotBlank()
 
                         val setsCount = assignment.sets.coerceAtLeast(1)
                         
-                        // FIX: Pull multiple values correctly from reps or duration fields
                         val valueStrings = if (isDuration) {
                             assignment.duration.split(",")
                         } else {

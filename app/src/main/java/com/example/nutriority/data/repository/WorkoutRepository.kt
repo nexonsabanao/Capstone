@@ -13,12 +13,10 @@ import com.example.nutriority.data.model.WorkoutWithExercises
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import java.io.BufferedReader
 
 class WorkoutRepository(
     private val workoutDao: WorkoutDao,
@@ -29,20 +27,14 @@ class WorkoutRepository(
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    val allWorkouts: Flow<List<Workout>> = workoutDao.getAllWorkouts().map { workouts ->
-        workouts.map { workout ->
-            workout.copy().apply {
-                imageResId = application.resources.getIdentifier(imageName, "drawable", application.packageName)
-            }
-        }
-    }
+    val allWorkouts: Flow<List<Workout>> = workoutDao.getAllWorkouts()
 
     suspend fun getAllWorkoutsList(): List<WorkoutWithExercises> {
-        return workoutDao.getAllWorkoutsWithExercises().first().map { it.applyImages() }
+        return workoutDao.getAllWorkoutsWithExercises().first()
     }
 
-    fun getWorkoutWithExercises(workoutId: Int): Flow<WorkoutWithExercises> {
-        return workoutDao.getWorkoutWithExercises(workoutId).map { it.applyImages() }
+    fun getWorkoutWithExercises(workoutId: Int): Flow<WorkoutWithExercises?> {
+        return workoutDao.getWorkoutWithExercises(workoutId)
     }
 
     suspend fun getExerciseById(exerciseId: String): Exercise? {
@@ -74,41 +66,77 @@ class WorkoutRepository(
     }
 
     /**
-     * MANDATORY RESTORE: Loads official exercises and trainer workouts from assets.
+     * Synchronizes exercises and predefined workouts from Firestore.
      */
-    suspend fun ensureLibraryIsLoaded() {
-        val exerciseCount = workoutDao.getExerciseCount()
-        if (exerciseCount > 0) return
-        
+    suspend fun syncWorkoutsAndExercisesFromCloud() {
         try {
-            val jsonStr = application.assets.open("workouts.json").bufferedReader().use(BufferedReader::readText)
-            val root = Gson().fromJson(jsonStr, RootJson::class.java)
-            
-            // 1. Load all base exercises
-            root.exercises.forEach { workoutDao.insertExercise(it) }
-            
-            // 2. Load official trainer workouts (ID 1-25)
-            root.workouts.forEach { w ->
-                val workout = Workout(
-                    id = w.id, 
-                    name = w.name, 
-                    description = w.description,
-                    category = w.category, 
-                    targetMuscle = w.targetMuscle,
-                    imageName = w.imageName,
-                    difficulty = w.difficulty,
-                    duration = w.duration,
-                    metValue = if (w.category.lowercase().contains("cardio")) 8.0 else 5.0
-                )
-                val assignments = w.exercises.mapIndexed { index, we ->
-                    WorkoutExercise(w.id, we.exerciseId, we.category ?: "Exercise", we.sets, we.reps, we.rest, we.duration ?: "", index)
+            // 1. Sync Exercises
+            val exerciseSnapshot = db.collection("exercises").get().await()
+            val cloudExercises = exerciseSnapshot.toObjects(Exercise::class.java)
+            if (cloudExercises.isNotEmpty()) {
+                cloudExercises.forEachIndexed { index, exercise ->
+                    if (exercise.id.isEmpty()) {
+                        exercise.id = exerciseSnapshot.documents[index].id
+                    }
                 }
-                workoutDao.updateWorkoutWithExercises(workout, assignments)
+                workoutDao.insertAllExercises(cloudExercises)
+                Log.d("WorkoutRepo", "Synced ${cloudExercises.size} exercises from Firestore")
             }
-            Log.d("Restore", "Workout Library Loaded Successfully")
+
+            // 2. Sync Predefined Workouts
+            val workoutSnapshot = db.collection("workouts").get().await()
+            val cloudWorkouts = workoutSnapshot.toObjects(Workout::class.java)
+            if (cloudWorkouts.isNotEmpty()) {
+                cloudWorkouts.forEach { workout ->
+                    workoutDao.insertWorkout(workout)
+                }
+                Log.d("WorkoutRepo", "Synced ${cloudWorkouts.size} workouts from Firestore")
+            } else if (cloudExercises.isNotEmpty()) {
+                // FALLBACK: Generate standard ones from synced exercises
+                generateStandardWorkouts(cloudExercises)
+            }
+
         } catch (e: Exception) {
-            Log.e("Restore", "Failed to load library", e)
+            Log.e("WorkoutRepo", "Error syncing: ${e.message}")
         }
+    }
+
+    private suspend fun generateStandardWorkouts(exercises: List<Exercise>) {
+        val foci = listOf("Chest", "Back", "Legs", "Arms", "Abs", "Shoulders")
+        val difficulties = listOf("Beginner", "Intermediate")
+
+        foci.forEach { focus ->
+            difficulties.forEach { diff ->
+                val matching = exercises.filter { 
+                    (it.bodyPart.contains(focus, true) || it.target.contains(focus, true)) && 
+                    it.difficulty.equals(diff, true)
+                }.shuffled().take(6)
+
+                if (matching.size >= 3) {
+                    val workoutId = (focus + diff).hashCode()
+                    val workout = Workout(
+                        id = workoutId,
+                        name = "$focus Workout ($diff)",
+                        description = "Complete $focus session for $diff level.",
+                        category = "Strength",
+                        targetMuscle = focus,
+                        difficulty = diff,
+                        duration = "30 min",
+                        metValue = 5.0
+                    )
+                    
+                    val assignments = matching.mapIndexed { i, ex ->
+                        WorkoutExercise(workoutId, ex.id, "Exercise", 3, "12", "60s", "", i)
+                    }
+                    workoutDao.updateWorkoutWithExercises(workout, assignments)
+                }
+            }
+        }
+        Log.d("WorkoutRepo", "Generated standard workouts for the library.")
+    }
+
+    suspend fun ensureLibraryIsLoaded() {
+        syncWorkoutsAndExercisesFromCloud()
     }
 
     private suspend fun syncCustomWorkoutToCloud(workoutId: Int) {
@@ -116,7 +144,7 @@ class WorkoutRepository(
         try {
             val workout = workoutDao.getWorkoutById(workoutId)
             val detail = workoutDao.getWorkoutWithExercises(workoutId).first()
-            if (workout != null) {
+            if (workout != null && detail != null) {
                 val workoutMap = hashMapOf(
                     "workout" to hashMapOf(
                         "id" to workout.id,
@@ -221,18 +249,21 @@ class WorkoutRepository(
         workoutDao.deleteAllCustomWorkouts()
     }
 
-    private data class RootJson(val exercises: List<Exercise>, val workouts: List<WorkoutJson>)
-    private data class WorkoutJson(val id: Int, val name: String, val description: String, val category: String, val targetMuscle: String, val imageName: String, val difficulty: String, val duration: String, val exercises: List<WorkoutExerciseJson>)
-    private data class WorkoutExerciseJson(val exerciseId: String, val category: String?, val sets: Int, val reps: String, val rest: String, val duration: String?)
-
     fun getLatestSessionLog(): Flow<WorkoutSessionLog?> = workoutDao.getLatestSessionLog()
     fun getAllSessionLogs(): Flow<List<WorkoutSessionLog>> = workoutDao.getAllSessionLogs()
     fun getWorkoutLogs(): Flow<List<WorkoutLog>> = workoutLogDao.getWorkoutLogs()
-    fun getAllExercises(): Flow<List<Exercise>> = workoutDao.getAllExercises().map { list -> list.map { it.copy().apply { imageResId = application.resources.getIdentifier(imageName, "drawable", application.packageName) } } }
-    fun getUniqueTargetMuscles(): Flow<List<String>> = workoutDao.getAllExercises().map { exercises -> exercises.flatMap { it.targetMuscle.split(',') }.map { it.trim() }.filter { it.isNotBlank() }.distinct().sorted() }
+    fun getAllExercises(): Flow<List<Exercise>> = workoutDao.getAllExercises()
+    fun getUniqueTargetMuscles(): Flow<List<String>> = workoutDao.getAllExercises().map { exercises -> exercises.map { it.target }.filter { it.isNotBlank() }.distinct().sorted() }
+    
+    suspend fun getExercisesByFocusAndDifficulty(focus: String, difficulty: String): List<Exercise> {
+        return workoutDao.getExercisesByFocusAndDifficulty(focus, difficulty)
+    }
 
-    private fun WorkoutWithExercises.applyImages(): WorkoutWithExercises {
-        this.exerciseAssignments.forEach { assignment -> assignment.exercise.imageResId = application.resources.getIdentifier(assignment.exercise.imageName, "drawable", application.packageName) }
-        return this
+    suspend fun getExercisesByFocus(focus: String): List<Exercise> {
+        return workoutDao.getExercisesByFocus(focus)
+    }
+    
+    suspend fun syncExercisesFromCloud() {
+        syncWorkoutsAndExercisesFromCloud()
     }
 }

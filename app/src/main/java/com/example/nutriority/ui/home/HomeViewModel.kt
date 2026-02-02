@@ -36,9 +36,11 @@ class HomeViewModel @Inject constructor(
     val calorieGoal: StateFlow<String>
 
     init {
-        // Automatically sync articles from Firestore when Home is opened
+        // Automatically sync data from Firestore when Home is opened
         viewModelScope.launch {
             articleRepository.syncArticlesFromCloud()
+            mealRepository.syncMealsFromCloud()
+            workoutRepository.syncExercisesFromCloud()
         }
 
         allMeals = mealRepository.allMeals.stateIn(
@@ -61,20 +63,19 @@ class HomeViewModel @Inject constructor(
 
         val recommendedWorkouts = combine(workoutRepository.allWorkouts, userRepository.getUser.asFlow()) { workouts, user ->
             if (user == null) return@combine emptyList()
-
-            // Only recommend official trainer workouts
-            val trainerOnly = workouts.filter { it.id <= 25 }
             
             val desiredDifficulties = when (user.activityLevel) {
-                "Sedentary" -> listOf("Beginner")
-                "Lightly active" -> listOf("Beginner", "Intermediate")
+                "Sedentary", "Lightly active" -> listOf("Beginner")
+                "Active" -> listOf("Beginner", "Intermediate")
                 else -> listOf("Intermediate", "Advanced")
             }
 
-            val filteredWorkouts = trainerOnly.filter { it.difficulty in desiredDifficulties }
+            // Removed the id <= 25 restriction since workouts are now dynamic or cloud-based
+            val filteredWorkouts = workouts.filter { it.difficulty in desiredDifficulties }
 
             if (filteredWorkouts.isEmpty()) {
-                emptyList()
+                // If no difficulty match, just show some random ones so the screen isn't empty
+                workouts.shuffled().take(5)
             } else {
                 filteredWorkouts.groupBy { it.targetMuscle }.map { it.value.random() }
             }

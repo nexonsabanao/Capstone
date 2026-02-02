@@ -24,6 +24,9 @@ interface WorkoutDao {
     suspend fun insertExercise(exercise: Exercise)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllExercises(exercises: List<Exercise>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWorkoutExercise(workoutExercise: WorkoutExercise)
 
     @Update
@@ -62,7 +65,7 @@ interface WorkoutDao {
 
     @Transaction
     @Query("SELECT * FROM workouts WHERE id = :workoutId")
-    fun getWorkoutWithExercises(workoutId: Int): Flow<WorkoutWithExercises>
+    fun getWorkoutWithExercises(workoutId: Int): Flow<WorkoutWithExercises?>
 
     @Update
     suspend fun updateExercise(exercise: Exercise)
@@ -100,7 +103,6 @@ interface WorkoutDao {
 
     @Transaction
     suspend fun deleteAllCustomWorkouts() {
-        // Assuming custom workouts have IDs > 25
         val customWorkouts = getWorkoutsWithIdGreaterThan(25)
         customWorkouts.forEach { workout ->
             deleteWorkoutExercises(workout.id)
@@ -110,4 +112,13 @@ interface WorkoutDao {
 
     @Query("SELECT * FROM workouts WHERE id > :id")
     suspend fun getWorkoutsWithIdGreaterThan(id: Int): List<Workout>
+
+    @Query("SELECT * FROM exercises WHERE (bodyPart LIKE '%' || :focus || '%' OR target LIKE '%' || :focus || '%') AND difficulty = :difficulty AND category NOT LIKE '%warmup%' AND category NOT LIKE '%cooldown%'")
+    suspend fun getExercisesByFocusAndDifficulty(focus: String, difficulty: String): List<Exercise>
+
+    @Query("SELECT * FROM exercises WHERE (bodyPart LIKE '%' || :focus || '%' OR target LIKE '%' || :focus || '%') AND category NOT LIKE '%warmup%' AND category NOT LIKE '%cooldown%'")
+    suspend fun getExercisesByFocus(focus: String): List<Exercise>
+
+    @Query("SELECT * FROM exercises WHERE category LIKE '%' || :category || '%'")
+    suspend fun getExercisesByCategory(category: String): List<Exercise>
 }

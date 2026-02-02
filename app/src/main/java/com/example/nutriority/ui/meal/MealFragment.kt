@@ -14,11 +14,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
-import com.example.nutriority.data.model.Meal
 import com.example.nutriority.databinding.FragmentMealBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -133,6 +133,22 @@ class MealFragment : Fragment() {
                         val hasPlan = mealViewModel.currentMealPlan.value.isNotEmpty()
                         binding.doneButton.isVisible = hasPlan && isExpired
                         binding.nextButton.isVisible = !hasPlan || isExpired
+                    }
+                }
+
+                launch {
+                    mealViewModel.swapState.collectLatest { state ->
+                        state?.let {
+                            val bottomSheet = MealSwapBottomSheetFragment(
+                                mealType = it.mealToReplace.mealTime,
+                                options = it.options,
+                                onMealSwapped = { newMeal ->
+                                    mealViewModel.onSwapMealSelected(it.mealToReplace, newMeal, it.dayIndex)
+                                }
+                            )
+                            bottomSheet.show(parentFragmentManager, "MealSwapBottomSheet")
+                            mealViewModel.onSwapCancelled() // Clear state so it doesn't reopen on config change
+                        }
                     }
                 }
             }

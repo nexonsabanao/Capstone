@@ -79,27 +79,21 @@
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
-                        android:layout_height="240dp"
+                        android:layout_height="280dp"
                         app:cardBackgroundColor="#F5F5F5"
                         app:cardCornerRadius="24dp"
                         app:cardElevation="0dp"
                         app:cardPreventCornerOverlap="false"
                         app:strokeWidth="0dp">
 
-                        <FrameLayout
+                        <ImageView
+                            android:id="@+id/ivExerciseVisual"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@android:color/transparent">
+                            android:importantForAccessibility="no"
+                            android:scaleType="fitCenter"
+                            tools:src="@tools:sample/backgrounds/scenic" />
 
-                            <ImageView
-                                android:id="@+id/ivExerciseVisual"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:importantForAccessibility="no"
-                                android:scaleType="centerInside"
-                                android:padding="24dp"
-                                tools:src="@tools:sample/backgrounds/scenic" />
-                        </FrameLayout>
                     </com.google.android.material.card.MaterialCardView>
 
                     <TextView
@@ -142,25 +136,6 @@
                         <!-- Chips will be added dynamically -->
                     </com.google.android.material.chip.ChipGroup>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="32dp"
-                        android:fontFamily="sans-serif"
-                        android:textStyle="bold"
-                        android:text="TIPS"
-                        android:textColor="@color/primary_dark"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/tvTips"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:lineSpacingExtra="6dp"
-                        android:textColor="#616161"
-                        android:textSize="15sp"
-                        tools:text="• Keep your core tight throughout the exercise." />
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>
         </LinearLayout>
