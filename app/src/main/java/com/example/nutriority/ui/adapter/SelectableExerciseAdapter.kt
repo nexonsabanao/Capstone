@@ -15,7 +15,8 @@ class SelectableExerciseAdapter(
 
     private var allExercises = listOf<Exercise>()
     private var selectedExercises = mutableListOf<Exercise>() 
-    private var currentFilter = "Exercise"
+    private var currentCategory = "Exercise"
+    private var currentTarget: String? = null
     private var displayList = listOf<Exercise>()
 
     fun setData(exercises: List<Exercise>, initialSelected: List<Exercise>) {
@@ -24,8 +25,9 @@ class SelectableExerciseAdapter(
         updateDisplayList()
     }
 
-    fun setFilter(category: String) {
-        currentFilter = category
+    fun setFilter(category: String, target: String?) {
+        currentCategory = category
+        currentTarget = target
         updateDisplayList()
     }
 
@@ -35,12 +37,19 @@ class SelectableExerciseAdapter(
 
     private fun updateDisplayList() {
         val filtered = allExercises.filter { exercise ->
-            when (currentFilter.lowercase()) {
+            // Category filtering
+            val categoryMatch = when (currentCategory.lowercase()) {
                 "warmup" -> exercise.category.lowercase().contains("warmup")
                 "cooldown" -> exercise.category.lowercase().contains("cooldown")
                 else -> !exercise.category.lowercase().contains("warmup") && 
                         !exercise.category.lowercase().contains("cooldown")
             }
+            
+            // Target muscle filtering
+            val targetMatch = if (currentTarget == null) true 
+                             else exercise.target.contains(currentTarget!!, ignoreCase = true)
+            
+            categoryMatch && targetMatch
         }
 
         displayList = filtered.sortedWith(
@@ -51,7 +60,7 @@ class SelectableExerciseAdapter(
     }
 
     private fun isSelected(exercise: Exercise): Boolean {
-        return selectedExercises.any { it.id == exercise.id && it.category.equals(currentFilter, true) }
+        return selectedExercises.any { it.id == exercise.id && it.category.equals(currentCategory, true) }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -72,7 +81,6 @@ class SelectableExerciseAdapter(
             binding.tvTargetMuscle.text = exercise.target
             binding.rbSelect.isChecked = isSelected
             
-            // Fixed Glide loading for Selectable items
             Glide.with(binding.ivExerciseImage.context)
                 .load(exercise.gifUrl)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -81,9 +89,9 @@ class SelectableExerciseAdapter(
 
             binding.root.setOnClickListener {
                 if (isSelected) {
-                    selectedExercises.removeAll { it.id == exercise.id && it.category.equals(currentFilter, true) }
+                    selectedExercises.removeAll { it.id == exercise.id && it.category.equals(currentCategory, true) }
                 } else {
-                    selectedExercises.add(exercise.copy(category = currentFilter))
+                    selectedExercises.add(exercise.copy(category = currentCategory))
                 }
                 onExerciseSelected(exercise, !isSelected)
                 updateDisplayList()

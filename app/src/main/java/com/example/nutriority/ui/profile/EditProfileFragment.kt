@@ -106,46 +106,69 @@ class EditProfileFragment : Fragment() {
 
         binding.rowName.setOnClickListener { 
             showEditBottomSheet("Full Name", "What should we call you?", currentUser?.name ?: "", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS) { newVal ->
-                updateUserField { it.copy(name = newVal) }
+                if (newVal != currentUser?.name) {
+                    updateUserField(false) { it.copy(name = newVal) }
+                }
             }
         }
 
         binding.rowAge.root.setOnClickListener { 
             showEditBottomSheet("Age", "Enter your current age", currentUser?.age?.toString() ?: "", InputType.TYPE_CLASS_NUMBER) { newVal ->
-                updateUserField { it.copy(age = newVal.toIntOrNull()) }
+                val newAge = newVal.toIntOrNull()
+                if (newAge != currentUser?.age) {
+                    updateUserField(false) { it.copy(age = newAge) }
+                }
             }
         }
 
         binding.rowWeight.root.setOnClickListener { 
             showEditBottomSheet("Weight", "Enter your weight in kg", currentUser?.weightKg?.toString() ?: "", InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL) { newVal ->
-                updateUserField { it.copy(weightKg = newVal.toDoubleOrNull() ?: 0.0) }
+                val newWeight = newVal.toDoubleOrNull() ?: 0.0
+                if (newWeight != currentUser?.weightKg) {
+                    updateUserField(false) { it.copy(weightKg = newWeight) }
+                }
             }
         }
 
         binding.rowHeight.root.setOnClickListener { 
             showEditBottomSheet("Height", "Enter your height in cm", currentUser?.heightCm?.toString() ?: "", InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL) { newVal ->
-                updateUserField { it.copy(heightCm = newVal.toDoubleOrNull() ?: 0.0) }
+                val newHeight = newVal.toDoubleOrNull() ?: 0.0
+                if (newHeight != currentUser?.heightCm) {
+                    updateUserField(false) { it.copy(heightCm = newHeight) }
+                }
             }
         }
 
         binding.rowActivity.root.setOnClickListener { 
             val options = arrayOf("Sedentary", "Lightly active", "Active")
             showOptionsBottomSheet("Activity Level", "Choose your daily activity level", options) { selection ->
-                updateUserField { it.copy(activityLevel = selection) }
+                if (selection != currentUser?.activityLevel) {
+                    showUpdateOptionsDialog("Activity Level") { shouldRestart ->
+                        updateUserField(shouldRestart) { it.copy(activityLevel = selection) }
+                    }
+                }
             }
         }
 
         binding.rowGoal.root.setOnClickListener { 
             val options = arrayOf("Lose weight", "Keep fit", "Build muscle")
             showOptionsBottomSheet("Main Goal", "What do you want to achieve?", options) { selection ->
-                updateUserField { it.copy(goal = selection) }
+                if (selection != currentUser?.goal) {
+                    showUpdateOptionsDialog("Goal") { shouldRestart ->
+                        updateUserField(shouldRestart) { it.copy(goal = selection) }
+                    }
+                }
             }
         }
 
         binding.rowDiet.root.setOnClickListener { 
             val options = arrayOf("Balanced", "Low Carb", "Vegetarian")
             showOptionsBottomSheet("Preferred Diet", "Choose a nutrition style", options) { selection ->
-                updateUserField { it.copy(preferredDiet = selection) }
+                if (selection != currentUser?.preferredDiet) {
+                    showUpdateOptionsDialog("Preferred Diet") { shouldRestart ->
+                        updateUserField(shouldRestart) { it.copy(preferredDiet = selection) }
+                    }
+                }
             }
         }
 
@@ -156,6 +179,41 @@ class EditProfileFragment : Fragment() {
         binding.btnDeleteAccount.setOnClickListener {
             showDeleteAccountConfirmation()
         }
+    }
+
+    private fun showUpdateOptionsDialog(fieldName: String, onSelection: (Boolean) -> Unit) {
+        // Use a generic AlertDialog with transparent background to prevent weird corners and center it properly
+        val builder = AlertDialog.Builder(requireContext())
+        val dialogView = layoutInflater.inflate(R.layout.dialog_plan_update_choice, null)
+        
+        val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
+        val btnUpdate = dialogView.findViewById<MaterialButton>(R.id.btnUpdatePlan)
+        val btnKeep = dialogView.findViewById<MaterialButton>(R.id.btnKeepCurrent)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+
+        tvMessage.text = "You are changing your $fieldName. Would you like to update your current workout and nutrition plan to match this new setting, or keep your existing plan?"
+
+        builder.setView(dialogView)
+        val dialog = builder.create()
+        
+        // Ensure background is transparent so the CardView's rounded corners and shadows show correctly
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnUpdate.setOnClickListener {
+            onSelection(true)
+            dialog.dismiss()
+        }
+
+        btnKeep.setOnClickListener {
+            onSelection(false)
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun processAndSaveProfileImage(uri: Uri) {
@@ -172,7 +230,7 @@ class EditProfileFragment : Fragment() {
             bitmap?.let {
                 val path = convertToWebP(it)
                 if (path != null) {
-                    updateUserField { user -> user.copy(profileImageUrl = path) }
+                    updateUserField(false) { user -> user.copy(profileImageUrl = path) }
                     Toast.makeText(requireContext(), "Profile image updated", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show()
@@ -217,7 +275,7 @@ class EditProfileFragment : Fragment() {
             .setTitle("Delete Account")
             .setMessage("This will permanently erase ALL your progress. This action cannot be undone.")
             .setPositiveButton("DELETE EVERYTHING") { _, _ -> performFullDataWipe() }
-            .setNegativeButton("CANCEL", null)
+            .setNegativeButton("Cancel", null)
             .show()
     }
 
@@ -275,11 +333,15 @@ class EditProfileFragment : Fragment() {
         }
     }
 
-    private fun updateUserField(action: (User) -> User) {
+    private fun updateUserField(restartPlan: Boolean, action: (User) -> User) {
         viewLifecycleOwner.lifecycleScope.launch {
             userViewModel.updateOnboardingDataSuspend(action)
-            userViewModel.restartWorkoutPlan()
-            Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
+            if (restartPlan) {
+                userViewModel.restartWorkoutPlan()
+                Toast.makeText(requireContext(), "Profile updated and plan refreshed", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

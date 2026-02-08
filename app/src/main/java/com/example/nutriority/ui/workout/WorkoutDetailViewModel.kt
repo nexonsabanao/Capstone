@@ -9,6 +9,7 @@ import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.data.model.WorkoutWithExercises
+import com.example.nutriority.data.repository.RecommendedWorkoutRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.google.gson.Gson
@@ -27,6 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WorkoutDetailViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
+    private val recommendedWorkoutRepository: RecommendedWorkoutRepository,
     private val userRepository: UserRepository,
     private val application: Application
 ) : AndroidViewModel(application) {
@@ -87,10 +89,6 @@ class WorkoutDetailViewModel @Inject constructor(
 
     // Persistent Session Summary from DB
     val latestSessionLog = workoutRepository.getLatestSessionLog().asLiveData()
-
-    private data class WorkoutExerciseJson(val exerciseId: String, val category: String?, val sets: Int, val reps: String, val rest: String, val duration: String?)
-    private data class WorkoutJson(val id: Int, val name: String, val exercises: List<WorkoutExerciseJson>)
-    private data class RootJson(val exercises: List<Exercise>, val workouts: List<WorkoutJson>)
 
     fun getWorkoutById(workoutId: Int) {
         if (_workout.value?.workout?.id == workoutId) return
@@ -288,15 +286,7 @@ class WorkoutDetailViewModel @Inject constructor(
         }
     }
 
-    suspend fun getDefaultAssignmentsFromAssets(workoutId: Int, workoutName: String): List<WorkoutExercise> {
-        return try {
-            val gson = Gson()
-            val jsonStr = application.assets.open("workouts.json").bufferedReader().use(BufferedReader::readText)
-            val rootData = gson.fromJson(jsonStr, RootJson::class.java)
-            val match = rootData.workouts.find { it.id == workoutId || it.name.equals(workoutName, ignoreCase = true) }
-            match?.exercises?.mapIndexed { index, we ->
-                WorkoutExercise(workoutId, we.exerciseId, we.category ?: "Exercise", we.sets, we.reps, we.rest, we.duration ?: "", index, false)
-            } ?: emptyList()
-        } catch (e: Exception) { emptyList() }
+    suspend fun getOriginalAssignments(workoutId: Int): List<WorkoutExercise> {
+        return recommendedWorkoutRepository.getOriginalAssignments(workoutId)
     }
 }

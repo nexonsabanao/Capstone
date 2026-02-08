@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.data.repository.MealRepository
+import com.example.nutriority.data.repository.RecommendedWorkoutRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.databinding.FragmentSplashBinding
@@ -34,6 +35,7 @@ class SplashFragment : Fragment() {
     @Inject lateinit var workoutRepository: WorkoutRepository
     @Inject lateinit var mealRepository: MealRepository
     @Inject lateinit var userRepository: UserRepository
+    @Inject lateinit var recommendedWorkoutRepository: RecommendedWorkoutRepository
     
     private val userViewModel: UserViewModel by activityViewModels()
 
@@ -55,32 +57,29 @@ class SplashFragment : Fragment() {
                 workoutRepository.ensureLibraryIsLoaded()
                 mealRepository.ensureLibraryIsLoaded()
                 
-                // 2. Check Authentication
+                // 2. Seed Official Trainer Workouts
+                val allExercises = workoutRepository.getAllExercises().firstOrNull() ?: emptyList()
+                if (allExercises.isNotEmpty()) {
+                    recommendedWorkoutRepository.seedOfficialWorkouts(allExercises)
+                }
+                
+                // 3. Check Authentication
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 if (firebaseUser != null) {
-                    // Try to restore user from cloud if local DB is empty
                     var localUser = userRepository.getInitialUser()
                     if (localUser == null) {
                         userRepository.restoreUserFromCloud()
                         localUser = userRepository.getInitialUser()
                     }
 
-                    // Navigate to Home if user exists locally
                     if (localUser != null) {
                         findNavController().navigate(R.id.action_splashFragment_to_mainTabsFragment)
                     } else {
-                        // User exists in Firebase but no profile data yet - go to onboarding
                         findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
                     }
                 } else {
-                    // Not logged in
                     delay(1500)
-                    if (onBoardingIsFinished()) {
-                        // This usually shouldn't happen with your specific flow, but just in case
-                        findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
-                    } else {
-                        findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
-                    }
+                    findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
                 }
             } catch (e: Exception) {
                 Log.e("Splash", "Navigation failed", e)

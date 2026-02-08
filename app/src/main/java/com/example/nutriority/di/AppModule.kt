@@ -14,6 +14,7 @@ import com.example.nutriority.data.local.WorkoutDao
 import com.example.nutriority.data.local.WorkoutLogDao
 import com.example.nutriority.data.repository.ArticleRepository
 import com.example.nutriority.data.repository.MealRepository
+import com.example.nutriority.data.repository.RecommendedWorkoutRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.planner.MealPlanner
@@ -121,6 +122,14 @@ object AppModule {
     @Singleton
     fun provideWorkoutGenerator(): WorkoutGenerator {
         return WorkoutGenerator()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRecommendedWorkoutRepository(
+        workoutDao: WorkoutDao
+    ): RecommendedWorkoutRepository {
+        return RecommendedWorkoutRepository(workoutDao)
     }
 
     @Provides

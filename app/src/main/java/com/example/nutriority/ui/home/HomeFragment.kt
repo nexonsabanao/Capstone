@@ -21,7 +21,6 @@ import com.example.nutriority.ui.workout.WorkoutDetailViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import me.relex.circleindicator.CircleIndicator2
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -54,6 +53,7 @@ class HomeFragment : Fragment() {
     }
 
     private val workoutSnapHelper = PagerSnapHelper()
+    private var isFirstWorkoutLoad = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -72,22 +72,32 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerViews() {
+        // Meals
         binding.mealsRecyclerView.apply {
+            setHasFixedSize(true)
+            itemAnimator = null
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = mealAdapter
         }
 
+        // Workouts
         binding.workoutsRecyclerView.apply {
+            setHasFixedSize(true)
+            itemAnimator = null // Essential to prevent flickering
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = workoutAdapter
+
+            // Attach SnapHelper and Indicator once
             if (onFlingListener == null) {
                 workoutSnapHelper.attachToRecyclerView(this)
+                binding.workoutsIndicator.attachToRecyclerView(this, workoutSnapHelper)
             }
         }
 
-        binding.workoutsIndicator.attachToRecyclerView(binding.workoutsRecyclerView, workoutSnapHelper)
-
+        // Articles
         binding.articlesRecyclerView.apply {
+            setHasFixedSize(true)
+            itemAnimator = null
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = articleAdapter
         }
@@ -96,6 +106,8 @@ class HomeFragment : Fragment() {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                // Ongoing Workout Logic
                 launch {
                     workoutViewModel.isWorkoutActive.collect { isActive ->
                         binding.ongoingWorkoutCard.visibility = if (isActive) View.VISIBLE else View.GONE
@@ -104,16 +116,18 @@ class HomeFragment : Fragment() {
 
                 launch {
                     workoutViewModel.completedExercisesCount.collect { completed ->
-                        val workout = workoutViewModel.workout.value ?: return@collect
-                        if (workout.workout.id == workoutViewModel.activeWorkoutId.value) {
-                            val total = workout.exerciseAssignments.size
-                            val progress = if (total > 0) (completed.toFloat() / total.toFloat()) * 100 else 0f
-                            binding.ongoingProgress.progress = progress
-                            binding.tvOngoingSubtitle.text = "$completed from $total exercises done"
+                        workoutViewModel.workout.value?.let { workout ->
+                            if (workout.workout.id == workoutViewModel.activeWorkoutId.value) {
+                                val total = workout.exerciseAssignments.size
+                                val progress = if (total > 0) (completed.toFloat() / total.toFloat()) * 100 else 0f
+                                binding.ongoingProgress.progress = progress
+                                binding.tvOngoingSubtitle.text = "$completed from $total exercises done"
+                            }
                         }
                     }
                 }
 
+                // Meals Logic
                 launch {
                     homeViewModel.allMeals.collect { meals ->
                         if (meals.isNotEmpty()) {
@@ -124,13 +138,25 @@ class HomeFragment : Fragment() {
                     }
                 }
 
+                // Workouts Logic (Fix for Flicker and Indicator)
                 launch {
-                    // RESTORED: Observe SMART list (allWorkouts) instead of raw database (unfilteredWorkouts)
                     homeViewModel.allWorkouts.collect { workouts ->
                         if (workouts.isNotEmpty()) {
                             workoutAdapter.submitList(workouts) {
-                                binding.workoutsIndicator.attachToRecyclerView(binding.workoutsRecyclerView, workoutSnapHelper)
-                                binding.workoutsIndicator.visibility = View.VISIBLE
+                                // Logic inside this block runs AFTER DiffUtil finishes calculating
+                                if (isFirstWorkoutLoad) {
+                                    binding.workoutsRecyclerView.scrollToPosition(0)
+                                    isFirstWorkoutLoad = false
+                                }
+
+                                // Update Indicator visibility and count
+                                if (workouts.size > 1) {
+                                    binding.workoutsIndicator.visibility = View.VISIBLE
+                                    // Re-attaching can sometimes fix indicator not appearing after list submission
+                                    binding.workoutsIndicator.createIndicators(workouts.size, 0)
+                                } else {
+                                    binding.workoutsIndicator.visibility = View.GONE
+                                }
                             }
                             binding.workoutsRecyclerView.visibility = View.VISIBLE
                             binding.workoutsProgressBar.visibility = View.GONE
@@ -138,6 +164,7 @@ class HomeFragment : Fragment() {
                     }
                 }
 
+                // Articles Logic
                 launch {
                     homeViewModel.allArticles.collect { articles ->
                         if (articles.isNotEmpty()) {
@@ -148,6 +175,7 @@ class HomeFragment : Fragment() {
                     }
                 }
 
+                // Calories Logic
                 launch {
                     homeViewModel.calorieGoal.collect { calorieGoal ->
                         binding.mealPlanCard.tvCalories.text = calorieGoal
@@ -165,7 +193,7 @@ class HomeFragment : Fragment() {
         binding.mealPlanCard.btnViewPlan.setOnClickListener {
             navigationViewModel.setTab(2)
         }
-        
+
         binding.btnResumeOngoing.setOnClickListener {
             val activeId = workoutViewModel.activeWorkoutId.value
             if (activeId != -1) navigationViewModel.navigateToWorkoutDetail(activeId)

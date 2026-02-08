@@ -31,11 +31,13 @@ import com.example.nutriority.ui.adapter.WorkoutItem
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.Locale
 import kotlin.math.abs
 
 @AndroidEntryPoint
@@ -215,7 +217,6 @@ class WorkoutDetailFragment : Fragment() {
             val allExercisesList = viewModel.getAllExercises().first()
 
             val workoutName = workoutWithExercises.workout.name
-            // UPDATED APPROACH: Treat negative IDs (Generated) and IDs <= 25 (System) as non-editable/resettable
             val isEditableName = workoutWithExercises.workout.id > 25
 
             if (!isEditableName) {
@@ -227,28 +228,56 @@ class WorkoutDetailFragment : Fragment() {
                 dialogBinding.btnReset.visibility = View.GONE
             }
 
+            // SIMPLIFIED: Static list of simplified target chips
+            val simplifiedTargets = listOf("Abs", "Arms", "Back", "Chest", "Legs", "Shoulders", "Full Body")
+
+            dialogBinding.targetMuscleChipGroup.removeAllViews()
+            
+            // Add "All" chip
+            val allChip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
+            allChip.text = "All"
+            allChip.isChecked = true
+            allChip.id = View.generateViewId()
+            dialogBinding.targetMuscleChipGroup.addView(allChip)
+
+            simplifiedTargets.forEach { target ->
+                val chip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
+                chip.text = target
+                chip.id = View.generateViewId()
+                dialogBinding.targetMuscleChipGroup.addView(chip)
+            }
+
             val selectedExercises = workoutWithExercises.exerciseAssignments.map { assignment ->
                 assignment.exercise.copy(category = assignment.assignment.category)
             }
             selectableAdapter.setData(allExercisesList, selectedExercises)
 
-            dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-                val category = when (checkedIds.firstOrNull()) {
+            fun applyFilters() {
+                val category = when (dialogBinding.categoryChipGroup.checkedChipId) {
                     R.id.chip_warmup -> "warmup"
                     R.id.chip_cooldown -> "cooldown"
                     else -> "Exercise"
                 }
-                selectableAdapter.setFilter(category)
+                
+                val checkedTargetId = dialogBinding.targetMuscleChipGroup.checkedChipId
+                val selectedTarget = if (checkedTargetId != View.NO_ID) {
+                    dialogBinding.targetMuscleChipGroup.findViewById<Chip>(checkedTargetId)?.text?.toString() ?: "All"
+                } else "All"
+
+                selectableAdapter.setFilter(category, if (selectedTarget == "All") null else selectedTarget)
             }
+
+            dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, _ -> applyFilters() }
+            dialogBinding.targetMuscleChipGroup.setOnCheckedStateChangeListener { _, _ -> applyFilters() }
 
             dialogBinding.btnReset.setOnClickListener {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val defaults = viewModel.getDefaultAssignmentsFromAssets(workoutWithExercises.workout.id, workoutName)
-                    if (defaults.isNotEmpty()) {
-                        val defaultExercises = defaults.mapNotNull { assignment ->
+                    val originalAssignments = viewModel.getOriginalAssignments(workoutWithExercises.workout.id)
+                    if (originalAssignments.isNotEmpty()) {
+                        val originalExercises = originalAssignments.mapNotNull { assignment ->
                             allExercisesList.find { it.id == assignment.exerciseId }?.copy(category = assignment.category)
                         }
-                        selectableAdapter.setData(allExercisesList, defaultExercises)
+                        selectableAdapter.setData(allExercisesList, originalExercises)
                     }
                 }
             }
@@ -268,10 +297,10 @@ class WorkoutDetailFragment : Fragment() {
                         workoutId = workoutWithExercises.workout.id,
                         exerciseId = ex.id,
                         category = ex.category.ifBlank { "Exercise" },
-                        sets = existing?.assignment?.sets ?: 3,
-                        reps = existing?.assignment?.reps ?: "10",
-                        rest = existing?.assignment?.rest ?: "60s",
-                        duration = existing?.assignment?.duration ?: "",
+                        sets = existing?.assignment?.sets ?: (if (ex.category == "Exercise") 3 else 1),
+                        reps = existing?.assignment?.reps ?: (if (ex.category == "Exercise") "10" else "1"),
+                        rest = existing?.assignment?.rest ?: (if (ex.category == "Exercise") "60s" else "0s"),
+                        duration = existing?.assignment?.duration ?: (if (ex.category == "Exercise") "" else "1 min"),
                         order = index
                     )
                 }
@@ -310,7 +339,6 @@ class WorkoutDetailFragment : Fragment() {
                 }
             },
             onListUpdated = { updatedList ->
-                // FIX: Support both system and custom updates
                 val assignments = updatedList.map { it.assignment }
                 viewModel.updateWorkout(viewModel.workout.value!!.workout, assignments)
             },
@@ -415,6 +443,16 @@ class WorkoutDetailFragment : Fragment() {
         }
     }
 
+    private fun parseTimeToSeconds(timeStr: String): Int {
+        if (timeStr.isBlank()) return 0
+        val lower = timeStr.lowercase().trim()
+        val value = lower.filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: return 0
+        return when {
+            lower.contains("min") || (lower.contains("m") && !lower.contains("s")) -> (value * 60).toInt()
+            else -> value.toInt()
+        }
+    }
+
     private fun updateDisplayList(workout: WorkoutWithExercises, includeAll: Boolean) {
         val displayList = mutableListOf<WorkoutItem>()
         val assignments = workout.exerciseAssignments.sortedBy { it.assignment.order }
@@ -440,16 +478,23 @@ class WorkoutDetailFragment : Fragment() {
             displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
         }
 
-        // Calculate total duration
+        // Improved duration calculation
         val totalSeconds = assignments.filter {
             includeAll || it.assignment.category.equals("Exercise", ignoreCase = true)
         }.sumOf { item ->
-            val durationStr = item.assignment.duration.lowercase()
-            if (durationStr.contains("s")) {
-                durationStr.filter { it.isDigit() }.toIntOrNull() ?: 30
+            val assignment = item.assignment
+            val sets = assignment.sets
+            val restSec = parseTimeToSeconds(assignment.rest)
+            
+            val workSec = if (assignment.duration.isNotBlank()) {
+                parseTimeToSeconds(assignment.duration)
             } else {
-                (item.assignment.sets * 10 * 3) + (item.assignment.sets * 45)
+                // Parse reps (e.g., "10", "12-15", etc.)
+                val reps = assignment.reps.split("-").last().filter { it.isDigit() }.toIntOrNull() ?: 10
+                reps * 3 // Assume 3 seconds per rep
             }
+            
+            (sets * workSec) + ((sets - 1).coerceAtLeast(0) * restSec)
         }
 
         binding.workoutDuration.text = "${Math.ceil(totalSeconds / 60.0).toInt()} mins"

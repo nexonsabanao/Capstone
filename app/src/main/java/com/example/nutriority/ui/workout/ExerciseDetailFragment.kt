@@ -276,6 +276,16 @@ class ExerciseDetailFragment : Fragment() {
         }
     }
 
+    private fun parseTimeToSeconds(timeStr: String): Int {
+        if (timeStr.isBlank()) return 0
+        val lower = timeStr.lowercase().trim()
+        val value = lower.filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: return 0
+        return when {
+            lower.contains("min") || (lower.contains("m") && !lower.contains("s")) -> (value * 60).toInt()
+            else -> value.toInt()
+        }
+    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -283,7 +293,6 @@ class ExerciseDetailFragment : Fragment() {
                     if (exercise != null) {
                         binding.exerciseTitle.text = exercise.name
                         
-                        // Removed placeholder for cleaner loading
                         Glide.with(requireContext())
                             .asGif()
                             .load(exercise.gifUrl)
@@ -314,9 +323,12 @@ class ExerciseDetailFragment : Fragment() {
                         }
 
                         val initialSets = List(setsCount) { i ->
-                            val value = valueStrings.getOrNull(i)?.trim()?.toIntOrNull() 
-                                ?: valueStrings.firstOrNull()?.trim()?.toIntOrNull() 
-                                ?: 10
+                            val rawValue = valueStrings.getOrNull(i)?.trim() ?: valueStrings.firstOrNull()?.trim() ?: ""
+                            val value = if (isDuration) {
+                                parseTimeToSeconds(rawValue).takeIf { it > 0 } ?: 60
+                            } else {
+                                rawValue.filter { it.isDigit() }.toIntOrNull() ?: 10
+                            }
                             ExerciseSet(value = value, isDuration = isDuration, isCompleted = assignment.isCompleted) 
                         }
                         updateAndSubmitList(initialSets)

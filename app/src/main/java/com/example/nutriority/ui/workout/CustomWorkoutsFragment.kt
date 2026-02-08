@@ -23,6 +23,7 @@ import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.CustomWorkoutAdapter
 import com.example.nutriority.ui.adapter.SelectableExerciseAdapter
 import com.example.nutriority.ui.home.HomeViewModel
+import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -97,7 +98,7 @@ class CustomWorkoutsFragment : Fragment() {
         dialog.setContentView(dialogBinding.root)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
-        dialogBinding.headerContainer.findViewById<TextView>(R.id.workout_title)?.text = "Create Workout"
+        dialogBinding.workoutTitle.text = "Create Workout"
         dialogBinding.btnSave.text = "CREATE WORKOUT"
         dialogBinding.workoutNameLayout.visibility = View.VISIBLE
 
@@ -107,18 +108,51 @@ class CustomWorkoutsFragment : Fragment() {
             adapter = selectableAdapter
         }
 
-        dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-            val category = when (checkedIds.firstOrNull()) {
-                R.id.chip_warmup -> "warmup"
-                R.id.chip_cooldown -> "cooldown"
-                else -> "Exercise"
-            }
-            selectableAdapter.setFilter(category)
-        }
-
         viewLifecycleOwner.lifecycleScope.launch {
             val allExercises = viewModel.getAllExercises().first()
+            
+            // Populate Target Muscle Chips
+            val uniqueTargets = allExercises.flatMap { it.target.split(",") }
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sorted()
+
+            dialogBinding.targetMuscleChipGroup.removeAllViews()
+            
+            // Add "All" chip
+            val allChip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
+            allChip.text = "All"
+            allChip.isChecked = true
+            allChip.id = View.generateViewId()
+            dialogBinding.targetMuscleChipGroup.addView(allChip)
+
+            uniqueTargets.forEach { target ->
+                val chip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
+                chip.text = target
+                chip.id = View.generateViewId()
+                dialogBinding.targetMuscleChipGroup.addView(chip)
+            }
+
             selectableAdapter.setData(allExercises, emptyList())
+
+            fun applyFilters() {
+                val category = when (dialogBinding.categoryChipGroup.checkedChipId) {
+                    R.id.chip_warmup -> "warmup"
+                    R.id.chip_cooldown -> "cooldown"
+                    else -> "Exercise"
+                }
+                
+                val checkedTargetId = dialogBinding.targetMuscleChipGroup.checkedChipId
+                val selectedTarget = if (checkedTargetId != View.NO_ID) {
+                    dialogBinding.targetMuscleChipGroup.findViewById<Chip>(checkedTargetId)?.text?.toString() ?: "All"
+                } else "All"
+
+                selectableAdapter.setFilter(category, if (selectedTarget == "All") null else selectedTarget)
+            }
+
+            dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, _ -> applyFilters() }
+            dialogBinding.targetMuscleChipGroup.setOnCheckedStateChangeListener { _, _ -> applyFilters() }
 
             dialogBinding.btnSave.setOnClickListener {
                 val workoutName = dialogBinding.etWorkoutName.text.toString().trim()
@@ -144,7 +178,16 @@ class CustomWorkoutsFragment : Fragment() {
                 )
 
                 val assignments = selected.mapIndexed { index, ex ->
-                    WorkoutExercise(newId, ex.id, ex.category, 3, "10", "60s", "", index)
+                    WorkoutExercise(
+                        workoutId = newId, 
+                        exerciseId = ex.id, 
+                        category = ex.category, 
+                        sets = 3, 
+                        reps = "10", 
+                        rest = "60s", 
+                        duration = "", 
+                        order = index
+                    )
                 }
 
                 viewModel.updateWorkout(newWorkout, assignments)

@@ -109,21 +109,7 @@
                         android:layout_height="match_parent"
                         android:importantForAccessibility="no"
                         android:scaleType="centerInside"
-                        android:layout_margin="32dp"
-                        android:src="@android:drawable/ic_menu_gallery"
-                        app:tint="#E0E0E0" />
-
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:importantForAccessibility="no"
-                        android:src="@android:drawable/ic_media_play"
-                        android:alpha="0.2"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="@color/primary_dark" />
+                        android:layout_margin="32dp" />
 
                     <TextView
                         android:id="@+id/btnAboutExercise"
