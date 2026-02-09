@@ -67,7 +67,8 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_delete_plan -> {
-                    deleteMealPlan()
+                    mealViewModel.deleteMealPlan()
+                    Toast.makeText(requireContext(), "Meal plan deleted", Toast.LENGTH_SHORT).show()
                     true
                 }
                 else -> false
@@ -76,52 +77,29 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
         popup.show()
     }
 
-    private fun deleteMealPlan() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val user = mealViewModel.userRepository.getInitialUser()
-            if (user != null) {
-                mealViewModel.userRepository.insertUser(user.copy(mealPlanJson = null))
-                Toast.makeText(requireContext(), "Meal plan deleted", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    mealViewModel.isGenerating.observe(viewLifecycleOwner) { isGenerating ->
-                        binding.loadingProgressBar.isVisible = isGenerating
-                        if (isGenerating) {
+                    mealViewModel.uiState.collectLatest { state ->
+                        // Only show the UI once we've finished the initial database fetch
+                        if (state.isInitialLoading) {
+                            binding.loadingProgressBar.isVisible = true
                             binding.initialView.isVisible = false
                             binding.generatedMealPlanRecyclerView.isVisible = false
                             binding.btnMenu.isVisible = false
-                            binding.nextButton.isEnabled = false
-                        } else {
-                            binding.btnMenu.isVisible = mealViewModel.currentMealPlan.value.isNotEmpty()
-                            binding.nextButton.isEnabled = true
+                            return@collectLatest
                         }
-                    }
-                }
 
-                launch {
-                    mealViewModel.currentMealPlan.collect { planItems ->
-                        val isGenerating = mealViewModel.isGenerating.value == true
-                        if (!isGenerating) {
-                            val hasPlan = planItems.isNotEmpty()
-                            binding.initialView.isVisible = !hasPlan
-                            binding.generatedMealPlanRecyclerView.isVisible = hasPlan
-                            binding.btnMenu.isVisible = hasPlan
-                            mealAdapter.submitList(planItems)
-                        }
-                    }
-                }
-
-                launch {
-                    mealViewModel.isPlanExpired.observe(viewLifecycleOwner) { isExpired ->
-                        val hasPlan = mealViewModel.currentMealPlan.value.isNotEmpty()
-                        binding.doneButton.isVisible = hasPlan && isExpired
-                        binding.nextButton.isVisible = !hasPlan || isExpired
+                        binding.loadingProgressBar.isVisible = state.isGenerating
+                        binding.initialView.isVisible = !state.hasPlan && !state.isGenerating
+                        binding.generatedMealPlanRecyclerView.isVisible = state.hasPlan && !state.isGenerating
+                        binding.btnMenu.isVisible = state.hasPlan
+                        binding.nextButton.isEnabled = !state.isGenerating
+                        binding.doneButton.isVisible = state.hasPlan && state.isPlanExpired
+                        binding.nextButton.isVisible = !state.hasPlan || state.isPlanExpired
+                        
+                        mealAdapter.submitList(state.items)
                     }
                 }
 

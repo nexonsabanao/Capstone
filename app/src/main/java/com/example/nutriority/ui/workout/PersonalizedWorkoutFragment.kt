@@ -125,10 +125,9 @@ class PersonalizedWorkoutFragment : BaseBindingFragment<FragmentPersonalizedWork
                                     if (fullPlan?.sessions != null) {
                                         val safeLastCompleted = lastCompletedDay ?: 0
                                         
-                                        // Sync logic in background
-                                        userViewModel.ensurePlanSynced(fullPlan, safeLastCompleted)
+                                        // We no longer call ensurePlanSynced here. 
+                                        // The plan is synced once when generated or restored in UserViewModel.
                                         
-                                        // UI update
                                         val currentWeek = (safeLastCompleted / 7).coerceAtMost(3)
                                         val startIndex = currentWeek * 7
                                         val endIndex = (startIndex + 7).coerceAtMost(fullPlan.sessions.size)
@@ -137,6 +136,8 @@ class PersonalizedWorkoutFragment : BaseBindingFragment<FragmentPersonalizedWork
                                         workoutAdapter.updateLastCompletedDay(safeLastCompleted)
                                         workoutAdapter.submitList(activeSessions)
                                         updateHeaderText(activeSessions, safeLastCompleted, currentWeek)
+                                        
+                                        binding.rvWorkoutPlan.visibility = View.VISIBLE
                                     }
                                 } catch (e: JsonSyntaxException) {
                                     Log.e("WorkoutDebug", "JSON Syntax Error", e)

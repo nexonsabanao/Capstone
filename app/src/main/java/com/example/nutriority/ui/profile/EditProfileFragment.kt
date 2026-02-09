@@ -1,20 +1,14 @@
 package com.example.nutriority.ui.profile
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -25,7 +19,6 @@ import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.data.model.User
 import com.example.nutriority.databinding.FragmentEditProfileBinding
 import com.example.nutriority.ui.NavigationViewModel
-import com.example.nutriority.ui.util.AgeUtil
 import com.example.nutriority.ui.util.DatePickerUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
@@ -34,14 +27,9 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class EditProfileFragment : Fragment() {
@@ -54,13 +42,6 @@ class EditProfileFragment : Fragment() {
     private val navigationViewModel: NavigationViewModel by activityViewModels()
 
     private var currentUser: User? = null
-
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri = result.data?.data ?: return@registerForActivityResult
-            processAndSaveProfileImage(uri)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -101,11 +82,6 @@ class EditProfileFragment : Fragment() {
     private fun setupClickListeners() {
         binding.btnBack.setOnClickListener {
             navigationViewModel.goBack()
-        }
-
-        binding.btnEditProfileImage.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            pickImageLauncher.launch(intent)
         }
 
         binding.rowName.setOnClickListener { 
@@ -217,43 +193,6 @@ class EditProfileFragment : Fragment() {
         dialog.show()
     }
 
-    private fun processAndSaveProfileImage(uri: Uri) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val bitmap = withContext(Dispatchers.IO) {
-                try {
-                    val inputStream = requireContext().contentResolver.openInputStream(uri)
-                    BitmapFactory.decodeStream(inputStream)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-
-            bitmap?.let {
-                val path = convertToWebP(it)
-                if (path != null) {
-                    updateUserField(false) { user -> user.copy(profileImageUrl = path) }
-                    Toast.makeText(requireContext(), "Profile image updated", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    private suspend fun convertToWebP(bitmap: Bitmap): String? = withContext(Dispatchers.IO) {
-        try {
-            val fileName = "profile_${System.currentTimeMillis()}.webp"
-            val file = File(requireContext().filesDir, fileName)
-            val out = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.WEBP, 80, out)
-            out.flush()
-            out.close()
-            file.absolutePath
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     private fun showLogoutConfirmation() {
         AlertDialog.Builder(requireContext())
             .setTitle("Log Out")
@@ -316,7 +255,6 @@ class EditProfileFragment : Fragment() {
             user?.let {
                 binding.tvNameValue.text = if (it.name.isBlank()) "User" else it.name
                 
-                // Display formatted birthdate
                 val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
                 binding.rowAge.tvValue.text = it.birthDate?.let { date -> sdf.format(Date(date)) } ?: "Not set"
                 
@@ -329,7 +267,7 @@ class EditProfileFragment : Fragment() {
 
                 if (it.profileImageUrl.isNotEmpty()) {
                     Glide.with(this)
-                        .load(File(it.profileImageUrl))
+                        .load(it.profileImageUrl)
                         .placeholder(R.drawable.logo)
                         .circleCrop()
                         .into(binding.profileImage)

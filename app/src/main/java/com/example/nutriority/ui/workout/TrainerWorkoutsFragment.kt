@@ -49,8 +49,10 @@ class TrainerWorkoutsFragment : BaseBindingFragment<LayoutTrainerWorkoutsBinding
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                homeViewModel.allWorkouts.collect { workouts ->
-                    workoutAdapter.submitList(workouts.filter { it.id <= 25 })
+                // Observe the unfilteredWorkouts to show all official workouts (ID 1-25)
+                homeViewModel.unfilteredWorkouts.collect { workouts ->
+                    val officialWorkouts = workouts.filter { it.id in 1..25 }
+                    workoutAdapter.submitList(officialWorkouts)
                 }
             }
         }

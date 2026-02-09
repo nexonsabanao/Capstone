@@ -13,6 +13,7 @@ import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.data.repository.MealRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -25,7 +26,8 @@ class ProfileViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences 
 ) : ViewModel() {
 
-    val getUser: LiveData<User> = userRepository.getUser
+    // getUser is now a Flow in the repository, convert it back to LiveData for the UI
+    val getUser: LiveData<User?> = userRepository.getUser.asLiveData()
     val sessionLogs: LiveData<List<WorkoutSessionLog>> = workoutRepository.getAllSessionLogs().asLiveData()
     val todayMealLogs: LiveData<List<DailyMealLog>> = mealRepository.getLogsForToday().asLiveData()
 
@@ -73,7 +75,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     private suspend fun ensureActiveSessionLogged() {
-        val logs = workoutRepository.getAllSessionLogs().asLiveData().value ?: emptyList()
+        val logs = workoutRepository.getAllSessionLogs().firstOrNull() ?: emptyList()
         val hasTodayLog = logs.any { 
             val cal = Calendar.getInstance().apply { timeInMillis = it.date }
             val today = Calendar.getInstance()

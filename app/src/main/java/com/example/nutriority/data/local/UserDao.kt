@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.nutriority.data.model.User
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDao {
@@ -18,10 +19,10 @@ interface UserDao {
 
     /**
      * Retrieves the single user profile from the table for continuous observation.
-     * LiveData will automatically update the UI when the data changes.
+     * This now returns a Flow for reactive updates, which is more robust than LiveData.
      */
     @Query("SELECT * FROM user_profile LIMIT 1")
-    fun getUser(): LiveData<User>
+    fun getUser(): Flow<User?>
 
     /**
      * Retrieves the single user profile from the table just once.

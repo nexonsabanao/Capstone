@@ -1,7 +1,6 @@
 package com.example.nutriority.ui.home
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import com.example.nutriority.data.model.Article
 import com.example.nutriority.data.model.Meal
@@ -49,20 +48,17 @@ class HomeViewModel @Inject constructor(
             recommendedWorkoutRepository.syncOfficialWorkoutsFromCloud()
         }
 
-        allMeals = combine(mealRepository.allMeals, userRepository.getUser.asFlow()) { meals, user ->
-            if (user == null || meals.isEmpty()) return@combine emptyList()
+        allMeals = combine(mealRepository.allMeals, userRepository.getUser) { meals, user ->
+            if (user == null || meals.isEmpty()) return@combine emptyList<Meal>()
 
-            // 1. Filter by User's preferred diet
             var filtered = if (user.preferredDiet.isNotEmpty() && user.preferredDiet != "Balanced") {
                 meals.filter { it.preferredDiet.equals(user.preferredDiet, ignoreCase = true) }
             } else {
                 meals
             }
 
-            // 2. Filter out meals containing excluded ingredients (allergies)
             if (user.excludedIngredients.isNotEmpty()) {
                 filtered = filtered.filter { meal ->
-                    // Check if any excluded ingredient is present in the meal's ingredients list
                     user.excludedIngredients.none { excluded ->
                         meal.ingredients.any { ingredient -> 
                             ingredient.contains(excluded, ignoreCase = true) 
@@ -71,7 +67,6 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            // 3. Determine current time-based order
             val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
             val timePriority = when {
                 currentHour in 5..10 -> listOf("Breakfast", "Lunch", "Dinner")
@@ -80,7 +75,6 @@ class HomeViewModel @Inject constructor(
                 else -> listOf("Breakfast", "Lunch", "Dinner") 
             }
 
-            // 4. Group and Sort
             filtered.sortedWith(compareBy<Meal> { meal ->
                 val index = timePriority.indexOfFirst { it.equals(meal.mealTime, ignoreCase = true) }
                 if (index == -1) 99 else index
@@ -106,9 +100,9 @@ class HomeViewModel @Inject constructor(
 
         val recommendedWorkouts = combine(
             workoutRepository.allWorkouts, 
-            userRepository.getUser.asFlow()
+            userRepository.getUser
         ) { workouts, user ->
-            if (user == null || workouts.isEmpty()) return@combine emptyList()
+            if (user == null || workouts.isEmpty()) return@combine emptyList<Workout>()
             
             val stableWorkouts = workouts.sortedBy { it.id }
             val officialOnly = stableWorkouts.filter { it.id in 1..25 }
@@ -149,7 +143,7 @@ class HomeViewModel @Inject constructor(
             initialValue = false
         )
 
-        calorieGoal = userRepository.getUser.asFlow().map { user ->
+        calorieGoal = userRepository.getUser.map { user ->
             if (user == null) return@map "1800-2200 kcal / day"
             
             NutritionCalculator.getCalorieRangeForDisplay(

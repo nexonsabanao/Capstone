@@ -1,11 +1,11 @@
 package com.example.nutriority.data.repository
 
-import androidx.lifecycle.LiveData
 import com.example.nutriority.data.model.User
 import com.example.nutriority.data.local.UserDao
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 
 class UserRepository(private val userDao: UserDao) {
@@ -18,7 +18,7 @@ class UserRepository(private val userDao: UserDao) {
     }
     private val auth = FirebaseAuth.getInstance()
 
-    val getUser: LiveData<User> = userDao.getUser()
+    val getUser: Flow<User?> = userDao.getUser()
 
     suspend fun getInitialUser(): User? {
         return userDao.getUserById()

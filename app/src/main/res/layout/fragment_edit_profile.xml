@@ -88,26 +88,6 @@
                     app:strokeColor="@color/white"
                     app:strokeWidth="4dp" />
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/btnEditProfileImage"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    app:cardBackgroundColor="@color/green"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
-                    app:layout_constraintBottom_toBottomOf="@id/profile_image"
-                    app:layout_constraintEnd_toEndOf="@id/profile_image"
-                    app:strokeColor="@color/white"
-                    app:strokeWidth="2dp">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_plus"
-                        app:tint="@color/white" />
-                </com.google.android.material.card.MaterialCardView>
-
                 <LinearLayout
                     android:id="@+id/rowName"
                     android:layout_width="0dp"
