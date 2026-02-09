@@ -9,13 +9,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -25,6 +22,7 @@ import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.data.model.User
 import com.example.nutriority.databinding.FragmentSeventhScreenBinding
 import com.example.nutriority.planner.PlannerService
+import com.example.nutriority.ui.util.BaseBindingFragment
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -34,34 +32,27 @@ import kotlin.math.floor
 import kotlin.math.pow
 
 @AndroidEntryPoint
-class SeventhScreen : Fragment() {
+class SeventhScreen : BaseBindingFragment<FragmentSeventhScreenBinding>(FragmentSeventhScreenBinding::inflate) {
 
     @Inject
     lateinit var plannerService: PlannerService
-
-    private var _binding: FragmentSeventhScreenBinding? = null
-    private val binding get() = _binding!!
+    
+    @Inject
+    lateinit var gson: Gson
 
     private val userViewModel: UserViewModel by activityViewModels()
 
     private var recapAnimationStarted = false
     private var pulseAnimator: AnimatorSet? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentSeventhScreenBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Ensure initial state
         binding.bmiCard.alpha = 0f
         binding.bmiCard.visibility = View.INVISIBLE
         
         startDoublePulseAnimation()
 
-        // Corrected index check for SeventhScreen (position 10 in the new 11-page flow)
         val parentVp = parentFragment?.view?.findViewById<ViewPager2>(R.id.viewPager)
         if (parentVp?.currentItem == 10) {
             startRecapIfNeeded()
@@ -69,13 +60,11 @@ class SeventhScreen : Fragment() {
 
         parentFragmentManager.setFragmentResultListener("pageSelected", this) { _, bundle ->
             val position = bundle.getInt("position", -1)
-            // Position 10 is the SeventhScreen in the updated ViewPagerAdapter
             if (position == 10) startRecapIfNeeded()
         }
     }
 
     private fun startDoublePulseAnimation() {
-        // Inner Pulse
         val innerScaleX = ObjectAnimator.ofFloat(binding.pulseInner, "scaleX", 1f, 1.4f).apply {
             repeatCount = ValueAnimator.INFINITE
             repeatMode = ValueAnimator.REVERSE
@@ -89,7 +78,6 @@ class SeventhScreen : Fragment() {
             repeatMode = ValueAnimator.REVERSE
         }
 
-        // Outer Pulse
         val outerScaleX = ObjectAnimator.ofFloat(binding.pulseOuter, "scaleX", 1f, 1.6f).apply {
             repeatCount = ValueAnimator.INFINITE
             repeatMode = ValueAnimator.REVERSE
@@ -115,15 +103,13 @@ class SeventhScreen : Fragment() {
     }
 
     private fun runRecapAnimation() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             val user = userViewModel.user.value ?: return@launch
             val (initial, details) = buildRecap(user)
 
-            // 1. Animated details recap
             for ((i, text) in initial.withIndex()) {
                 animateRecapText(text)
                 delay(1500)
-
                 if (i == 2) showBmiWithAnimation(user)
             }
 
@@ -132,20 +118,24 @@ class SeventhScreen : Fragment() {
                 delay(if (text.contains("Finalizing")) 3500 else 1500)
             }
 
-            // 2. Final Plan Generation and Navigation
             try {
-                val generatedPersonalizedPlan = plannerService.generatePlanForUser(user)
-                val workoutPlanJson = Gson().toJson(generatedPersonalizedPlan.workoutPlan)
-                val saveSuccess = userViewModel.savePersonalizedPlanAndAwait(workoutPlanJson)
+                // FIXED: Generate BOTH workout and meal plan simultaneously
+                val (workoutPlan, mealPlan) = plannerService.generateFullPlan(user)
+                
+                val workoutJson = gson.toJson(workoutPlan)
+                val mealJson = gson.toJson(mealPlan)
+                
+                // SAVE: Persist everything to the user profile at once
+                val saveSuccess = userViewModel.saveFullPlan(workoutJson, mealJson)
 
                 if (saveSuccess) {
                     finishOnboarding()
                     findNavController().navigate(R.id.action_viewPagerFragment_to_mainTabsFragment)
                 } else {
-                    Log.e("OnboardingError", "Failed to save the personalized workout plan.")
+                    Log.e("OnboardingError", "Failed to save the full plan.")
                 }
             } catch (e: Exception) {
-                Log.e("OnboardingError", "An error occurred during plan generation.", e)
+                Log.e("OnboardingError", "An error occurred during full plan generation.", e)
             }
         }
     }
@@ -171,7 +161,6 @@ class SeventhScreen : Fragment() {
         binding.bmiValueText.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_dark))
         binding.bmiCategoryText.setTextColor(color)
 
-        // Smooth Reveal: Slide up + Fade in
         binding.bmiCard.visibility = View.VISIBLE
         binding.bmiCard.translationY = 200f
         binding.bmiCard.alpha = 0f
@@ -186,8 +175,6 @@ class SeventhScreen : Fragment() {
 
     private fun animateRecapText(newText: String) {
         val v = binding.userDataRecapText
-        
-        // Premium Text Animation: Slide Up + Fade Out, then Slide Up + Fade In
         val fadeOut = ObjectAnimator.ofFloat(v, "alpha", 1f, 0f)
         val slideOut = ObjectAnimator.ofFloat(v, "translationY", 0f, -60f)
 
@@ -200,7 +187,7 @@ class SeventhScreen : Fragment() {
         outSet.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 v.text = newText
-                v.translationY = 60f // Start from below for the next text
+                v.translationY = 60f 
                 
                 val fadeIn = ObjectAnimator.ofFloat(v, "alpha", 0f, 1f)
                 val slideIn = ObjectAnimator.ofFloat(v, "translationY", 40f, 0f)
@@ -213,7 +200,6 @@ class SeventhScreen : Fragment() {
                 }
             }
         })
-
         outSet.start()
     }
 
@@ -249,17 +235,8 @@ class SeventhScreen : Fragment() {
             "Weight: ${user.weightKg.toInt()} kg"
         }
 
-        val initial = listOf(
-            "Gender: ${user.gender}",
-            height,
-            weight
-        )
-
-        val details = mutableListOf(
-            "Activity: ${user.activityLevel}",
-            "Diet: ${user.preferredDiet}",
-            "Goal: ${user.goal}"
-        )
+        val initial = listOf("Gender: ${user.gender}", height, weight)
+        val details = mutableListOf("Activity: ${user.activityLevel}", "Diet: ${user.preferredDiet}")
 
         if (user.excludedIngredients.isNotEmpty()) {
             val exclusions = user.excludedIngredients.joinToString(", ")
@@ -267,13 +244,11 @@ class SeventhScreen : Fragment() {
         }
 
         details.add("Finalizing your plan...")
-
         return initial to details
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         pulseAnimator?.cancel()
-        _binding = null
     }
 }

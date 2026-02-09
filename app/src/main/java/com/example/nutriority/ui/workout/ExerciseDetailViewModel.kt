@@ -6,9 +6,11 @@ import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.data.repository.WorkoutRepository
+import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,11 +27,13 @@ class ExerciseDetailViewModel @Inject constructor(
 
     fun getExerciseById(workoutId: Int, exerciseId: String) {
         viewModelScope.launch {
-            workoutRepository.getWorkoutWithExercises(workoutId).collect { workoutWithExercises ->
-                val assignment = workoutWithExercises?.exerciseAssignments?.find { it.assignment.exerciseId == exerciseId }
-                _exerciseWithDetail.value = assignment
-                _exercise.value = assignment?.exercise ?: workoutRepository.getExerciseById(exerciseId)
-            }
+            // Optimization: Use first() to get the current snapshot efficiently 
+            // rather than maintaining an open collection for simple detailed view
+            val workoutWithExercises = workoutRepository.getWorkoutWithExercises(workoutId).first()
+            val assignment = workoutWithExercises?.exerciseAssignments?.find { it.assignment.exerciseId == exerciseId }
+            
+            _exerciseWithDetail.value = assignment
+            _exercise.value = assignment?.exercise ?: workoutRepository.getExerciseById(exerciseId)
         }
     }
 

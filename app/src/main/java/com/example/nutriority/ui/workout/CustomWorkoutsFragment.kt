@@ -6,13 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
 import com.example.nutriority.data.model.Workout
@@ -23,16 +19,15 @@ import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.CustomWorkoutAdapter
 import com.example.nutriority.ui.adapter.SelectableExerciseAdapter
 import com.example.nutriority.ui.home.HomeViewModel
+import com.example.nutriority.ui.util.BaseBindingFragment
+import com.example.nutriority.ui.util.KeyboardUtil
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class CustomWorkoutsFragment : Fragment() {
-
-    private var _binding: LayoutCustomWorkoutsBinding? = null
-    private val binding get() = _binding!!
+class CustomWorkoutsFragment : BaseBindingFragment<LayoutCustomWorkoutsBinding>(LayoutCustomWorkoutsBinding::inflate) {
 
     private val homeViewModel: HomeViewModel by activityViewModels()
     private val viewModel: WorkoutDetailViewModel by activityViewModels()
@@ -40,42 +35,37 @@ class CustomWorkoutsFragment : Fragment() {
 
     private val customAdapter by lazy {
         CustomWorkoutAdapter(
-            onClick = { workout -> 
-                navigationViewModel.navigateToWorkoutDetail(workout.id) 
-            },
-            onDeleteClick = { workout ->
-                showDeleteConfirmation(workout)
-            }
+            onClick = { workout -> navigationViewModel.navigateToWorkoutDetail(workout.id) },
+            onDeleteClick = { workout -> showDeleteConfirmation(workout) }
         )
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = LayoutCustomWorkoutsBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+        setupRecyclerView()
+        setupClickListeners()
+        observeViewModel()
+    }
+
+    private fun setupRecyclerView() {
         binding.rvCustomWorkouts.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = customAdapter
+            setHasFixedSize(true)
         }
+    }
 
-        binding.btnCreateWorkout.setOnClickListener {
-            showCreateWorkoutDialog()
-        }
+    private fun setupClickListeners() {
+        binding.btnCreateWorkout.setOnClickListener { showCreateWorkoutDialog() }
+    }
 
+    private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                homeViewModel.unfilteredWorkouts.collect { workouts ->
-                    // FIX: Personalized workouts use negative IDs. User-created use positive IDs > 25.
-                    val customOnes = workouts.filter { it.id > 25 }
-                    customAdapter.submitList(customOnes)
-                    
-                    binding.emptyStateLayout.visibility = if (customOnes.isEmpty()) View.VISIBLE else View.GONE
-                    binding.rvCustomWorkouts.visibility = if (customOnes.isEmpty()) View.GONE else View.VISIBLE
-                }
+            homeViewModel.unfilteredWorkouts.collect { workouts ->
+                val customOnes = workouts.filter { it.id in 26..999 }
+                customAdapter.submitList(customOnes)
+                binding.emptyStateLayout.visibility = if (customOnes.isEmpty()) View.VISIBLE else View.GONE
+                binding.rvCustomWorkouts.visibility = if (customOnes.isEmpty()) View.GONE else View.VISIBLE
             }
         }
     }
@@ -83,7 +73,7 @@ class CustomWorkoutsFragment : Fragment() {
     private fun showDeleteConfirmation(workout: Workout) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Workout")
-            .setMessage("Are you sure you want to delete '${workout.name}'? This action cannot be undone.")
+            .setMessage("Are you sure you want to delete '${workout.name}'?")
             .setPositiveButton("DELETE") { _, _ ->
                 viewModel.deleteWorkout(workout)
                 Toast.makeText(requireContext(), "Workout deleted", Toast.LENGTH_SHORT).show()
@@ -110,100 +100,63 @@ class CustomWorkoutsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             val allExercises = viewModel.getAllExercises().first()
-            
-            // Populate Target Muscle Chips
-            val uniqueTargets = allExercises.flatMap { it.target.split(",") }
-                .map { it.trim() }
-                .filter { it.isNotBlank() }
-                .distinct()
-                .sorted()
-
-            dialogBinding.targetMuscleChipGroup.removeAllViews()
-            
-            // Add "All" chip
-            val allChip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
-            allChip.text = "All"
-            allChip.isChecked = true
-            allChip.id = View.generateViewId()
-            dialogBinding.targetMuscleChipGroup.addView(allChip)
-
-            uniqueTargets.forEach { target ->
-                val chip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
-                chip.text = target
-                chip.id = View.generateViewId()
-                dialogBinding.targetMuscleChipGroup.addView(chip)
-            }
-
+            setupTargetChips(dialogBinding, allExercises, selectableAdapter)
             selectableAdapter.setData(allExercises, emptyList())
 
-            fun applyFilters() {
-                val category = when (dialogBinding.categoryChipGroup.checkedChipId) {
-                    R.id.chip_warmup -> "warmup"
-                    R.id.chip_cooldown -> "cooldown"
-                    else -> "Exercise"
-                }
-                
-                val checkedTargetId = dialogBinding.targetMuscleChipGroup.checkedChipId
-                val selectedTarget = if (checkedTargetId != View.NO_ID) {
-                    dialogBinding.targetMuscleChipGroup.findViewById<Chip>(checkedTargetId)?.text?.toString() ?: "All"
-                } else "All"
-
-                selectableAdapter.setFilter(category, if (selectedTarget == "All") null else selectedTarget)
-            }
-
-            dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, _ -> applyFilters() }
-            dialogBinding.targetMuscleChipGroup.setOnCheckedStateChangeListener { _, _ -> applyFilters() }
-
             dialogBinding.btnSave.setOnClickListener {
+                // BUG FIX: Hide keyboard when user clicks save
+                KeyboardUtil.hideKeyboard(dialog.window?.decorView ?: dialogBinding.root)
+                
                 val workoutName = dialogBinding.etWorkoutName.text.toString().trim()
                 if (workoutName.isBlank()) {
-                    Toast.makeText(context, "Please enter a name", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Please enter a name", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
-
                 val selected = selectableAdapter.getSelectedExercises()
                 if (selected.isEmpty()) {
-                    Toast.makeText(context, "Select at least one exercise", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Please select at least one exercise", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 
-                val newId = (System.currentTimeMillis() % 1000000).toInt() + 100 
-                
-                val newWorkout = Workout(
-                    id = newId,
-                    name = workoutName,
-                    category = "Custom",
-                    difficulty = "Intermediate",
-                    imageName = "" 
-                )
-
-                val assignments = selected.mapIndexed { index, ex ->
-                    WorkoutExercise(
-                        workoutId = newId, 
-                        exerciseId = ex.id, 
-                        category = ex.category, 
-                        sets = 3, 
-                        reps = "10", 
-                        rest = "60s", 
-                        duration = "", 
-                        order = index
-                    )
+                val newId = (System.currentTimeMillis() % 900).toInt() + 100 
+                val newWorkout = Workout(id = newId, name = workoutName, category = "Custom", difficulty = "Intermediate")
+                val assignments = selected.mapIndexed { i, ex ->
+                    WorkoutExercise(workoutId = newId, exerciseId = ex.id, category = ex.category, sets = 3, reps = "10", rest = "60s", order = i)
                 }
-
                 viewModel.updateWorkout(newWorkout, assignments)
                 dialog.dismiss()
-                Toast.makeText(requireContext(), "Custom workout created!", Toast.LENGTH_SHORT).show()
             }
-
-            dialogBinding.btnBack.setOnClickListener { dialog.dismiss() }
+            dialogBinding.btnBack.setOnClickListener { 
+                KeyboardUtil.hideKeyboard(dialog.window?.decorView ?: dialogBinding.root)
+                dialog.dismiss() 
+            }
             dialogBinding.loadingProgress.visibility = View.GONE
             dialogBinding.contentLayout.visibility = View.VISIBLE
         }
         dialog.show()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun setupTargetChips(dialogBinding: DialogEditWorkoutBinding, all: List<com.example.nutriority.data.model.Exercise>, adapter: SelectableExerciseAdapter) {
+        val targets = listOf("Abs", "Arms", "Back", "Chest", "Legs", "Shoulders", "Full Body")
+        dialogBinding.targetMuscleChipGroup.removeAllViews()
+        val allChip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
+        allChip.text = "All"; allChip.isChecked = true; allChip.id = View.generateViewId()
+        dialogBinding.targetMuscleChipGroup.addView(allChip)
+
+        targets.forEach { t ->
+            val chip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
+            chip.text = t; chip.id = View.generateViewId()
+            dialogBinding.targetMuscleChipGroup.addView(chip)
+        }
+
+        fun filter() {
+            val cat = when(dialogBinding.categoryChipGroup.checkedChipId) {
+                R.id.chip_warmup -> "warmup"; R.id.chip_cooldown -> "cooldown"; else -> "Exercise"
+            }
+            val chip = dialogBinding.targetMuscleChipGroup.findViewById<Chip>(dialogBinding.targetMuscleChipGroup.checkedChipId)
+            adapter.setFilter(cat, if (chip?.text == "All") null else chip?.text?.toString())
+        }
+        dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, _ -> filter() }
+        dialogBinding.targetMuscleChipGroup.setOnCheckedStateChangeListener { _, _ -> filter() }
     }
 }

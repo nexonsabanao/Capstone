@@ -251,18 +251,6 @@
                 app:layout_constraintTop_toBottomOf="@id/generated_meal_plan_recycler_view"
                 tools:visibility="gone" />
 
-            <ProgressBar
-                android:id="@+id/loading_progress_bar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:visibility="gone"
-                android:indeterminateTint="@color/green"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/date_selectors"
-                tools:visibility="gone" />
-
             <androidx.constraintlayout.widget.Group
                 android:id="@+id/initialView"
                 android:layout_width="wrap_content"
@@ -271,5 +259,18 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- CENTERED PROGRESS BAR -->
+    <ProgressBar
+        android:id="@+id/loading_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:indeterminateTint="@color/green"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

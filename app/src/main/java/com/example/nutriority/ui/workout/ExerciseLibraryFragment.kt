@@ -1,10 +1,7 @@
 package com.example.nutriority.ui.workout
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -12,19 +9,18 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutExerciseWithDetail
+import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.databinding.FragmentExerciseLibraryBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.ExerciseAdapter
 import com.example.nutriority.ui.adapter.WorkoutItem
+import com.example.nutriority.ui.util.BaseBindingFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ExerciseLibraryFragment : Fragment() {
+class ExerciseLibraryFragment : BaseBindingFragment<FragmentExerciseLibraryBinding>(FragmentExerciseLibraryBinding::inflate) {
 
-    private var _binding: FragmentExerciseLibraryBinding? = null
-    private val binding get() = _binding!!
-    
     private val viewModel: WorkoutDetailViewModel by activityViewModels()
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     
@@ -36,25 +32,13 @@ class ExerciseLibraryFragment : Fragment() {
             },
             onListUpdated = { },
             onDragStart = { },
-            isLibraryView = true // FIX: Enable Library Mode to show target muscles and hide drag handles
+            isLibraryView = true 
         )
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentExerciseLibraryBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.backButton.setOnClickListener {
-            navigationViewModel.goBack()
-        }
-
+        binding.backButton.setOnClickListener { navigationViewModel.goBack() }
         setupRecyclerView()
         observeViewModel()
     }
@@ -63,15 +47,14 @@ class ExerciseLibraryFragment : Fragment() {
         binding.exerciseLibraryRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = exerciseAdapter
+            setHasFixedSize(true)
         }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.getAllExercises().collect { exercises ->
-                    // For the library view, we wrap Exercises into a dummy detail object 
-                    // since the Adapter expects WorkoutExerciseWithDetail
                     val workoutItems = exercises.map { exercise -> 
                         WorkoutItem.ExerciseItem(
                             WorkoutExerciseWithDetail(
@@ -91,10 +74,5 @@ class ExerciseLibraryFragment : Fragment() {
                 }
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

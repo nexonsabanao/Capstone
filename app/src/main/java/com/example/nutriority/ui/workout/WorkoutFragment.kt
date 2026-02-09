@@ -2,9 +2,7 @@ package com.example.nutriority.ui.workout
 
 import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -13,27 +11,16 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentWorkoutBinding
 import com.example.nutriority.ui.NavigationViewModel
+import com.example.nutriority.ui.util.BaseBindingFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class WorkoutFragment : Fragment() {
-
-    private var _binding: FragmentWorkoutBinding? = null
-    private val binding get() = _binding!!
+class WorkoutFragment : BaseBindingFragment<FragmentWorkoutBinding>(FragmentWorkoutBinding::inflate) {
 
     private val navigationViewModel: NavigationViewModel by activityViewModels()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentWorkoutBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupViewPager()
         setupTabs()
     }
@@ -46,13 +33,16 @@ class WorkoutFragment : Fragment() {
             }
         }
 
-        binding.workoutViewPager.adapter = adapter
-        
-        binding.workoutViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                updateTabUI(position == 0)
-            }
-        })
+        binding.workoutViewPager.apply {
+            this.adapter = adapter
+            offscreenPageLimit = 1 // Optimization: Keep tabs in memory for instant switching
+            
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    updateTabUI(position == 0)
+                }
+            })
+        }
     }
 
     private fun setupTabs() {
@@ -77,10 +67,5 @@ class WorkoutFragment : Fragment() {
             binding.tabTrainer.setBackgroundColor(transparentBg)
             binding.tabTrainer.setTextColor(grayColor)
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

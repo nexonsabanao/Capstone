@@ -2,17 +2,51 @@ package com.example.nutriority.planner
 
 import com.example.nutriority.data.model.User
 import com.example.nutriority.data.model.Meal
+import com.example.nutriority.ui.util.AgeUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class PlannerService @Inject constructor(
-    private val mealPlanner: MealPlanner,
-    private val workoutPlanner: WorkoutPlanner
+    val mealPlanner: MealPlanner,
+    val workoutPlanner: WorkoutPlanner
 ) {
 
+    /**
+     * Generates a full personalized plan including a 4-week workout program
+     * and a full 7-day meal plan.
+     */
+    suspend fun generateFullPlan(user: User): Pair<WorkoutPlan, List<List<Meal>>> = withContext(Dispatchers.IO) {
+        // 1. Generate 4-week workout plan
+        val workoutPlanDeferred = async { workoutPlanner.planWorkouts(user) }
+
+        // 2. Generate 7-day meal plan in parallel
+        val dailyCalories = NutritionCalculator.calculateTdeeDailyCalories(
+            user.weightKg, user.heightCm, AgeUtil.calculateAge(user.birthDate), user.gender, user.activityLevel, user.goal
+        )
+        
+        // Fetch meal pool once to optimize speed
+        val mealPool = mealPlanner.mealRepository.getAllMealsList()
+        
+        val mealPlanDeferred = (0 until 7).map {
+            async { 
+                mealPlanner.planMeals(dailyCalories, user.preferredDiet, user.excludedIngredients, mealPool) 
+            }
+        }
+
+        val workoutPlan = workoutPlanDeferred.await()
+        val mealPlan = mealPlanDeferred.awaitAll()
+
+        workoutPlan to mealPlan
+    }
+
     suspend fun generatePlanForUser(user: User): PersonalizedPlan {
-        val input = PlannerInput(user, user.age ?: 30)
+        val age = AgeUtil.calculateAge(user.birthDate)
+        val input = PlannerInput(user, age)
 
         val dailyCalories = NutritionCalculator.calculateTdeeDailyCalories(
             weightKg = user.weightKg,
@@ -24,17 +58,11 @@ class PlannerService @Inject constructor(
         )
 
         val macros = NutritionCalculator.macronutrientTargets(dailyCalories)
-
         val meals: List<Meal> = mealPlanner.planMeals(dailyCalories, user.preferredDiet, user.excludedIngredients)
-
-        // The meals list is now in the correct format, so no mapping is needed.
         val nutritionPlan = NutritionPlan(dailyCalories, macros, meals)
-
         val workoutPlan = workoutPlanner.planWorkouts(user)
 
-        val plan = PersonalizedPlan(user.id, nutritionPlan, workoutPlan)
-
-        return plan
+        return PersonalizedPlan(user.id, nutritionPlan, workoutPlan)
     }
 
     fun planSummary(plan: PersonalizedPlan): String {

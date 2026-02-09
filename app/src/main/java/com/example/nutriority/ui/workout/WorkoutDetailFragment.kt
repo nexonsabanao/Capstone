@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asFlow
@@ -20,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.data.model.User
-import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.data.model.WorkoutWithExercises
 import com.example.nutriority.databinding.FragmentWorkoutDetailBinding
 import com.example.nutriority.databinding.DialogEditWorkoutBinding
@@ -28,6 +26,9 @@ import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.ExerciseAdapter
 import com.example.nutriority.ui.adapter.SelectableExerciseAdapter
 import com.example.nutriority.ui.adapter.WorkoutItem
+import com.example.nutriority.ui.util.BaseBindingFragment
+import com.example.nutriority.ui.util.ImageUtil
+import com.example.nutriority.ui.util.WorkoutUtil
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
@@ -37,36 +38,22 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.util.Locale
 import kotlin.math.abs
 
 @AndroidEntryPoint
-class WorkoutDetailFragment : Fragment() {
+class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(FragmentWorkoutDetailBinding::inflate) {
 
-    private var _binding: FragmentWorkoutDetailBinding? = null
-    private val binding get() = _binding!!
-    
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     private val viewModel: WorkoutDetailViewModel by activityViewModels()
     private val userViewModel: UserViewModel by activityViewModels()
     
     private lateinit var exerciseAdapter: ExerciseAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
-    
     private var isSettingInitialState = false
     private var currentToast: Toast? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentWorkoutDetailBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupToolbar()
         setupRecyclerView()
         observeNavigationData()
@@ -75,10 +62,7 @@ class WorkoutDetailFragment : Fragment() {
     }
 
     private fun setupToolbar() {
-        binding.btnBack.setOnClickListener {
-            navigationViewModel.goBack()
-        }
-
+        binding.btnBack.setOnClickListener { navigationViewModel.goBack() }
         binding.tvToolbarTitle.alpha = 0f
         binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
 
@@ -90,8 +74,7 @@ class WorkoutDetailFragment : Fragment() {
             val startFadeAt = 0.8f
             if (percentage > startFadeAt) {
                 val alphaProgress = (percentage - startFadeAt) / (1f - startFadeAt)
-                val alphaInt = (alphaProgress * 255).toInt().coerceIn(0, 255)
-                binding.toolbar.setBackgroundColor(Color.argb(alphaInt, 255, 255, 255))
+                binding.toolbar.setBackgroundColor(Color.argb((alphaProgress * 255).toInt(), 255, 255, 255))
                 binding.tvToolbarTitle.alpha = alphaProgress
             } else {
                 binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
@@ -121,44 +104,33 @@ class WorkoutDetailFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        binding.addExerciseButton.setOnClickListener {
-            showEditWorkoutDialog()
-        }
-
+        binding.addExerciseButton.setOnClickListener { showEditWorkoutDialog() }
         binding.switchIncludeWarmupCooldown.setOnCheckedChangeListener { _, isChecked ->
             if (isSettingInitialState) return@setOnCheckedChangeListener
             viewModel.updateWorkoutPreference(isChecked)
         }
-        
-        binding.startButton.setOnClickListener {
-            val currentWorkoutId = viewModel.workout.value?.workout?.id ?: -1
-            val activeWorkoutId = viewModel.activeWorkoutId.value
-            
-            if (viewModel.isWorkoutActive.value && activeWorkoutId != currentWorkoutId) {
-                showToast("You already have another workout in progress!")
-                return@setOnClickListener
-            }
-            
-            val dayIndex = navigationViewModel.selectedDayIndex.value
-            viewModel.startWorkout(currentWorkoutId, dayIndex)
-            navigateToCurrentExercise()
-        }
+        binding.startButton.setOnClickListener { handleStartAction() }
+        binding.btnEndWorkout.setOnClickListener { showEndWorkoutBottomSheet() }
+    }
 
-        binding.btnEndWorkout.setOnClickListener {
-            showEndWorkoutBottomSheet()
+    private fun handleStartAction() {
+        val currentWorkoutId = viewModel.workout.value?.workout?.id ?: -1
+        val activeWorkoutId = viewModel.activeWorkoutId.value
+        
+        if (viewModel.isWorkoutActive.value && activeWorkoutId != currentWorkoutId) {
+            showToast("Another workout is in progress!")
+            return
         }
+        
+        viewModel.startWorkout(currentWorkoutId, navigationViewModel.selectedDayIndex.value)
+        navigateToCurrentExercise()
     }
 
     private fun navigateToCurrentExercise() {
         val items = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
         if (items.isNotEmpty()) {
-            val firstAssignment = items[0].detail.assignment
-            navigationViewModel.navigateToExerciseDetail(
-                firstAssignment.workoutId,
-                firstAssignment.exerciseId,
-                1,
-                items.size
-            )
+            val first = items[0].detail.assignment
+            navigationViewModel.navigateToExerciseDetail(first.workoutId, first.exerciseId, 1, items.size)
         }
     }
 
@@ -168,32 +140,22 @@ class WorkoutDetailFragment : Fragment() {
         dialog.setContentView(view)
 
         val workout = viewModel.workout.value ?: return
-        val totalCount = workout.exerciseAssignments.size
-        val completedCount = viewModel.completedExercisesCount.value
-        val progress = if (totalCount > 0) (completedCount * 100) / totalCount else 0
+        val total = workout.exerciseAssignments.size
+        val done = viewModel.completedExercisesCount.value
+        val progress = if (total > 0) (done * 100) / total else 0
 
-        view.findViewById<TextView>(R.id.tvSubtitle).text = 
-            "($completedCount from $totalCount completed - $progress%)"
+        view.findViewById<TextView>(R.id.tvSubtitle).text = "($done from $total completed - $progress%)"
 
-        val resumeAction = {
-            viewModel.resumeWorkout()
-            dialog.dismiss()
-        }
-
-        view.findViewById<View>(R.id.btnClose).setOnClickListener { resumeAction() }
-        view.findViewById<MaterialButton>(R.id.btnResume).setOnClickListener { resumeAction() }
+        val resume = { viewModel.resumeWorkout(); dialog.dismiss() }
+        view.findViewById<View>(R.id.btnClose).setOnClickListener { resume() }
+        view.findViewById<MaterialButton>(R.id.btnResume).setOnClickListener { resume() }
         
         dialog.setOnCancelListener { viewModel.resumeWorkout() }
-
         view.findViewById<MaterialButton>(R.id.btnDiscard).setOnClickListener {
-            viewModel.stopWorkout(save = false)
-            dialog.dismiss()
+            viewModel.stopWorkout(false); dialog.dismiss()
         }
-
         view.findViewById<MaterialButton>(R.id.btnSaveFinish).setOnClickListener {
-            viewModel.finishWorkout()
-            navigationViewModel.navigateToWorkoutComplete()
-            dialog.dismiss()
+            viewModel.finishWorkout(); navigationViewModel.navigateToWorkoutComplete(); dialog.dismiss()
         }
 
         viewModel.pauseWorkout()
@@ -215,99 +177,36 @@ class WorkoutDetailFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val workoutWithExercises = viewModel.workout.filterNotNull().first()
             val allExercisesList = viewModel.getAllExercises().first()
-
             val workoutName = workoutWithExercises.workout.name
-            val isEditableName = workoutWithExercises.workout.id > 25
+            val isEditable = workoutWithExercises.workout.id > 25
 
-            if (!isEditableName) {
-                dialogBinding.workoutNameLayout.visibility = View.GONE
-                dialogBinding.btnReset.visibility = View.VISIBLE
-            } else {
-                dialogBinding.etWorkoutName.setText(workoutName)
-                dialogBinding.workoutNameLayout.visibility = View.VISIBLE
-                dialogBinding.btnReset.visibility = View.GONE
-            }
+            dialogBinding.workoutNameLayout.visibility = if (isEditable) View.VISIBLE else View.GONE
+            dialogBinding.btnReset.visibility = if (isEditable) View.GONE else View.VISIBLE
+            if (isEditable) dialogBinding.etWorkoutName.setText(workoutName)
 
-            // SIMPLIFIED: Static list of simplified target chips
-            val simplifiedTargets = listOf("Abs", "Arms", "Back", "Chest", "Legs", "Shoulders", "Full Body")
+            setupTargetChips(dialogBinding, allExercisesList, selectableAdapter)
 
-            dialogBinding.targetMuscleChipGroup.removeAllViews()
-            
-            // Add "All" chip
-            val allChip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
-            allChip.text = "All"
-            allChip.isChecked = true
-            allChip.id = View.generateViewId()
-            dialogBinding.targetMuscleChipGroup.addView(allChip)
-
-            simplifiedTargets.forEach { target ->
-                val chip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
-                chip.text = target
-                chip.id = View.generateViewId()
-                dialogBinding.targetMuscleChipGroup.addView(chip)
-            }
-
-            val selectedExercises = workoutWithExercises.exerciseAssignments.map { assignment ->
-                assignment.exercise.copy(category = assignment.assignment.category)
-            }
-            selectableAdapter.setData(allExercisesList, selectedExercises)
-
-            fun applyFilters() {
-                val category = when (dialogBinding.categoryChipGroup.checkedChipId) {
-                    R.id.chip_warmup -> "warmup"
-                    R.id.chip_cooldown -> "cooldown"
-                    else -> "Exercise"
-                }
-                
-                val checkedTargetId = dialogBinding.targetMuscleChipGroup.checkedChipId
-                val selectedTarget = if (checkedTargetId != View.NO_ID) {
-                    dialogBinding.targetMuscleChipGroup.findViewById<Chip>(checkedTargetId)?.text?.toString() ?: "All"
-                } else "All"
-
-                selectableAdapter.setFilter(category, if (selectedTarget == "All") null else selectedTarget)
-            }
-
-            dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, _ -> applyFilters() }
-            dialogBinding.targetMuscleChipGroup.setOnCheckedStateChangeListener { _, _ -> applyFilters() }
-
-            dialogBinding.btnReset.setOnClickListener {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    val originalAssignments = viewModel.getOriginalAssignments(workoutWithExercises.workout.id)
-                    if (originalAssignments.isNotEmpty()) {
-                        val originalExercises = originalAssignments.mapNotNull { assignment ->
-                            allExercisesList.find { it.id == assignment.exerciseId }?.copy(category = assignment.category)
-                        }
-                        selectableAdapter.setData(allExercisesList, originalExercises)
-                    }
-                }
-            }
+            selectableAdapter.setData(allExercisesList, workoutWithExercises.exerciseAssignments.map { it.exercise.copy(category = it.assignment.category) })
 
             dialogBinding.btnSave.setOnClickListener {
-                val finalName = if (!isEditableName) workoutName else dialogBinding.etWorkoutName.text.toString()
-                if (finalName.isBlank()) return@setOnClickListener
-
-                val finalSelectedExercises = selectableAdapter.getSelectedExercises()
-                
-                val newAssignments = finalSelectedExercises.mapIndexed { index, ex ->
-                    val existing = workoutWithExercises.exerciseAssignments.find { 
-                        it.assignment.exerciseId == ex.id && it.assignment.category == ex.category 
-                    }
-                    
+                val name = if (isEditable) dialogBinding.etWorkoutName.text.toString() else workoutName
+                if (name.isBlank()) return@setOnClickListener
+                val newAssignments = selectableAdapter.getSelectedExercises().mapIndexed { i, ex ->
+                    val existing = workoutWithExercises.exerciseAssignments.find { it.assignment.exerciseId == ex.id && it.assignment.category == ex.category }
                     com.example.nutriority.data.model.WorkoutExercise(
                         workoutId = workoutWithExercises.workout.id,
                         exerciseId = ex.id,
                         category = ex.category.ifBlank { "Exercise" },
-                        sets = existing?.assignment?.sets ?: (if (ex.category == "Exercise") 3 else 1),
-                        reps = existing?.assignment?.reps ?: (if (ex.category == "Exercise") "10" else "1"),
-                        rest = existing?.assignment?.rest ?: (if (ex.category == "Exercise") "60s" else "0s"),
-                        duration = existing?.assignment?.duration ?: (if (ex.category == "Exercise") "" else "1 min"),
-                        order = index
+                        sets = existing?.assignment?.sets ?: if (ex.category == "Exercise") 3 else 1,
+                        reps = existing?.assignment?.reps ?: if (ex.category == "Exercise") "10" else "1",
+                        rest = existing?.assignment?.rest ?: if (ex.category == "Exercise") "60s" else "0s",
+                        duration = existing?.assignment?.duration ?: if (ex.category == "Exercise") "" else "1 min",
+                        order = i
                     )
                 }
-                viewModel.updateWorkout(workoutWithExercises.workout.copy(name = finalName), newAssignments)
+                viewModel.updateWorkout(workoutWithExercises.workout.copy(name = name), newAssignments)
                 dialog.dismiss()
             }
-
             dialogBinding.btnBack.setOnClickListener { dialog.dismiss() }
             dialogBinding.loadingProgress.visibility = View.GONE
             dialogBinding.contentLayout.visibility = View.VISIBLE
@@ -315,65 +214,64 @@ class WorkoutDetailFragment : Fragment() {
         dialog.show()
     }
 
+    private fun setupTargetChips(dialogBinding: DialogEditWorkoutBinding, all: List<com.example.nutriority.data.model.Exercise>, adapter: SelectableExerciseAdapter) {
+        val targets = listOf("Abs", "Arms", "Back", "Chest", "Legs", "Shoulders", "Full Body")
+        dialogBinding.targetMuscleChipGroup.removeAllViews()
+        val allChip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
+        allChip.text = "All"; allChip.isChecked = true; allChip.id = View.generateViewId()
+        dialogBinding.targetMuscleChipGroup.addView(allChip)
+
+        targets.forEach { t ->
+            val chip = LayoutInflater.from(requireContext()).inflate(R.layout.layout_filter_chip, dialogBinding.targetMuscleChipGroup, false) as Chip
+            chip.text = t; chip.id = View.generateViewId()
+            dialogBinding.targetMuscleChipGroup.addView(chip)
+        }
+
+        fun filter() {
+            val cat = when(dialogBinding.categoryChipGroup.checkedChipId) {
+                R.id.chip_warmup -> "warmup"; R.id.chip_cooldown -> "cooldown"; else -> "Exercise"
+            }
+            val chip = dialogBinding.targetMuscleChipGroup.findViewById<Chip>(dialogBinding.targetMuscleChipGroup.checkedChipId)
+            adapter.setFilter(cat, if (chip?.text == "All") null else chip?.text?.toString())
+        }
+        dialogBinding.categoryChipGroup.setOnCheckedStateChangeListener { _, _ -> filter() }
+        dialogBinding.targetMuscleChipGroup.setOnCheckedStateChangeListener { _, _ -> filter() }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private fun setupRecyclerView() {
         exerciseAdapter = ExerciseAdapter(
             onItemClick = { item, _, _ ->
-                val currentWorkoutId = viewModel.workout.value?.workout?.id ?: -1
-                val activeWorkoutId = viewModel.activeWorkoutId.value
-                
-                if (viewModel.isWorkoutActive.value && activeWorkoutId != currentWorkoutId) {
-                    showToast("You already have another workout in progress!")
-                    return@ExerciseAdapter
+                if (viewModel.isWorkoutActive.value && viewModel.activeWorkoutId.value != item.assignment.workoutId) {
+                    showToast("Another workout in progress!"); return@ExerciseAdapter
                 }
-
-                val itemsOnly = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
-                val index = itemsOnly.indexOfFirst { it.detail.assignment.exerciseId == item.assignment.exerciseId }
-                if (index != -1) {
-                    navigationViewModel.navigateToExerciseDetail(
-                        item.assignment.workoutId,
-                        item.assignment.exerciseId,
-                        index + 1,
-                        itemsOnly.size
-                    )
-                }
+                val onlyEx = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
+                val idx = onlyEx.indexOfFirst { it.detail.assignment.exerciseId == item.assignment.exerciseId }
+                if (idx != -1) navigationViewModel.navigateToExerciseDetail(item.assignment.workoutId, item.assignment.exerciseId, idx + 1, onlyEx.size)
             },
-            onListUpdated = { updatedList ->
-                val assignments = updatedList.map { it.assignment }
-                viewModel.updateWorkout(viewModel.workout.value!!.workout, assignments)
-            },
-            onDragStart = { viewHolder ->
-                itemTouchHelper.startDrag(viewHolder)
-            }
+            onListUpdated = { list -> viewModel.updateWorkout(viewModel.workout.value!!.workout, list.map { it.assignment }) },
+            onDragStart = { vh -> itemTouchHelper.startDrag(vh) }
         )
-
         binding.exercisesRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = exerciseAdapter
-            itemAnimator = null
-            isNestedScrollingEnabled = false
+            adapter = exerciseAdapter; itemAnimator = null; isNestedScrollingEnabled = false
         }
-
-        val callback = SimpleItemTouchHelperCallback(exerciseAdapter)
-        itemTouchHelper = ItemTouchHelper(callback)
+        itemTouchHelper = ItemTouchHelper(SimpleItemTouchHelperCallback(exerciseAdapter))
         itemTouchHelper.attachToRecyclerView(binding.exercisesRecyclerView)
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.workout.collect { workoutWithExercises ->
-                    workoutWithExercises?.let { workout ->
-                        if (binding.tvToolbarTitle.text != workout.workout.name) {
-                            binding.tvToolbarTitle.text = workout.workout.name
-                            binding.workoutTitle.text = workout.workout.name
-                        }
-
+                viewModel.workout.collect { workout ->
+                    workout?.let {
+                        binding.tvToolbarTitle.text = it.workout.name
+                        binding.workoutTitle.text = it.workout.name
+                        binding.workoutBannerImage.setImageResource(ImageUtil.getWorkoutImageResource(it.workout.targetMuscle, it.workout.name, it.workout.difficulty))
                         isSettingInitialState = true
-                        binding.switchIncludeWarmupCooldown.isChecked = workout.workout.includeWarmupCooldown
+                        binding.switchIncludeWarmupCooldown.isChecked = it.workout.includeWarmupCooldown
                         isSettingInitialState = false
-
-                        updateDisplayList(workout, workout.workout.includeWarmupCooldown)
+                        updateDisplayList(it, it.workout.includeWarmupCooldown)
                     }
                 }
             }
@@ -381,131 +279,56 @@ class WorkoutDetailFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(
-                    viewModel.isWorkoutActive,
-                    viewModel.activeWorkoutId,
-                    viewModel.workout,
-                    userViewModel.user.asFlow(),
-                    navigationViewModel.isPersonalizedFlow,
-                    navigationViewModel.selectedDayIndex
-                ) { params -> 
-                    val isActive = params[0] as Boolean
-                    val activeId = params[1] as Int
-                    val current = params[2] as? WorkoutWithExercises
-                    val user = params[3] as? User
-                    val isPersonalized = params[4] as Boolean
-                    val dayIndex = params[5] as Int
-                    
-                    val isThisActiveSession = isActive && activeId == current?.workout?.id
-                    
-                    var isLocked = false
-                    if (isPersonalized && dayIndex != -1) {
-                        val lastDayDone = user?.lastCompletedWorkoutDay ?: 0
-                        isLocked = dayIndex > lastDayDone
+                combine(viewModel.isWorkoutActive, viewModel.activeWorkoutId, viewModel.workout, userViewModel.user.asFlow(), navigationViewModel.isPersonalizedFlow, navigationViewModel.selectedDayIndex) { p -> 
+                    val isActive = p[0] as Boolean; val activeId = p[1] as Int; val curr = p[2] as? WorkoutWithExercises; val user = p[3] as? User; val isPers = p[4] as Boolean; val day = p[5] as Int
+                    val isThis = isActive && activeId == curr?.workout?.id
+                    val isLocked = isPers && day != -1 && day > (user?.lastCompletedWorkoutDay ?: 0)
+                    Triple(isThis, isActive, isLocked)
+                }.collect { (isThis, any, isLocked) ->
+                    binding.startButton.apply {
+                        visibility = if (isLocked || isThis || !any) View.VISIBLE else View.GONE
+                        isEnabled = !isLocked
+                        alpha = if (isLocked) 0.5f else 1.0f
+                        text = if (isLocked) "LOCKED" else if (isThis) "RESUME" else "START"
                     }
-                    
-                    Triple(isThisActiveSession, isActive, isLocked)
-                }.collect { (isThisActive, anyActive, isLocked) ->
-                    
-                    if (isLocked) {
-                        binding.startButton.visibility = View.VISIBLE
-                        binding.startButton.text = "LOCKED"
-                        binding.startButton.isEnabled = false
-                        binding.startButton.alpha = 0.5f
-                        binding.activeWorkoutBar.visibility = View.GONE
-                    } else {
-                        binding.startButton.isEnabled = true
-                        binding.startButton.alpha = 1.0f
-                        binding.startButton.visibility = if (isThisActive || !anyActive) View.VISIBLE else View.GONE
-                        binding.activeWorkoutBar.visibility = if (isThisActive) View.VISIBLE else View.GONE
-                        binding.startButton.text = if (isThisActive) "RESUME" else "START"
-                    }
+                    binding.activeWorkoutBar.visibility = if (isThis) View.VISIBLE else View.GONE
                 }
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.elapsedTimeSeconds.collect { seconds ->
-                    binding.tvActiveTimer.text = viewModel.formatElapsedTime(seconds)
-                }
+                viewModel.elapsedTimeSeconds.collect { binding.tvActiveTimer.text = viewModel.formatElapsedTime(it) }
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.completedExercisesCount.collect { completed ->
+                viewModel.completedExercisesCount.collect { done ->
                     val total = viewModel.workout.value?.exerciseAssignments?.size ?: 1
-                    val progress = (completed.toFloat() / total.toFloat()) * 100
-                    binding.workoutProgress.progress = progress
+                    binding.workoutProgress.progress = (done.toFloat() / total) * 100
                 }
             }
         }
     }
 
-    private fun parseTimeToSeconds(timeStr: String): Int {
-        if (timeStr.isBlank()) return 0
-        val lower = timeStr.lowercase().trim()
-        val value = lower.filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: return 0
-        return when {
-            lower.contains("min") || (lower.contains("m") && !lower.contains("s")) -> (value * 60).toInt()
-            else -> value.toInt()
-        }
-    }
-
-    private fun updateDisplayList(workout: WorkoutWithExercises, includeAll: Boolean) {
-        val displayList = mutableListOf<WorkoutItem>()
+    private fun updateDisplayList(workout: WorkoutWithExercises, include: Boolean) {
+        val list = mutableListOf<WorkoutItem>()
         val assignments = workout.exerciseAssignments.sortedBy { it.assignment.order }
+        val warm = assignments.filter { it.assignment.category.equals("warmup", true) }
+        val cool = assignments.filter { it.assignment.category.equals("cooldown", true) }
+        val main = assignments.filter { it.assignment.category.equals("Exercise", true) }
 
-        val warmup = assignments.filter { it.assignment.category.equals("warmup", ignoreCase = true) }
-        val cooldown = assignments.filter { it.assignment.category.equals("cooldown", ignoreCase = true) }
-        val main = assignments.filter { it.assignment.category.equals("Exercise", ignoreCase = true) }
-
-        binding.workoutExerciseCount.text = main.size.toString()
-
-        if (includeAll) {
-            if (warmup.isNotEmpty()) {
-                displayList.add(WorkoutItem.DividerItem("Warm-up"))
-                displayList.addAll(warmup.map { WorkoutItem.ExerciseItem(it) })
-            }
-            displayList.add(WorkoutItem.DividerItem("Main Workout"))
-            displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
-            if (cooldown.isNotEmpty()) {
-                displayList.add(WorkoutItem.DividerItem("Cool-down"))
-                displayList.addAll(cooldown.map { WorkoutItem.ExerciseItem(it) })
-            }
+        if (include) {
+            binding.workoutExerciseCount.text = assignments.size.toString()
+            if (warm.isNotEmpty()) { list.add(WorkoutItem.DividerItem("Warm-up")); list.addAll(warm.map { WorkoutItem.ExerciseItem(it) }) }
+            list.add(WorkoutItem.DividerItem("Main Workout")); list.addAll(main.map { WorkoutItem.ExerciseItem(it) })
+            if (cool.isNotEmpty()) { list.add(WorkoutItem.DividerItem("Cool-down")); list.addAll(cool.map { WorkoutItem.ExerciseItem(it) }) }
         } else {
-            displayList.addAll(main.map { WorkoutItem.ExerciseItem(it) })
+            binding.workoutExerciseCount.text = main.size.toString()
+            list.addAll(main.map { WorkoutItem.ExerciseItem(it) })
         }
-
-        // Improved duration calculation
-        val totalSeconds = assignments.filter {
-            includeAll || it.assignment.category.equals("Exercise", ignoreCase = true)
-        }.sumOf { item ->
-            val assignment = item.assignment
-            val sets = assignment.sets
-            val restSec = parseTimeToSeconds(assignment.rest)
-            
-            val workSec = if (assignment.duration.isNotBlank()) {
-                parseTimeToSeconds(assignment.duration)
-            } else {
-                // Parse reps (e.g., "10", "12-15", etc.)
-                val reps = assignment.reps.split("-").last().filter { it.isDigit() }.toIntOrNull() ?: 10
-                reps * 3 // Assume 3 seconds per rep
-            }
-            
-            (sets * workSec) + ((sets - 1).coerceAtLeast(0) * restSec)
-        }
-
-        binding.workoutDuration.text = "${Math.ceil(totalSeconds / 60.0).toInt()} mins"
-        exerciseAdapter.submitList(displayList)
+        binding.workoutDuration.text = WorkoutUtil.calculateTotalDuration(assignments, include)
+        exerciseAdapter.submitList(list)
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        currentToast?.cancel()
-        _binding = null
-    }
-    
-    data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 }

@@ -2,55 +2,35 @@ package com.example.nutriority.ui.onboarding.screens
 
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
-import androidx.navigation.fragment.findNavController
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentFifthScreenBinding
+import com.example.nutriority.ui.util.BaseBindingFragment
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class FifthScreen : Fragment() {
-
-    private var _binding: FragmentFifthScreenBinding? = null
-    private val binding get() = _binding!!
+class FifthScreen : BaseBindingFragment<FragmentFifthScreenBinding>(FragmentFifthScreenBinding::inflate) {
 
     private val userViewModel: UserViewModel by activityViewModels()
-
     private var initialValueRestored = false
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentFifthScreenBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupChipStyle()
         observeAndSetInitialState()
-        // Listeners are no longer set up here.
     }
 
-    // --- THE FIX: PART 1 ---
-    // Listeners are now set up only when the fragment is fully visible and interactive.
     override fun onResume() {
         super.onResume()
         setupClickListeners()
     }
 
-    // --- THE FIX: PART 2 ---
-    // Listeners are detached when the fragment is paused. This is the key to preventing the bug.
     override fun onPause() {
         super.onPause()
         clearClickListeners()
@@ -75,24 +55,19 @@ class FifthScreen : Fragment() {
     }
 
     private fun setupChipStyle() {
-        val primaryDarkColor = ContextCompat.getColor(requireContext(), R.color.primary_dark)
-        val defaultBackgroundColor = ContextCompat.getColor(requireContext(), R.color.white)
-        val defaultTextColor = ContextCompat.getColor(requireContext(), R.color.dark_gray)
-        val whiteColor = ContextCompat.getColor(requireContext(), android.R.color.white)
+        val context = requireContext()
+        val primaryDarkColor = ContextCompat.getColor(context, R.color.primary_dark)
+        val defaultBackgroundColor = ContextCompat.getColor(context, R.color.white)
+        val defaultTextColor = ContextCompat.getColor(context, R.color.dark_gray)
+        val whiteColor = ContextCompat.getColor(context, android.R.color.white)
 
         val backgroundStateList = ColorStateList(
-            arrayOf(
-                intArrayOf(android.R.attr.state_checked),
-                intArrayOf(-android.R.attr.state_checked)
-            ),
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
             intArrayOf(primaryDarkColor, defaultBackgroundColor)
         )
 
         val textStateList = ColorStateList(
-            arrayOf(
-                intArrayOf(android.R.attr.state_checked),
-                intArrayOf(-android.R.attr.state_checked)
-            ),
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
             intArrayOf(whiteColor, defaultTextColor)
         )
 
@@ -110,14 +85,9 @@ class FifthScreen : Fragment() {
         binding.backButton.setOnClickListener {
             parentFragmentManager.setFragmentResult("navigationRequestPrevious", Bundle())
         }
-
-        binding.nextButton.setOnClickListener {
-            saveDataAndFinish()
-        }
+        binding.nextButton.setOnClickListener { saveDataAndFinish() }
     }
 
-    // --- THE FIX: PART 3 ---
-    // A new function to nullify all listeners, preventing ghost clicks and memory leaks.
     private fun clearClickListeners() {
         binding.backButton.setOnClickListener(null)
         binding.nextButton.setOnClickListener(null)
@@ -125,12 +95,7 @@ class FifthScreen : Fragment() {
 
     private fun saveDataAndFinish() {
         val excludedIngredients = getSelectedIngredients()
-
-        userViewModel.updateOnboardingData { currentUserState ->
-            currentUserState.copy(excludedIngredients = excludedIngredients)
-        }
-
-        userViewModel.saveOnboardingData()
+        userViewModel.updateOnboardingData { it.copy(excludedIngredients = excludedIngredients) }
         setFragmentResult("navigationRequestNext", Bundle())
     }
 
@@ -144,10 +109,5 @@ class FifthScreen : Fragment() {
             }
         }
         return selectedIngredients
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

@@ -12,6 +12,7 @@ import com.example.nutriority.data.repository.RecommendedWorkoutRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.planner.NutritionCalculator
+import com.example.nutriority.ui.util.AgeUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,7 +49,44 @@ class HomeViewModel @Inject constructor(
             recommendedWorkoutRepository.syncOfficialWorkoutsFromCloud()
         }
 
-        allMeals = mealRepository.allMeals.stateIn(
+        allMeals = combine(mealRepository.allMeals, userRepository.getUser.asFlow()) { meals, user ->
+            if (user == null || meals.isEmpty()) return@combine emptyList()
+
+            // 1. Filter by User's preferred diet
+            var filtered = if (user.preferredDiet.isNotEmpty() && user.preferredDiet != "Balanced") {
+                meals.filter { it.preferredDiet.equals(user.preferredDiet, ignoreCase = true) }
+            } else {
+                meals
+            }
+
+            // 2. Filter out meals containing excluded ingredients (allergies)
+            if (user.excludedIngredients.isNotEmpty()) {
+                filtered = filtered.filter { meal ->
+                    // Check if any excluded ingredient is present in the meal's ingredients list
+                    user.excludedIngredients.none { excluded ->
+                        meal.ingredients.any { ingredient -> 
+                            ingredient.contains(excluded, ignoreCase = true) 
+                        }
+                    }
+                }
+            }
+
+            // 3. Determine current time-based order
+            val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+            val timePriority = when {
+                currentHour in 5..10 -> listOf("Breakfast", "Lunch", "Dinner")
+                currentHour in 11..15 -> listOf("Lunch", "Dinner", "Breakfast")
+                currentHour in 16..21 -> listOf("Dinner", "Breakfast", "Lunch")
+                else -> listOf("Breakfast", "Lunch", "Dinner") 
+            }
+
+            // 4. Group and Sort
+            filtered.sortedWith(compareBy<Meal> { meal ->
+                val index = timePriority.indexOfFirst { it.equals(meal.mealTime, ignoreCase = true) }
+                if (index == -1) 99 else index
+            }.thenBy { it.name })
+
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
@@ -72,10 +110,7 @@ class HomeViewModel @Inject constructor(
         ) { workouts, user ->
             if (user == null || workouts.isEmpty()) return@combine emptyList()
             
-            // 1. Sort workouts by ID to ensure stable input for selection
             val stableWorkouts = workouts.sortedBy { it.id }
-            
-            // 2. STRICT FILTER: Only show official trainer workouts (ID 1-25)
             val officialOnly = stableWorkouts.filter { it.id in 1..25 }
             
             val desiredDifficulties = when (user.activityLevel) {
@@ -86,20 +121,18 @@ class HomeViewModel @Inject constructor(
 
             val filteredWorkouts = officialOnly.filter { it.difficulty in desiredDifficulties }
 
-            // Use a stable seed (current day) to keep recommendations consistent for the day
             val seed = Calendar.getInstance().get(Calendar.DAY_OF_YEAR).toLong()
             val random = Random(seed)
 
             if (filteredWorkouts.isEmpty()) {
                 officialOnly.shuffled(random).take(5)
             } else {
-                // Group by target muscle and pick a stable selection for the day
                 filteredWorkouts.groupBy { it.targetMuscle }
                     .map { it.value.random(random) }
-                    .sortedBy { it.id } // Ensure consistent UI order
+                    .sortedBy { it.id }
             }
         }
-        .distinctUntilChanged() // Crucial: Only emit if the actual list content changed
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -122,7 +155,7 @@ class HomeViewModel @Inject constructor(
             NutritionCalculator.getCalorieRangeForDisplay(
                 user.weightKg,
                 user.heightCm,
-                user.age ?: 30,
+                AgeUtil.calculateAge(user.birthDate),
                 user.gender,
                 user.activityLevel,
                 user.goal

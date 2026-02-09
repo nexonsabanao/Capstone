@@ -13,7 +13,7 @@ data class User(
     val name: String = "",
     val profileImageUrl: String = "",
     val gender: String = "",
-    val age: Int? = null,
+    val birthDate: Long? = null,
     val heightCm: Double = 0.0,
     val weightKg: Double = 0.0,
     val unitSystem: String = "METRIC",

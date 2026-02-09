@@ -2,45 +2,41 @@ package com.example.nutriority.ui.workout
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import android.widget.PopupMenu
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentPersonalizedWorkoutBinding
 import com.example.nutriority.planner.WorkoutPlan
+import com.example.nutriority.planner.WorkoutPlanner
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.PersonalizedWorkoutAdapter
+import com.example.nutriority.ui.util.BaseBindingFragment
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class PersonalizedWorkoutFragment : Fragment() {
-
-    private var _binding: FragmentPersonalizedWorkoutBinding? = null
-    private val binding get() = _binding!!
+class PersonalizedWorkoutFragment : BaseBindingFragment<FragmentPersonalizedWorkoutBinding>(FragmentPersonalizedWorkoutBinding::inflate) {
 
     private val userViewModel: UserViewModel by activityViewModels()
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     
+    @Inject lateinit var workoutPlanner: WorkoutPlanner
+    @Inject lateinit var gson: Gson
+    
     private lateinit var workoutAdapter: PersonalizedWorkoutAdapter
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentPersonalizedWorkoutBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -49,36 +45,53 @@ class PersonalizedWorkoutFragment : Fragment() {
             navigationViewModel.goBack()
         }
 
+        binding.btnMenu.setOnClickListener {
+            showPopupMenu(it)
+        }
+
         setupRecyclerView()
         observeViewModel()
     }
 
+    private fun showPopupMenu(view: View) {
+        val popup = PopupMenu(requireContext(), view)
+        popup.menuInflater.inflate(R.menu.menu_personalized_workout, popup.menu)
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_restart -> {
+                    handleRestartWorkout()
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
     private fun setupRecyclerView() {
         workoutAdapter = PersonalizedWorkoutAdapter(
-            emptyList(),
             0,
-            onStartWorkoutClicked = { dayIndex -> 
+            onStartWorkoutClicked = { globalDayIndex -> 
                 val user = userViewModel.user.value
                 val json = user?.personalizedPlanJson
                 if (!json.isNullOrBlank()) {
                     try {
-                        val plan = Gson().fromJson(json, WorkoutPlan::class.java)
-                        val session = plan?.sessions?.getOrNull(dayIndex)
+                        val plan = gson.fromJson(json, WorkoutPlan::class.java)
+                        val session = plan?.sessions?.getOrNull(globalDayIndex)
                         val id = session?.unifiedWorkoutId ?: -1
                         
                         if (session?.focus == "Rest Day") {
-                            handleWorkoutStarted(dayIndex)
+                            handleWorkoutStarted(globalDayIndex)
                         } else if (id > 0) {
-                            navigationViewModel.navigateToWorkoutDetail(id, isFromPersonalized = true, dayIndex = dayIndex)
+                            navigationViewModel.navigateToWorkoutDetail(id, isFromPersonalized = true, dayIndex = globalDayIndex)
                         }
                     } catch (e: Exception) {
                         Log.e("Workout", "Navigation error", e)
                     }
                 }
             },
-            onRestartWorkoutClicked = { handleRestartWorkout() },
-            onWorkoutClicked = { workoutId, dayIndex ->
-                navigationViewModel.navigateToWorkoutDetail(workoutId, isFromPersonalized = true, dayIndex = dayIndex)
+            onWorkoutClicked = { workoutId, globalDayIndex ->
+                navigationViewModel.navigateToWorkoutDetail(workoutId, isFromPersonalized = true, dayIndex = globalDayIndex)
             }
         )
         
@@ -86,44 +99,76 @@ class PersonalizedWorkoutFragment : Fragment() {
             layoutManager = LinearLayoutManager(context)
             adapter = workoutAdapter
             itemAnimator = null 
+            setHasFixedSize(true)
         }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Use asFlow() for more reliable real-time updates during restoration
-                userViewModel.user.asFlow().collectLatest { user ->
-                    if (user != null && !user.personalizedPlanJson.isNullOrBlank()) {
-                        try {
-                            val workoutPlan = Gson().fromJson(user.personalizedPlanJson, WorkoutPlan::class.java)
-                            if (workoutPlan?.sessions != null) {
-                                binding.rvWorkoutPlan.visibility = View.VISIBLE
-                                updateUI(workoutPlan, user.lastCompletedWorkoutDay)
-                            }
-                        } catch (e: JsonSyntaxException) {
-                            Log.e("WorkoutDebug", "JSON Syntax Error", e)
-                        }
-                    } else {
-                        // Empty state handling
-                        binding.rvWorkoutPlan.visibility = View.GONE
+                // Observe loading state
+                launch {
+                    userViewModel.isLoading.collect { isLoading ->
+                        showLoading(isLoading)
                     }
+                }
+
+                // Observe user data changes
+                launch {
+                    userViewModel.user.asFlow()
+                        .map { it?.personalizedPlanJson to it?.lastCompletedWorkoutDay }
+                        .distinctUntilChanged()
+                        .collectLatest { (json, lastCompletedDay) ->
+                            if (!json.isNullOrBlank()) {
+                                try {
+                                    val fullPlan = gson.fromJson(json, WorkoutPlan::class.java)
+                                    if (fullPlan?.sessions != null) {
+                                        val safeLastCompleted = lastCompletedDay ?: 0
+                                        
+                                        // Sync logic in background
+                                        userViewModel.ensurePlanSynced(fullPlan, safeLastCompleted)
+                                        
+                                        // UI update
+                                        val currentWeek = (safeLastCompleted / 7).coerceAtMost(3)
+                                        val startIndex = currentWeek * 7
+                                        val endIndex = (startIndex + 7).coerceAtMost(fullPlan.sessions.size)
+                                        val activeSessions = fullPlan.sessions.subList(startIndex, endIndex)
+                                        
+                                        workoutAdapter.updateLastCompletedDay(safeLastCompleted)
+                                        workoutAdapter.submitList(activeSessions)
+                                        updateHeaderText(activeSessions, safeLastCompleted, currentWeek)
+                                    }
+                                } catch (e: JsonSyntaxException) {
+                                    Log.e("WorkoutDebug", "JSON Syntax Error", e)
+                                }
+                            } else {
+                                binding.rvWorkoutPlan.visibility = View.GONE
+                            }
+                        }
                 }
             }
         }
     }
 
-    private fun updateUI(plan: WorkoutPlan, lastCompletedDay: Int) {
-        val currentDay = lastCompletedDay + 1
-        if (currentDay <= plan.sessions.size) {
-            val session = plan.sessions[lastCompletedDay]
-            val focusText = if (session.focus == "Rest Day") "Recover & Rebuild" else session.focus
-            binding.tvTitle.text = "Day $currentDay: $focusText"
-        } else {
-            binding.tvTitle.text = "Plan Completed!"
-        }
+    private fun showLoading(isLoading: Boolean) {
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.rvWorkoutPlan.visibility = if (isLoading) View.GONE else View.VISIBLE
+        binding.btnMenu.isEnabled = !isLoading
+        binding.tvTitle.visibility = if (isLoading) View.GONE else View.VISIBLE
+    }
 
-        workoutAdapter.updateData(plan.sessions, lastCompletedDay)
+    private fun updateHeaderText(sessions: List<com.example.nutriority.planner.WorkoutSession>, lastCompletedDay: Int, currentWeek: Int) {
+        val totalDays = 28
+        if (lastCompletedDay < totalDays) {
+            val sessionIndexInWeek = lastCompletedDay % 7
+            val session = sessions.getOrNull(sessionIndexInWeek)
+            val focusText = session?.focus?.let { 
+                if (it == "Rest Day") "Recover & Rebuild" else it 
+            } ?: "Keep Going!"
+            binding.tvTitle.text = "Week ${currentWeek + 1} · Day ${lastCompletedDay + 1}: $focusText"
+        } else {
+            binding.tvTitle.text = "All 4 Weeks Completed!"
+        }
     }
 
     private fun handleWorkoutStarted(dayIndex: Int) {
@@ -136,10 +181,5 @@ class PersonalizedWorkoutFragment : Fragment() {
         lifecycleScope.launch {
             userViewModel.restartWorkoutPlan()
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

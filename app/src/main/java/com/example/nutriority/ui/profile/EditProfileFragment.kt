@@ -25,6 +25,8 @@ import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.data.model.User
 import com.example.nutriority.databinding.FragmentEditProfileBinding
 import com.example.nutriority.ui.NavigationViewModel
+import com.example.nutriority.ui.util.AgeUtil
+import com.example.nutriority.ui.util.DatePickerUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -37,6 +39,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -75,7 +79,7 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun setupFieldStaticContent() {
-        binding.rowAge.tvLabel.text = "Age"
+        binding.rowAge.tvLabel.text = "Birthday"
         binding.rowAge.ivIcon.setImageResource(R.drawable.ic_calendar)
 
         binding.rowWeight.tvLabel.text = "Weight"
@@ -113,10 +117,9 @@ class EditProfileFragment : Fragment() {
         }
 
         binding.rowAge.root.setOnClickListener { 
-            showEditBottomSheet("Age", "Enter your current age", currentUser?.age?.toString() ?: "", InputType.TYPE_CLASS_NUMBER) { newVal ->
-                val newAge = newVal.toIntOrNull()
-                if (newAge != currentUser?.age) {
-                    updateUserField(false) { it.copy(age = newAge) }
+            DatePickerUtil.showDatePicker(requireContext(), currentUser?.birthDate) { selection ->
+                if (selection != currentUser?.birthDate) {
+                    updateUserField(false) { it.copy(birthDate = selection) }
                 }
             }
         }
@@ -182,7 +185,6 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun showUpdateOptionsDialog(fieldName: String, onSelection: (Boolean) -> Unit) {
-        // Use a generic AlertDialog with transparent background to prevent weird corners and center it properly
         val builder = AlertDialog.Builder(requireContext())
         val dialogView = layoutInflater.inflate(R.layout.dialog_plan_update_choice, null)
         
@@ -196,7 +198,6 @@ class EditProfileFragment : Fragment() {
         builder.setView(dialogView)
         val dialog = builder.create()
         
-        // Ensure background is transparent so the CardView's rounded corners and shadows show correctly
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         btnUpdate.setOnClickListener {
@@ -314,7 +315,11 @@ class EditProfileFragment : Fragment() {
             currentUser = user
             user?.let {
                 binding.tvNameValue.text = if (it.name.isBlank()) "User" else it.name
-                binding.rowAge.tvValue.text = it.age?.toString() ?: "0"
+                
+                // Display formatted birthdate
+                val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                binding.rowAge.tvValue.text = it.birthDate?.let { date -> sdf.format(Date(date)) } ?: "Not set"
+                
                 binding.rowWeight.tvValue.text = "${it.weightKg} kg"
                 binding.rowHeight.tvValue.text = "${it.heightCm} cm"
                 binding.rowActivity.tvValue.text = it.activityLevel

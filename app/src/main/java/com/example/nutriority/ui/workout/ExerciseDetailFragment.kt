@@ -1,13 +1,11 @@
 package com.example.nutriority.ui.workout
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -18,25 +16,23 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.nutriority.R
 import com.example.nutriority.data.model.ExerciseSet
-import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.databinding.FragmentExerciseDetailBinding
 import com.example.nutriority.ui.NavigationViewModel
+import com.example.nutriority.ui.adapter.WorkoutItem
+import com.example.nutriority.ui.util.BaseBindingFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.util.Date
+import kotlin.math.abs
 
 @AndroidEntryPoint
-class ExerciseDetailFragment : Fragment() {
+class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding>(FragmentExerciseDetailBinding::inflate) {
 
-    private var _binding: FragmentExerciseDetailBinding? = null
-    private val binding get() = _binding!!
-    
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     private val viewModel: ExerciseDetailViewModel by activityViewModels()
     private val workoutViewModel: WorkoutDetailViewModel by activityViewModels()
@@ -48,100 +44,60 @@ class ExerciseDetailFragment : Fragment() {
 
     private val exerciseSetAdapter by lazy {
         ExerciseSetAdapter(
-            onRepClick = { position ->
-                showEditRepsDialog(position)
-            },
-            onDeleteClick = { position ->
-                if (!isProcessing && position >= 0 && position < currentSets.size) {
-                    isProcessing = true
-                    val mutableList = currentSets.toMutableList()
-                    if (mutableList.size > 1) {
-                        mutableList.removeAt(position)
-                        updateAndSubmitList(mutableList)
-                        saveChangesToDatabase(mutableList)
-                    }
-                    binding.root.postDelayed({ isProcessing = false }, 150)
-                }
-            }
+            onRepClick = { position -> showEditRepsDialog(position) },
+            onDeleteClick = { position -> handleDeleteSet(position) }
         )
     }
     
     private val addSetAdapter by lazy {
-        AddSetAdapter {
-            if (!isProcessing) {
-                isProcessing = true
-                val lastSet = currentSets.lastOrNull()
-                val isDuration = lastSet?.isDuration ?: false
-                val newValue = lastSet?.value ?: if (isDuration) 30 else 10
-                val mutableList = currentSets.toMutableList()
-                val newSet = ExerciseSet(value = newValue, isDuration = isDuration)
-                mutableList.add(newSet)
-                updateAndSubmitList(mutableList)
-                saveChangesToDatabase(mutableList)
-                binding.root.postDelayed({ isProcessing = false }, 150)
-            }
-        }
+        AddSetAdapter { handleAddSet() }
     }
     
     private var currentSets = listOf<ExerciseSet>()
     private var isProcessing = false
     private var currentDialog: AlertDialog? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentExerciseDetailBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerView()
         observeNavigationData()
         observeViewModel()
         setupClickListeners()
     }
 
-    private fun observeNavigationData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(
-                    navigationViewModel.selectedWorkoutId,
-                    navigationViewModel.selectedExerciseId
-                ) { wId, eId -> wId to eId }
-                .collect { (workoutId, exerciseId) ->
-                    if (workoutId != -1 && exerciseId.isNotBlank()) {
-                        isInitialized = false
-                        viewModel.getExerciseById(workoutId, exerciseId)
-                    }
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(
-                    navigationViewModel.exercisePosition,
-                    navigationViewModel.totalExercises
-                ) { pos, total -> pos to total }
-                    .collect { (pos, total) ->
-                        if (pos != -1 && total != -1) {
-                            binding.exerciseCountText.text = "$pos/$total"
-                        }
-                    }
-            }
+    private fun setupRecyclerView() {
+        binding.setsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = ConcatAdapter(exerciseSetAdapter, addSetAdapter)
+            itemAnimator = null
+            setHasFixedSize(true)
         }
     }
 
-    private fun setupRecyclerView() {
-        val concatAdapter = ConcatAdapter(exerciseSetAdapter, addSetAdapter)
-        binding.setsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = concatAdapter
-            itemAnimator = null
+    private fun handleAddSet() {
+        if (isProcessing) return
+        isProcessing = true
+        val lastSet = currentSets.lastOrNull()
+        val isDuration = lastSet?.isDuration ?: false
+        val newValue = lastSet?.value ?: if (isDuration) 30 else 10
+        val mutableList = currentSets.toMutableList().apply {
+            add(ExerciseSet(value = newValue, isDuration = isDuration))
         }
+        updateAndSubmitList(mutableList)
+        saveChangesToDatabase(mutableList)
+        binding.root.postDelayed({ isProcessing = false }, 150)
+    }
+
+    private fun handleDeleteSet(position: Int) {
+        if (isProcessing || position < 0 || position >= currentSets.size) return
+        isProcessing = true
+        val mutableList = currentSets.toMutableList()
+        if (mutableList.size > 1) {
+            mutableList.removeAt(position)
+            updateAndSubmitList(mutableList)
+            saveChangesToDatabase(mutableList)
+        }
+        binding.root.postDelayed({ isProcessing = false }, 150)
     }
 
     private fun showEditRepsDialog(position: Int) {
@@ -152,152 +108,75 @@ class ExerciseDetailFragment : Fragment() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_reps, null)
         
         val tvTitle = dialogView.findViewById<TextView>(R.id.dialog_title)
-        val tvSubtitle = dialogView.findViewById<TextView>(R.id.dialog_subtitle)
         val layoutInput = dialogView.findViewById<TextInputLayout>(R.id.edit_reps_layout)
         val repsInput = dialogView.findViewById<EditText>(R.id.edit_reps_input)
         val btnOk = dialogView.findViewById<MaterialButton>(R.id.btn_ok)
-        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btn_cancel)
 
-        if (exerciseSet.isDuration) {
-            tvTitle.text = "Enter Seconds"
-            tvSubtitle.text = "How many seconds did you complete?"
-            layoutInput.hint = "Number of seconds"
-            repsInput.hint = "Number of seconds"
-        } else {
-            tvTitle.text = "Enter Repetitions"
-            tvSubtitle.text = "How many reps did you complete?"
-            layoutInput.hint = "Number of reps"
-            repsInput.hint = "Number of reps"
-        }
+        tvTitle.text = if (exerciseSet.isDuration) "Enter Seconds" else "Enter Repetitions"
+        layoutInput.hint = if (exerciseSet.isDuration) "Number of seconds" else "Number of reps"
+        repsInput.setText(exerciseSet.value.toString())
 
         currentDialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
-            .create()
-
-        currentDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        repsInput.setText(exerciseSet.value.toString())
+            .create().apply {
+                window?.setBackgroundDrawableResource(android.R.color.transparent)
+            }
 
         btnOk.setOnClickListener {
             val newValue = repsInput.text.toString().toIntOrNull()
             if (newValue != null) {
                 val mutableList = currentSets.toMutableList()
-                if (position >= 0 && position < mutableList.size) {
-                    val updatedSet = mutableList[position].copy(value = newValue)
-                    mutableList[position] = updatedSet
-                    updateAndSubmitList(mutableList)
-                    saveChangesToDatabase(mutableList)
-                }
+                mutableList[position] = mutableList[position].copy(value = newValue)
+                updateAndSubmitList(mutableList)
+                saveChangesToDatabase(mutableList)
             }
             currentDialog?.dismiss()
         }
-
-        btnCancel.setOnClickListener {
-            currentDialog?.dismiss()
-        }
+        dialogView.findViewById<View>(R.id.btn_cancel).setOnClickListener { currentDialog?.dismiss() }
         currentDialog?.show()
     }
 
     private fun saveChangesToDatabase(updatedSets: List<ExerciseSet>) {
         val detail = viewModel.exerciseWithDetail.value ?: return
         val isDuration = updatedSets.firstOrNull()?.isDuration ?: false
+        val valStr = updatedSets.joinToString(",") { it.value.toString() }
         
-        val valueString = updatedSets.joinToString(",") { it.value.toString() }
-        
-        val updatedAssignment = detail.assignment.copy(
+        val updated = detail.assignment.copy(
             sets = updatedSets.size,
-            reps = if (isDuration) "1" else valueString,
-            duration = if (isDuration) valueString else ""
+            reps = if (isDuration) "1" else valStr,
+            duration = if (isDuration) valStr else ""
         )
-        
+        viewLifecycleOwner.lifecycleScope.launch { workoutViewModel.updateWorkoutExercise(updated) }
+    }
+
+    private fun observeNavigationData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            workoutViewModel.updateWorkoutExercise(updatedAssignment)
-        }
-    }
-
-    private fun showAutoLogBottomSheet() {
-        val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
-        val view = layoutInflater.inflate(R.layout.layout_auto_log_bottom_sheet, null)
-        dialog.setContentView(view)
-
-        val switch = view.findViewById<MaterialSwitch>(R.id.switchAutoLog)
-        switch.isChecked = isAutoLogOn
-        switch.setOnCheckedChangeListener { _, isChecked ->
-            isAutoLogOn = isChecked
-            binding.btnAutoLog.text = if (isChecked) "Auto Log : ON" else "Auto Log : OFF"
-            if (isChecked) {
-                startAutoLogTimerIfNeeded()
-            } else {
-                workoutViewModel.stopAutoLogTimer()
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                combine(navigationViewModel.selectedWorkoutId, navigationViewModel.selectedExerciseId) { w, e -> w to e }
+                .collect { (wId, eId) ->
+                    if (wId != -1 && eId.isNotBlank()) {
+                        isInitialized = false
+                        viewModel.getExerciseById(wId, eId)
+                    }
+                }
             }
         }
-
-        view.findViewById<View>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
-        
-        val chipGroup = view.findViewById<com.google.android.material.chip.ChipGroup>(R.id.timeChipGroup)
-        
-        val checkId = when(autoLogTimeSeconds) {
-            15L -> R.id.chip_15s
-            30L -> R.id.chip_30s
-            45L -> R.id.chip_45s
-            60L -> R.id.chip_1m
-            else -> R.id.chip_recd
-        }
-        chipGroup.check(checkId)
-
-        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-            autoLogTimeSeconds = when (checkedIds.firstOrNull()) {
-                R.id.chip_15s -> 15L
-                R.id.chip_30s -> 30L
-                R.id.chip_45s -> 45L
-                R.id.chip_1m -> 60L
-                else -> 30L
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                combine(navigationViewModel.exercisePosition, navigationViewModel.totalExercises) { p, t -> p to t }
+                .collect { (pos, total) -> if (pos != -1 && total != -1) binding.exerciseCountText.text = "$pos/$total" }
             }
-            if (isAutoLogOn) startAutoLogTimerIfNeeded()
-        }
-
-        dialog.show()
-    }
-
-    private fun startAutoLogTimerIfNeeded() {
-        if (!isAutoLogOn) return
-        
-        val activeSet = currentSets.find { it.isActive && !it.isCompleted } ?: return
-        val time = if (activeSet.isDuration) activeSet.value.toLong() else autoLogTimeSeconds
-        
-        workoutViewModel.startAutoLogTimer(time) {
-            logSetAndAdvance()
-        }
-    }
-
-    private fun showAboutExerciseDialog() {
-        viewModel.exercise.value?.let { exercise ->
-            AboutExerciseBottomSheet.newInstance(exercise)
-                .show(childFragmentManager, "AboutExerciseBottomSheet")
-        }
-    }
-
-    private fun parseTimeToSeconds(timeStr: String): Int {
-        if (timeStr.isBlank()) return 0
-        val lower = timeStr.lowercase().trim()
-        val value = lower.filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: return 0
-        return when {
-            lower.contains("min") || (lower.contains("m") && !lower.contains("s")) -> (value * 60).toInt()
-            else -> value.toInt()
         }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.exercise.collect { exercise ->
-                    if (exercise != null) {
-                        binding.exerciseTitle.text = exercise.name
-                        
-                        Glide.with(requireContext())
-                            .asGif()
-                            .load(exercise.gifUrl)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .into(binding.imgExercise)
+                viewModel.exercise.collect { ex ->
+                    if (ex != null) {
+                        binding.exerciseTitle.text = ex.name
+                        Glide.with(this@ExerciseDetailFragment).asGif().load(ex.gifUrl)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL).into(binding.imgExercise)
                     }
                 }
             }
@@ -308,31 +187,15 @@ class ExerciseDetailFragment : Fragment() {
                 viewModel.exerciseWithDetail.collect { detail ->
                     if (detail != null && !isInitialized) {
                         isInitialized = true
-                        val assignment = detail.assignment
-                        
-                        val isDuration = assignment.category.contains("warmup", true) || 
-                                         assignment.category.contains("cooldown", true) ||
-                                         assignment.duration.isNotBlank()
-
-                        val setsCount = assignment.sets.coerceAtLeast(1)
-                        
-                        val valueStrings = if (isDuration) {
-                            assignment.duration.split(",")
-                        } else {
-                            assignment.reps.split(",")
+                        val assign = detail.assignment
+                        val isDur = assign.category.contains("warmup", true) || assign.category.contains("cooldown", true) || assign.duration.isNotBlank()
+                        val vals = if (isDur) assign.duration.split(",") else assign.reps.split(",")
+                        val initial = List(assign.sets.coerceAtLeast(1)) { i ->
+                            val raw = vals.getOrNull(i)?.trim() ?: vals.firstOrNull()?.trim() ?: ""
+                            val v = if (isDur) parseTimeToSeconds(raw).takeIf { it > 0 } ?: 60 else raw.filter { it.isDigit() }.toIntOrNull() ?: 10
+                            ExerciseSet(value = v, isDuration = isDur, isCompleted = assign.isCompleted) 
                         }
-
-                        val initialSets = List(setsCount) { i ->
-                            val rawValue = valueStrings.getOrNull(i)?.trim() ?: valueStrings.firstOrNull()?.trim() ?: ""
-                            val value = if (isDuration) {
-                                parseTimeToSeconds(rawValue).takeIf { it > 0 } ?: 60
-                            } else {
-                                rawValue.filter { it.isDigit() }.toIntOrNull() ?: 10
-                            }
-                            ExerciseSet(value = value, isDuration = isDuration, isCompleted = assignment.isCompleted) 
-                        }
-                        updateAndSubmitList(initialSets)
-                        
+                        updateAndSubmitList(initial)
                         if (isAutoLogOn) startAutoLogTimerIfNeeded()
                     }
                 }
@@ -344,92 +207,59 @@ class ExerciseDetailFragment : Fragment() {
                 workoutViewModel.isResting.collect { isResting ->
                     binding.restTimerBar.visibility = if (isResting) View.VISIBLE else View.GONE
                     binding.bottomBar.visibility = if (isResting) View.GONE else View.VISIBLE
-                    
-                    if (!isResting && isAutoLogOn) {
-                        startAutoLogTimerIfNeeded()
-                    }
+                    if (!isResting && isAutoLogOn) startAutoLogTimerIfNeeded()
                 }
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                workoutViewModel.restTimeRemaining.collect { seconds ->
-                    val mins = seconds / 60
-                    val secs = seconds % 60
-                    binding.tvRestTimer.text = String.format("%02d:%02ds", mins, secs)
+                workoutViewModel.restTimeRemaining.collect { s ->
+                    binding.tvRestTimer.text = String.format("%02d:%02ds", s / 60, s % 60)
                 }
             }
         }
     }
 
-    private fun updateAndSubmitList(updatedSets: List<ExerciseSet>) {
-        currentSets = updatedSets.mapIndexed { index, set ->
-            set.copy(setNumber = index + 1)
+    private fun updateAndSubmitList(updated: List<ExerciseSet>) {
+        currentSets = updated.mapIndexed { i, s -> s.copy(setNumber = i + 1) }
+        if (!currentSets.any { it.isActive } && currentSets.isNotEmpty()) {
+            val next = currentSets.indexOfFirst { !it.isCompleted }
+            if (next != -1) currentSets[next].isActive = true
         }
-        
-        val hasActive = currentSets.any { it.isActive }
-        if (!hasActive && currentSets.isNotEmpty()) {
-            val nextActiveIndex = currentSets.indexOfFirst { !it.isCompleted }
-            if (nextActiveIndex != -1) {
-                currentSets[nextActiveIndex].isActive = true
-            }
-        }
-        
         exerciseSetAdapter.submitList(currentSets)
         
-        val allCompleted = currentSets.all { it.isCompleted }
-        val activeSet = currentSets.find { it.isActive }
+        val allDone = currentSets.all { it.isCompleted }
+        val active = currentSets.find { it.isActive }
         
-        if (allCompleted) {
-            val isLastExercise = navigationViewModel.exercisePosition.value == navigationViewModel.totalExercises.value
-            binding.btnLogSet.text = if (isLastExercise) "FINISH WORKOUT" else "NEXT EXERCISE"
-            binding.btnLogSet.setIconResource(if (isLastExercise) R.drawable.ic_check_circle else R.drawable.ic_play_arrow)
-            binding.btnLogSet.setBackgroundColor(resources.getColor(R.color.green, null))
+        if (allDone) {
+            val isLast = navigationViewModel.exercisePosition.value == navigationViewModel.totalExercises.value
+            binding.btnLogSet.apply {
+                text = if (isLast) "FINISH WORKOUT" else "NEXT EXERCISE"
+                setIconResource(if (isLast) R.drawable.ic_check_circle else R.drawable.ic_play_arrow)
+                setBackgroundColor(ContextCompat.getColor(context, R.color.green))
+            }
             binding.btnCheck.visibility = View.GONE
-        } else if (activeSet != null) {
-            val unit = if (activeSet.isDuration) "SEC" else "REPS"
-            binding.btnLogSet.text = "LOG SET ${activeSet.setNumber} (${activeSet.value} $unit)"
-            binding.btnLogSet.setIconResource(android.R.drawable.ic_input_get)
-            binding.btnLogSet.setBackgroundColor(resources.getColor(R.color.primary_dark, null))
+        } else if (active != null) {
+            binding.btnLogSet.apply {
+                text = "LOG SET ${active.setNumber} (${active.value} ${if (active.isDuration) "SEC" else "REPS"})"
+                setIconResource(android.R.drawable.ic_input_get)
+                setBackgroundColor(ContextCompat.getColor(context, R.color.primary_dark))
+            }
             binding.btnCheck.visibility = View.VISIBLE
         }
     }
 
     private fun setupClickListeners() {
-        binding.backButton.setOnClickListener {
-            workoutViewModel.stopRestTimer()
-            navigationViewModel.goBack()
-        }
-
-        binding.btnAboutExercise.setOnClickListener {
-            showAboutExerciseDialog()
-        }
-
-        binding.btnRest.setOnClickListener {
-            isRestOn = !isRestOn
-            binding.btnRest.text = if (isRestOn) "Rest : ON" else "Rest : OFF"
-        }
-
-        binding.btnAutoLog.setOnClickListener {
-            showAutoLogBottomSheet()
-        }
-
-        binding.btnCheck.setOnClickListener {
+        binding.backButton.setOnClickListener { workoutViewModel.stopRestTimer(); navigationViewModel.goBack() }
+        binding.btnAboutExercise.setOnClickListener { viewModel.exercise.value?.let { AboutExerciseBottomSheet.newInstance(it).show(childFragmentManager, "AboutExerciseBottomSheet") } }
+        binding.btnRest.setOnClickListener { isRestOn = !isRestOn; binding.btnRest.text = if (isRestOn) "Rest : ON" else "Rest : OFF" }
+        binding.btnAutoLog.setOnClickListener { showAutoLogBottomSheet() }
+        binding.btnCheck.setOnClickListener { ensureWorkoutStarted(); completeAllSets() }
+        binding.btnLogSet.setOnClickListener { 
             ensureWorkoutStarted()
-            completeAllSets()
+            if (currentSets.all { it.isCompleted }) finishOrNext() else logSetAndAdvance()
         }
-
-        binding.btnLogSet.setOnClickListener {
-            ensureWorkoutStarted()
-            val allCompleted = currentSets.all { it.isCompleted }
-            if (allCompleted) {
-                finishOrNext()
-            } else {
-                logSetAndAdvance()
-            }
-        }
-
         binding.btnCloseRest.setOnClickListener { workoutViewModel.stopRestTimer() }
         binding.btnStopRest.setOnClickListener { workoutViewModel.stopRestTimer() }
         binding.btnMinus5.setOnClickListener { workoutViewModel.adjustRestTime(-5) }
@@ -438,103 +268,76 @@ class ExerciseDetailFragment : Fragment() {
 
     private fun ensureWorkoutStarted() {
         if (!workoutViewModel.isWorkoutActive.value) {
-            val workoutId = navigationViewModel.selectedWorkoutId.value
-            if (workoutId != -1) {
-                workoutViewModel.startWorkout(workoutId, navigationViewModel.selectedDayIndex.value)
-            }
+            navigationViewModel.selectedWorkoutId.value.takeIf { it != -1 }?.let { workoutViewModel.startWorkout(it, navigationViewModel.selectedDayIndex.value) }
         }
     }
 
     private fun completeAllSets() {
         workoutViewModel.stopAutoLogTimer() 
-        val updatedList = currentSets.map { it.copy(isActive = false, isCompleted = true) }
-        updateAndSubmitList(updatedList)
-        
-        viewModel.exerciseWithDetail.value?.let { detail ->
-            workoutViewModel.updateExerciseCompletion(
-                detail.assignment.workoutId,
-                detail.assignment.exerciseId,
-                detail.assignment.category,
-                true
-            )
-        }
+        val updated = currentSets.map { it.copy(isActive = false, isCompleted = true) }
+        updateAndSubmitList(updated)
+        viewModel.exerciseWithDetail.value?.let { detail -> workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true) }
     }
 
     private fun finishOrNext() {
-        workoutViewModel.stopAutoLogTimer()
-        workoutViewModel.stopRestTimer()
-        
+        workoutViewModel.stopAutoLogTimer(); workoutViewModel.stopRestTimer()
         viewLifecycleOwner.lifecycleScope.launch {
             val detail = viewModel.exerciseWithDetail.value ?: return@launch
-            val workoutWithExercises = workoutViewModel.workout.first() ?: return@launch
-            
-            workoutViewModel.updateExerciseCompletion(
-                detail.assignment.workoutId,
-                detail.assignment.exerciseId,
-                detail.assignment.category,
-                true
-            )
-
-            val currentPos = navigationViewModel.exercisePosition.value
+            val workout = workoutViewModel.workout.first() ?: return@launch
+            workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true)
+            val pos = navigationViewModel.exercisePosition.value
             val total = navigationViewModel.totalExercises.value
-
-            if (currentPos < total) {
-                val includeAll = workoutWithExercises.workout.includeWarmupCooldown
-                val assignments = workoutWithExercises.exerciseAssignments.sortedBy { it.assignment.order }
-                val visibleAssignments = if (includeAll) assignments else assignments.filter { it.assignment.category.equals("Exercise", ignoreCase = true) }
-
-                if (currentPos < visibleAssignments.size) {
-                    val nextAssignment = visibleAssignments[currentPos]
-                    navigationViewModel.navigateToExerciseDetail(
-                        nextAssignment.assignment.workoutId,
-                        nextAssignment.assignment.exerciseId,
-                        currentPos + 1,
-                        visibleAssignments.size
-                    )
-                } else {
-                    workoutViewModel.finishWorkout()
-                    navigationViewModel.navigateToWorkoutComplete()
-                }
-            } else {
-                workoutViewModel.finishWorkout()
-                navigationViewModel.navigateToWorkoutComplete()
-            }
+            if (pos < total) {
+                val assignments = workout.exerciseAssignments.sortedBy { it.assignment.order }.filter { workout.workout.includeWarmupCooldown || it.assignment.category.equals("Exercise", true) }
+                if (pos < assignments.size) {
+                    val next = assignments[pos]
+                    navigationViewModel.navigateToExerciseDetail(next.assignment.workoutId, next.assignment.exerciseId, pos + 1, assignments.size)
+                } else { workoutViewModel.finishWorkout(); navigationViewModel.navigateToWorkoutComplete() }
+            } else { workoutViewModel.finishWorkout(); navigationViewModel.navigateToWorkoutComplete() }
         }
     }
 
     private fun logSetAndAdvance() {
-        val activeIndex = currentSets.indexOfFirst { it.isActive }
-        if (activeIndex != -1) {
-            val mutableList = currentSets.toMutableList()
-            mutableList[activeIndex] = mutableList[activeIndex].copy(isActive = false, isCompleted = true)
-            
-            val isFinalSet = activeIndex == currentSets.size - 1
-            
-            if (!isFinalSet) {
-                mutableList[activeIndex + 1] = mutableList[activeIndex + 1].copy(isActive = true)
-                updateAndSubmitList(mutableList)
-                
+        val activeIdx = currentSets.indexOfFirst { it.isActive }
+        if (activeIdx != -1) {
+            val mutable = currentSets.toMutableList()
+            mutable[activeIdx] = mutable[activeIdx].copy(isActive = false, isCompleted = true)
+            if (activeIdx < currentSets.size - 1) {
+                mutable[activeIdx + 1] = mutable[activeIdx + 1].copy(isActive = true)
+                updateAndSubmitList(mutable)
                 if (isRestOn) {
-                    val restTime = viewModel.exerciseWithDetail.value?.assignment?.rest?.filter { it.isDigit() }?.toLongOrNull() ?: 60L
-                    workoutViewModel.startRestTimer(restTime)
-                } else if (isAutoLogOn) {
-                    startAutoLogTimerIfNeeded()
-                }
-            } else {
-                updateAndSubmitList(mutableList)
-                
-                if (isRestOn) {
-                    val restTime = viewModel.exerciseWithDetail.value?.assignment?.rest?.filter { it.isDigit() }?.toLongOrNull() ?: 60L
-                    workoutViewModel.startRestTimer(restTime)
-                }
-            }
+                    val rest = viewModel.exerciseWithDetail.value?.assignment?.rest?.filter { it.isDigit() }?.toLongOrNull() ?: 60L
+                    workoutViewModel.startRestTimer(rest)
+                } else if (isAutoLogOn) startAutoLogTimerIfNeeded()
+            } else updateAndSubmitList(mutable)
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        workoutViewModel.stopRestTimer()
-        workoutViewModel.stopAutoLogTimer()
-        _binding = null
+    private fun showAutoLogBottomSheet() {
+        val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
+        val v = layoutInflater.inflate(R.layout.layout_auto_log_bottom_sheet, null)
+        dialog.setContentView(v)
+        v.findViewById<MaterialSwitch>(R.id.switchAutoLog).apply {
+            isChecked = isAutoLogOn
+            setOnCheckedChangeListener { _, isChecked ->
+                isAutoLogOn = isChecked
+                binding.btnAutoLog.text = if (isChecked) "Auto Log : ON" else "Auto Log : OFF"
+                if (isChecked) startAutoLogTimerIfNeeded() else workoutViewModel.stopAutoLogTimer()
+            }
+        }
+        v.findViewById<View>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun startAutoLogTimerIfNeeded() {
+        if (!isAutoLogOn) return
+        val active = currentSets.find { it.isActive && !it.isCompleted } ?: return
+        workoutViewModel.startAutoLogTimer(if (active.isDuration) active.value.toLong() else autoLogTimeSeconds) { logSetAndAdvance() }
+    }
+
+    private fun parseTimeToSeconds(s: String): Int {
+        val lower = s.lowercase().trim()
+        val v = lower.filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: return 0
+        return if (lower.contains("min") || (lower.contains("m") && !lower.contains("s"))) (v * 60).toInt() else v.toInt()
     }
 }

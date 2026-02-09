@@ -137,10 +137,9 @@ object AppModule {
     fun provideWorkoutPlanner(
         workoutRepository: WorkoutRepository,
         workoutGenerator: WorkoutGenerator,
-        application: Application,
-        gson: Gson
+        application: Application
     ): WorkoutPlanner {
-        return WorkoutPlanner(workoutRepository, workoutGenerator, application, gson)
+        return WorkoutPlanner(workoutRepository, workoutGenerator, application)
     }
 
     @Provides

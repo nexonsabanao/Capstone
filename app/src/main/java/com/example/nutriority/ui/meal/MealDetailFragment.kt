@@ -7,16 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.R
 import com.example.nutriority.data.model.Meal
 import com.example.nutriority.databinding.FragmentMealDetailBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.profile.ProfileViewModel
+import com.example.nutriority.ui.util.BaseBindingFragment
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -27,29 +29,16 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @AndroidEntryPoint
-class MealDetailFragment : Fragment() {
+class MealDetailFragment : BaseBindingFragment<FragmentMealDetailBinding>(FragmentMealDetailBinding::inflate) {
 
-    private var _binding: FragmentMealDetailBinding? = null
-    private val binding get() = _binding!!
-    
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     private val profileViewModel: ProfileViewModel by activityViewModels()
     private var currentMeal: Meal? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentMealDetailBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnBack.setOnClickListener {
-            navigationViewModel.goBack()
-        }
+        binding.btnBack.setOnClickListener { navigationViewModel.goBack() }
 
         binding.tvToolbarTitle.alpha = 0f
         binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
@@ -120,7 +109,6 @@ class MealDetailFragment : Fragment() {
             binding.mealTime.text = "${meal.duration} min"
             binding.tvMealInstructions.text = meal.instructions
 
-            // Image loading
             val context = requireContext()
             if (meal.imageName.startsWith("http")) {
                 com.bumptech.glide.Glide.with(this)
@@ -158,17 +146,13 @@ class MealDetailFragment : Fragment() {
             entries.add(PieEntry(1f, "No Data"))
         }
 
-        val dataSet = PieDataSet(entries, "")
-        dataSet.colors = listOf(
-            Color.parseColor("#4CAF50"), // Green for Protein
-            Color.parseColor("#2196F3"), // Blue for Carbs
-            Color.parseColor("#FF5722")  // Orange for Fat
-        )
-        dataSet.setDrawValues(false)
+        val dataSet = PieDataSet(entries, "").apply {
+            colors = listOf(Color.parseColor("#4CAF50"), Color.parseColor("#2196F3"), Color.parseColor("#FF5722"))
+            setDrawValues(false)
+        }
 
-        val data = PieData(dataSet)
         binding.nutritionChart.apply {
-            this.data = data
+            data = PieData(dataSet)
             description.isEnabled = false
             legend.isEnabled = false
             isDrawHoleEnabled = true
@@ -207,23 +191,16 @@ class MealDetailFragment : Fragment() {
         binding.contentRecyclerView.visibility = View.VISIBLE
         
         currentMeal?.let { meal ->
-            val adapter = LoggedIngredientAdapter(meal.ingredients)
-            binding.contentRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
-            binding.contentRecyclerView.adapter = adapter
+            binding.contentRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+            binding.contentRecyclerView.adapter = LoggedIngredientAdapter(meal.ingredients)
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
 
-// Simple internal adapter for ingredients list
 class LoggedIngredientAdapter(private val ingredients: List<String>) : 
-    androidx.recyclerview.widget.RecyclerView.Adapter<LoggedIngredientAdapter.ViewHolder>() {
+    RecyclerView.Adapter<LoggedIngredientAdapter.ViewHolder>() {
     
-    class ViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val text: TextView = view.findViewById(android.R.id.text1)
     }
 

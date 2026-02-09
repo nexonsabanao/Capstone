@@ -18,6 +18,7 @@ import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.databinding.FragmentWorkoutCompleteBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.profile.ProfileViewModel
+import com.example.nutriority.ui.util.ImageUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -84,6 +85,10 @@ class WorkoutCompleteFragment : Fragment() {
                 binding.tvStatTime.text = viewModel.formatElapsedTime(it.durationSeconds)
                 binding.tvWorkoutSummary.text = it.workoutName
                 binding.tvStatCalories.text = it.caloriesBurned.toString()
+
+                // Set dynamic banner image using the utility
+                val resId = ImageUtil.getWorkoutImageResource("", it.workoutName, it.difficulty)
+                binding.ivWorkoutBanner.setImageResource(resId)
             }
         }
     }

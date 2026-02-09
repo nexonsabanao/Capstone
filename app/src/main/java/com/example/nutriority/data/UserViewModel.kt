@@ -5,10 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nutriority.data.model.User
 import com.example.nutriority.data.repository.UserRepository
+import com.example.nutriority.planner.WorkoutPlan
 import com.example.nutriority.planner.WorkoutPlanner
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -20,48 +24,89 @@ class UserViewModel @Inject constructor(
     private val gson: Gson
 ) : ViewModel() {
 
-    // Always observe the database directly for the strongest "Source of Truth"
     val user: LiveData<User> = repository.getUser
 
-    /**
-     * Updates specific onboarding data points and saves them to the DB.
-     */
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private var lastSyncedWeekIndex = -1
+
     fun updateOnboardingData(updateAction: (User) -> User) {
         viewModelScope.launch {
             updateOnboardingDataSuspend(updateAction)
         }
     }
 
-    /**
-     * Suspend version to allow sequential operations.
-     */
     suspend fun updateOnboardingDataSuspend(updateAction: (User) -> User) {
         withContext(Dispatchers.IO) {
             val currentUser = repository.getInitialUser() ?: User(id = 1)
             val updatedUser = updateAction(currentUser)
             repository.insertUser(updatedUser)
+            
+            if (!updatedUser.personalizedPlanJson.isNullOrBlank()) {
+                try {
+                    val plan = gson.fromJson(updatedUser.personalizedPlanJson, WorkoutPlan::class.java)
+                    workoutPlanner.syncPlanToDatabase(plan)
+                } catch (e: Exception) { }
+            }
         }
     }
 
-    /**
-     * Helper for screens that perform multiple updates before triggering a save.
-     */
-    fun saveOnboardingData() {
-        // No-op in this new architecture as updateOnboardingData now saves instantly.
+    suspend fun saveFullPlan(workoutPlanJson: String, mealPlanJson: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            val currentUser = repository.getInitialUser() ?: User(id = 1)
+            val updatedUser = currentUser.copy(
+                personalizedPlanJson = workoutPlanJson,
+                mealPlanJson = mealPlanJson
+            )
+            val success = repository.insertUser(updatedUser)
+            
+            if (success) {
+                try {
+                    val plan = gson.fromJson(workoutPlanJson, WorkoutPlan::class.java)
+                    workoutPlanner.syncPlanToDatabase(plan)
+                    lastSyncedWeekIndex = 0
+                } catch (e: Exception) { }
+            }
+            success
+        }
+    }
+
+    suspend fun ensurePlanSynced(plan: WorkoutPlan, dayIndex: Int): Boolean {
+        val currentWeek = dayIndex / 7
+        if (currentWeek == lastSyncedWeekIndex) return false
+        
+        return withContext(Dispatchers.IO) {
+            val startIndex = currentWeek * 7
+            val endIndex = (startIndex + 7).coerceAtMost(plan.sessions.size)
+            val activeSessions = plan.sessions.subList(startIndex, endIndex)
+            
+            workoutPlanner.syncPlanToDatabase(plan.copy(sessions = activeSessions))
+            lastSyncedWeekIndex = currentWeek
+            true
+        }
     }
 
     suspend fun savePersonalizedPlanAndAwait(planJson: String): Boolean {
         return withContext(Dispatchers.IO) {
             val currentUser = repository.getInitialUser() ?: User(id = 1)
             val updatedUser = currentUser.copy(personalizedPlanJson = planJson)
-            repository.insertUser(updatedUser)
+            val success = repository.insertUser(updatedUser)
+            
+            if (success) {
+                try {
+                    val plan = gson.fromJson(planJson, WorkoutPlan::class.java)
+                    workoutPlanner.syncPlanToDatabase(plan)
+                    lastSyncedWeekIndex = 0
+                } catch (e: Exception) { }
+            }
+            success
         }
     }
 
     suspend fun completeWorkoutDay(dayIndex: Int) {
         withContext(Dispatchers.IO) {
             val currentUser = repository.getInitialUser() ?: return@withContext
-            // Only increment if we are completing the current active day
             if (dayIndex == currentUser.lastCompletedWorkoutDay) {
                 val updatedUser = currentUser.copy(lastCompletedWorkoutDay = dayIndex + 1)
                 repository.insertUser(updatedUser)
@@ -70,6 +115,7 @@ class UserViewModel @Inject constructor(
     }
 
     suspend fun restartWorkoutPlan() {
+        _isLoading.value = true
         withContext(Dispatchers.IO) {
             val currentUser = repository.getInitialUser() ?: return@withContext
             val newPlan = workoutPlanner.planWorkouts(currentUser)
@@ -80,6 +126,8 @@ class UserViewModel @Inject constructor(
                 lastCompletedWorkoutDay = 0
             )
             repository.insertUser(updatedUser)
+            lastSyncedWeekIndex = -1 // Force re-sync
         }
+        _isLoading.value = false
     }
 }

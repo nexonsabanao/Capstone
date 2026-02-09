@@ -2,36 +2,34 @@ package com.example.nutriority.ui.onboarding.screens
 
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.View
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.databinding.FragmentLoginBinding
-import com.google.firebase.auth.*
+import com.example.nutriority.ui.util.BaseBindingFragment
+import com.example.nutriority.ui.util.KeyboardUtil
+import com.example.nutriority.planner.WorkoutPlan
+import com.example.nutriority.planner.WorkoutPlanner
+import com.google.firebase.auth.FirebaseAuth
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class LoginFragment : Fragment() {
-
-    private var _binding: FragmentLoginBinding? = null
-    private val binding get() = _binding!!
+class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBinding::inflate) {
 
     @Inject lateinit var userRepository: UserRepository
     @Inject lateinit var workoutRepository: WorkoutRepository
     @Inject lateinit var mealRepository: MealRepository
+    @Inject lateinit var workoutPlanner: WorkoutPlanner
+    @Inject lateinit var gson: Gson
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentLoginBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -40,6 +38,7 @@ class LoginFragment : Fragment() {
         binding.etPassword.doAfterTextChanged { binding.tvError.isVisible = false }
 
         binding.btnLogin.setOnClickListener {
+            KeyboardUtil.hideKeyboard(requireActivity())
             val email = binding.etEmail.text.toString().lowercase().trim()
             val password = binding.etPassword.text.toString().trim()
 
@@ -74,7 +73,6 @@ class LoginFragment : Fragment() {
     private fun restoreAndProceed() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Restore profile, workout, and meal history from cloud
                 coroutineScope {
                     awaitAll(
                         async { userRepository.restoreUserFromCloud() },
@@ -83,10 +81,17 @@ class LoginFragment : Fragment() {
                     )
                 }
                 
-                // Show success state
+                // "TRICK": Inflate the restored plan into the workout DB silently
+                val user = userRepository.getInitialUser()
+                if (user != null && !user.personalizedPlanJson.isNullOrBlank()) {
+                    try {
+                        val plan = gson.fromJson(user.personalizedPlanJson, WorkoutPlan::class.java)
+                        workoutPlanner.syncPlanToDatabase(plan)
+                    } catch (e: Exception) { }
+                }
+
                 updateOverlayToSuccess()
                 delay(1500)
-                
             } catch (e: Exception) {
                 Log.e("Login", "Restore error", e)
             } finally {
@@ -97,7 +102,6 @@ class LoginFragment : Fragment() {
     }
 
     private fun showAuthOverlay(show: Boolean) {
-        if (_binding == null) return
         binding.authOverlay.isVisible = show
         if (show) {
             binding.authProgress.isVisible = true
@@ -107,10 +111,9 @@ class LoginFragment : Fragment() {
     }
 
     private fun updateOverlayToSuccess() {
-        if (_binding == null) return
         binding.authProgress.isVisible = false
         binding.authCheck.isVisible = true
-        binding.authStatusText.text = "Log in successfully"
+        binding.authStatusText.text = "Logged in successfully"
     }
 
     private fun showError(msg: String) {
@@ -118,12 +121,5 @@ class LoginFragment : Fragment() {
         binding.tvError.isVisible = true
     }
 
-    private fun isValidStudentEmail(email: String): Boolean {
-        return email.startsWith("tmc.") && email.endsWith("@cvsu.edu.ph")
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+    private fun isValidStudentEmail(email: String): Boolean = email.startsWith("tmc.") && email.endsWith("@cvsu.edu.ph")
 }

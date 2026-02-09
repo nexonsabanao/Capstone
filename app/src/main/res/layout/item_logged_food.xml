@@ -86,7 +86,7 @@
                 <ImageView
                     android:layout_width="12dp"
                     android:layout_height="12dp"
-                    android:src="@drawable/circles"
+                    android:src="@drawable/ic_protien"
                     app:tint="#81C784" />
 
                 <TextView
@@ -102,7 +102,7 @@
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:layout_marginStart="6dp"
-                    android:src="@drawable/ic_fire"
+                    android:src="@drawable/ic_fat"
                     app:tint="#FF8A65" />
 
                 <TextView
@@ -118,7 +118,7 @@
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:layout_marginStart="6dp"
-                    android:src="@drawable/ic_indicator_dot"
+                    android:src="@drawable/ic_carbs"
                     app:tint="#64B5F6" />
 
                 <TextView

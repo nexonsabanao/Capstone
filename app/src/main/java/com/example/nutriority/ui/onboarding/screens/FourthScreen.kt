@@ -3,16 +3,14 @@ package com.example.nutriority.ui.onboarding.screens
 import android.os.Bundle
 import android.text.Html
 import android.text.Spanned
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentFourthScreenBinding
+import com.example.nutriority.ui.util.BaseBindingFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 private sealed class DietType(val value: String) {
@@ -22,41 +20,23 @@ private sealed class DietType(val value: String) {
 }
 
 @AndroidEntryPoint
-class FourthScreen : Fragment() {
-
-    private var _binding: FragmentFourthScreenBinding? = null
-    private val binding get() = _binding!!
+class FourthScreen : BaseBindingFragment<FragmentFourthScreenBinding>(FragmentFourthScreenBinding::inflate) {
 
     private val userViewModel: UserViewModel by activityViewModels()
-
     private var selectedDiet: DietType? = null
     private var initialValueRestored = false
-
     private val dietDetailsMap by lazy { createDietDetailsMap() }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentFourthScreenBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeAndSetInitialState()
-        // Listeners are no longer set up here.
     }
 
-    // --- THE FIX: PART 1 ---
-    // Listeners are now set up only when the fragment is fully visible and interactive.
     override fun onResume() {
         super.onResume()
         setupClickListeners()
     }
 
-    // --- THE FIX: PART 2 ---
-    // Listeners are detached when the fragment is paused. This is the key to preventing the bug.
     override fun onPause() {
         super.onPause()
         clearClickListeners()
@@ -88,16 +68,16 @@ class FourthScreen : Fragment() {
         binding.vegetarianCard.setOnClickListener { handleCardSelection(DietType.Vegetarian) }
 
         binding.detailsBalanced.setOnClickListener {
-            val (title, message) = dietDetailsMap[DietType.Balanced]!!
-            showDetailsDialog(title, message)
+            val details = dietDetailsMap[DietType.Balanced] ?: return@setOnClickListener
+            showDetailsDialog(details.first, details.second)
         }
         binding.detailsLowCarb.setOnClickListener {
-            val (title, message) = dietDetailsMap[DietType.LowCarb]!!
-            showDetailsDialog(title, message)
+            val details = dietDetailsMap[DietType.LowCarb] ?: return@setOnClickListener
+            showDetailsDialog(details.first, details.second)
         }
         binding.detailsVegetarian.setOnClickListener {
-            val (title, message) = dietDetailsMap[DietType.Vegetarian]!!
-            showDetailsDialog(title, message)
+            val details = dietDetailsMap[DietType.Vegetarian] ?: return@setOnClickListener
+            showDetailsDialog(details.first, details.second)
         }
 
         binding.backButton.setOnClickListener {
@@ -105,35 +85,32 @@ class FourthScreen : Fragment() {
         }
         binding.nextButton.setOnClickListener {
             selectedDiet?.let { diet ->
-                userViewModel.updateOnboardingData { currentUserState ->
-                    currentUserState.copy(preferredDiet = diet.value)
-                }
+                userViewModel.updateOnboardingData { it.copy(preferredDiet = diet.value) }
             }
             setFragmentResult("navigationRequestNext", Bundle())
         }
     }
 
-    // --- THE FIX: PART 3 ---
-    // A new function to nullify all listeners, preventing ghost clicks and memory leaks.
     private fun clearClickListeners() {
-        binding.balancedCard.setOnClickListener(null)
-        binding.lowCarbCard.setOnClickListener(null)
-        binding.vegetarianCard.setOnClickListener(null)
-
-        binding.detailsBalanced.setOnClickListener(null)
-        binding.detailsLowCarb.setOnClickListener(null)
-        binding.detailsVegetarian.setOnClickListener(null)
-
-        binding.backButton.setOnClickListener(null)
-        binding.nextButton.setOnClickListener(null)
+        with(binding) {
+            balancedCard.setOnClickListener(null)
+            lowCarbCard.setOnClickListener(null)
+            vegetarianCard.setOnClickListener(null)
+            detailsBalanced.setOnClickListener(null)
+            detailsLowCarb.setOnClickListener(null)
+            detailsVegetarian.setOnClickListener(null)
+            backButton.setOnClickListener(null)
+            nextButton.setOnClickListener(null)
+        }
     }
 
     private fun handleCardSelection(diet: DietType) {
         selectedDiet = diet
 
-        val primaryDarkColor = ContextCompat.getColor(requireContext(), R.color.primary_dark)
-        val whiteColor = ContextCompat.getColor(requireContext(), android.R.color.white)
-        val darkGrayColor = ContextCompat.getColor(requireContext(), R.color.dark_gray)
+        val context = requireContext()
+        val primaryDarkColor = ContextCompat.getColor(context, R.color.primary_dark)
+        val whiteColor = ContextCompat.getColor(context, android.R.color.white)
+        val darkGrayColor = ContextCompat.getColor(context, R.color.dark_gray)
 
         val uiMap = mapOf(
             DietType.Balanced to Triple(binding.balancedCard, binding.radioBalanced, binding.detailsBalanced),
@@ -141,18 +118,13 @@ class FourthScreen : Fragment() {
             DietType.Vegetarian to Triple(binding.vegetarianCard, binding.radioVegetarian, binding.detailsVegetarian)
         )
 
-        uiMap.values.forEach { (card, radioButton, detailsView) ->
-            card.setCardBackgroundColor(whiteColor)
-            radioButton.isChecked = false
-            radioButton.setTextColor(darkGrayColor)
-            detailsView.setTextColor(primaryDarkColor)
-        }
-
-        uiMap[diet]?.let { (card, radioButton, detailsView) ->
-            card.setCardBackgroundColor(primaryDarkColor)
-            radioButton.isChecked = true
-            radioButton.setTextColor(whiteColor)
-            detailsView.setTextColor(whiteColor)
+        uiMap.forEach { (type, views) ->
+            val isSelected = type == diet
+            val (card, radio, details) = views
+            card.setCardBackgroundColor(if (isSelected) primaryDarkColor else whiteColor)
+            radio.isChecked = isSelected
+            radio.setTextColor(if (isSelected) whiteColor else darkGrayColor)
+            details.setTextColor(if (isSelected) whiteColor else primaryDarkColor)
         }
 
         binding.nextButton.isEnabled = true
@@ -165,16 +137,11 @@ class FourthScreen : Fragment() {
     }
 
     private fun showDetailsDialog(title: String, message: Spanned) {
-        if (parentFragmentManager.findFragmentByTag("DietDetailsDialog")?.isAdded == true) {
-            return
-        }
-        val dialog = DietDetailsDialogFragment.newInstance(title, message)
-        dialog.show(parentFragmentManager, "DietDetailsDialog")
+        if (parentFragmentManager.findFragmentByTag("DietDetailsDialog")?.isAdded == true) return
+        DietDetailsDialogFragment.newInstance(title, message).show(parentFragmentManager, "DietDetailsDialog")
     }
 
-    private fun String.asHtml(): Spanned {
-        return Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY)
-    }
+    private fun String.asHtml(): Spanned = Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY)
 
     private fun createDietDetailsMap(): Map<DietType, Pair<String, Spanned>> {
         return mapOf(
@@ -225,10 +192,5 @@ class FourthScreen : Fragment() {
                 """.trimIndent().replace("\n", "<br>").asHtml()
                     )
         )
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

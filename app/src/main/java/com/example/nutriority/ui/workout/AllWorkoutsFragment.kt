@@ -1,10 +1,7 @@
 package com.example.nutriority.ui.workout
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -14,15 +11,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.databinding.FragmentAllWorkoutsBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.WorkoutAdapter
+import com.example.nutriority.ui.util.BaseBindingFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class AllWorkoutsFragment : Fragment() {
+class AllWorkoutsFragment : BaseBindingFragment<FragmentAllWorkoutsBinding>(FragmentAllWorkoutsBinding::inflate) {
 
-    private var _binding: FragmentAllWorkoutsBinding? = null
-    private val binding get() = _binding!!
-    
     private val viewModel: AllWorkoutsViewModel by viewModels()
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     
@@ -32,21 +27,9 @@ class AllWorkoutsFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentAllWorkoutsBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.backButton.setOnClickListener {
-            navigationViewModel.goBack()
-        }
-
+        binding.backButton.setOnClickListener { navigationViewModel.goBack() }
         setupRecyclerView()
         observeViewModel()
     }
@@ -54,26 +37,19 @@ class AllWorkoutsFragment : Fragment() {
     private fun setupRecyclerView() {
         binding.allWorkoutsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            if (adapter != workoutAdapter) {
-                adapter = workoutAdapter
-            }
+            adapter = workoutAdapter
+            setHasFixedSize(true)
         }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.allWorkouts.collect { workouts ->
-                    // FIX: Filter out custom workouts (ID > 25) to keep "Show All" exclusive to trainers
                     val officialWorkouts = workouts.filter { it.id <= 25 }
                     workoutAdapter.submitList(officialWorkouts)
                 }
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

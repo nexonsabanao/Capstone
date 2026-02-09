@@ -36,9 +36,9 @@ class UserRepository(private val userDao: UserDao) {
             val userMap = hashMapOf(
                 "id" to user.id,
                 "name" to user.name,
-                "profileImageUrl" to user.profileImageUrl, // Added to sync
+                "profileImageUrl" to user.profileImageUrl, 
                 "gender" to user.gender,
-                "age" to user.age,
+                "birthDate" to user.birthDate,
                 "heightCm" to user.heightCm,
                 "weightKg" to user.weightKg,
                 "unitSystem" to user.unitSystem,
@@ -69,9 +69,9 @@ class UserRepository(private val userDao: UserDao) {
                 val restoredUser = User(
                     id = 1,
                     name = data["name"] as? String ?: "",
-                    profileImageUrl = data["profileImageUrl"] as? String ?: "", // Restore image path
+                    profileImageUrl = data["profileImageUrl"] as? String ?: "", 
                     gender = data["gender"] as? String ?: "",
-                    age = (data["age"] as? Number)?.toInt(),
+                    birthDate = (data["birthDate"] as? Number)?.toLong(),
                     heightCm = (data["heightCm"] as? Number)?.toDouble() ?: 0.0,
                     weightKg = (data["weightKg"] as? Number)?.toDouble() ?: 0.0,
                     unitSystem = data["unitSystem"] as? String ?: "METRIC",

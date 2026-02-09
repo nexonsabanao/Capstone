@@ -1,15 +1,12 @@
 package com.example.nutriority.ui
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -25,6 +22,7 @@ import com.example.nutriority.ui.meal.MealFragment
 import com.example.nutriority.ui.profile.EditProfileFragment
 import com.example.nutriority.ui.profile.LogManualFragment
 import com.example.nutriority.ui.profile.ProfileFragment
+import com.example.nutriority.ui.util.BaseBindingFragment
 import com.example.nutriority.ui.workout.AllWorkoutsFragment
 import com.example.nutriority.ui.workout.ExerciseDetailFragment
 import com.example.nutriority.ui.workout.ExerciseLibraryFragment
@@ -36,24 +34,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainTabsFragment : Fragment() {
-
-    private var _binding: FragmentMainTabsBinding? = null
-    private val binding get() = _binding!!
+class MainTabsFragment : BaseBindingFragment<FragmentMainTabsBinding>(FragmentMainTabsBinding::inflate) {
 
     private val navigationViewModel: NavigationViewModel by activityViewModels()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentMainTabsBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupInsets()
         setupViewPager()
         setupBottomNavigation()
@@ -135,10 +121,10 @@ class MainTabsFragment : Fragment() {
         })
     }
 
-    private inner class TabsAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
+    private inner class TabsAdapter(fragment: androidx.fragment.app.Fragment) : FragmentStateAdapter(fragment) {
         override fun getItemCount(): Int = 14
 
-        override fun createFragment(position: Int): Fragment = when (position) {
+        override fun createFragment(position: Int): androidx.fragment.app.Fragment = when (position) {
             0 -> HomeFragment()
             1 -> WorkoutFragment()
             2 -> MealFragment()
@@ -155,10 +141,5 @@ class MainTabsFragment : Fragment() {
             13 -> LogManualFragment()
             else -> HomeFragment()
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

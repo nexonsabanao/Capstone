@@ -8,23 +8,22 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.nutriority.R
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.databinding.FragmentLogManualBinding
 import com.example.nutriority.ui.NavigationViewModel
-import com.google.android.material.chip.Chip
+import com.example.nutriority.ui.util.BaseBindingFragment
+import com.example.nutriority.ui.util.KeyboardUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,10 +33,7 @@ import java.io.FileOutputStream
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class LogManualFragment : Fragment() {
-
-    private var _binding: FragmentLogManualBinding? = null
-    private val binding get() = _binding!!
+class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(FragmentLogManualBinding::inflate) {
 
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     @Inject lateinit var mealRepository: MealRepository
@@ -54,17 +50,8 @@ class LogManualFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentLogManualBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupDropdown()
         setupClickListeners()
         updateIngredientsUi()
@@ -77,28 +64,20 @@ class LogManualFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        binding.btnBack.setOnClickListener {
-            navigationViewModel.goBack()
-        }
-
+        binding.btnBack.setOnClickListener { navigationViewModel.goBack() }
         binding.btnCamera.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             pickImageLauncher.launch(intent)
         }
-
-        binding.btnAddIngredient.setOnClickListener {
-            showAddIngredientDialog()
-        }
-
-        binding.btnLogMeal.setOnClickListener {
-            saveMeal()
+        binding.btnAddIngredient.setOnClickListener { showAddIngredientDialog() }
+        binding.btnLogMeal.setOnClickListener { 
+            KeyboardUtil.hideKeyboard(requireActivity())
+            saveMeal() 
         }
     }
 
     private fun showAddIngredientDialog() {
-        val input = EditText(requireContext()).apply {
-            hint = "Enter ingredient name"
-        }
+        val input = EditText(requireContext()).apply { hint = "Enter ingredient name" }
         AlertDialog.Builder(requireContext())
             .setTitle("Add Ingredient")
             .setView(input)
@@ -121,7 +100,7 @@ class LogManualFragment : Fragment() {
             val textView = TextView(requireContext()).apply {
                 text = "• $ingredient"
                 textSize = 16f
-                setTextColor(resources.getColor(R.color.dark_gray))
+                setTextColor(ContextCompat.getColor(context, R.color.dark_gray))
                 setPadding(0, 8, 0, 8)
                 setOnLongClickListener {
                     ingredientsList.removeAt(index)
@@ -136,8 +115,10 @@ class LogManualFragment : Fragment() {
     private fun processAndDisplayImage(uri: Uri) {
         viewLifecycleOwner.lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.IO) {
-                val inputStream = requireContext().contentResolver.openInputStream(uri)
-                BitmapFactory.decodeStream(inputStream)
+                try {
+                    val inputStream = requireContext().contentResolver.openInputStream(uri)
+                    BitmapFactory.decodeStream(inputStream)
+                } catch (e: Exception) { null }
             }
 
             bitmap?.let {
@@ -158,9 +139,7 @@ class LogManualFragment : Fragment() {
             out.flush()
             out.close()
             file.absolutePath
-        } catch (e: Exception) {
-            null
-        }
+        } catch (e: Exception) { null }
     }
 
     private fun saveMeal() {
@@ -168,7 +147,6 @@ class LogManualFragment : Fragment() {
         val protein = binding.etProtein.text.toString().toIntOrNull() ?: 0
         val carbs = binding.etCarb.text.toString().toIntOrNull() ?: 0
         val fats = binding.etFat.text.toString().toIntOrNull() ?: 0
-        val enteredKcal = binding.etCalories.text.toString().toIntOrNull() ?: 0
         val mealTime = binding.spinnerMealTime.text.toString()
 
         if (title.isBlank()) {
@@ -178,24 +156,12 @@ class LogManualFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                mealRepository.logManualMeal(
-                    name = title,
-                    protein = protein,
-                    carbs = carbs,
-                    fats = fats,
-                    time = mealTime,
-                    ingredients = ingredientsList
-                )
+                mealRepository.logManualMeal(title, protein, carbs, fats, mealTime, ingredientsList)
                 Toast.makeText(requireContext(), "Meal logged successfully!", Toast.LENGTH_SHORT).show()
                 navigationViewModel.goBack()
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Failed to log meal: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

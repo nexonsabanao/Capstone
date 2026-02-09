@@ -2,26 +2,21 @@ package com.example.nutriority.ui.onboarding.screens
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentSecondScreenBinding
+import com.example.nutriority.ui.util.BaseBindingFragment
 import com.google.android.material.button.MaterialButtonToggleGroup
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
-class SecondScreen : Fragment() {
-
-    private var _binding: FragmentSecondScreenBinding? = null
-    private val binding get() = _binding!!
+class SecondScreen : BaseBindingFragment<FragmentSecondScreenBinding>(FragmentSecondScreenBinding::inflate) {
 
     private val userViewModel: UserViewModel by activityViewModels()
 
@@ -39,14 +34,6 @@ class SecondScreen : Fragment() {
     companion object {
         private const val CM_PER_INCH = 2.54
         private const val LBS_PER_KG = 2.20462
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentSecondScreenBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -223,10 +210,5 @@ class SecondScreen : Fragment() {
             val button = group.getChildAt(i) as? Button
             button?.setTextColor(if (button.id == group.checkedButtonId) whiteColor else darkGrayColor)
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

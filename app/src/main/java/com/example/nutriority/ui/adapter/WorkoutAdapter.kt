@@ -1,14 +1,21 @@
 package com.example.nutriority.ui.adapter
 
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.example.nutriority.R
 import com.example.nutriority.data.model.Workout
 import com.example.nutriority.databinding.ItemPreviewWorkoutBinding
+import com.example.nutriority.ui.util.ImageUtil
 
 class WorkoutAdapter(
     private val onItemClick: (Workout) -> Unit
@@ -45,16 +52,41 @@ class WorkoutAdapter(
             tvDifficulty.text = currentWorkout.difficulty
             tvDuration.text = currentWorkout.duration
 
-            // Use Glide for efficient image loading
-            if (currentWorkout.imageResId != 0) {
-                Glide.with(workoutImage.context)
-                    .load(currentWorkout.imageResId)
-                    .centerCrop()
-                    .placeholder(R.drawable.img_balanced_diet)
-                    .into(workoutImage)
+            // Determine the correct image resource
+            val imageRes = if (currentWorkout.imageResId != 0) {
+                currentWorkout.imageResId
             } else {
-                workoutImage.setImageResource(R.drawable.img_balanced_diet)
+                ImageUtil.getWorkoutImageResource(currentWorkout.targetMuscle, currentWorkout.name, currentWorkout.difficulty)
             }
+
+            // Show progress bar and load image with Glide
+            imageProgressBar.visibility = View.VISIBLE
+            Glide.with(workoutImage.context)
+                .load(imageRes)
+                .centerCrop()
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        imageProgressBar.visibility = View.GONE
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        imageProgressBar.visibility = View.GONE
+                        return false
+                    }
+                })
+                .into(workoutImage)
         }
     }
 

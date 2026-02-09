@@ -44,6 +44,7 @@ class RecommendedWorkoutRepository @Inject constructor(
     suspend fun getOriginalAssignments(workoutId: Int): List<WorkoutExercise> {
         return try {
             val doc = db.collection("workoutsOfficial").document("workout_$workoutId").get().await()
+            if (!doc.exists()) return emptyList()
             val allExercises = workoutDao.getAllExercises().first()
             val result = parseWorkoutDocument(doc, workoutId, allExercises)
             result?.second ?: emptyList()
@@ -80,8 +81,11 @@ class RecommendedWorkoutRepository @Inject constructor(
 
         fun addGroup(data: List<Map<String, Any>>, category: String) {
             data.forEach { item ->
+                // Try to find the exercise in our local DB first to get its proper ID
                 val name = item["name"] as? String ?: ""
-                findExerciseIdByName(name, allExercises)?.let { exId ->
+                val exId = findExerciseIdByName(name, allExercises)
+
+                if (exId != null) {
                     assignments.add(WorkoutExercise(
                         workoutId = workoutId,
                         exerciseId = exId,
@@ -104,8 +108,15 @@ class RecommendedWorkoutRepository @Inject constructor(
     }
 
     private fun findExerciseIdByName(name: String, allExercises: List<Exercise>): String? {
-        return allExercises.find { it.name.equals(name, true) }?.id 
-            ?: allExercises.find { it.name.contains(name, true) }?.id
+        // Try exact match first
+        val exactMatch = allExercises.find { it.name.equals(name, true) }
+        if (exactMatch != null) return exactMatch.id
+
+        // Try fuzzy match (contains)
+        val fuzzyMatch = allExercises.find { it.name.contains(name, true) }
+        if (fuzzyMatch != null) return fuzzyMatch.id
+
+        return null
     }
 
     suspend fun seedOfficialWorkouts(ignored: Any) {

@@ -20,18 +20,33 @@
         android:background="@android:color/transparent"
         android:padding="12dp">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/workoutImage"
+        <FrameLayout
+            android:id="@+id/imageContainer"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:scaleType="centerCrop"
-            android:background="#F5F5F5"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CornerSize16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@tools:sample/avatars"
-            tools:ignore="ContentDescription" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/workoutImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="#F5F5F5"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CornerSize16dp"
+                tools:src="@tools:sample/avatars"
+                tools:ignore="ContentDescription" />
+
+            <ProgressBar
+                android:id="@+id/imageProgressBar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/green"
+                android:visibility="gone" />
+        </FrameLayout>
 
         <TextView
             android:id="@+id/workoutName"
@@ -50,7 +65,7 @@
             app:autoSizeMinTextSize="14sp"
             app:autoSizeMaxTextSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/workoutImage"
+            app:layout_constraintStart_toEndOf="@+id/imageContainer"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="HIIT Core Burner" />
 

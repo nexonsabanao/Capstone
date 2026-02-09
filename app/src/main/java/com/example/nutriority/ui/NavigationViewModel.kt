@@ -3,7 +3,8 @@ package com.example.nutriority.ui
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.Stack
+import kotlinx.coroutines.flow.asStateFlow
+import java.util.ArrayDeque
 import javax.inject.Inject
 import dagger.hilt.android.lifecycle.HiltViewModel
 
@@ -11,33 +12,34 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 class NavigationViewModel @Inject constructor() : ViewModel() {
     
     private val _currentTab = MutableStateFlow(0)
-    val currentTab: StateFlow<Int> = _currentTab
+    val currentTab: StateFlow<Int> = _currentTab.asStateFlow()
 
     private val _selectedMealJson = MutableStateFlow<String?>(null)
-    val selectedMealJson: StateFlow<String?> = _selectedMealJson
+    val selectedMealJson: StateFlow<String?> = _selectedMealJson.asStateFlow()
 
     private val _selectedArticleJson = MutableStateFlow<String?>(null)
-    val selectedArticleJson: StateFlow<String?> = _selectedArticleJson
+    val selectedArticleJson: StateFlow<String?> = _selectedArticleJson.asStateFlow()
 
     private val _selectedWorkoutId = MutableStateFlow(-1)
-    val selectedWorkoutId: StateFlow<Int> = _selectedWorkoutId
+    val selectedWorkoutId: StateFlow<Int> = _selectedWorkoutId.asStateFlow()
 
     private val _isPersonalizedFlow = MutableStateFlow(false)
-    val isPersonalizedFlow: StateFlow<Boolean> = _isPersonalizedFlow
+    val isPersonalizedFlow: StateFlow<Boolean> = _isPersonalizedFlow.asStateFlow()
 
     private val _selectedDayIndex = MutableStateFlow(-1)
-    val selectedDayIndex: StateFlow<Int> = _selectedDayIndex
+    val selectedDayIndex: StateFlow<Int> = _selectedDayIndex.asStateFlow()
 
     private val _selectedExerciseId = MutableStateFlow("")
-    val selectedExerciseId: StateFlow<String> = _selectedExerciseId
+    val selectedExerciseId: StateFlow<String> = _selectedExerciseId.asStateFlow()
 
     private val _exercisePosition = MutableStateFlow(-1)
-    val exercisePosition: StateFlow<Int> = _exercisePosition
+    val exercisePosition: StateFlow<Int> = _exercisePosition.asStateFlow()
 
     private val _totalExercises = MutableStateFlow(-1)
-    val totalExercises: StateFlow<Int> = _totalExercises
+    val totalExercises: StateFlow<Int> = _totalExercises.asStateFlow()
 
-    private val backStack = Stack<Int>()
+    // Using ArrayDeque for a more modern and efficient stack implementation
+    private val backStack = ArrayDeque<Int>()
 
     fun setTab(index: Int, addToBackStack: Boolean = true) {
         if (index == _currentTab.value) return

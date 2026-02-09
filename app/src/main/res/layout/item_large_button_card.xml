@@ -6,82 +6,54 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardBackgroundColor="@color/primary_dark"
-    app:cardCornerRadius="24dp"
-    app:cardElevation="4dp"
+    app:cardCornerRadius="21dp"
+    app:cardElevation="0dp"
     app:cardPreventCornerOverlap="false"
-    app:cardUseCompatPadding="true"
-    app:strokeColor="#1AFFFFFF"
-    app:strokeWidth="1dp">
+    app:cardUseCompatPadding="false"
+    app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:paddingBottom="16dp"
-        android:clipToPadding="false">
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:padding="20dp">
 
-        <!-- Background Decoration: Compact Top Glow -->
+        <!-- Background Decoration: Subtle Glows -->
         <View
-            android:layout_width="180dp"
-            android:layout_height="180dp"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
             android:layout_marginTop="-80dp"
             android:layout_marginStart="-60dp"
-            android:alpha="0.08"
+            android:alpha="0.12"
             android:background="@drawable/bg_circle_green"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Background Decoration: Compact Accent Glow -->
         <View
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="10dp"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:layout_marginEnd="-30dp"
-            android:alpha="0.04"
+            android:layout_marginBottom="-30dp"
+            android:alpha="0.06"
             android:background="@drawable/bg_circle_orange"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.6" />
-
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="4dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/img_full_body_pose"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/guideline_content"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            tools:ignore="ContentDescription" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Horizontal Top Badge Decoration -->
+        <!-- Badge -->
         <LinearLayout
             android:id="@+id/badgeLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="20dp"
             android:background="@drawable/rounded_chip_background_light"
             android:backgroundTint="#1AFFFFFF"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="8dp"
+            android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/guideline_content"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constrainedWidth="true">
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:layout_width="10dp"
@@ -95,17 +67,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:fontFamily="sans-serif"
-                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:text="28 DAYS CHALLENGE"
                 android:textAllCaps="true"
-                android:text="7 DAYS CHALLENGE"
                 android:textColor="@color/green"
                 android:textSize="9sp"
                 android:letterSpacing="0.1"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="7sp"
-                app:autoSizeMaxTextSize="10sp"
-                app:autoSizeStepGranularity="1sp"
                 tools:ignore="SmallSp" />
         </LinearLayout>
 
@@ -113,20 +80,13 @@
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="8dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="Full Body Transformation"
+            android:layout_marginTop="12dp"
+            android:fontFamily="sans-serif-black"
+            android:text="Personalized Journey"
             android:textColor="@android:color/white"
             android:textSize="22sp"
             android:lineSpacingExtra="2dp"
-            app:autoSizeTextType="uniform"
-            app:autoSizeMinTextSize="16sp"
-            app:autoSizeMaxTextSize="22sp"
-            app:autoSizeStepGranularity="1sp"
-            app:layout_constraintEnd_toStartOf="@+id/guideline_content"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/badgeLayout" />
 
@@ -135,18 +95,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="12dp"
             android:fontFamily="sans-serif"
-            android:text="Target every muscle group with our expert-led program."
-            android:textColor="#BDBDBD"
-            android:textSize="13sp"
+            android:text="A comprehensive 4-week program designed specifically for your goals and fitness level."
+            android:textColor="#CCFFFFFF"
+            android:textSize="14sp"
             android:lineSpacingExtra="2dp"
-            app:autoSizeTextType="uniform"
-            app:autoSizeMinTextSize="10sp"
-            app:autoSizeMaxTextSize="14sp"
-            app:autoSizeStepGranularity="1sp"
-            app:layout_constraintEnd_toStartOf="@+id/guideline_content"
-            app:layout_constraintStart_toStartOf="@+id/tvTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
         <com.google.android.material.button.MaterialButton
@@ -155,22 +110,20 @@
             android:layout_height="48dp"
             android:layout_marginTop="20dp"
             android:paddingHorizontal="24dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="START NOW"
+            android:fontFamily="sans-serif-medium"
+            android:text="START"
             android:textColor="@color/primary_dark"
             android:textSize="13sp"
             app:backgroundTint="@color/white"
-            app:cornerRadius="14dp"
+            app:cornerRadius="12dp"
             app:elevation="4dp"
             app:icon="@drawable/ic_play_arrow"
             app:iconPadding="6dp"
             app:iconSize="16dp"
             app:iconTint="@color/primary_dark"
-            app:layout_constraintStart_toStartOf="@+id/tvTitle"
-            app:layout_constraintTop_toBottomOf="@+id/tvDescription"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintVertical_bias="1.0"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvDescription" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

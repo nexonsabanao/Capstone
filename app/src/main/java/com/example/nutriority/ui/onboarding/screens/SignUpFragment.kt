@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.nutriority.data.model.User
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.databinding.FragmentSignUpBinding
+import com.example.nutriority.ui.util.KeyboardUtil
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import dagger.hilt.android.AndroidEntryPoint
@@ -55,10 +56,16 @@ class SignUpFragment : Fragment() {
         binding.etPassword.doAfterTextChanged { binding.tvError.isVisible = false }
         binding.etConfirmPassword.doAfterTextChanged { binding.tvError.isVisible = false }
 
-        binding.btnSignUp.setOnClickListener { validateInputsAndProceed() }
+        binding.btnSignUp.setOnClickListener { 
+            KeyboardUtil.hideKeyboard(requireActivity())
+            validateInputsAndProceed() 
+        }
         
         // This button now triggers the official Firebase Verification Link
-        binding.btnSendCode.setOnClickListener { performRegistrationAndSendLink() }
+        binding.btnSendCode.setOnClickListener { 
+            KeyboardUtil.hideKeyboard(requireActivity())
+            performRegistrationAndSendLink() 
+        }
         
         binding.btnVerify.setOnClickListener {
             // After sending link, user just needs to go to login
@@ -167,7 +174,7 @@ class SignUpFragment : Fragment() {
                                 val newUser = User(
                                     id = 1,
                                     gender = "",
-                                    age = null,
+                                    birthDate = null,
                                     heightCm = 0.0,
                                     weightKg = 0.0,
                                     unitSystem = "METRIC",

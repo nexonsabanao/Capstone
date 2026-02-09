@@ -9,32 +9,38 @@ import kotlin.math.abs
 
 @Singleton
 class MealPlanner @Inject constructor(
-    private val mealRepository: MealRepository
+    val mealRepository: MealRepository
 ) {
 
-    // Main function to generate a meal plan based on user preferences.
-    suspend fun planMeals(dailyCalories: Int, preferredDiet: String, excludedIngredients: List<String>): List<Meal> {
+    /**
+     * Optimized meal planning.
+     * @param mealPool Optional pre-fetched list of all meals to avoid repeated DB hits.
+     */
+    suspend fun planMeals(
+        dailyCalories: Int, 
+        preferredDiet: String, 
+        excludedIngredients: List<String>,
+        mealPool: List<Meal>? = null
+    ): List<Meal> {
         val splits = listOf(0.30, 0.35, 0.35) // Breakfast, Lunch, Dinner percentages
         val targetCalories = splits.map { (dailyCalories * it).toInt() }
 
-        val allMeals = mealRepository.getAllMealsList()
+        val allMeals = mealPool ?: mealRepository.getAllMealsList()
 
         if (allMeals.isEmpty()) {
-            Log.w("MealPlanner", "The meal database is empty. Cannot generate a meal plan.")
+            Log.w("MealPlanner", "The meal database is empty.")
             return emptyList()
         }
 
-        // Filter meals based on dietary preferences and exclusions
+        // 1. Pre-filter by exclusions and diet once
         val filteredMeals = allMeals.filter { meal ->
             val isExcluded = excludedIngredients.any { ex -> meal.ingredients.any { it.contains(ex, true) } }
             if (isExcluded) return@filter false
 
-            // Priority 1: Match the user's preferred diet if specified in the meal data
             if (meal.preferredDiet.isNotEmpty() && !meal.preferredDiet.equals("Balanced", true)) {
                 if (!meal.preferredDiet.equals(preferredDiet, true)) return@filter false
             }
 
-            // Priority 2: Fallback logic check if meal data lacks specific diet tagging
             when (preferredDiet.lowercase()) {
                 "vegetarian" -> !containsMeat(meal)
                 "low carb" -> isLowCarb(meal)
@@ -49,19 +55,16 @@ class MealPlanner @Inject constructor(
         mealTimes.zip(targetCalories).forEach { (time, targetCal) ->
             val bestMealsForTime = availableMeals
                 .filter { it.mealTime.equals(time, ignoreCase = true) }
-                .sortedBy { abs(it.calories.toDouble() - targetCal.toDouble()) } 
+                .sortedBy { abs(it.calories - targetCal) } 
                 .take(15) 
 
             if (bestMealsForTime.isNotEmpty()) {
                 val chosenMeal = bestMealsForTime.random()
-                // We keep the original calories but the planner picks the closest one
                 plannedMeals.add(chosenMeal)
+                // Don't remove if we want potential duplicates across days, 
+                // but keep it for within-day variety
                 availableMeals.remove(chosenMeal) 
             }
-        }
-
-        if (plannedMeals.size < 3) {
-            Log.w("MealPlanner", "Incomplete plan: Found ${plannedMeals.size} meals for diet: $preferredDiet")
         }
 
         return plannedMeals

@@ -37,7 +37,7 @@
             android:fontFamily="sans-serif"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:text="How old are you?"
+            android:text="When is your birthday?"
             android:textColor="#212121"
             android:textSize="32sp"
             app:autoSizeTextType="uniform"
@@ -51,7 +51,7 @@
             android:layout_marginTop="12dp"
             android:fontFamily="sans-serif-medium"
             android:gravity="center_horizontal"
-            android:text="Age helps us calculate your BMI and goal"
+            android:text="Your birthdate is used to determine your age accurately."
             android:textColor="#757575"
             android:textSize="16sp"
             app:autoSizeTextType="uniform"
@@ -76,37 +76,75 @@
             android:paddingHorizontal="32dp"
             android:paddingTop="48dp">
 
-            <!-- Age Input -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ageInputLayout"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            <!-- Date Input Area (Looks like a button) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/datePickerButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter your age"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusTopStart="16dp"
-                app:boxStrokeColor="@color/green"
-                app:hintTextColor="@color/green"
-                app:errorEnabled="true"
-                app:errorIconDrawable="@null">
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#EEEEEE"
+                app:strokeWidth="1dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/ageInput"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:imeOptions="actionNext"
-                    android:inputType="number"
-                    android:maxLength="3"
-                    android:maxLines="1"
-                    android:textColor="#212121"
-                    android:textSize="24sp" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="20dp">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_calendar"
+                        app:tint="@color/green" />
+
+                    <TextView
+                        android:id="@+id/tvSelectedDate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="Select Birthday"
+                        android:textColor="#212121"
+                        android:textSize="18sp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_edit"
+                        app:tint="#BDBDBD" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/tvCalculatedAge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:textColor="@color/green"
+                android:textSize="16sp"
+                android:visibility="gone"
+                tools:text="Age: 25 years old"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/tvDateError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif"
+                android:gravity="center"
+                android:textColor="@color/bmi_obese"
+                android:textSize="12sp"
+                android:visibility="gone"
+                tools:text="You must be at least 15 years old" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
@@ -124,6 +162,7 @@
         android:text="@string/action_next"
         android:textSize="16sp"
         android:letterSpacing="0.05"
+        android:enabled="false"
         app:cornerRadius="32dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 

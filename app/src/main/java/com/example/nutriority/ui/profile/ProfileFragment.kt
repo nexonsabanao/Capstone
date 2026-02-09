@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -13,7 +12,6 @@ import android.widget.TextView
 import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -25,6 +23,8 @@ import com.example.nutriority.data.model.DailyMealLog
 import com.example.nutriority.databinding.FragmentProfileBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.custom.WeightMarkerView
+import com.example.nutriority.ui.util.AgeUtil
+import com.example.nutriority.ui.util.BaseBindingFragment
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -35,10 +35,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @AndroidEntryPoint
-class ProfileFragment : Fragment() {
-
-    private var _binding: FragmentProfileBinding? = null
-    private val binding get() = _binding!!
+class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProfileBinding::inflate) {
 
     private val profileViewModel: ProfileViewModel by activityViewModels()
     private val navigationViewModel: NavigationViewModel by activityViewModels()
@@ -50,14 +47,6 @@ class ProfileFragment : Fragment() {
         LoggedFoodAdapter { log ->
             profileViewModel.deleteMealLog(log)
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentProfileBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -72,6 +61,7 @@ class ProfileFragment : Fragment() {
         binding.rvLoggedFood.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = loggedFoodAdapter
+            setHasFixedSize(true)
         }
     }
 
@@ -148,7 +138,6 @@ class ProfileFragment : Fragment() {
                 profileViewModel.todayMealLogs.observe(viewLifecycleOwner) { logs ->
                     loggedFoodAdapter.submitList(logs)
                     
-                    // Show/Hide "Today's Meals" header based on data
                     val hasLogs = logs.isNotEmpty()
                     binding.tvFoodTitle.isVisible = hasLogs
                     binding.rvLoggedFood.isVisible = hasLogs
@@ -179,7 +168,6 @@ class ProfileFragment : Fragment() {
         val calendar = currentDisplayDate.clone() as Calendar
         val today = Calendar.getInstance()
         
-        // EXCLUDE weight logs (workoutId == 0) from calendar highlighting
         val logDates = logs.filter { it.workoutId != 0 }
             .map { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }
             .toSet()
@@ -264,7 +252,6 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateStreak(logs: List<WorkoutSessionLog>) {
-        // EXCLUDE weight logs (workoutId == 0) from streak calculation
         val logDates = logs.filter { it.workoutId != 0 }
             .map { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }
             .toSet()
@@ -279,12 +266,10 @@ class ProfileFragment : Fragment() {
         val checkCal = Calendar.getInstance()
         val todayKey = getDayKey(checkCal)
         
-        // Check yesterday if nothing today yet
         if (!logDates.contains(todayKey)) {
             checkCal.add(Calendar.DAY_OF_YEAR, -1)
         }
 
-        // Count back from today (or yesterday if today is empty)
         while (logDates.contains(getDayKey(checkCal))) {
             streak++
             checkCal.add(Calendar.DAY_OF_YEAR, -1)
@@ -371,7 +356,7 @@ class ProfileFragment : Fragment() {
     private fun updateCalorieCard(user: com.example.nutriority.data.model.User, logs: List<DailyMealLog>) {
         val totalLogged = logs.sumOf { it.calories }
         val goalCalories = com.example.nutriority.planner.NutritionCalculator.calculateTdeeDailyCalories(
-            user.weightKg, user.heightCm, user.age ?: 30, user.gender, user.activityLevel, user.goal
+            user.weightKg, user.heightCm, AgeUtil.calculateAge(user.birthDate), user.gender, user.activityLevel, user.goal
         )
         
         val left = (goalCalories - totalLogged).coerceAtLeast(0)
@@ -414,10 +399,5 @@ class ProfileFragment : Fragment() {
         valueTv?.text = "$current/${target}g"
         progress?.max = target
         progress?.progress = current
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

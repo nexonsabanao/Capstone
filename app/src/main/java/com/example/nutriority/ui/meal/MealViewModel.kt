@@ -10,14 +10,21 @@ import com.example.nutriority.data.model.Meal
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.planner.PlannerService
+import com.example.nutriority.ui.util.AgeUtil
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -36,7 +43,7 @@ class MealViewModel @Inject constructor(
     private val application: Application
 ) : ViewModel() {
 
-    private val _isGenerating = MutableLiveData<Boolean>()
+    private val _isGenerating = MutableLiveData<Boolean>(false)
     val isGenerating: LiveData<Boolean> = _isGenerating
 
     private val _isPlanExpired = MutableLiveData<Boolean>()
@@ -48,68 +55,99 @@ class MealViewModel @Inject constructor(
     val currentMealPlan: StateFlow<List<MealListItem>>
 
     init {
-        currentMealPlan = combine(userRepository.getUser.asFlow(), mealRepository.allMeals) { user, allMeals ->
-            if (user?.mealPlanJson == null) {
-                return@combine emptyList()
-            }
+        currentMealPlan = userRepository.getUser.asFlow()
+            .map { it?.mealPlanJson }
+            .distinctUntilChanged()
+            .map { mealPlanJson ->
+                if (mealPlanJson == null) {
+                    return@map emptyList<MealListItem>()
+                }
 
-            try {
-                val gson = Gson()
-                val plan: List<List<Meal>> = gson.fromJson(user.mealPlanJson, object : com.google.gson.reflect.TypeToken<List<List<Meal>>>() {}.type)
-                val items = mutableListOf<MealListItem>()
+                try {
+                    val gson = Gson()
+                    val plan: List<List<Meal>> = gson.fromJson(mealPlanJson, object : com.google.gson.reflect.TypeToken<List<List<Meal>>>() {}.type)
+                    val items = mutableListOf<MealListItem>()
 
-                val startDateStr = getPlanStartDate()
-                val startDate = if (startDateStr != null) LocalDate.parse(startDateStr) else LocalDate.now()
-                val today = LocalDate.now()
-                val daysPassed = ChronoUnit.DAYS.between(startDate, today)
+                    val startDateStr = getPlanStartDate()
+                    val startDate = if (startDateStr != null) LocalDate.parse(startDateStr) else LocalDate.now()
+                    val today = LocalDate.now()
+                    val daysPassed = ChronoUnit.DAYS.between(startDate, today)
 
-                _isPlanExpired.postValue(daysPassed >= 7)
+                    _isPlanExpired.postValue(daysPassed >= 7)
 
-                plan.forEachIndexed { dayIndex, dayMeals ->
-                    val targetDate = startDate.plusDays(dayIndex.toLong())
-                    val dateHeader = if (dayIndex == 0) "Today" else if (dayIndex == 1) "Tomorrow" else targetDate.dayOfWeek.name.lowercase().capitalize()
+                    plan.forEachIndexed { dayIndex, dayMeals ->
+                        val targetDate = startDate.plusDays(dayIndex.toLong())
+                        val dateHeader = if (dayIndex == 0) "Today" else if (dayIndex == 1) "Tomorrow" else targetDate.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
 
-                    items.add(MealListItem.HeaderItem("$dateHeader, ${targetDate.month.name.lowercase().capitalize()} ${targetDate.dayOfMonth}", dayIndex))
+                        items.add(MealListItem.HeaderItem("$dateHeader, ${targetDate.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${targetDate.dayOfMonth}", dayIndex))
 
-                    val sortedMeals = dayMeals.sortedBy {
-                        when(it.mealTime.lowercase()) {
-                            "breakfast" -> 1
-                            "lunch" -> 2
-                            "dinner" -> 3
-                            else -> 4
+                        val sortedMeals = dayMeals.sortedBy {
+                            when(it.mealTime.lowercase()) {
+                                "breakfast" -> 1
+                                "lunch" -> 2
+                                "dinner" -> 3
+                                else -> 4
+                            }
+                        }
+
+                        sortedMeals.forEach { meal ->
+                            items.add(MealListItem.MealItem(meal, dayIndex))
                         }
                     }
-
-                    sortedMeals.forEach { meal ->
-                        items.add(MealListItem.MealItem(meal, dayIndex))
-                    }
+                    items
+                } catch (e: Exception) {
+                    emptyList<MealListItem>()
                 }
-                items
-            } catch (e: Exception) {
-                emptyList()
-            }
-        }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = emptyList()
+            )
     }
 
     fun generateNewMealPlan() {
         viewModelScope.launch {
             _isGenerating.value = true
-            val user = userRepository.getInitialUser()
-            if (user != null) {
-                val dailyCalories = com.example.nutriority.planner.NutritionCalculator.calculateTdeeDailyCalories(
-                    user.weightKg, user.heightCm, user.age ?: 30, user.gender, user.activityLevel, user.goal
-                ).toInt()
+            
+            val result = withContext(Dispatchers.Default) {
+                try {
+                    val user = userRepository.getInitialUser()
+                    if (user != null) {
+                        val dailyCalories = com.example.nutriority.planner.NutritionCalculator.calculateTdeeDailyCalories(
+                            user.weightKg, user.heightCm, AgeUtil.calculateAge(user.birthDate), user.gender, user.activityLevel, user.goal
+                        )
 
-                val weekPlan = mutableListOf<List<Meal>>()
-                for (i in 0 until 7) {
-                    val dayMeals = plannerService.generatePlanForUser(user).nutritionPlan.meals
-                    weekPlan.add(dayMeals)
+                        // Prefetch meals outside the loop
+                        val mealPool = mealRepository.getAllMealsList()
+
+                        val weekPlan = (0 until 7).map {
+                            async { 
+                                plannerService.mealPlanner.planMeals(
+                                    dailyCalories, 
+                                    user.preferredDiet, 
+                                    user.excludedIngredients,
+                                    mealPool
+                                )
+                            }
+                        }.awaitAll()
+
+                        val json = Gson().toJson(weekPlan)
+                        Triple(true, user, json)
+                    } else {
+                        Triple(false, null, null)
+                    }
+                } catch (e: Exception) {
+                    Triple(false, null, null)
                 }
+            }
 
-                val json = Gson().toJson(weekPlan)
+            if (result.first) {
+                val user = result.second!!
+                val json = result.third!!
                 userRepository.insertUser(user.copy(mealPlanJson = json))
                 savePlanStartDate(LocalDate.now().toString())
             }
+            
             _isGenerating.value = false
         }
     }

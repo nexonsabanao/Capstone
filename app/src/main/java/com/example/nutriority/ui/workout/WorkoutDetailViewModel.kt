@@ -9,9 +9,11 @@ import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.data.model.WorkoutWithExercises
+import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.data.repository.RecommendedWorkoutRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
+import com.example.nutriority.ui.util.WorkoutUtil
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import javax.inject.Inject
@@ -272,7 +275,20 @@ class WorkoutDetailViewModel @Inject constructor(
 
     fun updateWorkout(workout: Workout, workoutExercises: List<WorkoutExercise>) {
         viewModelScope.launch {
+            // SAFE DATA FETCH: Ensure exercises exist in DB before duration calculation
             workoutRepository.updateWorkoutWithExercises(workout, workoutExercises)
+            
+            // Re-fetch with details to ensure valid objects
+            val workoutWithDetails = workoutRepository.getWorkoutWithExercises(workout.id).first()
+            
+            if (workoutWithDetails != null) {
+                val newDuration = WorkoutUtil.calculateTotalDuration(
+                    workoutWithDetails.exerciseAssignments, 
+                    workout.includeWarmupCooldown
+                )
+                workoutRepository.updateWorkout(workout.copy(duration = newDuration))
+            }
+            
             _onWorkoutUpdated.emit(Unit)
         }
     }

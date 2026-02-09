@@ -5,10 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nutriority.R
 import com.example.nutriority.databinding.ItemPersonalizedWorkoutDayBinding
-import com.example.nutriority.databinding.ItemRestartWorkoutBinding
 import com.example.nutriority.planner.WorkoutSession
 
 enum class DayStatus {
@@ -18,91 +19,54 @@ enum class DayStatus {
 }
 
 class PersonalizedWorkoutAdapter(
-    private var workoutSessions: List<WorkoutSession>,
     private var lastCompletedDay: Int,
     private val onStartWorkoutClicked: (dayIndex: Int) -> Unit,
-    private val onRestartWorkoutClicked: () -> Unit,
     private val onWorkoutClicked: (workoutId: Int, dayIndex: Int) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : ListAdapter<WorkoutSession, PersonalizedWorkoutAdapter.WorkoutDayViewHolder>(WorkoutSessionDiffCallback()) {
 
-    companion object {
-        private const val VIEW_TYPE_WORKOUT = 0
-        private const val VIEW_TYPE_RESTART = 1
-    }
-
-    private var allWorkoutsCompleted = lastCompletedDay >= workoutSessions.size
-
-    fun updateData(newSessions: List<WorkoutSession>, newLastCompletedDay: Int) {
-        this.workoutSessions = newSessions
+    fun updateLastCompletedDay(newLastCompletedDay: Int) {
         this.lastCompletedDay = newLastCompletedDay
-        this.allWorkoutsCompleted = lastCompletedDay >= workoutSessions.size
         notifyDataSetChanged()
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (allWorkoutsCompleted && position == workoutSessions.size) {
-            VIEW_TYPE_RESTART
-        } else {
-            VIEW_TYPE_WORKOUT
-        }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkoutDayViewHolder {
+        val binding = ItemPersonalizedWorkoutDayBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return WorkoutDayViewHolder(binding)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return when (viewType) {
-            VIEW_TYPE_WORKOUT -> {
-                val binding = ItemPersonalizedWorkoutDayBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                WorkoutDayViewHolder(binding)
-            }
-            VIEW_TYPE_RESTART -> {
-                val binding = ItemRestartWorkoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                RestartButtonViewHolder(binding)
-            }
-            else -> throw IllegalArgumentException("Invalid view type")
+    override fun onBindViewHolder(holder: WorkoutDayViewHolder, position: Int) {
+        val session = getItem(position)
+        // Note: The global day index is needed for status check.
+        // We assume the list passed to submitList is the subset for the current week.
+        // We'll need the global index to correctly determine status.
+        val currentWeek = lastCompletedDay / 7
+        val globalIndex = (currentWeek * 7) + position
+        
+        val status = when {
+            globalIndex < lastCompletedDay -> DayStatus.COMPLETED
+            globalIndex == lastCompletedDay -> DayStatus.ACTIVE
+            else -> DayStatus.LOCKED
         }
-    }
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder.itemViewType) {
-            VIEW_TYPE_WORKOUT -> {
-                val workoutHolder = holder as WorkoutDayViewHolder
-                val session = workoutSessions[position]
-                val status = when {
-                    position < lastCompletedDay -> DayStatus.COMPLETED
-                    position == lastCompletedDay -> DayStatus.ACTIVE
-                    else -> DayStatus.LOCKED
-                }
-                workoutHolder.bind(session, status)
-            }
-            VIEW_TYPE_RESTART -> {
-                val restartHolder = holder as RestartButtonViewHolder
-                restartHolder.bind()
-            }
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return if (allWorkoutsCompleted) {
-            workoutSessions.size + 1
-        } else {
-            workoutSessions.size
-        }
+        holder.bind(session, status, globalIndex)
     }
 
     inner class WorkoutDayViewHolder(private val binding: ItemPersonalizedWorkoutDayBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
             binding.root.setOnClickListener {
                 val position = bindingAdapterPosition
-                if (position != RecyclerView.NO_POSITION && position < workoutSessions.size) {
-                    val session = workoutSessions[position]
+                if (position != RecyclerView.NO_POSITION) {
+                    val session = getItem(position)
+                    val currentWeek = lastCompletedDay / 7
+                    val globalIndex = (currentWeek * 7) + position
                     val id = session.unifiedWorkoutId
                     if (id != null && id > 0) {
-                        onWorkoutClicked(id, position)
+                        onWorkoutClicked(id, globalIndex)
                     }
                 }
             }
         }
 
-        fun bind(session: WorkoutSession, status: DayStatus) {
+        fun bind(session: WorkoutSession, status: DayStatus, globalIndex: Int) {
             val context = binding.root.context
             binding.tvDayTitle.text = session.day
             
@@ -128,7 +92,7 @@ class PersonalizedWorkoutAdapter(
                     binding.ivWorkoutImage.visibility = View.VISIBLE
                     binding.ivWorkoutImage.setImageResource(R.drawable.ic_play_arrow)
                     binding.ivWorkoutImage.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, android.R.color.white))
-                    binding.btnStart.setOnClickListener { onStartWorkoutClicked(bindingAdapterPosition) }
+                    binding.btnStart.setOnClickListener { onStartWorkoutClicked(globalIndex) }
 
                     if (session.focus == "Rest Day") {
                         binding.btnStart.text = "Complete Day"
@@ -163,11 +127,13 @@ class PersonalizedWorkoutAdapter(
         }
     }
 
-    inner class RestartButtonViewHolder(private val binding: ItemRestartWorkoutBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.btnRestartWorkout.setOnClickListener {
-                onRestartWorkoutClicked()
-            }
+    class WorkoutSessionDiffCallback : DiffUtil.ItemCallback<WorkoutSession>() {
+        override fun areItemsTheSame(oldItem: WorkoutSession, newItem: WorkoutSession): Boolean {
+            return oldItem.day == newItem.day
+        }
+
+        override fun areContentsTheSame(oldItem: WorkoutSession, newItem: WorkoutSession): Boolean {
+            return oldItem == newItem
         }
     }
 }
