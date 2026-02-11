@@ -41,7 +41,7 @@
                 android:layout_marginStart="12dp"
                 android:fontFamily="sans-serif"
                 android:textStyle="bold"
-                android:text="Breast Stroke"
+                android:text="Exercise Name"
                 android:textColor="#212121"
                 android:textSize="24sp"
                 app:autoSizeTextType="uniform"
@@ -51,6 +51,7 @@
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/contentScrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
@@ -94,12 +95,9 @@
                         android:textStyle="bold"
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="6dp"
-                        android:text="1/8"
+                        android:text="1/1"
                         android:textColor="@color/green"
                         android:textSize="12sp"
-                        app:autoSizeTextType="uniform"
-                        app:autoSizeMinTextSize="10sp"
-                        app:autoSizeMaxTextSize="12sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -122,9 +120,6 @@
                         android:textColor="#757575"
                         android:textSize="12sp"
                         android:letterSpacing="0.05"
-                        app:autoSizeTextType="uniform"
-                        app:autoSizeMinTextSize="10sp"
-                        app:autoSizeMaxTextSize="12sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent" />
@@ -156,10 +151,7 @@
                     android:textSize="13sp"
                     app:backgroundTint="@color/white"
                     app:cornerRadius="16dp"
-                    app:elevation="2dp"
-                    app:autoSizeTextType="uniform"
-                    app:autoSizeMinTextSize="10sp"
-                    app:autoSizeMaxTextSize="13sp" />
+                    app:elevation="2dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRest"
@@ -175,10 +167,7 @@
                     android:textSize="13sp"
                     app:backgroundTint="@color/white"
                     app:cornerRadius="16dp"
-                    app:elevation="2dp"
-                    app:autoSizeTextType="uniform"
-                    app:autoSizeMinTextSize="10sp"
-                    app:autoSizeMaxTextSize="13sp" />
+                    app:elevation="2dp" />
             </LinearLayout>
 
             <TextView
@@ -190,10 +179,7 @@
                 android:textStyle="bold"
                 android:text="Sets"
                 android:textColor="#212121"
-                android:textSize="20sp"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="16sp"
-                app:autoSizeMaxTextSize="20sp" />
+                android:textSize="20sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/setsRecyclerView"
@@ -206,6 +192,17 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- LOADING STATE -->
+    <ProgressBar
+        android:id="@+id/loadingProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <FrameLayout
         android:id="@+id/bottom_bar_container"
@@ -232,7 +229,6 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <!-- Updated Icon to Check All -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCheck"
                     style="@style/Widget.Material3.Button.OutlinedButton"
@@ -264,10 +260,7 @@
                     app:cornerRadius="20dp"
                     app:icon="@android:drawable/ic_input_get"
                     app:iconTint="@color/white"
-                    app:iconGravity="textStart"
-                    app:autoSizeTextType="uniform"
-                    app:autoSizeMinTextSize="12sp"
-                    app:autoSizeMaxTextSize="16sp" />
+                    app:iconGravity="textStart" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -290,7 +283,6 @@
                 android:clickable="true"
                 android:focusable="true">
 
-                <!-- Header: Close, Title -->
                 <ImageView
                     android:id="@+id/btnCloseRest"
                     android:layout_width="32dp"
@@ -314,7 +306,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/btnCloseRest" />
 
-                <!-- Timer Section -->
                 <LinearLayout
                     android:id="@+id/timer_layout"
                     android:layout_width="match_parent"
@@ -342,7 +333,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="24dp"
                         android:fontFamily="sans-serif"
-                        android:text="00:36s"
+                        android:text="00:30s"
                         android:textColor="#212121"
                         android:textSize="48sp"
                         android:textStyle="bold" />
@@ -360,7 +351,6 @@
                         app:strokeColor="@color/green" />
                 </LinearLayout>
 
-                <!-- Stop Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnStopRest"
                     android:layout_width="match_parent"
@@ -373,8 +363,6 @@
                     android:fontFamily="sans-serif"
                     android:textStyle="bold"
                     app:cornerRadius="20dp"
-                    app:icon="@drawable/dot_active"
-                    app:iconTint="#D32F2F"
                     app:layout_constraintTop_toBottomOf="@id/timer_layout" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

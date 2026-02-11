@@ -1,8 +1,6 @@
 <resources>
-    <!-- You might have other strings here like your app_name -->
     <string name="app_name">Nutriority</string>
 
-    <!-- Add  lines -->
     <string name="nutriority">NUTRIORITY</string>
     <string name="nutriority1">Train Hard, Eat Smart.</string>
 
@@ -13,14 +11,14 @@
     <string name="action_next">Next</string>
 
     <string name="app_logo_description">The Nutriority app logo</string>
-    <!-- TODO: Remove or change this placeholder text -->
-
-    <!-- ADD THIS STRING FOR THE TERMS -->
 
     <string name="age_error_invalid">Please enter a valid age</string>
     <string name="age_error_underage">You must be at least 15 years old</string>
     <string name="age_error_over_limit">We don\'t recommend you to use the app</string>
 
-    <!-- Firebase/Google Web Client ID from google-services.json -->
     <string name="default_web_client_id">427591895572-fhjmalivcah90fl9q4p6ri65tc1pc85e.apps.googleusercontent.com</string>
+
+    <!-- Workout Strings -->
+    <string name="exercise_count_format">%1$d/%2$d</string>
+    <string name="log_set_format">LOG SET %1$d (%2$d %3$s)</string>
 </resources>

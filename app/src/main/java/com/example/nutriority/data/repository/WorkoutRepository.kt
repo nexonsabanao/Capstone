@@ -10,12 +10,18 @@ import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.data.model.WorkoutWithExercises
+import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.PropertyName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class WorkoutRepository(
@@ -26,8 +32,15 @@ class WorkoutRepository(
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     val allWorkouts: Flow<List<Workout>> = workoutDao.getAllWorkouts()
+
+    // Helper data class for Firestore structure
+    data class CustomWorkoutDto(
+        val workout: Workout? = null,
+        val exercises: List<WorkoutExercise> = emptyList()
+    )
 
     suspend fun getAllWorkoutsList(): List<WorkoutWithExercises> {
         return workoutDao.getAllWorkoutsWithExercises().first()
@@ -35,6 +48,10 @@ class WorkoutRepository(
 
     fun getWorkoutWithExercises(workoutId: Int): Flow<WorkoutWithExercises?> {
         return workoutDao.getWorkoutWithExercises(workoutId)
+    }
+
+    fun getWorkoutExerciseWithDetail(workoutId: Int, exerciseId: String, category: String): Flow<WorkoutExerciseWithDetail?> {
+        return workoutDao.getWorkoutExerciseWithDetail(workoutId, exerciseId, category)
     }
 
     suspend fun getExerciseById(exerciseId: String): Exercise? {
@@ -55,20 +72,22 @@ class WorkoutRepository(
 
     suspend fun updateWorkoutExercise(workoutExercise: WorkoutExercise) {
         workoutDao.updateWorkoutExercise(workoutExercise)
-        // Sync any update to the user's private cloud
-        syncCustomWorkoutToCloud(workoutExercise.workoutId)
+        repositoryScope.launch {
+            syncCustomWorkoutToCloud(workoutExercise.workoutId)
+        }
     }
 
     suspend fun updateWorkoutWithExercises(workout: Workout, workoutExercises: List<WorkoutExercise>) {
         workoutDao.updateWorkoutWithExercises(workout, workoutExercises)
-        // Sync any update to the user's private cloud
-        syncCustomWorkoutToCloud(workout.id)
+        repositoryScope.launch {
+            syncCustomWorkoutToCloud(workout.id)
+        }
     }
 
-    /**
-     * Synchronizes exercises from Firestore. Predefined workouts are now handled
-     * strictly by RecommendedWorkoutRepository via workoutsOfficial collection.
-     */
+    suspend fun updateWorkoutsWithExercises(workouts: List<Workout>, workoutExercises: List<WorkoutExercise>) {
+        workoutDao.updateWorkoutsWithExercises(workouts, workoutExercises)
+    }
+
     suspend fun syncExercisesFromCloud() {
         try {
             val exerciseSnapshot = db.collection("exercises").get().await()
@@ -88,74 +107,64 @@ class WorkoutRepository(
     }
 
     suspend fun ensureLibraryIsLoaded() {
-        syncExercisesFromCloud()
+        val count = workoutDao.getExerciseCount()
+        if (count == 0) {
+            syncExercisesFromCloud()
+        }
     }
 
     private suspend fun syncCustomWorkoutToCloud(workoutId: Int) {
         val uid = auth.currentUser?.uid ?: return
+        if (workoutId >= 1000) return 
+        
         try {
             val workout = workoutDao.getWorkoutById(workoutId)
             val detail = workoutDao.getWorkoutWithExercises(workoutId).first()
             if (workout != null && detail != null) {
-                val workoutMap = hashMapOf(
-                    "workout" to hashMapOf(
-                        "id" to workout.id,
-                        "name" to workout.name,
-                        "description" to workout.description,
-                        "category" to workout.category,
-                        "targetMuscle" to workout.targetMuscle,
-                        "imageName" to workout.imageName,
-                        "difficulty" to workout.difficulty,
-                        "duration" to workout.duration,
-                        "metValue" to workout.metValue,
-                        "includeWarmupCooldown" to workout.includeWarmupCooldown
-                    ),
-                    "exercises" to detail.exerciseAssignments.map { 
-                        val assignment = it.assignment
-                        hashMapOf(
-                            "workoutId" to assignment.workoutId,
-                            "exerciseId" to assignment.exerciseId,
-                            "category" to assignment.category,
-                            "sets" to assignment.sets,
-                            "reps" to assignment.reps,
-                            "rest" to assignment.rest,
-                            "duration" to assignment.duration,
-                            "order" to assignment.order,
-                            "isCompleted" to assignment.isCompleted
-                        )
-                    }
+                val dto = CustomWorkoutDto(
+                    workout = workout,
+                    exercises = detail.exerciseAssignments.map { it.assignment }
                 )
-                // This saves to the USER'S private collection, NOT the global official collection
-                db.collection("users").document(uid).collection("custom_workouts").document(workoutId.toString()).set(workoutMap).await()
+                db.collection("users").document(uid)
+                    .collection("custom_workouts")
+                    .document(workoutId.toString())
+                    .set(dto).await()
             }
-        } catch (e: Exception) { }
+        } catch (e: Exception) {
+            Log.e("WorkoutRepo", "Error syncing custom workout: ${e.message}")
+        }
     }
 
     suspend fun deleteFullWorkout(workout: Workout) {
         workoutDao.deleteFullWorkout(workout)
-        auth.currentUser?.uid?.let { uid ->
+        val uid = auth.currentUser?.uid ?: return
+        repositoryScope.launch {
             try {
-                db.collection("users").document(uid).collection("custom_workouts").document(workout.id.toString()).delete().await()
+                db.collection("users").document(uid)
+                    .collection("custom_workouts")
+                    .document(workout.id.toString())
+                    .delete().await()
             } catch (e: Exception) { }
         }
     }
 
     suspend fun insertWorkoutLog(log: WorkoutLog) {
         workoutLogDao.insertLog(log)
-        auth.currentUser?.uid?.let { uid ->
+        val uid = auth.currentUser?.uid ?: return
+        repositoryScope.launch {
             try {
-                val logMap = hashMapOf("workoutId" to log.workoutId, "date" to Timestamp(log.date), "reps" to log.reps, "weightKg" to log.weightKg)
-                db.collection("users").document(uid).collection("exercise_records").add(logMap).await()
+                // Using a map for specific date formatting if needed, but object works too
+                db.collection("users").document(uid).collection("exercise_records").add(log).await()
             } catch (e: Exception) { }
         }
     }
 
     suspend fun insertSessionLog(log: WorkoutSessionLog) {
         workoutDao.insertSessionLog(log)
-        auth.currentUser?.uid?.let { uid ->
+        val uid = auth.currentUser?.uid ?: return
+        repositoryScope.launch {
             try {
-                val logMap = hashMapOf("workoutId" to log.workoutId, "workoutName" to log.workoutName, "date" to log.date, "exercisesDone" to log.exercisesDone, "totalExercises" to log.totalExercises, "durationSeconds" to log.durationSeconds, "caloriesBurned" to log.caloriesBurned, "difficulty" to log.difficulty, "weightKg" to log.weightKg)
-                db.collection("users").document(uid).collection("session_history").add(logMap).await()
+                db.collection("users").document(uid).collection("session_history").add(log).await()
             } catch (e: Exception) { }
         }
     }
@@ -165,35 +174,30 @@ class WorkoutRepository(
         try {
             ensureLibraryIsLoaded()
             val existingExerciseIds = workoutDao.getAllExercises().first().map { it.id }.toSet()
+            
+            // Restore Custom Workouts
             val customWorkouts = db.collection("users").document(uid).collection("custom_workouts").get().await()
             customWorkouts.documents.forEach { doc ->
-                val wData = doc.get("workout") as? Map<*, *> ?: return@forEach
-                @Suppress("UNCHECKED_CAST")
-                val exData = doc.get("exercises") as? List<Map<String, Any>> ?: emptyList()
-                
-                val workout = Workout(id = (wData["id"] as? Number)?.toInt() ?: 0, name = wData["name"] as? String ?: "", description = wData["description"] as? String ?: "", category = wData["category"] as? String ?: "Custom", targetMuscle = wData["targetMuscle"] as? String ?: "", imageName = wData["imageName"] as? String ?: "", difficulty = wData["difficulty"] as? String ?: "Intermediate", duration = wData["duration"] as? String ?: "", metValue = (wData["metValue"] as? Number)?.toDouble() ?: 5.0, includeWarmupCooldown = wData["includeWarmupCooldown"] as? Boolean ?: false)
-                
-                val assignments = exData.map { ex ->
-                    WorkoutExercise(workoutId = (ex["workoutId"] as? Number)?.toInt() ?: workout.id, exerciseId = ex["exerciseId"] as? String ?: "", category = ex["category"] as? String ?: "Exercise", sets = (ex["sets"] as? Number)?.toInt() ?: 3, reps = ex["reps"] as? String ?: "10", rest = ex["rest"] as? String ?: "60s", duration = ex["duration"] as? String ?: "", order = (ex["order"] as? Number)?.toInt() ?: 0)
-                }.filter { existingExerciseIds.contains(it.exerciseId) }
+                val dto = doc.toObject(CustomWorkoutDto::class.java) ?: return@forEach
+                val workout = dto.workout ?: return@forEach
+                val assignments = dto.exercises.filter { existingExerciseIds.contains(it.exerciseId) }
                 
                 workoutDao.updateWorkoutWithExercises(workout, assignments)
             }
+
+            // Restore Session History
             val sessions = db.collection("users").document(uid).collection("session_history").get().await()
-            sessions.documents.forEach { doc ->
-                val d = doc.data ?: return@forEach
-                val log = WorkoutSessionLog(workoutId = (d["workoutId"] as? Number)?.toInt() ?: 0, workoutName = d["workoutName"] as? String ?: "", date = (d["date"] as? Number)?.toLong() ?: 0L, exercisesDone = (d["exercisesDone"] as? Number)?.toInt() ?: 0, totalExercises = (d["totalExercises"] as? Number)?.toInt() ?: 0, durationSeconds = (d["durationSeconds"] as? Number)?.toLong() ?: 0L, caloriesBurned = (d["caloriesBurned"] as? Number)?.toInt() ?: 0, difficulty = d["difficulty"] as? String ?: "Intermediate", weightKg = (d["weightKg"] as? Number)?.toDouble() ?: 0.0)
-                workoutDao.insertSessionLog(log)
-            }
+            val sessionLogs = sessions.toObjects(WorkoutSessionLog::class.java)
+            sessionLogs.forEach { workoutDao.insertSessionLog(it) }
+
+            // Restore Exercise Records
             val records = db.collection("users").document(uid).collection("exercise_records").get().await()
-            records.documents.forEach { doc ->
-                val d = doc.data ?: return@forEach
-                val timestamp = d["date"] as? Timestamp
-                val date = timestamp?.toDate() ?: java.util.Date()
-                val log = WorkoutLog(workoutId = (d["workoutId"] as? Number)?.toInt() ?: 0, date = date, reps = d["reps"] as? String ?: "", weightKg = (d["weightKg"] as? Number)?.toDouble() ?: 0.0)
-                workoutLogDao.insertLog(log)
-            }
-        } catch (e: Exception) { }
+            val exerciseLogs = records.toObjects(WorkoutLog::class.java)
+            exerciseLogs.forEach { workoutLogDao.insertLog(it) }
+            
+        } catch (e: Exception) {
+            Log.e("WorkoutRepo", "Restore error: ${e.message}")
+        }
     }
 
     suspend fun deleteAllHistory() {
@@ -206,7 +210,10 @@ class WorkoutRepository(
     fun getAllSessionLogs(): Flow<List<WorkoutSessionLog>> = workoutDao.getAllSessionLogs()
     fun getWorkoutLogs(): Flow<List<WorkoutLog>> = workoutLogDao.getWorkoutLogs()
     fun getAllExercises(): Flow<List<Exercise>> = workoutDao.getAllExercises()
-    fun getUniqueTargetMuscles(): Flow<List<String>> = workoutDao.getAllExercises().map { exercises -> exercises.map { it.target }.filter { it.isNotBlank() }.distinct().sorted() }
+    
+    fun getUniqueTargetMuscles(): Flow<List<String>> = workoutDao.getAllExercises().map { exercises -> 
+        exercises.map { it.target }.filter { it.isNotBlank() }.distinct().sorted() 
+    }
     
     suspend fun getExercisesByFocusAndDifficulty(focus: String, difficulty: String): List<Exercise> {
         return workoutDao.getExercisesByFocusAndDifficulty(focus, difficulty)

@@ -6,11 +6,11 @@ import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.data.repository.WorkoutRepository
-import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,15 +25,30 @@ class ExerciseDetailViewModel @Inject constructor(
     private val _exercise = MutableStateFlow<Exercise?>(null)
     val exercise = _exercise.asStateFlow()
 
-    fun getExerciseById(workoutId: Int, exerciseId: String) {
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+    fun getExerciseById(workoutId: Int, exerciseId: String, category: String) {
+        _isLoading.value = true
         viewModelScope.launch {
-            // Optimization: Use first() to get the current snapshot efficiently 
-            // rather than maintaining an open collection for simple detailed view
-            val workoutWithExercises = workoutRepository.getWorkoutWithExercises(workoutId).first()
-            val assignment = workoutWithExercises?.exerciseAssignments?.find { it.assignment.exerciseId == exerciseId }
-            
-            _exerciseWithDetail.value = assignment
-            _exercise.value = assignment?.exercise ?: workoutRepository.getExerciseById(exerciseId)
+            // Fix: We observe the workout context reactively
+            workoutRepository.getWorkoutExerciseWithDetail(workoutId, exerciseId, category)
+                .distinctUntilChanged()
+                .collectLatest { assignment ->
+                    _exerciseWithDetail.value = assignment
+                    
+                    if (assignment != null) {
+                        _exercise.value = assignment.exercise
+                        _isLoading.value = false
+                    } else {
+                        // Fallback: If not found in workout context, check global library
+                        val fallback = workoutRepository.getExerciseById(exerciseId)
+                        if (fallback != null) {
+                            _exercise.value = fallback
+                        }
+                        _isLoading.value = false
+                    }
+                }
         }
     }
 

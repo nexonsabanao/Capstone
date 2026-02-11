@@ -12,6 +12,7 @@ import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.model.WorkoutExercise
 import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.data.model.WorkoutWithExercises
+import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -28,6 +29,9 @@ interface WorkoutDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWorkoutExercise(workoutExercise: WorkoutExercise)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllWorkoutExercises(workoutExercises: List<WorkoutExercise>)
 
     @Update
     suspend fun updateWorkoutExercise(workoutExercise: WorkoutExercise)
@@ -67,6 +71,10 @@ interface WorkoutDao {
     @Query("SELECT * FROM workouts WHERE id = :workoutId")
     fun getWorkoutWithExercises(workoutId: Int): Flow<WorkoutWithExercises?>
 
+    @Transaction
+    @Query("SELECT * FROM workout_exercises WHERE workoutId = :workoutId AND exerciseId = :exerciseId AND category = :category LIMIT 1")
+    fun getWorkoutExerciseWithDetail(workoutId: Int, exerciseId: String, category: String): Flow<WorkoutExerciseWithDetail?>
+
     @Update
     suspend fun updateExercise(exercise: Exercise)
 
@@ -78,6 +86,9 @@ interface WorkoutDao {
 
     @Query("DELETE FROM workout_exercises WHERE workoutId = :workoutId")
     suspend fun deleteWorkoutExercises(workoutId: Int)
+
+    @Query("DELETE FROM workout_exercises WHERE workoutId IN (:workoutIds)")
+    suspend fun deleteWorkoutExercisesList(workoutIds: List<Int>)
 
     @Delete
     suspend fun deleteWorkout(workout: Workout)
@@ -92,7 +103,15 @@ interface WorkoutDao {
     suspend fun updateWorkoutWithExercises(workout: Workout, workoutExercises: List<WorkoutExercise>) {
         insertWorkout(workout)
         deleteWorkoutExercises(workout.id)
-        workoutExercises.forEach { insertWorkoutExercise(it) }
+        insertAllWorkoutExercises(workoutExercises)
+    }
+
+    @Transaction
+    suspend fun updateWorkoutsWithExercises(workouts: List<Workout>, workoutExercises: List<WorkoutExercise>) {
+        workouts.forEach { insertWorkout(it) }
+        val ids = workouts.map { it.id }
+        deleteWorkoutExercisesList(ids)
+        insertAllWorkoutExercises(workoutExercises)
     }
 
     @Transaction

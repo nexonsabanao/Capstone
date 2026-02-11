@@ -1,6 +1,7 @@
 package com.example.nutriority.ui
 
 import androidx.lifecycle.ViewModel
+import com.example.nutriority.planner.WorkoutSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +24,9 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
     private val _selectedWorkoutId = MutableStateFlow(-1)
     val selectedWorkoutId: StateFlow<Int> = _selectedWorkoutId.asStateFlow()
 
+    private val _selectedSession = MutableStateFlow<WorkoutSession?>(null)
+    val selectedSession: StateFlow<WorkoutSession?> = _selectedSession.asStateFlow()
+
     private val _isPersonalizedFlow = MutableStateFlow(false)
     val isPersonalizedFlow: StateFlow<Boolean> = _isPersonalizedFlow.asStateFlow()
 
@@ -32,13 +36,15 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
     private val _selectedExerciseId = MutableStateFlow("")
     val selectedExerciseId: StateFlow<String> = _selectedExerciseId.asStateFlow()
 
+    private val _selectedCategory = MutableStateFlow("")
+    val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
+
     private val _exercisePosition = MutableStateFlow(-1)
     val exercisePosition: StateFlow<Int> = _exercisePosition.asStateFlow()
 
     private val _totalExercises = MutableStateFlow(-1)
     val totalExercises: StateFlow<Int> = _totalExercises.asStateFlow()
 
-    // Using ArrayDeque for a more modern and efficient stack implementation
     private val backStack = ArrayDeque<Int>()
 
     fun setTab(index: Int, addToBackStack: Boolean = true) {
@@ -59,16 +65,18 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
         setTab(8)
     }
 
-    fun navigateToWorkoutDetail(workoutId: Int, isFromPersonalized: Boolean = false, dayIndex: Int = -1) {
+    fun navigateToWorkoutDetail(workoutId: Int, session: WorkoutSession? = null, isFromPersonalized: Boolean = false, dayIndex: Int = -1) {
         _selectedWorkoutId.value = workoutId
+        _selectedSession.value = session
         _isPersonalizedFlow.value = isFromPersonalized
         _selectedDayIndex.value = dayIndex
         setTab(9)
     }
 
-    fun navigateToExerciseDetail(workoutId: Int, exerciseId: String, position: Int, total: Int) {
+    fun navigateToExerciseDetail(workoutId: Int, exerciseId: String, category: String, position: Int, total: Int) {
         _selectedWorkoutId.value = workoutId
         _selectedExerciseId.value = exerciseId
+        _selectedCategory.value = category
         _exercisePosition.value = position
         _totalExercises.value = total
         setTab(10)
@@ -84,6 +92,20 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
 
     fun navigateToLogManual() {
         setTab(13)
+    }
+
+    fun nextExercise() {
+        val currentPos = _exercisePosition.value
+        val total = _totalExercises.value
+        if (currentPos != -1 && total != -1 && currentPos < total) {
+            // Signal to UI that we want to move to next exercise.
+            // Since navigation is tab-based, the fragment/activity needs to know how to find the next exercise.
+            // For now, we increment the position. The observer in ExerciseDetailFragment will trigger a re-load
+            // if we actually change the Triple (workoutId, exerciseId, category).
+            // Usually this logic resides in WorkoutDetailFragment which handles the list.
+            // To be safe and bug-free, we go back so user can select next or we'd need more state here.
+            goBack()
+        }
     }
 
     fun goBack(): Boolean {

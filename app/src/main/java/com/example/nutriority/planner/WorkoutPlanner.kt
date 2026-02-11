@@ -40,6 +40,8 @@ class WorkoutPlanner @Inject constructor(
 
         val userDifficulty = mapActivityLevelToDifficulty(user.activityLevel)
         val sessions = mutableListOf<WorkoutSession>()
+        val allWorkouts = mutableListOf<Workout>()
+        val allAssignments = mutableListOf<WorkoutExercise>()
 
         val seed = user.id.hashCode().toLong()
         val random = Random(seed)
@@ -52,8 +54,6 @@ class WorkoutPlanner @Inject constructor(
                     sessions.add(createRestDay(totalDayIndex))
                 } else {
                     val workoutId = 1000 + totalDayIndex
-                    
-                    // SMART FILTERING
                     val pool = filterExercisesByFocus(focus, allExercises)
 
                     val generated = workoutGenerator.generatePersonalizedWorkout(
@@ -64,17 +64,13 @@ class WorkoutPlanner @Inject constructor(
                         random = random
                     )
 
-                    // Persist to local DB immediately
-                    workoutRepository.updateWorkoutWithExercises(
-                        generated.workout, 
-                        generated.exerciseAssignments.map { it.assignment }
-                    )
+                    allWorkouts.add(generated.workout)
+                    allAssignments.addAll(generated.exerciseAssignments.map { it.assignment })
 
                     val durationStr = WorkoutUtil.calculateTotalDuration(generated.exerciseAssignments, true)
                     val durationMinutes = durationStr.filter { it.isDigit() }.toIntOrNull() ?: 30
                     val caloriesBurned = ((generated.workout.metValue * 3.5 * user.weightKg) / 200 * durationMinutes).toInt()
 
-                    // Populate detailed exercise lists for the plan JSON
                     val warmupList = generated.exerciseAssignments
                         .filter { it.assignment.category == "warmup" }
                         .map { mapToPlannerExercise(it.assignment, allExercises) }
@@ -104,35 +100,37 @@ class WorkoutPlanner @Inject constructor(
             }
         }
 
+        // Batch update to database for better performance and consistency
+        workoutRepository.updateWorkoutsWithExercises(allWorkouts, allAssignments)
+
         return WorkoutPlan(sessions.sumOf { it.caloriesBurned }, sessions)
     }
 
-    /**
-     * Ensures that a plan restored from the cloud is correctly inflated into the local database.
-     */
     suspend fun syncPlanToDatabase(plan: WorkoutPlan) {
+        val workouts = mutableListOf<Workout>()
+        val assignments = mutableListOf<WorkoutExercise>()
+        
         plan.sessions.forEach { session ->
             val workoutId = session.workoutDetails?.id ?: return@forEach
             
-            val assignments = mutableListOf<WorkoutExercise>()
             var order = 0
-            
             session.warmup?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "warmup", order++)) }
             session.exercises?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "Exercise", order++)) }
             session.cooldown?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "cooldown", order++)) }
             
-            if (assignments.isNotEmpty()) {
-                val workout = Workout(
-                    id = workoutId,
-                    name = session.focus,
-                    description = session.description,
-                    category = "Personalized",
-                    difficulty = if (session.focus.contains("Beginner")) "Beginner" else if (session.focus.contains("Advanced")) "Advanced" else "Intermediate",
-                    duration = "${session.durationMinutes} min",
-                    imageName = "img_gym_bg"
-                )
-                workoutRepository.updateWorkoutWithExercises(workout, assignments)
-            }
+            workouts.add(Workout(
+                id = workoutId,
+                name = session.focus,
+                description = session.description,
+                category = "Personalized",
+                difficulty = if (session.focus.contains("Beginner")) "Beginner" else if (session.focus.contains("Advanced")) "Advanced" else "Intermediate",
+                duration = "${session.durationMinutes} min",
+                imageName = "img_gym_bg"
+            ))
+        }
+        
+        if (workouts.isNotEmpty()) {
+            workoutRepository.updateWorkoutsWithExercises(workouts, assignments)
         }
     }
 

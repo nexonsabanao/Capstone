@@ -1,9 +1,7 @@
 package com.example.nutriority.data.model
 
-import java.util.UUID
-
 data class ExerciseSet(
-    val id: String = UUID.randomUUID().toString(),
+    val id: String, // Stable ID: workoutId_exerciseId_category_setNumber
     var setNumber: Int = 0,
     val value: Int,
     var isActive: Boolean = false,

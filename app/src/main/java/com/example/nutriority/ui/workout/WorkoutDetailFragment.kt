@@ -130,7 +130,13 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
         val items = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
         if (items.isNotEmpty()) {
             val first = items[0].detail.assignment
-            navigationViewModel.navigateToExerciseDetail(first.workoutId, first.exerciseId, 1, items.size)
+            navigationViewModel.navigateToExerciseDetail(
+                workoutId = first.workoutId, 
+                exerciseId = first.exerciseId, 
+                category = first.category,
+                position = 1, 
+                total = items.size
+            )
         }
     }
 
@@ -243,11 +249,19 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
         exerciseAdapter = ExerciseAdapter(
             onItemClick = { item, _, _ ->
                 if (viewModel.isWorkoutActive.value && viewModel.activeWorkoutId.value != item.assignment.workoutId) {
-                    showToast("Another workout in progress!"); return@ExerciseAdapter
+                    showToast("Another workout is in progress!"); return@ExerciseAdapter
                 }
                 val onlyEx = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
-                val idx = onlyEx.indexOfFirst { it.detail.assignment.exerciseId == item.assignment.exerciseId }
-                if (idx != -1) navigationViewModel.navigateToExerciseDetail(item.assignment.workoutId, item.assignment.exerciseId, idx + 1, onlyEx.size)
+                val idx = onlyEx.indexOfFirst { it.detail.assignment.exerciseId == item.assignment.exerciseId && it.detail.assignment.category == item.assignment.category }
+                if (idx != -1) {
+                    navigationViewModel.navigateToExerciseDetail(
+                        workoutId = item.assignment.workoutId, 
+                        exerciseId = item.assignment.exerciseId, 
+                        category = item.assignment.category,
+                        position = idx + 1, 
+                        total = onlyEx.size
+                    )
+                }
             },
             onListUpdated = { list -> viewModel.updateWorkout(viewModel.workout.value!!.workout, list.map { it.assignment }) },
             onDragStart = { vh -> itemTouchHelper.startDrag(vh) }

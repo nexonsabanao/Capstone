@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -29,21 +28,20 @@ class UserViewModel @Inject constructor(
     private val gson: Gson
 ) : ViewModel() {
 
-    // Direct Flow for reactive observation in fragments
     val userFlow: Flow<User?> = repository.getUser
-    
-    // LiveData version for compatibility with other parts of the app
     val user: LiveData<User?> = userFlow.asLiveData(viewModelScope.coroutineContext)
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
-        // Automatically sync the workout plan to the DB on startup if it exists
+        // We only sync if the plan is found in the user object but exercises might be missing.
+        // This is safer than syncing on every single startup.
         viewModelScope.launch {
             val currentUser = repository.getInitialUser()
-            currentUser?.personalizedPlanJson?.let {
-                syncEntirePlanToDb(it)
+            if (currentUser != null && !currentUser.personalizedPlanJson.isNullOrBlank()) {
+                // Background check/sync - won't block the UI
+                workoutPlanner.syncPlanToDatabase(gson.fromJson(currentUser.personalizedPlanJson, WorkoutPlan::class.java))
             }
         }
     }
@@ -63,10 +61,6 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Generates ONLY the 28-day workout plan. 
-     * Completely independent from meals.
-     */
     fun restartWorkoutPlan() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -84,7 +78,7 @@ class UserViewModel @Inject constructor(
                 )
                 
                 repository.insertUser(updatedUser)
-                workoutPlanner.syncPlanToDatabase(workoutPlan)
+                // sync is already done in planWorkouts
             } catch (e: Exception) {
             } finally {
                 _isLoading.value = false

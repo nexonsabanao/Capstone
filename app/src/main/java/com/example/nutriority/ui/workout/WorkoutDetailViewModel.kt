@@ -13,8 +13,8 @@ import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.example.nutriority.data.repository.RecommendedWorkoutRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
+import com.example.nutriority.planner.WorkoutSession
 import com.example.nutriority.ui.util.WorkoutUtil
-import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -23,9 +23,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,7 +46,6 @@ class WorkoutDetailViewModel @Inject constructor(
     private val _onWorkoutUpdated = MutableSharedFlow<Unit>()
     val onWorkoutUpdated = _onWorkoutUpdated.asSharedFlow()
     
-    // Workout Session State
     private val _isWorkoutActive = MutableStateFlow(false)
     val isWorkoutActive = _isWorkoutActive.asStateFlow()
 
@@ -61,7 +61,6 @@ class WorkoutDetailViewModel @Inject constructor(
     private val _completedExercisesCount = MutableStateFlow(0)
     val completedExercisesCount = _completedExercisesCount.asStateFlow()
 
-    // SESSION SUMMARY (Snapshot)
     data class SessionSummary(
         val workoutName: String, 
         val exercisesDone: Int, 
@@ -72,7 +71,6 @@ class WorkoutDetailViewModel @Inject constructor(
     private val _sessionSummary = MutableStateFlow<SessionSummary?>(null)
     val sessionSummary = _sessionSummary.asStateFlow()
 
-    // Rest/Auto Log Timer State
     private val _isResting = MutableStateFlow(false)
     val isResting = _isResting.asStateFlow()
 
@@ -90,21 +88,95 @@ class WorkoutDetailViewModel @Inject constructor(
     private var restTimerJob: Job? = null
     private var autoLogTimerJob: Job? = null
 
-    // Persistent Session Summary from DB
     val latestSessionLog = workoutRepository.getLatestSessionLog().asLiveData()
 
-    fun getWorkoutById(workoutId: Int) {
-        if (_workout.value?.workout?.id == workoutId) return
-        
+    fun resolveWorkout(workoutId: Int, session: WorkoutSession? = null) {
         workoutJob?.cancel()
-        _workout.value = null
+        _isLoading.value = true
         
         workoutJob = viewModelScope.launch {
-            workoutRepository.getWorkoutWithExercises(workoutId).collect {
-                _workout.value = it
-                _completedExercisesCount.value = it?.exerciseAssignments?.count { it.assignment.isCompleted } ?: 0
+            if (session != null) {
+                val mappedWorkout = Workout(
+                    id = workoutId,
+                    name = session.focus,
+                    description = session.description,
+                    category = "Personalized",
+                    difficulty = if (session.focus.contains("Beginner")) "Beginner" else if (session.focus.contains("Advanced")) "Advanced" else "Intermediate",
+                    duration = "${session.durationMinutes} min",
+                    imageName = "img_gym_bg"
+                )
+
+                val assignments = mutableListOf<WorkoutExerciseWithDetail>()
+                session.warmup?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "warmup")) }
+                session.exercises?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "Exercise")) }
+                session.cooldown?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "cooldown")) }
+
+                _workout.value = WorkoutWithExercises(mappedWorkout, assignments)
+                _completedExercisesCount.value = 0 
+                _isLoading.value = false
+
+                launch { syncSessionToDb(workoutId, session) }
+            } else {
+                workoutRepository.getWorkoutWithExercises(workoutId)
+                    .distinctUntilChanged()
+                    .collectLatest {
+                        _workout.value = it
+                        _completedExercisesCount.value = it?.exerciseAssignments?.count { it.assignment.isCompleted } ?: 0
+                        _isLoading.value = false
+                    }
             }
         }
+    }
+
+    private suspend fun mapPlannerToDetail(workoutId: Int, pe: com.example.nutriority.planner.PlannerExercise, category: String): WorkoutExerciseWithDetail {
+        val exercise = workoutRepository.getExerciseById(pe.exerciseId) ?: Exercise(id = pe.exerciseId, name = pe.name)
+        val assignment = WorkoutExercise(
+            workoutId = workoutId,
+            exerciseId = pe.exerciseId,
+            category = category,
+            sets = pe.sets,
+            reps = pe.reps,
+            duration = pe.duration,
+            rest = pe.rest,
+            isCompleted = false
+        )
+        return WorkoutExerciseWithDetail(assignment, exercise)
+    }
+
+    private suspend fun syncSessionToDb(workoutId: Int, session: WorkoutSession) {
+        val assignments = mutableListOf<WorkoutExercise>()
+        var order = 0
+        session.warmup?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "warmup", order++)) }
+        session.exercises?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "Exercise", order++)) }
+        session.cooldown?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "cooldown", order++)) }
+        
+        val workout = Workout(
+            id = workoutId,
+            name = session.focus,
+            description = session.description,
+            category = "Personalized",
+            difficulty = if (session.focus.contains("Beginner")) "Beginner" else if (session.focus.contains("Advanced")) "Advanced" else "Intermediate",
+            duration = "${session.durationMinutes} min",
+            imageName = "img_gym_bg"
+        )
+        workoutRepository.updateWorkoutWithExercises(workout, assignments)
+    }
+
+    private fun createWorkoutExercise(workoutId: Int, pe: com.example.nutriority.planner.PlannerExercise, category: String, order: Int): WorkoutExercise {
+        return WorkoutExercise(
+            workoutId = workoutId,
+            exerciseId = pe.exerciseId,
+            category = category,
+            sets = pe.sets,
+            reps = pe.reps,
+            duration = pe.duration,
+            rest = pe.rest,
+            order = order
+        )
+    }
+
+    fun getWorkoutById(workoutId: Int) {
+        resolveWorkout(workoutId, null)
     }
 
     fun startWorkout(workoutId: Int, dayIndex: Int = -1) {
@@ -179,12 +251,10 @@ class WorkoutDetailViewModel @Inject constructor(
         
         viewModelScope.launch {
             val currentWorkout = _workout.value ?: return@launch
-            
             val resetAssignments = currentWorkout.exerciseAssignments.map { 
                 it.assignment.copy(isCompleted = false) 
             }
             workoutRepository.updateWorkoutWithExercises(currentWorkout.workout, resetAssignments)
-            
             _completedExercisesCount.value = 0
         }
     }
@@ -195,7 +265,6 @@ class WorkoutDetailViewModel @Inject constructor(
         }
     }
 
-    // Timer Methods
     private fun startTimer() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
@@ -275,12 +344,9 @@ class WorkoutDetailViewModel @Inject constructor(
 
     fun updateWorkout(workout: Workout, workoutExercises: List<WorkoutExercise>) {
         viewModelScope.launch {
-            // SAFE DATA FETCH: Ensure exercises exist in DB before duration calculation
             workoutRepository.updateWorkoutWithExercises(workout, workoutExercises)
             
-            // Re-fetch with details to ensure valid objects
             val workoutWithDetails = workoutRepository.getWorkoutWithExercises(workout.id).first()
-            
             if (workoutWithDetails != null) {
                 val newDuration = WorkoutUtil.calculateTotalDuration(
                     workoutWithDetails.exerciseAssignments, 
@@ -288,14 +354,10 @@ class WorkoutDetailViewModel @Inject constructor(
                 )
                 workoutRepository.updateWorkout(workout.copy(duration = newDuration))
             }
-            
             _onWorkoutUpdated.emit(Unit)
         }
     }
 
-    /**
-     * NEW: Method to update a single workout exercise row in the database.
-     */
     fun updateWorkoutExercise(workoutExercise: WorkoutExercise) {
         viewModelScope.launch {
             workoutRepository.updateWorkoutExercise(workoutExercise)

@@ -18,17 +18,17 @@ import com.example.nutriority.R
 import com.example.nutriority.data.model.ExerciseSet
 import com.example.nutriority.databinding.FragmentExerciseDetailBinding
 import com.example.nutriority.ui.NavigationViewModel
-import com.example.nutriority.ui.adapter.WorkoutItem
 import com.example.nutriority.ui.util.BaseBindingFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputLayout
-import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlin.math.abs
+import java.util.Locale
 
 @AndroidEntryPoint
 class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding>(FragmentExerciseDetailBinding::inflate) {
@@ -36,9 +36,8 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     private val viewModel: ExerciseDetailViewModel by activityViewModels()
     private val workoutViewModel: WorkoutDetailViewModel by activityViewModels()
-    
-    private var isInitialized = false
-    private var isRestOn = true 
+
+    private var isRestOn = true
     private var isAutoLogOn = false
     private var autoLogTimeSeconds = 30L
 
@@ -48,14 +47,15 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
             onDeleteClick = { position -> handleDeleteSet(position) }
         )
     }
-    
+
     private val addSetAdapter by lazy {
         AddSetAdapter { handleAddSet() }
     }
-    
+
     private var currentSets = listOf<ExerciseSet>()
     private var isProcessing = false
     private var currentDialog: AlertDialog? = null
+    private var lastObservedAssignmentId: String? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -70,7 +70,6 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
             layoutManager = LinearLayoutManager(requireContext())
             adapter = ConcatAdapter(exerciseSetAdapter, addSetAdapter)
             itemAnimator = null
-            setHasFixedSize(true)
         }
     }
 
@@ -79,9 +78,18 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         isProcessing = true
         val lastSet = currentSets.lastOrNull()
         val isDuration = lastSet?.isDuration ?: false
-        val newValue = lastSet?.value ?: if (isDuration) 30 else 10
+        val newValue = lastSet?.value ?: 10
+
+        val detail = viewModel.exerciseWithDetail.value
+        val nextSetNumber = currentSets.size + 1
+        val stableId = if (detail != null) {
+            "${detail.assignment.workoutId}_${detail.assignment.exerciseId}_${detail.assignment.category}_$nextSetNumber"
+        } else {
+            java.util.UUID.randomUUID().toString()
+        }
+
         val mutableList = currentSets.toMutableList().apply {
-            add(ExerciseSet(value = newValue, isDuration = isDuration))
+            add(ExerciseSet(id = stableId, setNumber = nextSetNumber, value = newValue, isDuration = isDuration))
         }
         updateAndSubmitList(mutableList)
         saveChangesToDatabase(mutableList)
@@ -106,7 +114,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
 
         val exerciseSet = currentSets[position]
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_reps, null)
-        
+
         val tvTitle = dialogView.findViewById<TextView>(R.id.dialog_title)
         val layoutInput = dialogView.findViewById<TextInputLayout>(R.id.edit_reps_layout)
         val repsInput = dialogView.findViewById<EditText>(R.id.edit_reps_input)
@@ -140,7 +148,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         val detail = viewModel.exerciseWithDetail.value ?: return
         val isDuration = updatedSets.firstOrNull()?.isDuration ?: false
         val valStr = updatedSets.joinToString(",") { it.value.toString() }
-        
+
         val updated = detail.assignment.copy(
             sets = updatedSets.size,
             reps = if (isDuration) "1" else valStr,
@@ -152,24 +160,38 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
     private fun observeNavigationData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(navigationViewModel.selectedWorkoutId, navigationViewModel.selectedExerciseId) { w, e -> w to e }
-                .collect { (wId, eId) ->
-                    if (wId != -1 && eId.isNotBlank()) {
-                        isInitialized = false
-                        viewModel.getExerciseById(wId, eId)
+                combine(
+                    navigationViewModel.selectedWorkoutId,
+                    navigationViewModel.selectedExerciseId,
+                    navigationViewModel.selectedCategory
+                ) { wId, eId, cat -> Triple(wId, eId, cat) }
+                    .collect { (wId, eId, cat) ->
+                        if (wId != -1 && eId.isNotBlank()) {
+                            lastObservedAssignmentId = null
+                            viewModel.getExerciseById(wId, eId, cat)
+                        }
                     }
-                }
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(navigationViewModel.exercisePosition, navigationViewModel.totalExercises) { p, t -> p to t }
-                .collect { (pos, total) -> if (pos != -1 && total != -1) binding.exerciseCountText.text = "$pos/$total" }
+                    .collect { (pos, total) -> if (pos != -1 && total != -1) binding.exerciseCountText.text = getString(R.string.exercise_count_format, pos, total) }
             }
         }
     }
 
     private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isLoading.collect { isLoading ->
+                    binding.loadingProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+                    binding.contentScrollView.visibility = if (isLoading) View.INVISIBLE else View.VISIBLE
+                    binding.bottomBarContainer.visibility = if (isLoading) View.GONE else View.VISIBLE
+                }
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.exercise.collect { ex ->
@@ -185,18 +207,38 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.exerciseWithDetail.collect { detail ->
-                    if (detail != null && !isInitialized) {
-                        isInitialized = true
+                    if (detail != null) {
                         val assign = detail.assignment
-                        val isDur = assign.category.contains("warmup", true) || assign.category.contains("cooldown", true) || assign.duration.isNotBlank()
-                        val vals = if (isDur) assign.duration.split(",") else assign.reps.split(",")
-                        val initial = List(assign.sets.coerceAtLeast(1)) { i ->
-                            val raw = vals.getOrNull(i)?.trim() ?: vals.firstOrNull()?.trim() ?: ""
-                            val v = if (isDur) parseTimeToSeconds(raw).takeIf { it > 0 } ?: 60 else raw.filter { it.isDigit() }.toIntOrNull() ?: 10
-                            ExerciseSet(value = v, isDuration = isDur, isCompleted = assign.isCompleted) 
+                        val currentId = "${assign.workoutId}_${assign.exerciseId}_${assign.category}"
+
+                        if (lastObservedAssignmentId != currentId) {
+                            lastObservedAssignmentId = currentId
+                            val isDur = assign.category.contains("warmup", true) || assign.category.contains("cooldown", true) || assign.duration.isNotBlank()
+
+                            val rawValue = if (isDur) assign.duration else assign.reps
+                            val vals = if (rawValue.contains(",")) {
+                                rawValue.split(",")
+                            } else if (rawValue.contains("-")) {
+                                listOf(rawValue.split("-").first().trim())
+                            } else {
+                                listOf(rawValue.trim())
+                            }
+
+                            val initial = List(assign.sets.coerceAtLeast(1)) { i ->
+                                val setNum = i + 1
+                                val raw = vals.getOrNull(i)?.trim() ?: vals.firstOrNull()?.trim() ?: ""
+                                val v = if (isDur) parseTimeToSeconds(raw).takeIf { it > 0 } ?: 60 else raw.filter { it.isDigit() }.toIntOrNull() ?: 10
+                                ExerciseSet(
+                                    id = "${assign.workoutId}_${assign.exerciseId}_${assign.category}_$setNum",
+                                    setNumber = setNum,
+                                    value = v,
+                                    isDuration = isDur,
+                                    isCompleted = assign.isCompleted
+                                )
+                            }
+                            updateAndSubmitList(initial)
+                            if (isAutoLogOn) startAutoLogTimerIfNeeded()
                         }
-                        updateAndSubmitList(initial)
-                        if (isAutoLogOn) startAutoLogTimerIfNeeded()
                     }
                 }
             }
@@ -215,7 +257,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 workoutViewModel.restTimeRemaining.collect { s ->
-                    binding.tvRestTimer.text = String.format("%02d:%02ds", s / 60, s % 60)
+                    binding.tvRestTimer.text = String.format(Locale.getDefault(), "%02d:%02ds", s / 60, s % 60)
                 }
             }
         }
@@ -228,12 +270,12 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
             if (next != -1) currentSets[next].isActive = true
         }
         exerciseSetAdapter.submitList(currentSets)
-        
+
         val allDone = currentSets.all { it.isCompleted }
         val active = currentSets.find { it.isActive }
-        
+
         if (allDone) {
-            val isLast = navigationViewModel.exercisePosition.value == navigationViewModel.totalExercises.value
+            val isLast = (navigationViewModel.exercisePosition.value) == (navigationViewModel.totalExercises.value)
             binding.btnLogSet.apply {
                 text = if (isLast) "FINISH WORKOUT" else "NEXT EXERCISE"
                 setIconResource(if (isLast) R.drawable.ic_check_circle else R.drawable.ic_play_arrow)
@@ -242,7 +284,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
             binding.btnCheck.visibility = View.GONE
         } else if (active != null) {
             binding.btnLogSet.apply {
-                text = "LOG SET ${active.setNumber} (${active.value} ${if (active.isDuration) "SEC" else "REPS"})"
+                text = getString(R.string.log_set_format, active.setNumber, active.value, if (active.isDuration) "SEC" else "REPS")
                 setIconResource(android.R.drawable.ic_input_get)
                 setBackgroundColor(ContextCompat.getColor(context, R.color.primary_dark))
             }
@@ -256,7 +298,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         binding.btnRest.setOnClickListener { isRestOn = !isRestOn; binding.btnRest.text = if (isRestOn) "Rest : ON" else "Rest : OFF" }
         binding.btnAutoLog.setOnClickListener { showAutoLogBottomSheet() }
         binding.btnCheck.setOnClickListener { ensureWorkoutStarted(); completeAllSets() }
-        binding.btnLogSet.setOnClickListener { 
+        binding.btnLogSet.setOnClickListener {
             ensureWorkoutStarted()
             if (currentSets.all { it.isCompleted }) finishOrNext() else logSetAndAdvance()
         }
@@ -268,76 +310,118 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
 
     private fun ensureWorkoutStarted() {
         if (!workoutViewModel.isWorkoutActive.value) {
-            navigationViewModel.selectedWorkoutId.value.takeIf { it != -1 }?.let { workoutViewModel.startWorkout(it, navigationViewModel.selectedDayIndex.value) }
-        }
-    }
-
-    private fun completeAllSets() {
-        workoutViewModel.stopAutoLogTimer() 
-        val updated = currentSets.map { it.copy(isActive = false, isCompleted = true) }
-        updateAndSubmitList(updated)
-        viewModel.exerciseWithDetail.value?.let { detail -> workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true) }
-    }
-
-    private fun finishOrNext() {
-        workoutViewModel.stopAutoLogTimer(); workoutViewModel.stopRestTimer()
-        viewLifecycleOwner.lifecycleScope.launch {
-            val detail = viewModel.exerciseWithDetail.value ?: return@launch
-            val workout = workoutViewModel.workout.first() ?: return@launch
-            workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true)
-            val pos = navigationViewModel.exercisePosition.value
-            val total = navigationViewModel.totalExercises.value
-            if (pos < total) {
-                val assignments = workout.exerciseAssignments.sortedBy { it.assignment.order }.filter { workout.workout.includeWarmupCooldown || it.assignment.category.equals("Exercise", true) }
-                if (pos < assignments.size) {
-                    val next = assignments[pos]
-                    navigationViewModel.navigateToExerciseDetail(next.assignment.workoutId, next.assignment.exerciseId, pos + 1, assignments.size)
-                } else { workoutViewModel.finishWorkout(); navigationViewModel.navigateToWorkoutComplete() }
-            } else { workoutViewModel.finishWorkout(); navigationViewModel.navigateToWorkoutComplete() }
+            val wId = navigationViewModel.selectedWorkoutId.value
+            if (wId != -1) {
+                workoutViewModel.startWorkout(wId, navigationViewModel.selectedDayIndex.value)
+            }
         }
     }
 
     private fun logSetAndAdvance() {
-        val activeIdx = currentSets.indexOfFirst { it.isActive }
-        if (activeIdx != -1) {
-            val mutable = currentSets.toMutableList()
-            mutable[activeIdx] = mutable[activeIdx].copy(isActive = false, isCompleted = true)
-            if (activeIdx < currentSets.size - 1) {
-                mutable[activeIdx + 1] = mutable[activeIdx + 1].copy(isActive = true)
-                updateAndSubmitList(mutable)
-                if (isRestOn) {
-                    val rest = viewModel.exerciseWithDetail.value?.assignment?.rest?.filter { it.isDigit() }?.toLongOrNull() ?: 60L
-                    workoutViewModel.startRestTimer(rest)
-                } else if (isAutoLogOn) startAutoLogTimerIfNeeded()
-            } else updateAndSubmitList(mutable)
+        val index = currentSets.indexOfFirst { it.isActive }
+        if (index == -1) return
+
+        val mutableSets = currentSets.toMutableList()
+        val current = mutableSets[index]
+        mutableSets[index] = current.copy(isCompleted = true, isActive = false)
+
+        val nextIndex = index + 1
+        if (nextIndex < mutableSets.size) {
+            mutableSets[nextIndex] = mutableSets[nextIndex].copy(isActive = true)
+            if (isRestOn) {
+                val detail = viewModel.exerciseWithDetail.value
+                val restSecs = parseTimeToSeconds(detail?.assignment?.rest ?: "60s")
+                workoutViewModel.startRestTimer(restSecs.toLong())
+            }
+        }
+
+        updateAndSubmitList(mutableSets)
+
+        val detail = viewModel.exerciseWithDetail.value ?: return
+        if (mutableSets.all { it.isCompleted }) {
+            workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true)
+        }
+    }
+
+    private fun completeAllSets() {
+        val mutableSets = currentSets.map { it.copy(isCompleted = true, isActive = false) }
+        updateAndSubmitList(mutableSets)
+        val detail = viewModel.exerciseWithDetail.value ?: return
+        workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true)
+    }
+
+    private fun finishOrNext() {
+        val isLast = (navigationViewModel.exercisePosition.value) == (navigationViewModel.totalExercises.value)
+        if (isLast) {
+            workoutViewModel.finishWorkout()
+            navigationViewModel.navigateToWorkoutComplete()
+        } else {
+            navigationViewModel.nextExercise()
         }
     }
 
     private fun showAutoLogBottomSheet() {
-        val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
-        val v = layoutInflater.inflate(R.layout.layout_auto_log_bottom_sheet, null)
-        dialog.setContentView(v)
-        v.findViewById<MaterialSwitch>(R.id.switchAutoLog).apply {
-            isChecked = isAutoLogOn
-            setOnCheckedChangeListener { _, isChecked ->
-                isAutoLogOn = isChecked
-                binding.btnAutoLog.text = if (isChecked) "Auto Log : ON" else "Auto Log : OFF"
-                if (isChecked) startAutoLogTimerIfNeeded() else workoutViewModel.stopAutoLogTimer()
+        val dialog = BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.layout_auto_log_bottom_sheet, null)
+
+        val switchAutoLog = view.findViewById<MaterialSwitch>(R.id.switchAutoLog)
+        val timeChipGroup = view.findViewById<ChipGroup>(R.id.timeChipGroup)
+
+        switchAutoLog.isChecked = isAutoLogOn
+        val chipIdToCheck = when(autoLogTimeSeconds) {
+            15L -> R.id.chip_15s
+            30L -> R.id.chip_30s
+            45L -> R.id.chip_45s
+            60L -> R.id.chip_1m
+            else -> R.id.chip_recd
+        }
+        timeChipGroup.check(chipIdToCheck)
+
+        view.findViewById<View>(R.id.btnClose).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        switchAutoLog.setOnCheckedChangeListener { _, isChecked ->
+            isAutoLogOn = isChecked
+            binding.btnAutoLog.text = if (isAutoLogOn) "Auto-Log: ON" else "Auto-Log: OFF"
+        }
+
+        timeChipGroup.setOnCheckedChangeListener { group, checkedId ->
+            val chip = group.findViewById<Chip>(checkedId)
+            autoLogTimeSeconds = when(chip.id) {
+                R.id.chip_15s -> 15L
+                R.id.chip_30s -> 30L
+                R.id.chip_45s -> 45L
+                R.id.chip_1m -> 60L
+                else -> 30L // Default to 30s
             }
         }
-        v.findViewById<View>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
+
+        dialog.setContentView(view)
         dialog.show()
     }
 
     private fun startAutoLogTimerIfNeeded() {
-        if (!isAutoLogOn) return
-        val active = currentSets.find { it.isActive && !it.isCompleted } ?: return
-        workoutViewModel.startAutoLogTimer(if (active.isDuration) active.value.toLong() else autoLogTimeSeconds) { logSetAndAdvance() }
+        if (!isAutoLogOn || workoutViewModel.isResting.value) return
+        currentSets.find { it.isActive && it.isDuration } ?: return
+
+        workoutViewModel.startAutoLogTimer(autoLogTimeSeconds) {
+            logSetAndAdvance()
+        }
     }
 
-    private fun parseTimeToSeconds(s: String): Int {
-        val lower = s.lowercase().trim()
-        val v = lower.filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: return 0
-        return if (lower.contains("min") || (lower.contains("m") && !lower.contains("s"))) (v * 60).toInt() else v.toInt()
+    private fun parseTimeToSeconds(timeStr: String): Int {
+        val clean = timeStr.lowercase().trim()
+        return when {
+            clean.endsWith("s") -> clean.dropLast(1).trim().toIntOrNull() ?: 0
+            clean.endsWith("m") -> (clean.dropLast(1).trim().toIntOrNull() ?: 0) * 60
+            clean.contains(":") -> {
+                val parts = clean.split(":")
+                val m = parts[0].toIntOrNull() ?: 0
+                val s = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                m * 60 + s
+            }
+            else -> clean.toIntOrNull() ?: 0
+        }
     }
 }

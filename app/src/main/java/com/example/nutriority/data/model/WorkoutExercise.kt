@@ -24,13 +24,13 @@ import androidx.room.Index
     indices = [Index("workoutId"), Index("exerciseId")]
 )
 data class WorkoutExercise(
-    var workoutId: Int,
-    var exerciseId: String,
-    var category: String,
-    var sets: Int,
-    var reps: String,
-    var rest: String,
+    var workoutId: Int = 0,
+    var exerciseId: String = "",
+    var category: String = "",
+    var sets: Int = 0,
+    var reps: String = "",
+    var rest: String = "",
     var duration: String = "",
     var order: Int = 0,
-    var isCompleted: Boolean = false // Track completion status
+    var isCompleted: Boolean = false
 )

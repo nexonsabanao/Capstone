@@ -2,6 +2,7 @@ package com.example.nutriority.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.firebase.firestore.Exclude
 
 @Entity(tableName = "exercises")
 data class Exercise(
@@ -14,13 +15,19 @@ data class Exercise(
     var instructions: List<String> = emptyList(),
     var secondary: String = "",
     var target: String = "",
-    var bodyPart: String = "", // Added to match Firestore data and fix Logcat errors
-
-    // Deprecated fields from old model - kept for local db migration if needed, but not used by Firestore
+    var bodyPart: String = "",
+    
+    @get:Exclude
     var description: String = "",
+    @get:Exclude
     var imageName: String = "",
+    @get:Exclude
     var targetMuscle: String = "",
+    @get:Exclude
     var equipment: String = "",
+    @get:Exclude
     var tips: String = "",
+    @get:Exclude
+    @Transient
     var imageResId: Int = 0
 )

@@ -3,6 +3,7 @@ package com.example.nutriority.data.model
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.google.firebase.firestore.Exclude
 
 @Entity(tableName = "workouts")
 data class Workout(
@@ -19,10 +20,15 @@ data class Workout(
     var tags: List<String> = emptyList(),
     var includeWarmupCooldown: Boolean = true
 ) {
+    @get:Exclude
     @Ignore
     var imageResId: Int = 0
+    
+    @get:Exclude
     @Ignore
     var warmup: List<Warmup> = emptyList()
+    
+    @get:Exclude
     @Ignore
     var cooldown: List<Cooldown> = emptyList()
 }
