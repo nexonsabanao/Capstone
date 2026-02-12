@@ -1,6 +1,7 @@
 package com.example.nutriority
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.RecommendedWorkoutRepository
 import com.example.nutriority.data.repository.WorkoutRepository
@@ -23,8 +24,10 @@ class NutriorityApp : Application() {
     override fun onCreate() {
         super.onCreate()
         
+        // Force Light Mode globally to prevent flickering in activities
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        
         // BACKGROUND OPTIMIZATION: Start syncing data silently in the background
-        // so the SplashFragment doesn't have to wait for it.
         applicationScope.launch {
             try {
                 workoutRepository.syncExercisesFromCloud()

@@ -58,7 +58,7 @@ class MainTabsFragment : BaseBindingFragment<FragmentMainTabsBinding>(FragmentMa
     private fun setupViewPager() {
         binding.viewPager.apply {
             adapter = TabsAdapter(this@MainTabsFragment)
-            offscreenPageLimit = 1 
+            offscreenPageLimit = 2
             isUserInputEnabled = false
             
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {

@@ -1,13 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Base.Theme.Nutriority" parent="Theme.Material3.Light.NoActionBar">
-        <item name="android:windowBackground">#F5F5F5</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">true</item>
         <item name="android:enforceNavigationBarContrast" tools:ignore="NewApi">false</item>
-        
+
         <!-- Fix pinkish/default colors -->
         <item name="colorPrimary">@color/primary_dark</item>
         <item name="colorOnPrimary">@color/white</item>
@@ -22,9 +21,10 @@
         <item name="windowSplashScreenAnimatedIcon">@color/transparent</item>
         <item name="postSplashScreenTheme">@style/Base.Theme.Nutriority</item>
     </style>
-    
+
     <style name="Theme.Nutriority" parent="Base.Theme.Nutriority"/>
 
+    <!-- Rest of your styles... -->
     <style name="ShapeAppearance.App.CornerSize16dp" parent="">
         <item name="cornerSize">16dp</item>
     </style>
@@ -68,7 +68,6 @@
         <item name="android:textColor">@color/primary_dark</item>
     </style>
 
-
     <style name="CollapsedAppBar" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@android:color/black</item>
         <item name="android:textSize">28sp</item>
@@ -81,7 +80,6 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <!-- Updated FilterChip style -->
     <style name="FilterChip" parent="Widget.MaterialComponents.Chip.Filter">
         <item name="chipBackgroundColor">@color/chip_background_selector</item>
         <item name="android:textColor">@color/chip_text_selector</item>
