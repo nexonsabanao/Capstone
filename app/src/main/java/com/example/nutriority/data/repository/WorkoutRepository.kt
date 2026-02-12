@@ -14,7 +14,6 @@ import com.example.nutriority.data.model.WorkoutExerciseWithDetail
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.PropertyName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,6 +22,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.Date
 
 class WorkoutRepository(
     private val workoutDao: WorkoutDao,
@@ -153,7 +153,6 @@ class WorkoutRepository(
         val uid = auth.currentUser?.uid ?: return
         repositoryScope.launch {
             try {
-                // Using a map for specific date formatting if needed, but object works too
                 db.collection("users").document(uid).collection("exercise_records").add(log).await()
             } catch (e: Exception) { }
         }
@@ -175,26 +174,55 @@ class WorkoutRepository(
             ensureLibraryIsLoaded()
             val existingExerciseIds = workoutDao.getAllExercises().first().map { it.id }.toSet()
             
-            // Restore Custom Workouts
+            // 1. Restore Custom Workouts
             val customWorkouts = db.collection("users").document(uid).collection("custom_workouts").get().await()
             customWorkouts.documents.forEach { doc ->
                 val dto = doc.toObject(CustomWorkoutDto::class.java) ?: return@forEach
                 val workout = dto.workout ?: return@forEach
                 val assignments = dto.exercises.filter { existingExerciseIds.contains(it.exerciseId) }
-                
                 workoutDao.updateWorkoutWithExercises(workout, assignments)
             }
 
-            // Restore Session History
+            // 2. Restore Session History (Calories, Duration, Workouts Completed)
             val sessions = db.collection("users").document(uid).collection("session_history").get().await()
-            val sessionLogs = sessions.toObjects(WorkoutSessionLog::class.java)
-            sessionLogs.forEach { workoutDao.insertSessionLog(it) }
+            sessions.documents.forEach { doc ->
+                try {
+                    val workoutId = (doc.get("workoutId") as? Number)?.toInt() ?: 0
+                    val workoutName = doc.get("workoutName") as? String ?: ""
+                    val date = (doc.get("date") as? Number)?.toLong() ?: 0L
+                    val exercisesDone = (doc.get("exercisesDone") as? Number)?.toInt() ?: 0
+                    val totalExercises = (doc.get("totalExercises") as? Number)?.toInt() ?: 0
+                    val durationSeconds = (doc.get("durationSeconds") as? Number)?.toLong() ?: 0L
+                    val caloriesBurned = (doc.get("caloriesBurned") as? Number)?.toInt() ?: 0
+                    val difficulty = doc.get("difficulty") as? String ?: "Intermediate"
+                    val weightKg = (doc.get("weightKg") as? Number)?.toDouble() ?: 0.0
 
-            // Restore Exercise Records
+                    val log = WorkoutSessionLog(
+                        workoutId = workoutId, workoutName = workoutName, date = date, 
+                        exercisesDone = exercisesDone, totalExercises = totalExercises, 
+                        durationSeconds = durationSeconds, caloriesBurned = caloriesBurned, 
+                        difficulty = difficulty, weightKg = weightKg
+                    )
+                    workoutDao.insertSessionLog(log)
+                } catch (e: Exception) { }
+            }
+
+            // 3. Restore Exercise Records (Weight Progress Graph)
             val records = db.collection("users").document(uid).collection("exercise_records").get().await()
-            val exerciseLogs = records.toObjects(WorkoutLog::class.java)
-            exerciseLogs.forEach { workoutLogDao.insertLog(it) }
-            
+            records.documents.forEach { doc ->
+                try {
+                    val workoutId = (doc.get("workoutId") as? Number)?.toInt() ?: 0
+                    val reps = doc.get("reps") as? String ?: ""
+                    val weightKg = (doc.get("weightKg") as? Number)?.toDouble() ?: 0.0
+                    
+                    val timestamp = doc.get("date") as? Timestamp
+                    val date = timestamp?.toDate() ?: Date()
+
+                    val log = WorkoutLog(workoutId = workoutId, date = date, reps = reps, weightKg = weightKg)
+                    workoutLogDao.insertLog(log)
+                } catch (e: Exception) { }
+            }
+            Log.d("WorkoutRepo", "Full history restored.")
         } catch (e: Exception) {
             Log.e("WorkoutRepo", "Restore error: ${e.message}")
         }

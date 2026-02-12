@@ -58,8 +58,8 @@ object AppModule {
     }
 
     @Provides
-    fun provideUserRepository(userDao: UserDao): UserRepository {
-        return UserRepository(userDao)
+    fun provideUserRepository(userDao: UserDao, workoutDao: WorkoutDao): UserRepository {
+        return UserRepository(userDao, workoutDao)
     }
 
     @Provides

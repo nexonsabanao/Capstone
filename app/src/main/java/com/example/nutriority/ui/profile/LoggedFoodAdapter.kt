@@ -51,15 +51,12 @@ class LoggedFoodAdapter(
             val requestBuilder = Glide.with(context).asDrawable().centerCrop()
 
             when {
-                // If it's a local WebP file path (from manual logging)
                 log.imageName.startsWith("/") -> {
                     requestBuilder.load(File(log.imageName))
                 }
-                // If it's a URL
                 log.imageName.startsWith("http") -> {
                     requestBuilder.load(log.imageName)
                 }
-                // If it's a drawable resource name
                 else -> {
                     val resId = context.resources.getIdentifier(log.imageName, "drawable", context.packageName)
                     if (resId != 0) {
@@ -89,7 +86,15 @@ class LoggedFoodAdapter(
     }
 
     class DiffCallback : DiffUtil.ItemCallback<DailyMealLog>() {
-        override fun areItemsTheSame(oldItem: DailyMealLog, newItem: DailyMealLog) = oldItem.id == newItem.id
-        override fun areContentsTheSame(oldItem: DailyMealLog, newItem: DailyMealLog) = oldItem == newItem
+        override fun areItemsTheSame(oldItem: DailyMealLog, newItem: DailyMealLog): Boolean {
+            // Using a combination of stable fields instead of auto-generated ID
+            return oldItem.mealId == newItem.mealId && 
+                   oldItem.name == newItem.name && 
+                   oldItem.date == newItem.date
+        }
+        
+        override fun areContentsTheSame(oldItem: DailyMealLog, newItem: DailyMealLog): Boolean {
+            return oldItem == newItem
+        }
     }
 }

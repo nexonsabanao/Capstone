@@ -6,6 +6,7 @@ import com.example.nutriority.data.model.Meal
 import com.example.nutriority.data.local.MealDao
 import com.example.nutriority.data.local.DailyMealLogDao
 import com.example.nutriority.data.model.DailyMealLog
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
@@ -43,16 +44,12 @@ class MealRepository(
         return mealDao.getMealById(mealId)
     }
 
-    /**
-     * Synchronizes the global meal library from Firestore to the local database.
-     */
     suspend fun syncMealsFromCloud() {
         try {
             val snapshot = db.collection("meals").get().await()
             val cloudMeals = snapshot.toObjects(Meal::class.java)
             if (cloudMeals.isNotEmpty()) {
                 mealDao.insertAllMeals(cloudMeals)
-                Log.d("MealRepo", "Synced ${cloudMeals.size} meals from Firestore")
             }
         } catch (e: Exception) {
             Log.e("MealRepo", "Error syncing meals: ${e.message}")
@@ -60,7 +57,6 @@ class MealRepository(
     }
 
     suspend fun ensureLibraryIsLoaded() {
-        // Only sync from cloud as per user request to stop using meals.json
         syncMealsFromCloud()
     }
 
@@ -115,7 +111,18 @@ class MealRepository(
         
         auth.currentUser?.uid?.let { uid ->
             try {
-                db.collection("users").document(uid).collection("daily_meal_logs").add(log).await()
+                val logMap = hashMapOf(
+                    "mealId" to log.mealId,
+                    "name" to log.name,
+                    "calories" to log.calories,
+                    "protein" to log.protein,
+                    "carbs" to log.carbs,
+                    "fats" to log.fats,
+                    "mealTime" to log.mealTime,
+                    "date" to log.date,
+                    "imageName" to log.imageName
+                )
+                db.collection("users").document(uid).collection("daily_meal_logs").add(logMap).await()
             } catch (e: Exception) {
                 Log.e("Sync", "Failed to sync meal log", e)
             }
@@ -134,6 +141,10 @@ class MealRepository(
         val end = calendar.timeInMillis
         
         return dailyMealLogDao.getLogsForDay(start, end)
+    }
+
+    fun getAllLogs(): Flow<List<DailyMealLog>> {
+        return dailyMealLogDao.getAllLogs()
     }
 
     suspend fun deleteMealLog(logId: Int) {
@@ -166,16 +177,50 @@ class MealRepository(
     suspend fun restoreMealsFromCloud() {
         val uid = auth.currentUser?.uid ?: return
         try {
-            // Restore library/favorites
+            dailyMealLogDao.deleteAll()
+            val logSnapshot = db.collection("users").document(uid).collection("daily_meal_logs").get().await()
+            val logsToInsert = mutableListOf<DailyMealLog>()
+            
+            logSnapshot.documents.forEach { doc ->
+                try {
+                    // Robust date parsing: handle both Long and Firestore Timestamp
+                    val dateVal = when (val rawDate = doc.get("date")) {
+                        is Number -> rawDate.toLong()
+                        is Timestamp -> rawDate.toDate().time
+                        else -> 0L
+                    }
+
+                    val log = DailyMealLog(
+                        id = 0,
+                        mealId = doc.getString("mealId") ?: "",
+                        name = doc.getString("name") ?: "",
+                        calories = doc.getLong("calories")?.toInt() ?: 0,
+                        protein = doc.getLong("protein")?.toInt() ?: 0,
+                        carbs = doc.getLong("carbs")?.toInt() ?: 0,
+                        fats = doc.getLong("fats")?.toInt() ?: 0,
+                        mealTime = doc.getString("mealTime") ?: "Snack",
+                        date = dateVal,
+                        imageName = doc.getString("imageName") ?: ""
+                    )
+                    logsToInsert.add(log)
+                } catch (e: Exception) { 
+                    Log.e("MealRepo", "Error parsing log document: ${e.message}")
+                }
+            }
+            
+            if (logsToInsert.isNotEmpty()) {
+                dailyMealLogDao.insertAll(logsToInsert)
+                Log.d("MealRepo", "Restored ${logsToInsert.size} meal logs successfully.")
+            }
+            
             val snapshot = db.collection("users").document(uid).collection("meal_logs").get().await()
             val meals = snapshot.toObjects(Meal::class.java)
-            meals.forEach { mealDao.insertMeal(it) }
-            
-            // Restore daily logging history
-            val logSnapshot = db.collection("users").document(uid).collection("daily_meal_logs").get().await()
-            val logs = logSnapshot.toObjects(DailyMealLog::class.java)
-            logs.forEach { dailyMealLogDao.insertLog(it) }
-        } catch (e: Exception) { }
+            if (meals.isNotEmpty()) {
+                meals.forEach { mealDao.insertMeal(it) }
+            }
+        } catch (e: Exception) {
+            Log.e("MealRepo", "Failed to restore meals: ${e.message}")
+        }
     }
 
     suspend fun deleteAll() {

@@ -42,14 +42,16 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            articleRepository.syncArticlesFromCloud()
-            mealRepository.syncMealsFromCloud()
-            workoutRepository.syncExercisesFromCloud()
-            recommendedWorkoutRepository.syncOfficialWorkoutsFromCloud()
+            // Non-blocking syncs to ensure UI shows cached data immediately
+            launch { try { articleRepository.syncArticlesFromCloud() } catch (e: Exception) {} }
+            launch { try { mealRepository.syncMealsFromCloud() } catch (e: Exception) {} }
+            launch { try { workoutRepository.syncExercisesFromCloud() } catch (e: Exception) {} }
+            launch { try { recommendedWorkoutRepository.syncOfficialWorkoutsFromCloud() } catch (e: Exception) {} }
         }
 
         allMeals = combine(mealRepository.allMeals, userRepository.getUser) { meals, user ->
-            if (user == null || meals.isEmpty()) return@combine emptyList<Meal>()
+            if (user == null) return@combine emptyList<Meal>()
+            if (meals.isEmpty()) return@combine emptyList<Meal>()
 
             var filtered = if (user.preferredDiet.isNotEmpty() && user.preferredDiet != "Balanced") {
                 meals.filter { it.preferredDiet.equals(user.preferredDiet, ignoreCase = true) }
@@ -135,8 +137,9 @@ class HomeViewModel @Inject constructor(
 
         allWorkouts = recommendedWorkouts
 
-        isDataReady = combine(allMeals, allWorkouts) { meals, workouts ->
-            meals.isNotEmpty() && workouts.isNotEmpty()
+        // Data is ready if we have SOME meals and SOME workouts (not necessarily recommended ones yet)
+        isDataReady = combine(mealRepository.allMeals, workoutRepository.allWorkouts) { meals, workouts ->
+            meals.isNotEmpty() || workouts.isNotEmpty()
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

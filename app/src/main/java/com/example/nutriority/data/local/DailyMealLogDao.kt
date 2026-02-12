@@ -12,6 +12,9 @@ interface DailyMealLogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLog(log: DailyMealLog)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(logs: List<DailyMealLog>)
+
     @Query("SELECT * FROM daily_meal_logs WHERE date >= :startOfDay AND date < :endOfDay ORDER BY date DESC")
     fun getLogsForDay(startOfDay: Long, endOfDay: Long): Flow<List<DailyMealLog>>
 

@@ -81,7 +81,10 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
                     )
                 }
                 
-                // "TRICK": Inflate the restored plan into the workout DB silently
+                // Recalculate and update stats after history is restored
+                userRepository.recalculateUserStats()
+
+                // Inflate the restored plan into the workout DB silently
                 val user = userRepository.getInitialUser()
                 if (user != null && !user.personalizedPlanJson.isNullOrBlank()) {
                     try {

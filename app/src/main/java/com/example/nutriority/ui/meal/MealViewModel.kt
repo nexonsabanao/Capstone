@@ -57,28 +57,31 @@ class MealViewModel @Inject constructor(
         if (user == null) {
             // No user data yet - still loading from database
             MealUiState(isInitialLoading = true)
-        } else if (user.mealPlanJson == null) {
-            // User exists but has no meal plan
-            MealUiState(isGenerating = isGenerating, isInitialLoading = false)
         } else {
-            // User exists and has a plan
-            val items = parseMealPlan(user.mealPlanJson)
-            val isExpired = checkPlanExpired()
-            
-            val dailyCalories = plannerService.calculateDailyTarget(user)
-            val macros = plannerService.calculateMacroTargets(dailyCalories)
-            
-            MealUiState(
-                items = items,
-                isGenerating = isGenerating,
-                isPlanExpired = isExpired,
-                hasPlan = items.isNotEmpty(),
-                targetCalories = dailyCalories,
-                targetProtein = macros.proteinGrams,
-                targetCarbs = macros.carbsGrams,
-                targetFat = macros.fatGrams,
-                isInitialLoading = false
-            )
+            val planJson = user.mealPlanJson
+            if (planJson == null) {
+                // User exists but has no meal plan
+                MealUiState(isGenerating = isGenerating, isInitialLoading = false)
+            } else {
+                // User exists and has a plan
+                val items = parseMealPlan(planJson)
+                val isExpired = checkPlanExpired()
+                
+                val dailyCalories = plannerService.calculateDailyTarget(user)
+                val macros = plannerService.calculateMacroTargets(dailyCalories)
+                
+                MealUiState(
+                    items = items,
+                    isGenerating = isGenerating,
+                    isPlanExpired = isExpired,
+                    hasPlan = items.isNotEmpty(),
+                    targetCalories = dailyCalories,
+                    targetProtein = macros.proteinGrams,
+                    targetCarbs = macros.carbsGrams,
+                    targetFat = macros.fatGrams,
+                    isInitialLoading = false
+                )
+            }
         }
     }.stateIn(
         scope = viewModelScope,
@@ -168,8 +171,9 @@ class MealViewModel @Inject constructor(
     fun onSwapMealSelected(oldMeal: Meal, newMeal: Meal, dayIndex: Int) {
         viewModelScope.launch {
             val user = userRepository.getInitialUser() ?: return@launch
+            val planJson = user.mealPlanJson ?: return@launch
             val gson = Gson()
-            val plan: MutableList<MutableList<Meal>> = gson.fromJson(user.mealPlanJson, object : com.google.gson.reflect.TypeToken<MutableList<MutableList<Meal>>>() {}.type)
+            val plan: MutableList<MutableList<Meal>> = gson.fromJson(planJson, object : com.google.gson.reflect.TypeToken<MutableList<MutableList<Meal>>>() {}.type)
 
             val dayMeals = plan[dayIndex]
             val index = dayMeals.indexOfFirst { it.id == oldMeal.id }

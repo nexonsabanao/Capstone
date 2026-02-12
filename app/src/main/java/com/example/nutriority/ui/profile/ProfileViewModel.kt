@@ -13,10 +13,17 @@ import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.data.repository.MealRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
+
+data class ProfileUiState(
+    val user: User? = null,
+    val todayMealLogs: List<DailyMealLog> = emptyList(),
+    val sessionLogs: List<WorkoutSessionLog> = emptyList(),
+    val isInitialLoading: Boolean = true
+)
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -26,10 +33,29 @@ class ProfileViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences 
 ) : ViewModel() {
 
-    // getUser is now a Flow in the repository, convert it back to LiveData for the UI
+    // Main UI State following MealFragment pattern
+    val uiState: StateFlow<ProfileUiState> = combine(
+        userRepository.getUser,
+        mealRepository.getLogsForToday(),
+        workoutRepository.getAllSessionLogs()
+    ) { user, meals, sessions ->
+        ProfileUiState(
+            user = user,
+            todayMealLogs = meals,
+            sessionLogs = sessions,
+            isInitialLoading = user == null
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = ProfileUiState(isInitialLoading = true)
+    )
+
+    // Legacy LiveData if needed for specific triggers
     val getUser: LiveData<User?> = userRepository.getUser.asLiveData()
     val sessionLogs: LiveData<List<WorkoutSessionLog>> = workoutRepository.getAllSessionLogs().asLiveData()
     val todayMealLogs: LiveData<List<DailyMealLog>> = mealRepository.getLogsForToday().asLiveData()
+    val allMealLogs: LiveData<List<DailyMealLog>> = mealRepository.getAllLogs().asLiveData()
 
     fun updateWeight(weightKg: Double) {
         viewModelScope.launch {

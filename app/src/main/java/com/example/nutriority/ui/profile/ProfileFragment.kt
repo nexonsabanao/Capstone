@@ -30,6 +30,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -120,30 +121,35 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                profileViewModel.getUser.observe(viewLifecycleOwner) { user ->
-                    user?.let {
-                        updateWeightChartFromLogs(profileViewModel.sessionLogs.value ?: emptyList())
-                        binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", it.weightKg)
-                        profileViewModel.todayMealLogs.value?.let { logs -> updateCalorieCard(it, logs) }
+                // Main UI State observation following the MealFragment pattern
+                launch {
+                    profileViewModel.uiState.collectLatest { state ->
+                        // Show loading indicator until initial DB fetch is complete
+                        if (state.isInitialLoading) {
+                            return@collectLatest
+                        }
+
+                        // Update User Info
+                        state.user?.let { user ->
+                            binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", user.weightKg)
+                            updateCalorieCard(user, state.todayMealLogs)
+                        }
+
+                        // Update Meal Log List
+                        loggedFoodAdapter.submitList(state.todayMealLogs)
+                        val hasLogs = state.todayMealLogs.isNotEmpty()
+                        binding.tvFoodTitle.isVisible = hasLogs
+                        binding.rvLoggedFood.isVisible = hasLogs
                     }
                 }
 
-                profileViewModel.sessionLogs.observe(viewLifecycleOwner) { logs ->
-                    updateActivityStats(logs)
-                    setupCalendar(logs)
-                    updateWeightChartFromLogs(logs)
-                    updateStreak(logs)
-                }
-
-                profileViewModel.todayMealLogs.observe(viewLifecycleOwner) { logs ->
-                    loggedFoodAdapter.submitList(logs)
-                    
-                    val hasLogs = logs.isNotEmpty()
-                    binding.tvFoodTitle.isVisible = hasLogs
-                    binding.rvLoggedFood.isVisible = hasLogs
-                    
-                    profileViewModel.getUser.value?.let { user ->
-                        updateCalorieCard(user, logs)
+                // Observations for less critical/historical data
+                launch {
+                    profileViewModel.sessionLogs.observe(viewLifecycleOwner) { logs ->
+                        updateActivityStats(logs)
+                        setupCalendar(logs)
+                        updateWeightChartFromLogs(logs)
+                        updateStreak(logs)
                     }
                 }
             }

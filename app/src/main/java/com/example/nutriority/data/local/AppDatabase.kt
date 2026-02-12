@@ -26,7 +26,7 @@ import java.io.BufferedReader
 
 @Database(
     entities = [Meal::class, Workout::class, Article::class, Exercise::class, WorkoutLog::class, WorkoutExercise::class, WorkoutSessionLog::class, DailyMealLog::class],
-    version = 38,
+    version = 41,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -68,7 +68,6 @@ abstract class AppDatabase : RoomDatabase() {
 
             override fun onOpen(db: SupportSQLiteDatabase) {
                 super.onOpen(db)
-                // No more pre-population from assets as per user request to move to online data
             }
         }
     }
