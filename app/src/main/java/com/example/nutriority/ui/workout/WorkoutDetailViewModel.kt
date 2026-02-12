@@ -95,11 +95,14 @@ class WorkoutDetailViewModel @Inject constructor(
         workoutJob?.cancel()
         _isLoading.value = true
         
-        // RESET summary to prevent "Workout Complete" view from appearing on new selections
+        // CRITICAL FIX: Reset workout and summary state to prevent flickering 
+        // between different types of workouts.
+        _workout.value = null
         _sessionSummary.value = null
         
         workoutJob = viewModelScope.launch {
             if (session != null) {
+                // For Personalized: Map directly from JSON plan
                 val mappedWorkout = Workout(
                     id = workoutId,
                     name = session.focus,
@@ -111,9 +114,16 @@ class WorkoutDetailViewModel @Inject constructor(
                 )
 
                 val assignments = mutableListOf<WorkoutExerciseWithDetail>()
-                session.warmup?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "warmup")) }
-                session.exercises?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "Exercise")) }
-                session.cooldown?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "cooldown")) }
+                
+                session.warmup?.forEach { pe -> 
+                    assignments.add(mapPlannerToDetail(workoutId, pe, "warmup")) 
+                }
+                session.exercises?.forEach { pe -> 
+                    assignments.add(mapPlannerToDetail(workoutId, pe, "Exercise")) 
+                }
+                session.cooldown?.forEach { pe -> 
+                    assignments.add(mapPlannerToDetail(workoutId, pe, "cooldown")) 
+                }
 
                 _workout.value = WorkoutWithExercises(mappedWorkout, assignments)
                 _completedExercisesCount.value = 0 
@@ -121,6 +131,7 @@ class WorkoutDetailViewModel @Inject constructor(
 
                 launch { syncSessionToDb(workoutId, session) }
             } else {
+                // For Official/Library: Use database
                 workoutRepository.getWorkoutWithExercises(workoutId)
                     .distinctUntilChanged()
                     .collectLatest {
@@ -255,10 +266,12 @@ class WorkoutDetailViewModel @Inject constructor(
         
         viewModelScope.launch {
             val currentWorkout = _workout.value ?: return@launch
+            
             val resetAssignments = currentWorkout.exerciseAssignments.map { 
                 it.assignment.copy(isCompleted = false) 
             }
             workoutRepository.updateWorkoutWithExercises(currentWorkout.workout, resetAssignments)
+            
             _completedExercisesCount.value = 0
             
             // Clear summary upon manual stop to ensure fresh state
