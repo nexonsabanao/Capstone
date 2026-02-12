@@ -160,11 +160,12 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
     private fun observeNavigationData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // FIXED: Observe bundled workoutNavRequest and exercise selection state together
                 combine(
-                    navigationViewModel.selectedWorkoutId,
+                    navigationViewModel.workoutNavRequest,
                     navigationViewModel.selectedExerciseId,
                     navigationViewModel.selectedCategory
-                ) { wId, eId, cat -> Triple(wId, eId, cat) }
+                ) { request, eId, cat -> Triple(request.workoutId, eId, cat) }
                     .collect { (wId, eId, cat) ->
                         if (wId != -1 && eId.isNotBlank()) {
                             lastObservedAssignmentId = null
@@ -249,7 +250,14 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
                 workoutViewModel.isResting.collect { isResting ->
                     binding.restTimerBar.visibility = if (isResting) View.VISIBLE else View.GONE
                     binding.bottomBar.visibility = if (isResting) View.GONE else View.VISIBLE
-                    if (!isResting && isAutoLogOn) startAutoLogTimerIfNeeded()
+                    
+                    if (!isResting) {
+                        if (currentSets.all { it.isCompleted }) {
+                            finishOrNext()
+                        } else if (isAutoLogOn) {
+                            startAutoLogTimerIfNeeded()
+                        }
+                    }
                 }
             }
         }
@@ -310,9 +318,9 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
 
     private fun ensureWorkoutStarted() {
         if (!workoutViewModel.isWorkoutActive.value) {
-            val wId = navigationViewModel.selectedWorkoutId.value
-            if (wId != -1) {
-                workoutViewModel.startWorkout(wId, navigationViewModel.selectedDayIndex.value)
+            val request = navigationViewModel.workoutNavRequest.value
+            if (request.workoutId != -1) {
+                workoutViewModel.startWorkout(request.workoutId, request.dayIndex)
             }
         }
     }
@@ -328,9 +336,18 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         val nextIndex = index + 1
         if (nextIndex < mutableSets.size) {
             mutableSets[nextIndex] = mutableSets[nextIndex].copy(isActive = true)
-            if (isRestOn) {
+        }
+        
+        if (isRestOn) {
+            val currentPos = navigationViewModel.exercisePosition.value
+            val total = navigationViewModel.totalExercises.value
+            val isLastExercise = currentPos != -1 && total != -1 && currentPos >= total
+            val isFinalSetOfWorkout = isLastExercise && nextIndex >= mutableSets.size
+            
+            if (!isFinalSetOfWorkout) {
                 val detail = viewModel.exerciseWithDetail.value
-                val restSecs = parseTimeToSeconds(detail?.assignment?.rest ?: "60s")
+                var restSecs = parseTimeToSeconds(detail?.assignment?.rest ?: "60s")
+                if (restSecs <= 0) restSecs = 30 
                 workoutViewModel.startRestTimer(restSecs.toLong())
             }
         }
@@ -340,6 +357,9 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         val detail = viewModel.exerciseWithDetail.value ?: return
         if (mutableSets.all { it.isCompleted }) {
             workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true)
+            if (!isRestOn) {
+                finishOrNext()
+            }
         }
     }
 
@@ -348,10 +368,29 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         updateAndSubmitList(mutableSets)
         val detail = viewModel.exerciseWithDetail.value ?: return
         workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true)
+        
+        if (isRestOn) {
+            val currentPos = navigationViewModel.exercisePosition.value
+            val total = navigationViewModel.totalExercises.value
+            val isLastExercise = currentPos != -1 && total != -1 && currentPos >= total
+            
+            if (!isLastExercise) {
+                var restSecs = parseTimeToSeconds(detail.assignment.rest)
+                if (restSecs <= 0) restSecs = 30
+                workoutViewModel.startRestTimer(restSecs.toLong())
+            } else {
+                finishOrNext()
+            }
+        } else {
+            finishOrNext()
+        }
     }
 
     private fun finishOrNext() {
-        val isLast = (navigationViewModel.exercisePosition.value) == (navigationViewModel.totalExercises.value)
+        val currentPos = navigationViewModel.exercisePosition.value
+        val total = navigationViewModel.totalExercises.value
+        val isLast = currentPos != -1 && total != -1 && currentPos >= total
+        
         if (isLast) {
             workoutViewModel.finishWorkout()
             navigationViewModel.navigateToWorkoutComplete()
@@ -384,11 +423,14 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         switchAutoLog.setOnCheckedChangeListener { _, isChecked ->
             isAutoLogOn = isChecked
             binding.btnAutoLog.text = if (isAutoLogOn) "Auto-Log: ON" else "Auto-Log: OFF"
+            
+            // Re-trigger auto-log check if enabling
+            if (isAutoLogOn) startAutoLogTimerIfNeeded()
         }
 
         timeChipGroup.setOnCheckedChangeListener { group, checkedId ->
             val chip = group.findViewById<Chip>(checkedId)
-            autoLogTimeSeconds = when(chip.id) {
+            autoLogTimeSeconds = when(chip?.id) {
                 R.id.chip_15s -> 15L
                 R.id.chip_30s -> 30L
                 R.id.chip_45s -> 45L
@@ -402,9 +444,13 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
     }
 
     private fun startAutoLogTimerIfNeeded() {
+        // Ensure auto-log is ON and we are not currently resting
         if (!isAutoLogOn || workoutViewModel.isResting.value) return
-        currentSets.find { it.isActive && it.isDuration } ?: return
+        
+        // Find any active set. Standard repetitions-based exercises should also be auto-logged.
+        val activeSet = currentSets.find { it.isActive } ?: return
 
+        // Start the timer. Standard repetitions or duration, it doesn't matter.
         workoutViewModel.startAutoLogTimer(autoLogTimeSeconds) {
             logSetAndAdvance()
         }
@@ -414,6 +460,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         val clean = timeStr.lowercase().trim()
         return when {
             clean.endsWith("s") -> clean.dropLast(1).trim().toIntOrNull() ?: 0
+            clean.endsWith("min") -> (clean.replace("min", "").trim().toIntOrNull() ?: 0) * 60
             clean.endsWith("m") -> (clean.dropLast(1).trim().toIntOrNull() ?: 0) * 60
             clean.contains(":") -> {
                 val parts = clean.split(":")

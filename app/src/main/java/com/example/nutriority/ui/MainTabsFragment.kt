@@ -102,8 +102,12 @@ class MainTabsFragment : BaseBindingFragment<FragmentMainTabsBinding>(FragmentMa
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 navigationViewModel.currentTab.collect { tabIndex ->
-                    if (binding.viewPager.currentItem != tabIndex) {
-                        binding.viewPager.setCurrentItem(tabIndex, false)
+                    // FIX: Use post to avoid "FragmentManager is already executing transactions" crash
+                    // by ensuring the page change happens outside the current transaction cycle.
+                    binding.viewPager.post {
+                        if (binding.viewPager.currentItem != tabIndex) {
+                            binding.viewPager.setCurrentItem(tabIndex, false)
+                        }
                     }
                 }
             }

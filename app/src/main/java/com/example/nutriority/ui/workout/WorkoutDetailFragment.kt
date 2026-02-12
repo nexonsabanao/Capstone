@@ -92,9 +92,10 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
     private fun observeNavigationData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                navigationViewModel.selectedWorkoutId.collect { workoutId ->
-                    if (workoutId != -1) {
-                        viewModel.getWorkoutById(workoutId)
+                // Observe the bundled request to prevent flickering
+                navigationViewModel.workoutNavRequest.collect { request ->
+                    if (request.workoutId != -1) {
+                        viewModel.resolveWorkout(request.workoutId, request.session)
                         binding.nestedScrollView.scrollTo(0, 0)
                         binding.appBarLayout.setExpanded(true)
                     }
@@ -114,15 +115,17 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
     }
 
     private fun handleStartAction() {
-        val currentWorkoutId = viewModel.workout.value?.workout?.id ?: -1
+        val currentWorkout = viewModel.workout.value ?: return
         val activeWorkoutId = viewModel.activeWorkoutId.value
         
-        if (viewModel.isWorkoutActive.value && activeWorkoutId != currentWorkoutId) {
+        if (viewModel.isWorkoutActive.value && activeWorkoutId != currentWorkout.workout.id) {
             showToast("Another workout is in progress!")
             return
         }
         
-        viewModel.startWorkout(currentWorkoutId, navigationViewModel.selectedDayIndex.value)
+        navigationViewModel.setCurrentWorkoutData(currentWorkout)
+        val navRequest = navigationViewModel.workoutNavRequest.value
+        viewModel.startWorkout(currentWorkout.workout.id, navRequest.dayIndex)
         navigateToCurrentExercise()
     }
 
@@ -254,6 +257,7 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
                 val onlyEx = exerciseAdapter.currentList.filterIsInstance<WorkoutItem.ExerciseItem>()
                 val idx = onlyEx.indexOfFirst { it.detail.assignment.exerciseId == item.assignment.exerciseId && it.detail.assignment.category == item.assignment.category }
                 if (idx != -1) {
+                    viewModel.workout.value?.let { navigationViewModel.setCurrentWorkoutData(it) }
                     navigationViewModel.navigateToExerciseDetail(
                         workoutId = item.assignment.workoutId, 
                         exerciseId = item.assignment.exerciseId, 
@@ -293,10 +297,16 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(viewModel.isWorkoutActive, viewModel.activeWorkoutId, viewModel.workout, userViewModel.user.asFlow(), navigationViewModel.isPersonalizedFlow, navigationViewModel.selectedDayIndex) { p -> 
-                    val isActive = p[0] as Boolean; val activeId = p[1] as Int; val curr = p[2] as? WorkoutWithExercises; val user = p[3] as? User; val isPers = p[4] as Boolean; val day = p[5] as Int
-                    val isThis = isActive && activeId == curr?.workout?.id
-                    val isLocked = isPers && day != -1 && day > (user?.lastCompletedWorkoutDay ?: 0)
+                // Atomic combined observation
+                combine(
+                    viewModel.isWorkoutActive, 
+                    viewModel.activeWorkoutId, 
+                    viewModel.workout, 
+                    userViewModel.user.asFlow(), 
+                    navigationViewModel.workoutNavRequest
+                ) { isActive, activeId, currWorkout, user, navRequest -> 
+                    val isThis = isActive && activeId == currWorkout?.workout?.id
+                    val isLocked = navRequest.isFromPersonalized && navRequest.dayIndex != -1 && navRequest.dayIndex > (user?.lastCompletedWorkoutDay ?: 0)
                     Triple(isThis, isActive, isLocked)
                 }.collect { (isThis, any, isLocked) ->
                     binding.startButton.apply {

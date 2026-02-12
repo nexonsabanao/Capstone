@@ -46,6 +46,7 @@ class WorkoutDetailViewModel @Inject constructor(
     private val _onWorkoutUpdated = MutableSharedFlow<Unit>()
     val onWorkoutUpdated = _onWorkoutUpdated.asSharedFlow()
     
+    // Workout Session State
     private val _isWorkoutActive = MutableStateFlow(false)
     val isWorkoutActive = _isWorkoutActive.asStateFlow()
 
@@ -93,6 +94,9 @@ class WorkoutDetailViewModel @Inject constructor(
     fun resolveWorkout(workoutId: Int, session: WorkoutSession? = null) {
         workoutJob?.cancel()
         _isLoading.value = true
+        
+        // RESET summary to prevent "Workout Complete" view from appearing on new selections
+        _sessionSummary.value = null
         
         workoutJob = viewModelScope.launch {
             if (session != null) {
@@ -256,6 +260,9 @@ class WorkoutDetailViewModel @Inject constructor(
             }
             workoutRepository.updateWorkoutWithExercises(currentWorkout.workout, resetAssignments)
             _completedExercisesCount.value = 0
+            
+            // Clear summary upon manual stop to ensure fresh state
+            _sessionSummary.value = null
         }
     }
 

@@ -17,6 +17,7 @@ import com.example.nutriority.ui.util.BaseBindingFragment
 import com.example.nutriority.ui.workout.WorkoutDetailViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -85,19 +86,30 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Ongoing Workout
+                // Ongoing Workout Visibility
                 launch {
                     workoutViewModel.isWorkoutActive.collect { isActive ->
                         binding.ongoingWorkoutCard.visibility = if (isActive) View.VISIBLE else View.GONE
                     }
                 }
 
+                // FIXED Progress Bar Logic: 
+                // Observe both the completion count and the active workout state together.
+                // This ensures that even if we view a different workout detail, the HOME progress bar 
+                // stays accurate to the actually RUNNING workout.
                 launch {
-                    workoutViewModel.completedExercisesCount.collect { completed ->
-                        workoutViewModel.workout.value?.let { workout ->
-                            if (workout.workout.id == workoutViewModel.activeWorkoutId.value) {
-                                val total = workout.exerciseAssignments.size
-                                binding.ongoingProgress.progress = if (total > 0) (completed.toFloat() / total) * 100 else 0f
+                    combine(
+                        workoutViewModel.completedExercisesCount,
+                        workoutViewModel.activeWorkoutId,
+                        workoutViewModel.workout
+                    ) { completed, activeId, currentDetail ->
+                        Triple(completed, activeId, currentDetail)
+                    }.collect { (completed, activeId, detail) ->
+                        if (activeId != -1 && detail != null && detail.workout.id == activeId) {
+                            val total = detail.exerciseAssignments.size
+                            if (total > 0) {
+                                val progress = (completed.toFloat() / total) * 100
+                                binding.ongoingProgress.progress = progress
                                 binding.tvOngoingSubtitle.text = "$completed from $total exercises done"
                             }
                         }
