@@ -37,8 +37,13 @@ class WorkoutDetailViewModel @Inject constructor(
     private val application: Application
 ) : AndroidViewModel(application) {
 
+    // Currently VIEWED workout
     private val _workout = MutableStateFlow<WorkoutWithExercises?>(null)
     val workout = _workout.asStateFlow()
+
+    // Currently ACTIVE workout (The one that is started/running)
+    private val _activeWorkoutDetail = MutableStateFlow<WorkoutWithExercises?>(null)
+    val activeWorkoutDetail = _activeWorkoutDetail.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
@@ -94,15 +99,11 @@ class WorkoutDetailViewModel @Inject constructor(
     fun resolveWorkout(workoutId: Int, session: WorkoutSession? = null) {
         workoutJob?.cancel()
         _isLoading.value = true
-        
-        // CRITICAL FIX: Reset workout and summary state to prevent flickering 
-        // between different types of workouts.
         _workout.value = null
         _sessionSummary.value = null
         
         workoutJob = viewModelScope.launch {
             if (session != null) {
-                // For Personalized: Map directly from JSON plan
                 val mappedWorkout = Workout(
                     id = workoutId,
                     name = session.focus,
@@ -114,29 +115,32 @@ class WorkoutDetailViewModel @Inject constructor(
                 )
 
                 val assignments = mutableListOf<WorkoutExerciseWithDetail>()
+                session.warmup?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "warmup")) }
+                session.exercises?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "Exercise")) }
+                session.cooldown?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "cooldown")) }
+
+                val detail = WorkoutWithExercises(mappedWorkout, assignments)
+                _workout.value = detail
                 
-                session.warmup?.forEach { pe -> 
-                    assignments.add(mapPlannerToDetail(workoutId, pe, "warmup")) 
-                }
-                session.exercises?.forEach { pe -> 
-                    assignments.add(mapPlannerToDetail(workoutId, pe, "Exercise")) 
-                }
-                session.cooldown?.forEach { pe -> 
-                    assignments.add(mapPlannerToDetail(workoutId, pe, "cooldown")) 
+                // If this is the active workout, keep the active detail in sync
+                if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
+                    _activeWorkoutDetail.value = detail
                 }
 
-                _workout.value = WorkoutWithExercises(mappedWorkout, assignments)
-                _completedExercisesCount.value = 0 
                 _isLoading.value = false
-
                 launch { syncSessionToDb(workoutId, session) }
             } else {
-                // For Official/Library: Use database
                 workoutRepository.getWorkoutWithExercises(workoutId)
                     .distinctUntilChanged()
-                    .collectLatest {
-                        _workout.value = it
-                        _completedExercisesCount.value = it?.exerciseAssignments?.count { it.assignment.isCompleted } ?: 0
+                    .collectLatest { detail ->
+                        _workout.value = detail
+                        
+                        // If this is the active workout, keep the active detail in sync
+                        if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
+                            _activeWorkoutDetail.value = detail
+                        }
+                        
+                        _completedExercisesCount.value = detail?.exerciseAssignments?.count { it.assignment.isCompleted } ?: 0
                         _isLoading.value = false
                     }
             }
@@ -200,6 +204,10 @@ class WorkoutDetailViewModel @Inject constructor(
         _activeDayIndex.value = dayIndex
         _elapsedTimeSeconds.value = 0
         _sessionSummary.value = null
+        
+        // Capture the detail of the workout being started
+        _activeWorkoutDetail.value = _workout.value
+        
         startTimer()
     }
 
@@ -213,7 +221,7 @@ class WorkoutDetailViewModel @Inject constructor(
     }
 
     fun finishWorkout() {
-        val current = _workout.value ?: return
+        val current = _activeWorkoutDetail.value ?: _workout.value ?: return
         val timeSecs = _elapsedTimeSeconds.value
         val doneCount = _completedExercisesCount.value
         val totalCount = current.exerciseAssignments.size
@@ -265,7 +273,7 @@ class WorkoutDetailViewModel @Inject constructor(
         stopAutoLogTimer()
         
         viewModelScope.launch {
-            val currentWorkout = _workout.value ?: return@launch
+            val currentWorkout = _activeWorkoutDetail.value ?: return@launch
             
             val resetAssignments = currentWorkout.exerciseAssignments.map { 
                 it.assignment.copy(isCompleted = false) 
@@ -273,8 +281,7 @@ class WorkoutDetailViewModel @Inject constructor(
             workoutRepository.updateWorkoutWithExercises(currentWorkout.workout, resetAssignments)
             
             _completedExercisesCount.value = 0
-            
-            // Clear summary upon manual stop to ensure fresh state
+            _activeWorkoutDetail.value = null
             _sessionSummary.value = null
         }
     }
@@ -356,7 +363,9 @@ class WorkoutDetailViewModel @Inject constructor(
     }
 
     fun updateExerciseCompletion(workoutId: Int, exerciseId: String, category: String, completed: Boolean) {
+        // Only update completion if it's the active workout
         if (_isWorkoutActive.value && _activeWorkoutId.value != workoutId) return
+        
         viewModelScope.launch {
             workoutRepository.updateExerciseCompletion(workoutId, exerciseId, category, completed)
         }

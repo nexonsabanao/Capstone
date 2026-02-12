@@ -94,18 +94,16 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                 }
 
                 // FIXED Progress Bar Logic: 
-                // Observe both the completion count and the active workout state together.
-                // This ensures that even if we view a different workout detail, the HOME progress bar 
-                // stays accurate to the actually RUNNING workout.
+                // Observe the completion count and the dedicated active workout detail together.
+                // This ensures the HOME progress bar stays accurate even when browsing other details.
                 launch {
                     combine(
                         workoutViewModel.completedExercisesCount,
-                        workoutViewModel.activeWorkoutId,
-                        workoutViewModel.workout
-                    ) { completed, activeId, currentDetail ->
-                        Triple(completed, activeId, currentDetail)
-                    }.collect { (completed, activeId, detail) ->
-                        if (activeId != -1 && detail != null && detail.workout.id == activeId) {
+                        workoutViewModel.activeWorkoutDetail
+                    ) { completed, activeDetail ->
+                        completed to activeDetail
+                    }.collect { (completed, detail) ->
+                        if (detail != null) {
                             val total = detail.exerciseAssignments.size
                             if (total > 0) {
                                 val progress = (completed.toFloat() / total) * 100
@@ -171,7 +169,16 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
         binding.mealPlanCard.btnViewPlan.setOnClickListener { navigationViewModel.setTab(2) }
         binding.btnResumeOngoing.setOnClickListener {
             val activeId = workoutViewModel.activeWorkoutId.value
-            if (activeId != -1) navigationViewModel.navigateToWorkoutDetail(activeId)
+            if (activeId != -1) {
+                // Determine if we need to pass the active detail back to navigation for seamless resume
+                val activeDetail = workoutViewModel.activeWorkoutDetail.value
+                val session = if (activeDetail?.workout?.category == "Personalized") {
+                    // Logic to reconstruct/pass session if needed, for now we rely on the resolver in detail
+                    null 
+                } else null
+                
+                navigationViewModel.navigateToWorkoutDetail(activeId, session)
+            }
         }
     }
 }
