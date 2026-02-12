@@ -7,13 +7,14 @@ import androidx.room.PrimaryKey
 data class DailyMealLog(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val mealId: String, // Changed to String to match Meal.id
+    val mealId: String, 
     val name: String,
     val calories: Int,
     val protein: Int,
     val carbs: Int,
     val fats: Int,
-    val mealTime: String, // Renamed from time to match Firestore
-    val date: Long, // timestamp
-    val imageName: String
+    val mealTime: String, 
+    val date: Long, 
+    val imageName: String,
+    val firestoreId: String? = null
 )

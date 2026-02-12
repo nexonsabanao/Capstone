@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/app_background">
 
-    <!-- Header Section (Untouched) -->
+    <!-- Header Section -->
     <LinearLayout
         android:id="@+id/header_container"
         android:layout_width="match_parent"
@@ -61,70 +61,29 @@
             android:paddingHorizontal="24dp"
             android:paddingTop="8dp">
 
-            <LinearLayout
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilTitle"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="top"
-                android:orientation="horizontal">
+                android:hint="What did you eat?"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxStrokeColor="@color/primary_dark"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="2dp"
+                app:hintTextColor="#757575">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilTitle"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="0dp"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTitle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="What did you eat?"
-                    app:boxCornerRadiusBottomEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxStrokeColor="#212121"
-                    app:hintTextColor="#757575">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etTitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textCapSentences"
-                        android:minHeight="56dp"
-                        android:textColor="#212121" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/btnCamera"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="4dp"
-                    app:cardBackgroundColor="#F5F5F5"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp"
-                    app:cardPreventCornerOverlap="false"
-                    app:cardUseCompatPadding="true"
-                    app:strokeColor="#E0E0E0"
-                    app:strokeWidth="1dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <ImageView
-                            android:id="@+id/ivMealPreview"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:visibility="gone" />
-
-                        <ImageView
-                            android:id="@+id/ivCameraIcon"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@android:drawable/ic_menu_camera"
-                            app:tint="#757575" />
-                    </FrameLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
+                    android:inputType="textCapSentences"
+                    android:minHeight="56dp"
+                    android:textColor="#212121" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -136,8 +95,12 @@
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusTopStart="12dp"
+                app:boxStrokeColor="@color/primary_dark"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="2dp"
                 app:startIconDrawable="@drawable/ic_time"
-                app:startIconTint="#757575">
+                app:startIconTint="#757575"
+                android:theme="@style/ThemeOverlay.Material3.TextInputEditText.OutlinedBox">
 
                 <AutoCompleteTextView
                     android:id="@+id/spinnerMealTime"
@@ -283,7 +246,7 @@
                                 android:textSize="12sp" />
 
                             <EditText
-                                android:id="@+id/etCarb"
+                                android:id="@+id/etCarbs"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:background="@null"
@@ -313,12 +276,12 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="sans-serif-medium"
-                                android:text="Fat (g)"
-                                android:textColor="#FF5722"
+                                android:text="Fats (g)"
+                                android:textColor="#FF9800"
                                 android:textSize="12sp" />
 
                             <EditText
-                                android:id="@+id/etFat"
+                                android:id="@+id/etFats"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:background="@null"
@@ -334,38 +297,20 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!-- Ingredients Section -->
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="12dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="Ingredients"
+                android:textColor="#212121"
+                android:textSize="18sp" />
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="Ingredients"
-                    android:textColor="#212121"
-                    android:textSize="18sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAddIngredient"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minWidth="0dp"
-                    android:paddingHorizontal="8dp"
-                    android:text="+ Add"
-                    android:textColor="@color/green" />
-            </LinearLayout>
-
-            <!-- Ingredients Card Fixed -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="2dp"
@@ -379,22 +324,31 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:id="@+id/tvIngredientEmpty"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:paddingVertical="8dp"
-                        android:fontFamily="sans-serif"
-                        android:text="No ingredients added yet"
-                        android:textColor="#9E9E9E"
-                        android:textSize="14sp" />
-
                     <LinearLayout
                         android:id="@+id/ingredientsContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical" />
+
+                    <TextView
+                        android:id="@+id/tvIngredientEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingVertical="12dp"
+                        android:text="No ingredients added yet"
+                        android:textColor="#BDBDBD" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddIngredient"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="8dp"
+                        android:text="+ Add Ingredient"
+                        android:textAllCaps="false"
+                        android:textColor="@color/primary_dark" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -402,22 +356,19 @@
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_log_meal"
+        android:id="@+id/btnLogMeal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="32dp"
+        android:layout_height="56dp"
+        android:layout_margin="24dp"
         android:backgroundTint="@color/primary_dark"
         android:fontFamily="sans-serif-medium"
-        android:paddingVertical="14dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
         android:text="Log Meal"
+        android:textAllCaps="false"
         android:textColor="@color/white"
         android:textSize="16sp"
         app:cornerRadius="16dp"
-        app:elevation="4dp"
-        app:icon="@drawable/ic_check"
-        app:iconGravity="textStart"
-        app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

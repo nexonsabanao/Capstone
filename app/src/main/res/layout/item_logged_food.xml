@@ -43,12 +43,15 @@
                 android:id="@+id/iv_food_image"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
-                android:scaleType="centerCrop"
+                android:scaleType="centerInside"
+                android:padding="8dp"
+                android:background="#EEEEEE"
+                android:src="@drawable/ic_award_meal_24"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CornerSize16dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:src="@tools:sample/avatars" />
+                app:tint="#BDBDBD" />
 
             <TextView
                 android:id="@+id/tv_food_name"

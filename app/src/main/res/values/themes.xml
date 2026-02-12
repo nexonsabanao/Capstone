@@ -7,6 +7,13 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">true</item>
         <item name="android:enforceNavigationBarContrast" tools:ignore="NewApi">false</item>
+        
+        <!-- Fix pinkish/default colors -->
+        <item name="colorPrimary">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/secondary_blue</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorControlActivated">@color/primary_dark</item>
     </style>
 
     <!--  2. SPLASH THEME  -->
@@ -58,7 +65,7 @@
     </style>
 
     <style name="CalendarDate.Selected">
-        <item name="android:textColor">@color/design_default_color_primary</item>
+        <item name="android:textColor">@color/primary_dark</item>
     </style>
 
 

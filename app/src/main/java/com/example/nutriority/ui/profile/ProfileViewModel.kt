@@ -128,7 +128,7 @@ class ProfileViewModel @Inject constructor(
 
     fun deleteMealLog(log: DailyMealLog) {
         viewModelScope.launch {
-            mealRepository.deleteMealLog(log.id)
+            mealRepository.deleteMealLog(log)
         }
     }
 

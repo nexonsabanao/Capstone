@@ -9,7 +9,12 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.gif.GifDrawable
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.example.nutriority.R
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.databinding.DialogAboutExerciseBinding
@@ -100,15 +105,47 @@ class AboutExerciseBottomSheet : BottomSheetDialogFragment() {
 
         // Load GIF using Glide from URL
         if (exercise.gifUrl.isNotBlank()) {
+            binding.progressBar.visibility = View.VISIBLE
+            binding.ivExerciseVisual.visibility = View.INVISIBLE
+            
             Glide.with(this)
                 .asGif()
                 .load(exercise.gifUrl)
-                .placeholder(R.drawable.img_balanced_diet)
-                .error(R.drawable.img_balanced_diet)
+                .listener(object : RequestListener<GifDrawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<GifDrawable>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        binding.progressBar.visibility = View.GONE
+                        binding.ivExerciseVisual.visibility = View.VISIBLE
+                        binding.ivExerciseVisual.setImageResource(R.drawable.img_balanced_diet)
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: GifDrawable,
+                        model: Any,
+                        target: Target<GifDrawable>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        binding.progressBar.visibility = View.GONE
+                        binding.ivExerciseVisual.visibility = View.VISIBLE
+                        return false
+                    }
+                })
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(binding.ivExerciseVisual)
         } else if (exercise.imageResId != 0) {
+            binding.progressBar.visibility = View.GONE
+            binding.ivExerciseVisual.visibility = View.VISIBLE
             binding.ivExerciseVisual.setImageResource(exercise.imageResId)
+        } else {
+            binding.progressBar.visibility = View.GONE
+            binding.ivExerciseVisual.visibility = View.VISIBLE
+            binding.ivExerciseVisual.setImageResource(R.drawable.img_balanced_diet)
         }
     }
 

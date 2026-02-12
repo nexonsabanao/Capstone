@@ -1,19 +1,17 @@
 package com.example.nutriority.ui.profile
 
-import android.app.Activity
 import android.app.AlertDialog
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
+import android.graphics.Color
 import android.os.Bundle
-import android.provider.MediaStore
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
@@ -25,11 +23,7 @@ import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.util.BaseBindingFragment
 import com.example.nutriority.ui.util.KeyboardUtil
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -38,36 +32,41 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
     private val navigationViewModel: NavigationViewModel by activityViewModels()
     @Inject lateinit var mealRepository: MealRepository
 
-    private var selectedImageUri: Uri? = null
-    private var webpImagePath: String? = null
     private val ingredientsList = mutableListOf<String>()
-
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri = result.data?.data ?: return@registerForActivityResult
-            selectedImageUri = uri
-            processAndDisplayImage(uri)
-        }
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Clear previous data every time the view is created to ensure a fresh start
+        clearFields()
+        
         setupDropdown()
         setupClickListeners()
         updateIngredientsUi()
     }
 
+    private fun clearFields() {
+        ingredientsList.clear()
+        binding.etTitle.setText("")
+        binding.etCalories.setText("")
+        binding.etProtein.setText("")
+        binding.etCarbs.setText("")
+        binding.etFats.setText("")
+        binding.spinnerMealTime.setText("Breakfast", false)
+        updateIngredientsUi()
+    }
+
     private fun setupDropdown() {
-        val items = listOf("Breakfast", "Lunch", "Dinner", "Snack")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
+        val items = listOf("Breakfast", "Lunch", "Dinner")
+        // Use the custom list_item layout to fix the pinkish color and styling
+        val adapter = ArrayAdapter(requireContext(), R.layout.list_item, items)
         binding.spinnerMealTime.setAdapter(adapter)
     }
 
     private fun setupClickListeners() {
-        binding.btnBack.setOnClickListener { navigationViewModel.goBack() }
-        binding.btnCamera.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            pickImageLauncher.launch(intent)
+        binding.btnBack.setOnClickListener { 
+            KeyboardUtil.hideKeyboard(requireActivity())
+            navigationViewModel.goBack() 
         }
         binding.btnAddIngredient.setOnClickListener { showAddIngredientDialog() }
         binding.btnLogMeal.setOnClickListener { 
@@ -77,7 +76,10 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
     }
 
     private fun showAddIngredientDialog() {
-        val input = EditText(requireContext()).apply { hint = "Enter ingredient name" }
+        val input = EditText(requireContext()).apply { 
+            hint = "Enter ingredient name"
+            setPadding(48, 48, 48, 48)
+        }
         AlertDialog.Builder(requireContext())
             .setTitle("Add Ingredient")
             .setView(input)
@@ -87,8 +89,11 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
                     ingredientsList.add(name)
                     updateIngredientsUi()
                 }
+                KeyboardUtil.hideKeyboard(requireActivity())
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton("Cancel") { _, _ ->
+                KeyboardUtil.hideKeyboard(requireActivity())
+            }
             .show()
     }
 
@@ -97,56 +102,47 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
         binding.tvIngredientEmpty.isVisible = ingredientsList.isEmpty()
 
         ingredientsList.forEachIndexed { index, ingredient ->
+            // Create a horizontal layout for the ingredient and a delete button
+            val itemLayout = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                setPadding(0, 8, 0, 8)
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+
             val textView = TextView(requireContext()).apply {
                 text = "• $ingredient"
                 textSize = 16f
                 setTextColor(ContextCompat.getColor(context, R.color.dark_gray))
-                setPadding(0, 8, 0, 8)
-                setOnLongClickListener {
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+
+            val deleteIcon = ImageView(requireContext()).apply {
+                setImageResource(R.drawable.ic_close)
+                layoutParams = LinearLayout.LayoutParams(48, 48)
+                setPadding(8, 8, 8, 8)
+                imageTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#BDBDBD"))
+                setOnClickListener {
                     ingredientsList.removeAt(index)
                     updateIngredientsUi()
-                    true
                 }
             }
-            binding.ingredientsContainer.addView(textView)
+
+            itemLayout.addView(textView)
+            itemLayout.addView(deleteIcon)
+            binding.ingredientsContainer.addView(itemLayout)
         }
-    }
-
-    private fun processAndDisplayImage(uri: Uri) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val bitmap = withContext(Dispatchers.IO) {
-                try {
-                    val inputStream = requireContext().contentResolver.openInputStream(uri)
-                    BitmapFactory.decodeStream(inputStream)
-                } catch (e: Exception) { null }
-            }
-
-            bitmap?.let {
-                binding.ivMealPreview.setImageBitmap(it)
-                binding.ivMealPreview.visibility = View.VISIBLE
-                binding.ivCameraIcon.visibility = View.GONE
-                webpImagePath = convertToWebP(it)
-            }
-        }
-    }
-
-    private suspend fun convertToWebP(bitmap: Bitmap): String? = withContext(Dispatchers.IO) {
-        try {
-            val fileName = "meal_${System.currentTimeMillis()}.webp"
-            val file = File(requireContext().cacheDir, fileName)
-            val out = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.WEBP, 80, out)
-            out.flush()
-            out.close()
-            file.absolutePath
-        } catch (e: Exception) { null }
     }
 
     private fun saveMeal() {
         val title = binding.etTitle.text.toString().trim()
         val protein = binding.etProtein.text.toString().toIntOrNull() ?: 0
-        val carbs = binding.etCarb.text.toString().toIntOrNull() ?: 0
-        val fats = binding.etFat.text.toString().toIntOrNull() ?: 0
+        val carbs = binding.etCarbs.text.toString().toIntOrNull() ?: 0
+        val fats = binding.etFats.text.toString().toIntOrNull() ?: 0
+        val calories = binding.etCalories.text.toString().toIntOrNull() ?: 0
         val mealTime = binding.spinnerMealTime.text.toString()
 
         if (title.isBlank()) {
@@ -156,7 +152,8 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                mealRepository.logManualMeal(title, protein, carbs, fats, mealTime, ingredientsList)
+                // Pass manual calories to repository
+                mealRepository.logManualMeal(title, protein, carbs, fats, mealTime, ingredientsList, calories)
                 Toast.makeText(requireContext(), "Meal logged successfully!", Toast.LENGTH_SHORT).show()
                 navigationViewModel.goBack()
             } catch (e: Exception) {

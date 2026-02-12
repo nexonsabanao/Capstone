@@ -1,6 +1,8 @@
 package com.example.nutriority.ui.profile
 
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +13,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.example.nutriority.R
 import com.example.nutriority.data.model.DailyMealLog
 import java.io.File
@@ -48,29 +54,54 @@ class LoggedFoodAdapter(
             mealTime.text = log.mealTime
 
             val context = itemView.context
-            val requestBuilder = Glide.with(context).asDrawable().centerCrop()
+            
+            // Set initial placeholder state
+            resetToPlaceholder()
 
-            when {
-                log.imageName.startsWith("/") -> {
-                    requestBuilder.load(File(log.imageName))
-                }
-                log.imageName.startsWith("http") -> {
-                    requestBuilder.load(log.imageName)
-                }
-                else -> {
-                    val resId = context.resources.getIdentifier(log.imageName, "drawable", context.packageName)
-                    if (resId != 0) {
-                        requestBuilder.load(resId)
-                    } else {
-                        requestBuilder.load(R.drawable.bg_meal_placeholder)
+            val hasValidImage = !log.imageName.isNullOrEmpty() && log.imageName != "bg_image_placeholder"
+
+            if (hasValidImage) {
+                val imageSource: Any? = when {
+                    log.imageName.startsWith("/") -> File(log.imageName)
+                    log.imageName.startsWith("http") -> log.imageName
+                    else -> {
+                        val resId = context.resources.getIdentifier(log.imageName, "drawable", context.packageName)
+                        if (resId != 0) resId else null
                     }
                 }
-            }
 
-            requestBuilder
-                .placeholder(R.drawable.bg_meal_placeholder)
-                .error(R.drawable.bg_meal_placeholder)
-                .into(foodImage)
+                if (imageSource != null) {
+                    Glide.with(context)
+                        .load(imageSource)
+                        .centerCrop()
+                        .listener(object : RequestListener<Drawable> {
+                            override fun onLoadFailed(
+                                e: GlideException?,
+                                model: Any?,
+                                target: Target<Drawable>,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                resetToPlaceholder()
+                                return false
+                            }
+
+                            override fun onResourceReady(
+                                resource: Drawable,
+                                model: Any,
+                                target: Target<Drawable>?,
+                                dataSource: DataSource,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                foodImage.scaleType = ImageView.ScaleType.CENTER_CROP
+                                foodImage.setPadding(0, 0, 0, 0)
+                                foodImage.setBackgroundColor(Color.TRANSPARENT)
+                                foodImage.imageTintList = null // Clear tint for real images
+                                return false
+                            }
+                        })
+                        .into(foodImage)
+                }
+            }
 
             val timeColor = when (log.mealTime.lowercase()) {
                 "breakfast" -> Color.parseColor("#EBB861")
@@ -83,14 +114,19 @@ class LoggedFoodAdapter(
 
             deleteBtn.setOnClickListener { onDelete(log) }
         }
+
+        private fun resetToPlaceholder() {
+            foodImage.scaleType = ImageView.ScaleType.CENTER_INSIDE
+            foodImage.setPadding(8, 8, 8, 8)
+            foodImage.setBackgroundColor(Color.parseColor("#EEEEEE"))
+            foodImage.setImageResource(R.drawable.ic_award_meal_24)
+            foodImage.imageTintList = ColorStateList.valueOf(Color.parseColor("#BDBDBD"))
+        }
     }
 
     class DiffCallback : DiffUtil.ItemCallback<DailyMealLog>() {
         override fun areItemsTheSame(oldItem: DailyMealLog, newItem: DailyMealLog): Boolean {
-            // Using a combination of stable fields instead of auto-generated ID
-            return oldItem.mealId == newItem.mealId && 
-                   oldItem.name == newItem.name && 
-                   oldItem.date == newItem.date
+            return oldItem.id == newItem.id
         }
         
         override fun areContentsTheSame(oldItem: DailyMealLog, newItem: DailyMealLog): Boolean {

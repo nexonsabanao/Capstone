@@ -56,10 +56,6 @@ class MealRepository(
         }
     }
 
-    suspend fun ensureLibraryIsLoaded() {
-        syncMealsFromCloud()
-    }
-
     // --- DAILY LOGGING ---
 
     suspend fun logMeal(meal: Meal) {
@@ -107,8 +103,6 @@ class MealRepository(
     }
 
     private suspend fun insertDailyLog(log: DailyMealLog) {
-        dailyMealLogDao.insertLog(log)
-        
         auth.currentUser?.uid?.let { uid ->
             try {
                 val logMap = hashMapOf(
@@ -122,11 +116,14 @@ class MealRepository(
                     "date" to log.date,
                     "imageName" to log.imageName
                 )
-                db.collection("users").document(uid).collection("daily_meal_logs").add(logMap).await()
+                val docRef = db.collection("users").document(uid).collection("daily_meal_logs").add(logMap).await()
+                // Store with Firestore ID
+                dailyMealLogDao.insertLog(log.copy(firestoreId = docRef.id))
             } catch (e: Exception) {
                 Log.e("Sync", "Failed to sync meal log", e)
+                dailyMealLogDao.insertLog(log)
             }
-        }
+        } ?: dailyMealLogDao.insertLog(log)
     }
 
     fun getLogsForToday(): Flow<List<DailyMealLog>> {
@@ -147,30 +144,20 @@ class MealRepository(
         return dailyMealLogDao.getAllLogs()
     }
 
-    suspend fun deleteMealLog(logId: Int) {
-        dailyMealLogDao.deleteLog(logId)
-    }
-
-    // --- CRUD ---
-
-    suspend fun insert(meal: Meal) {
-        mealDao.insertMeal(meal)
+    suspend fun deleteMealLog(log: DailyMealLog) {
+        // Delete locally
+        dailyMealLogDao.deleteLog(log.id)
+        
+        // Delete from Firestore
         auth.currentUser?.uid?.let { uid ->
-            db.collection("users").document(uid).collection("meal_logs").document(meal.id).set(meal)
-        }
-    }
-
-    suspend fun update(meal: Meal) {
-        mealDao.updateMeal(meal)
-        auth.currentUser?.uid?.let { uid ->
-            db.collection("users").document(uid).collection("meal_logs").document(meal.id).set(meal)
-        }
-    }
-
-    suspend fun delete(meal: Meal) {
-        mealDao.deleteMeal(meal)
-        auth.currentUser?.uid?.let { uid ->
-            db.collection("users").document(uid).collection("meal_logs").document(meal.id).delete()
+            log.firestoreId?.let { fId ->
+                try {
+                    db.collection("users").document(uid)
+                        .collection("daily_meal_logs").document(fId).delete().await()
+                } catch (e: Exception) {
+                    Log.e("MealRepo", "Failed to delete from Firestore", e)
+                }
+            }
         }
     }
 
@@ -182,41 +169,30 @@ class MealRepository(
             val logsToInsert = mutableListOf<DailyMealLog>()
             
             logSnapshot.documents.forEach { doc ->
-                try {
-                    // Robust date parsing: handle both Long and Firestore Timestamp
-                    val dateVal = when (val rawDate = doc.get("date")) {
-                        is Number -> rawDate.toLong()
-                        is Timestamp -> rawDate.toDate().time
-                        else -> 0L
-                    }
-
-                    val log = DailyMealLog(
-                        id = 0,
-                        mealId = doc.getString("mealId") ?: "",
-                        name = doc.getString("name") ?: "",
-                        calories = doc.getLong("calories")?.toInt() ?: 0,
-                        protein = doc.getLong("protein")?.toInt() ?: 0,
-                        carbs = doc.getLong("carbs")?.toInt() ?: 0,
-                        fats = doc.getLong("fats")?.toInt() ?: 0,
-                        mealTime = doc.getString("mealTime") ?: "Snack",
-                        date = dateVal,
-                        imageName = doc.getString("imageName") ?: ""
-                    )
-                    logsToInsert.add(log)
-                } catch (e: Exception) { 
-                    Log.e("MealRepo", "Error parsing log document: ${e.message}")
+                val dateVal = when (val rawDate = doc.get("date")) {
+                    is Number -> rawDate.toLong()
+                    is Timestamp -> rawDate.toDate().time
+                    else -> 0L
                 }
+
+                val log = DailyMealLog(
+                    id = 0,
+                    mealId = doc.getString("mealId") ?: "",
+                    name = doc.getString("name") ?: "",
+                    calories = doc.getLong("calories")?.toInt() ?: 0,
+                    protein = doc.getLong("protein")?.toInt() ?: 0,
+                    carbs = doc.getLong("carbs")?.toInt() ?: 0,
+                    fats = doc.getLong("fats")?.toInt() ?: 0,
+                    mealTime = doc.getString("mealTime") ?: "Snack",
+                    date = dateVal,
+                    imageName = doc.getString("imageName") ?: "",
+                    firestoreId = doc.id // Store the Firestore ID
+                )
+                logsToInsert.add(log)
             }
             
             if (logsToInsert.isNotEmpty()) {
                 dailyMealLogDao.insertAll(logsToInsert)
-                Log.d("MealRepo", "Restored ${logsToInsert.size} meal logs successfully.")
-            }
-            
-            val snapshot = db.collection("users").document(uid).collection("meal_logs").get().await()
-            val meals = snapshot.toObjects(Meal::class.java)
-            if (meals.isNotEmpty()) {
-                meals.forEach { mealDao.insertMeal(it) }
             }
         } catch (e: Exception) {
             Log.e("MealRepo", "Failed to restore meals: ${e.message}")
