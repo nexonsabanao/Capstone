@@ -104,6 +104,9 @@ class WorkoutDetailViewModel @Inject constructor(
         
         workoutJob = viewModelScope.launch {
             if (session != null) {
+                // First check if this personalized workout already exists in DB to get preferences
+                val existing = workoutRepository.getWorkoutWithExercises(workoutId).first()
+                
                 val mappedWorkout = Workout(
                     id = workoutId,
                     name = session.focus,
@@ -111,7 +114,8 @@ class WorkoutDetailViewModel @Inject constructor(
                     category = "Personalized",
                     difficulty = if (session.focus.contains("Beginner")) "Beginner" else if (session.focus.contains("Advanced")) "Advanced" else "Intermediate",
                     duration = "${session.durationMinutes} min",
-                    imageName = "img_gym_bg"
+                    imageName = "img_gym_bg",
+                    includeWarmupCooldown = existing?.workout?.includeWarmupCooldown ?: true
                 )
 
                 val assignments = mutableListOf<WorkoutExerciseWithDetail>()
@@ -122,20 +126,18 @@ class WorkoutDetailViewModel @Inject constructor(
                 val detail = WorkoutWithExercises(mappedWorkout, assignments)
                 _workout.value = detail
                 
-                // If this is the active workout, keep the active detail in sync
                 if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
                     _activeWorkoutDetail.value = detail
                 }
 
                 _isLoading.value = false
-                launch { syncSessionToDb(workoutId, session) }
+                launch { syncSessionToDb(workoutId, session, mappedWorkout.includeWarmupCooldown) }
             } else {
                 workoutRepository.getWorkoutWithExercises(workoutId)
                     .distinctUntilChanged()
                     .collectLatest { detail ->
                         _workout.value = detail
                         
-                        // If this is the active workout, keep the active detail in sync
                         if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
                             _activeWorkoutDetail.value = detail
                         }
@@ -162,7 +164,7 @@ class WorkoutDetailViewModel @Inject constructor(
         return WorkoutExerciseWithDetail(assignment, exercise)
     }
 
-    private suspend fun syncSessionToDb(workoutId: Int, session: WorkoutSession) {
+    private suspend fun syncSessionToDb(workoutId: Int, session: WorkoutSession, includeWarmup: Boolean) {
         val assignments = mutableListOf<WorkoutExercise>()
         var order = 0
         session.warmup?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "warmup", order++)) }
@@ -176,7 +178,8 @@ class WorkoutDetailViewModel @Inject constructor(
             category = "Personalized",
             difficulty = if (session.focus.contains("Beginner")) "Beginner" else if (session.focus.contains("Advanced")) "Advanced" else "Intermediate",
             duration = "${session.durationMinutes} min",
-            imageName = "img_gym_bg"
+            imageName = "img_gym_bg",
+            includeWarmupCooldown = includeWarmup
         )
         workoutRepository.updateWorkoutWithExercises(workout, assignments)
     }
@@ -205,7 +208,6 @@ class WorkoutDetailViewModel @Inject constructor(
         _elapsedTimeSeconds.value = 0
         _sessionSummary.value = null
         
-        // Capture the detail of the workout being started
         _activeWorkoutDetail.value = _workout.value
         
         startTimer()
@@ -352,9 +354,15 @@ class WorkoutDetailViewModel @Inject constructor(
     }
 
     fun updateWorkoutPreference(includeWarmupCooldown: Boolean) {
-        val currentWorkout = _workout.value?.workout ?: return
+        val current = _workout.value ?: return
+        val updatedWorkout = current.workout.copy(includeWarmupCooldown = includeWarmupCooldown)
+        
+        // Immediate UI update
+        _workout.value = current.copy(workout = updatedWorkout)
+        
         viewModelScope.launch {
-            workoutRepository.updateWorkout(currentWorkout.copy(includeWarmupCooldown = includeWarmupCooldown))
+            // Persist to DB
+            workoutRepository.updateWorkout(updatedWorkout)
         }
     }
 
@@ -363,7 +371,6 @@ class WorkoutDetailViewModel @Inject constructor(
     }
 
     fun updateExerciseCompletion(workoutId: Int, exerciseId: String, category: String, completed: Boolean) {
-        // Only update completion if it's the active workout
         if (_isWorkoutActive.value && _activeWorkoutId.value != workoutId) return
         
         viewModelScope.launch {
