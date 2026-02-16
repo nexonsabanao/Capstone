@@ -188,6 +188,18 @@
                     android:layout_gravity="center"
                     android:layout_margin="32dp"
                     android:indeterminateTint="@color/green" />
+
+                <TextView
+                    android:id="@+id/tvNoWorkouts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginVertical="40dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="No workouts found"
+                    android:textColor="#757575"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
             </FrameLayout>
 
             <me.relex.circleindicator.CircleIndicator2
@@ -208,17 +220,36 @@
                 android:layout_marginTop="32dp"
                 android:layout_marginHorizontal="20dp" />
 
-            <TextView
-                android:id="@+id/mealsLabel"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:layout_marginStart="24dp"
-                android:fontFamily="sans-serif"
-                android:textStyle="bold"
-                android:text="Healthy Recipes"
-                android:textColor="#212121"
-                android:textSize="20sp" />
+                android:paddingHorizontal="24dp">
+
+                <TextView
+                    android:id="@+id/mealsLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold"
+                    android:text="Healthy Recipes"
+                    android:textColor="#212121"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/btnViewAllMeals"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="View All"
+                    android:textColor="@color/green"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:padding="4dp" />
+            </RelativeLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -243,6 +274,18 @@
                     android:layout_gravity="center"
                     android:layout_margin="32dp"
                     android:indeterminateTint="@color/green" />
+
+                <TextView
+                    android:id="@+id/tvNoMeals"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginVertical="40dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="No recipes found for your diet"
+                    android:textColor="#757575"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
             </FrameLayout>
 
             <!-- Articles Section -->

@@ -75,7 +75,6 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
     }
 
     fun navigateToWorkoutDetail(workoutId: Int, session: WorkoutSession? = null, isFromPersonalized: Boolean = false, dayIndex: Int = -1) {
-        // Atomic update of all parameters
         _workoutNavRequest.value = WorkoutNavRequest(
             workoutId = workoutId,
             session = session,
@@ -83,19 +82,14 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
             dayIndex = dayIndex,
             timestamp = System.currentTimeMillis()
         )
-        
-        // Reset exercise state to avoid starting in the middle of a workout
         _selectedExerciseId.value = ""
         _selectedCategory.value = ""
         _exercisePosition.value = -1
-        
         setTab(9)
     }
 
     fun navigateToExerciseDetail(workoutId: Int, exerciseId: String, category: String, position: Int, total: Int) {
-        // Maintain consistent workout context
         _workoutNavRequest.value = _workoutNavRequest.value.copy(workoutId = workoutId)
-        
         _selectedExerciseId.value = exerciseId
         _selectedCategory.value = category
         _exercisePosition.value = position
@@ -119,6 +113,10 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
         setTab(13)
     }
 
+    fun navigateToAllMeals() {
+        setTab(14)
+    }
+
     fun nextExercise() {
         val currentWorkout = _currentWorkoutWithExercises.value
         val currentPos = _exercisePosition.value
@@ -128,7 +126,6 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
             val include = currentWorkout.workout.includeWarmupCooldown
             val assignments = currentWorkout.exerciseAssignments.sortedBy { it.assignment.order }
             val filtered = if (include) assignments else assignments.filter { it.assignment.category.equals("Exercise", true) }
-            
             val nextAssignment = filtered.getOrNull(currentPos) 
             
             if (nextAssignment != null) {

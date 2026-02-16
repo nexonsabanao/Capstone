@@ -13,6 +13,8 @@ import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.planner.NutritionCalculator
 import com.example.nutriority.ui.util.AgeUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -37,7 +39,8 @@ class HomeViewModel @Inject constructor(
     val allWorkouts: StateFlow<List<Workout>> 
     val unfilteredWorkouts: StateFlow<List<Workout>> 
     val allArticles: StateFlow<List<Article>>
-    val isDataReady: StateFlow<Boolean>
+    private val _isDataReady = MutableStateFlow(false)
+    val isDataReady: StateFlow<Boolean> = _isDataReady
     val calorieGoal: StateFlow<String>
 
     init {
@@ -47,18 +50,28 @@ class HomeViewModel @Inject constructor(
             launch { try { mealRepository.syncMealsFromCloud() } catch (e: Exception) {} }
             launch { try { workoutRepository.syncExercisesFromCloud() } catch (e: Exception) {} }
             launch { try { recommendedWorkoutRepository.syncOfficialWorkoutsFromCloud() } catch (e: Exception) {} }
+            
+            // Give a small delay to allow local Room data to emit at least once
+            delay(500)
+            _isDataReady.value = true
         }
 
         allMeals = combine(mealRepository.allMeals, userRepository.getUser) { meals, user ->
-            if (user == null) return@combine emptyList<Meal>()
-            if (meals.isEmpty()) return@combine emptyList<Meal>()
+            if (user == null || meals.isEmpty()) return@combine meals
 
-            var filtered = if (user.preferredDiet.isNotEmpty() && user.preferredDiet != "Balanced") {
+            // 1. Filter by Preferred Diet
+            var filtered = if (user.preferredDiet.isNotEmpty() && !user.preferredDiet.equals("Balanced", ignoreCase = true)) {
                 meals.filter { it.preferredDiet.equals(user.preferredDiet, ignoreCase = true) }
             } else {
                 meals
             }
 
+            // Fallback: If no meals match the specific diet, show all available meals (Balanced + others)
+            if (filtered.isEmpty()) {
+                filtered = meals
+            }
+
+            // 2. Filter by Excluded Ingredients
             if (user.excludedIngredients.isNotEmpty()) {
                 filtered = filtered.filter { meal ->
                     user.excludedIngredients.none { excluded ->
@@ -69,6 +82,7 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
+            // 3. Sort by Time of Day
             val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
             val timePriority = when {
                 currentHour in 5..10 -> listOf("Breakfast", "Lunch", "Dinner")
@@ -136,15 +150,6 @@ class HomeViewModel @Inject constructor(
         )
 
         allWorkouts = recommendedWorkouts
-
-        // Data is ready if we have SOME meals and SOME workouts (not necessarily recommended ones yet)
-        isDataReady = combine(mealRepository.allMeals, workoutRepository.allWorkouts) { meals, workouts ->
-            meals.isNotEmpty() || workouts.isNotEmpty()
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
 
         calorieGoal = userRepository.getUser.map { user ->
             if (user == null) return@map "1800-2200 kcal / day"

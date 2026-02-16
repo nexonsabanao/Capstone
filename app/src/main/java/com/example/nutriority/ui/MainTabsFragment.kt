@@ -15,6 +15,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.nutriority.R
 import com.example.nutriority.databinding.FragmentMainTabsBinding
+import com.example.nutriority.ui.home.AllMealsFragment
 import com.example.nutriority.ui.home.ArticleDetailFragment
 import com.example.nutriority.ui.home.HomeFragment
 import com.example.nutriority.ui.meal.MealDetailFragment
@@ -102,8 +103,6 @@ class MainTabsFragment : BaseBindingFragment<FragmentMainTabsBinding>(FragmentMa
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 navigationViewModel.currentTab.collect { tabIndex ->
-                    // FIX: Use post to avoid "FragmentManager is already executing transactions" crash
-                    // by ensuring the page change happens outside the current transaction cycle.
                     binding.viewPager.post {
                         if (binding.viewPager.currentItem != tabIndex) {
                             binding.viewPager.setCurrentItem(tabIndex, false)
@@ -126,7 +125,7 @@ class MainTabsFragment : BaseBindingFragment<FragmentMainTabsBinding>(FragmentMa
     }
 
     private inner class TabsAdapter(fragment: androidx.fragment.app.Fragment) : FragmentStateAdapter(fragment) {
-        override fun getItemCount(): Int = 14
+        override fun getItemCount(): Int = 15
 
         override fun createFragment(position: Int): androidx.fragment.app.Fragment = when (position) {
             0 -> HomeFragment()
@@ -143,6 +142,7 @@ class MainTabsFragment : BaseBindingFragment<FragmentMainTabsBinding>(FragmentMa
             11 -> WorkoutCompleteFragment()
             12 -> EditProfileFragment()
             13 -> LogManualFragment()
+            14 -> AllMealsFragment()
             else -> HomeFragment()
         }
     }

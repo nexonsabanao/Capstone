@@ -7,12 +7,34 @@
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">true</item>
         <item name="android:enforceNavigationBarContrast" tools:ignore="NewApi">false</item>
 
-        <!-- Fix pinkish/default colors -->
+        <!-- Material 3 Color Fixes: Eliminate pinkish/tonal tints -->
         <item name="colorPrimary">@color/primary_dark</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">@color/secondary_blue</item>
+        <item name="colorSecondary">@color/secondary_dark</item>
         <item name="colorOnSecondary">@color/white</item>
         <item name="colorControlActivated">@color/primary_dark</item>
+
+        <!-- Force surfaces to be pure white -->
+        <item name="colorSurface">@android:color/white</item>
+        <item name="colorSurfaceVariant">@android:color/white</item>
+
+        <!-- surfaceTint removed to resolve linking error -->
+
+        <item name="colorSurfaceContainer">@android:color/white</item>
+        <item name="colorSurfaceContainerLowest">@android:color/white</item>
+        <item name="colorSurfaceContainerLow">@android:color/white</item>
+        <item name="colorSurfaceContainerHigh">@android:color/white</item>
+        <item name="colorSurfaceContainerHighest">@android:color/white</item>
+        
+        <!-- Fix for PopupMenu Theme -->
+        <item name="popupMenuStyle">@style/Theme.Nutriority.PopupMenu</item>
+        <item name="android:popupMenuStyle">@style/Theme.Nutriority.PopupMenu</item>
+    </style>
+
+    <!-- Custom Popup style using the white drawable to bypass tonal tints -->
+    <style name="Theme.Nutriority.PopupMenu" parent="Widget.Material3.PopupMenu">
+        <item name="android:itemBackground">@android:color/white</item>
+        <item name="android:popupBackground">@drawable/bg_white_rounded_16</item>
     </style>
 
     <!--  2. SPLASH THEME  -->
@@ -24,7 +46,6 @@
 
     <style name="Theme.Nutriority" parent="Base.Theme.Nutriority"/>
 
-    <!-- Rest of your styles... -->
     <style name="ShapeAppearance.App.CornerSize16dp" parent="">
         <item name="cornerSize">16dp</item>
     </style>
@@ -55,7 +76,7 @@
         <item name="android:gravity">center</item>
         <item name="android:paddingVertical">8dp</item>
         <item name="android:textColor">@android:color/black</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize" tools:ignore="SpUsage">14sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 

@@ -2,6 +2,7 @@ package com.example.nutriority.ui.home
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -93,9 +94,6 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                     }
                 }
 
-                // FIXED Progress Bar Logic: 
-                // Observe the completion count and the dedicated active workout detail together.
-                // This ensures the HOME progress bar stays accurate even when browsing other details.
                 launch {
                     combine(
                         workoutViewModel.completedExercisesCount,
@@ -114,14 +112,23 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                     }
                 }
 
+                // Global Data Ready check to hide ALL progress bars if we know sync/load is done
+                launch {
+                    homeViewModel.isDataReady.collect { isReady ->
+                        if (isReady) {
+                            binding.mealsProgressBar.isVisible = false
+                            binding.workoutsProgressBar.isVisible = false
+                            binding.articlesProgressBar.isVisible = false
+                        }
+                    }
+                }
+
                 // Meals
                 launch {
                     homeViewModel.allMeals.collect { meals ->
-                        if (meals.isNotEmpty()) {
-                            mealAdapter.submitList(meals)
-                            binding.mealsRecyclerView.visibility = View.VISIBLE
-                            binding.mealsProgressBar.visibility = View.GONE
-                        }
+                        mealAdapter.submitList(meals)
+                        binding.mealsRecyclerView.isVisible = meals.isNotEmpty()
+                        binding.tvNoMeals.isVisible = meals.isEmpty() && homeViewModel.isDataReady.value
                     }
                 }
 
@@ -138,7 +145,6 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                                 if (workouts.size > 1) binding.workoutsIndicator.createIndicators(workouts.size, 0)
                             }
                             binding.workoutsRecyclerView.visibility = View.VISIBLE
-                            binding.workoutsProgressBar.visibility = View.GONE
                         }
                     }
                 }
@@ -149,7 +155,6 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                         if (articles.isNotEmpty()) {
                             articleAdapter.submitList(articles)
                             binding.articlesRecyclerView.visibility = View.VISIBLE
-                            binding.articlesProgressBar.visibility = View.GONE
                         }
                     }
                 }
@@ -170,15 +175,11 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
         binding.btnResumeOngoing.setOnClickListener {
             val activeId = workoutViewModel.activeWorkoutId.value
             if (activeId != -1) {
-                // Determine if we need to pass the active detail back to navigation for seamless resume
-                val activeDetail = workoutViewModel.activeWorkoutDetail.value
-                val session = if (activeDetail?.workout?.category == "Personalized") {
-                    // Logic to reconstruct/pass session if needed, for now we rely on the resolver in detail
-                    null 
-                } else null
-                
-                navigationViewModel.navigateToWorkoutDetail(activeId, session)
+                navigationViewModel.navigateToWorkoutDetail(activeId, null)
             }
+        }
+        binding.btnViewAllMeals.setOnClickListener {
+            navigationViewModel.navigateToAllMeals()
         }
     }
 }
