@@ -20,6 +20,9 @@ import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.planner.MealPlanner
 import com.example.nutriority.planner.WorkoutGenerator
 import com.example.nutriority.planner.WorkoutPlanner
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.PersistentCacheSettings
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -58,8 +61,8 @@ object AppModule {
     }
 
     @Provides
-    fun provideUserRepository(userDao: UserDao, workoutDao: WorkoutDao): UserRepository {
-        return UserRepository(userDao, workoutDao)
+    fun provideUserRepository(userDao: UserDao, workoutDao: WorkoutDao, firestore: FirebaseFirestore): UserRepository {
+        return UserRepository(userDao, workoutDao, firestore)
     }
 
     @Provides
@@ -152,5 +155,20 @@ object AppModule {
     @Singleton
     fun provideGson(): Gson {
         return Gson()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirestore(): FirebaseFirestore {
+        val firestore = FirebaseFirestore.getInstance()
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setLocalCacheSettings(PersistentCacheSettings.newBuilder().build())
+            .build()
+        try {
+            firestore.firestoreSettings = settings
+        } catch (e: Exception) {
+            // Settings might have already been applied, ignore if so to prevent crash
+        }
+        return firestore
     }
 }
