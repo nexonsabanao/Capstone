@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -103,8 +105,20 @@ class CustomWorkoutsFragment : BaseBindingFragment<LayoutCustomWorkoutsBinding>(
             setupTargetChips(dialogBinding, allExercises, selectableAdapter)
             selectableAdapter.setData(allExercises, emptyList())
 
+            // Implement Search Logic
+            dialogBinding.etSearchExercises.doAfterTextChanged { query ->
+                selectableAdapter.setSearchQuery(query?.toString() ?: "")
+            }
+
+            dialogBinding.etSearchExercises.setOnEditorActionListener { v, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+                    KeyboardUtil.hideKeyboard(v)
+                    v.clearFocus()
+                    true
+                } else false
+            }
+
             dialogBinding.btnSave.setOnClickListener {
-                // BUG FIX: Hide keyboard when user clicks save
                 KeyboardUtil.hideKeyboard(dialog.window?.decorView ?: dialogBinding.root)
                 
                 val workoutName = dialogBinding.etWorkoutName.text.toString().trim()

@@ -1,5 +1,6 @@
 package com.example.nutriority.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -53,9 +54,12 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
                         }
                     }
 
-                    // 2. Auth Check
+                    // 2. Auth & Onboarding Check
                     val firebaseUser = FirebaseAuth.getInstance().currentUser
-                    val destination = if (firebaseUser != null) {
+                    val sharedPref = requireActivity().getSharedPreferences("onBoarding", Context.MODE_PRIVATE)
+                    val isOnboardingFinished = sharedPref.getBoolean("Finished", false)
+
+                    val destination = if (firebaseUser != null && isOnboardingFinished) {
                         val localUser = userRepository.getInitialUser() ?: run {
                             userRepository.restoreUserFromCloud()
                             userRepository.getInitialUser()
@@ -76,6 +80,7 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
                             R.id.action_splashFragment_to_viewPagerFragment
                         }
                     } else {
+                        // If not logged in OR onboarding not finished, go to onboarding/login
                         R.id.action_splashFragment_to_viewPagerFragment
                     }
 

@@ -238,7 +238,7 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun showSilentReauthDialog() {
-        val builder = AlertDialog.Builder(requireContext())
+        val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
         val dialogView = layoutInflater.inflate(R.layout.layout_edit_field_bottom_sheet, null)
         
         val tvTitle = dialogView.findViewById<TextView>(R.id.tvSheetTitle)
@@ -253,10 +253,6 @@ class EditProfileFragment : Fragment() {
         etValue.hint = "Password"
         btnSave.text = "CONFIRM & DELETE"
         
-        builder.setView(dialogView)
-        val dialog = builder.create()
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
         btnSave.setOnClickListener {
             val password = etValue.text.toString()
             if (password.isNotBlank()) {
@@ -266,6 +262,8 @@ class EditProfileFragment : Fragment() {
                 til.error = "Password is required"
             }
         }
+        
+        dialog.setContentView(dialogView)
         dialog.show()
     }
 

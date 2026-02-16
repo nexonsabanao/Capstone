@@ -54,13 +54,14 @@ class SeventhScreen : BaseBindingFragment<FragmentSeventhScreenBinding>(Fragment
         startDoublePulseAnimation()
 
         val parentVp = parentFragment?.view?.findViewById<ViewPager2>(R.id.viewPager)
-        if (parentVp?.currentItem == 10) {
+        // SeventhScreen is at index 11
+        if (parentVp?.currentItem == 11) {
             startRecapIfNeeded()
         }
 
         parentFragmentManager.setFragmentResultListener("pageSelected", this) { _, bundle ->
             val position = bundle.getInt("position", -1)
-            if (position == 10) startRecapIfNeeded()
+            if (position == 11) startRecapIfNeeded()
         }
     }
 
@@ -130,7 +131,9 @@ class SeventhScreen : BaseBindingFragment<FragmentSeventhScreenBinding>(Fragment
 
                 if (saveSuccess) {
                     finishOnboarding()
-                    findNavController().navigate(R.id.action_viewPagerFragment_to_mainTabsFragment)
+                    if (isAdded && findNavController().currentDestination?.id == R.id.viewPagerFragment) {
+                        findNavController().navigate(R.id.action_viewPagerFragment_to_mainTabsFragment)
+                    }
                 } else {
                     Log.e("OnboardingError", "Failed to save the full plan.")
                 }
