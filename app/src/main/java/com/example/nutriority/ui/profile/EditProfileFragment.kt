@@ -7,6 +7,7 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -24,6 +25,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.firestore.FirebaseFirestore
@@ -229,13 +231,60 @@ class EditProfileFragment : Fragment() {
     private fun showDeleteAccountConfirmation() {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Account")
-            .setMessage("This will permanently erase ALL your progress. This action cannot be undone.")
-            .setPositiveButton("DELETE EVERYTHING") { _, _ -> performFullDataWipe() }
-            .setNegativeButton("Cancel", null)
+            .setMessage("This will permanently erase your account and ALL your progress. You will not be able to log back in. Are you sure?")
+            .setPositiveButton("DELETE PERMANENTLY") { _, _ -> showSilentReauthDialog() }
+            .setNegativeButton("CANCEL", null)
             .show()
     }
 
-    private fun performFullDataWipe() {
+    private fun showSilentReauthDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+        val dialogView = layoutInflater.inflate(R.layout.layout_edit_field_bottom_sheet, null)
+        
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tvSheetTitle)
+        val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvSheetSubtitle)
+        val etValue = dialogView.findViewById<TextInputEditText>(R.id.etFieldValue)
+        val til = dialogView.findViewById<TextInputLayout>(R.id.textInputLayout)
+        val btnSave = dialogView.findViewById<MaterialButton>(R.id.btnSave)
+
+        tvTitle.text = "Verify Password"
+        tvSubtitle.text = "Please enter your password to confirm account deletion."
+        etValue.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        etValue.hint = "Password"
+        btnSave.text = "CONFIRM & DELETE"
+        
+        builder.setView(dialogView)
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnSave.setOnClickListener {
+            val password = etValue.text.toString()
+            if (password.isNotBlank()) {
+                dialog.dismiss()
+                performReauthAndDeletion(password)
+            } else {
+                til.error = "Password is required"
+            }
+        }
+        dialog.show()
+    }
+
+    private fun performReauthAndDeletion(password: String) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val email = user.email ?: return
+        val credential = EmailAuthProvider.getCredential(email, password)
+
+        user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
+            if (reauthTask.isSuccessful) {
+                // Now that we are re-authenticated, delete the account
+                performImmediateDeletion()
+            } else {
+                Toast.makeText(requireContext(), "Verification failed: ${reauthTask.exception?.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun performImmediateDeletion() {
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null) {
             restartApp()
@@ -245,33 +294,20 @@ class EditProfileFragment : Fragment() {
         val uid = user.uid
         val db = FirebaseFirestore.getInstance()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                // 1. Attempt to delete from Firestore first
-                db.collection("users").document(uid).delete()
-                
-                // 2. Attempt to delete the Auth user
-                user.delete().addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        // Success path
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            profileViewModel.clearAllLocalData()
-                            Toast.makeText(requireContext(), "Account Wiped Successfully", Toast.LENGTH_SHORT).show()
-                            restartApp()
-                        }
-                    } else {
-                        // Failure path
-                        val exception = task.exception
-                        if (exception is FirebaseAuthRecentLoginRequiredException) {
-                            Toast.makeText(requireContext(), "Sensitive action! Please log in again to delete your account.", Toast.LENGTH_LONG).show()
-                            logout() // Log them out so they can sign in fresh
-                        } else {
-                            Toast.makeText(requireContext(), "Error: ${exception?.message}", Toast.LENGTH_LONG).show()
-                        }
+        user.delete().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        db.collection("users").document(uid).delete()
+                        profileViewModel.clearAllLocalData()
+                        Toast.makeText(requireContext(), "Account wiped successfully.", Toast.LENGTH_SHORT).show()
+                        restartApp()
+                    } catch (e: Exception) {
+                        restartApp()
                     }
                 }
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Reset failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
             }
         }
     }

@@ -111,7 +111,7 @@ class AllMealsFragment : BaseBindingFragment<FragmentAllMealsBinding>(FragmentAl
                     }
                     
                     val sectionedList = mutableListOf<AllMealItem>()
-                    val groups = filtered.groupBy { it.mealTime ?: "Snack" }
+                    val groups = filtered.groupBy { it.mealTime }
                     
                     val order = listOf("Breakfast", "Lunch", "Dinner", "Snack")
                     order.forEach { time ->

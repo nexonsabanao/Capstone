@@ -106,9 +106,10 @@ class MealSwapBottomSheetFragment(
             holder.card.strokeColor = ContextCompat.getColor(holder.itemView.context, R.color.green)
 
             holder.itemView.setOnClickListener {
-                if (selectedPosition != holder.adapterPosition) {
+                val currentPos = holder.bindingAdapterPosition
+                if (currentPos != RecyclerView.NO_POSITION && selectedPosition != currentPos) {
                     val previous = selectedPosition
-                    selectedPosition = holder.adapterPosition
+                    selectedPosition = currentPos
                     notifyItemChanged(previous)
                     notifyItemChanged(selectedPosition)
                     onMealSelected(meal)

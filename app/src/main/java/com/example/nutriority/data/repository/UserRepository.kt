@@ -5,22 +5,16 @@ import com.example.nutriority.data.local.UserDao
 import com.example.nutriority.data.local.WorkoutDao
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class UserRepository(
+class UserRepository @Inject constructor(
     private val userDao: UserDao,
-    private val workoutDao: WorkoutDao
+    private val workoutDao: WorkoutDao,
+    private val db: FirebaseFirestore
 ) {
-
-    private val db = FirebaseFirestore.getInstance().apply {
-        val settings = FirebaseFirestoreSettings.Builder()
-            .setPersistenceEnabled(true)
-            .build()
-        firestoreSettings = settings
-    }
     private val auth = FirebaseAuth.getInstance()
 
     val getUser: Flow<User?> = userDao.getUser()

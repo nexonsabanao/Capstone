@@ -25,7 +25,7 @@ class RecommendedWorkoutRepository @Inject constructor(
             val allExercises = workoutDao.getAllExercises().first()
 
             snapshot.documents.forEachIndexed { i, doc ->
-                val workoutData = doc.get("workout") as? Map<String, Any> ?: return@forEachIndexed
+                val workoutData = doc.get("workout") as? Map<*, *> ?: return@forEachIndexed
                 val workoutId = (workoutData["id"] as? Number)?.toInt() ?: (i + 1)
                 
                 val (officialWorkout, assignments) = parseWorkoutDocument(doc, workoutId, allExercises) ?: return@forEachIndexed
@@ -58,10 +58,10 @@ class RecommendedWorkoutRepository @Inject constructor(
         workoutId: Int, 
         allExercises: List<Exercise>
     ): Pair<Workout, List<WorkoutExercise>>? {
-        val workoutData = doc.get("workout") as? Map<String, Any> ?: return null
-        val warmupData = doc.get("warmup") as? List<Map<String, Any>> ?: emptyList()
-        val exercisesData = doc.get("exercises") as? List<Map<String, Any>> ?: emptyList()
-        val cooldownData = doc.get("cooldown") as? List<Map<String, Any>> ?: emptyList()
+        val workoutData = doc.get("workout") as? Map<*, *> ?: return null
+        val warmupData = (doc.get("warmup") as? List<*>)?.filterIsInstance<Map<*, *>>() ?: emptyList()
+        val exercisesData = (doc.get("exercises") as? List<*>)?.filterIsInstance<Map<*, *>>() ?: emptyList()
+        val cooldownData = (doc.get("cooldown") as? List<*>)?.filterIsInstance<Map<*, *>>() ?: emptyList()
 
         val officialWorkout = Workout(
             id = workoutId,
@@ -79,7 +79,7 @@ class RecommendedWorkoutRepository @Inject constructor(
         val assignments = mutableListOf<WorkoutExercise>()
         var order = 0
 
-        fun addGroup(data: List<Map<String, Any>>, category: String) {
+        fun addGroup(data: List<Map<*, *>>, category: String) {
             data.forEach { item ->
                 // Try to find the exercise in our local DB first to get its proper ID
                 val name = item["name"] as? String ?: ""

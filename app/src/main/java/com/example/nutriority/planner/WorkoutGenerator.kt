@@ -17,8 +17,8 @@ class WorkoutGenerator @Inject constructor() {
     enum class ExerciseRole { COMPOUND, ISOLATION, FINISHER_CORE, WARMUP, COOLDOWN }
 
     /**
-     * Generates a complete workout based on the specific structure:
-     * 1-2 Warmup, 3-5 Main Exercises, 1-2 Cooldown.
+     * Generates a complete workout based on the specific structure.
+     * Dynamic counts and intensities based on difficulty (Activity Level).
      */
     fun generatePersonalizedWorkout(
         id: Int,
@@ -28,16 +28,16 @@ class WorkoutGenerator @Inject constructor() {
         random: Random
     ): WorkoutWithExercises {
         
-        val workoutName = "$difficulty $focus Tone"
+        val workoutName = "$difficulty $focus Routine"
         val workout = Workout(
             id = id,
             name = workoutName,
-            description = "A balanced workout for toning and strengthening your $focus.",
+            description = "A precision-engineered $difficulty workout targeting $focus.",
             category = "Strength",
             targetMuscle = focus,
             imageName = "img_gym_bg", 
             difficulty = difficulty,
-            tags = listOf("keep fit", "strength", "bodyweight"),
+            tags = listOf("personalized", "strength", "fitness"),
             includeWarmupCooldown = true
         )
 
@@ -53,39 +53,79 @@ class WorkoutGenerator @Inject constructor() {
 
         var order = 0
 
-        // 2. Add Warmup (1 or 2)
-        val numWarmup = random.nextInt(1, 3)
+        // 2. Add Warmup (Smart Scaling)
+        val numWarmup = if (difficulty == "Advanced") 3 else 2
         warmupPool.shuffled(random).take(numWarmup).forEach { ex ->
-            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "warmup", order++, isStrength = false), ex))
+            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "warmup", order++, difficulty), ex))
         }
 
-        // 3. Add Main Exercises (3-5)
-        val numMain = random.nextInt(3, 6)
+        // 3. Add Main Exercises (Genius Scaling)
+        val numMain = when (difficulty) {
+            "Beginner" -> random.nextInt(3, 4)
+            "Intermediate" -> random.nextInt(4, 6)
+            "Advanced" -> random.nextInt(5, 7)
+            else -> 4
+        }
+        
         mainPool.shuffled(random).take(numMain).forEach { ex ->
-            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "Exercise", order++, isStrength = true), ex))
+            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "Exercise", order++, difficulty), ex))
         }
 
-        // 4. Add Cooldown (1 or 2)
-        val numCooldown = random.nextInt(1, 3)
+        // 4. Add Cooldown (Smart Scaling)
+        val numCooldown = if (difficulty == "Advanced") 1 else 2
         cooldownPool.shuffled(random).take(numCooldown).forEach { ex ->
-            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "cooldown", order++, isStrength = false), ex))
+            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "cooldown", order++, difficulty), ex))
         }
 
-        // 5. Build Detail List for Duration Calculation
+        // 5. Update Duration
         workout.duration = WorkoutUtil.calculateTotalDuration(assignments, true)
 
         return WorkoutWithExercises(workout, assignments)
     }
 
-    private fun createAssignment(workoutId: Int, ex: Exercise, category: String, order: Int, isStrength: Boolean): WorkoutExercise {
+    private fun createAssignment(workoutId: Int, ex: Exercise, category: String, order: Int, difficulty: String): WorkoutExercise {
+        val isMain = category == "Exercise"
+        
+        val sets = when {
+            !isMain -> 1
+            difficulty == "Beginner" -> 2
+            difficulty == "Intermediate" -> 3
+            difficulty == "Advanced" -> 4
+            else -> 3
+        }
+
+        val reps = when {
+            !isMain -> "1"
+            difficulty == "Beginner" -> "8-12"
+            difficulty == "Intermediate" -> "12-15"
+            difficulty == "Advanced" -> "15-20"
+            else -> "10-12"
+        }
+
+        val rest = when {
+            !isMain -> "0s"
+            difficulty == "Beginner" -> "90s"
+            difficulty == "Intermediate" -> "60s"
+            difficulty == "Advanced" -> "45s"
+            else -> "60s"
+        }
+
+        val duration = when {
+            isMain -> ""
+            difficulty == "Beginner" -> "1 min"
+            difficulty == "Intermediate" -> "2 min"
+            difficulty == "Advanced" -> "3 min"
+            else -> "1 min"
+        }
+
         return WorkoutExercise(
             workoutId = workoutId,
             exerciseId = ex.id,
             category = category,
-            sets = if (isStrength) 3 else 1,
-            reps = if (isStrength) "10-15" else "1",
-            duration = if (isStrength) "" else "1 min",
-            rest = if (isStrength) "60s" else "0s",
+            sets = sets,
+            reps = reps,
+            duration = duration,
+            rest = rest,
             order = order
         )
     }

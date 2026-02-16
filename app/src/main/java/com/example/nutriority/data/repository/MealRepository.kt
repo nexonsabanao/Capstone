@@ -66,7 +66,7 @@ class MealRepository(
             protein = meal.macros.protein, 
             carbs = meal.macros.carbs,
             fats = meal.macros.fats,
-            mealTime = meal.mealTime ?: "Snack",
+            mealTime = meal.mealTime,
             date = System.currentTimeMillis(),
             imageName = meal.imageName
         )

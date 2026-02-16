@@ -53,7 +53,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "nutriority_database"
                 )
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration(true)
                     .addCallback(AppDatabaseCallback(context.applicationContext, appScope))
                     .build()
                 INSTANCE = instance

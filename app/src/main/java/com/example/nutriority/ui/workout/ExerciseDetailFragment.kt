@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.util.Locale
 
+@Suppress("DEPRECATION")
 @AndroidEntryPoint
 class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding>(FragmentExerciseDetailBinding::inflate) {
 

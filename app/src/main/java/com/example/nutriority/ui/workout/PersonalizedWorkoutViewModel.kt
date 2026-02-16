@@ -39,7 +39,7 @@ class PersonalizedWorkoutViewModel @Inject constructor(
         } else {
             try {
                 val fullPlan = gson.fromJson(user.personalizedPlanJson, WorkoutPlan::class.java)
-                val safeLastCompleted = user.lastCompletedWorkoutDay ?: 0
+                val safeLastCompleted = user.lastCompletedWorkoutDay
                 val currentWeek = (safeLastCompleted / 7).coerceAtMost(3)
                 val startIndex = currentWeek * 7
                 val endIndex = (startIndex + 7).coerceAtMost(fullPlan.sessions.size)
