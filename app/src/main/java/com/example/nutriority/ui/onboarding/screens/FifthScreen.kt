@@ -1,10 +1,11 @@
 package com.example.nutriority.ui.onboarding.screens
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.TextView
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
@@ -16,8 +17,8 @@ import com.example.nutriority.databinding.FragmentFifthScreenBinding
 import com.example.nutriority.ui.util.BaseBindingFragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
+import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -77,13 +78,21 @@ class FifthScreen : BaseBindingFragment<FragmentFifthScreenBinding>(FragmentFift
     }
 
     private fun applyStyleToChip(chip: Chip) {
+        val context = requireContext()
+        
+        // Use a 16dp corner radius to match standard chips
+        val cornerRadius = resources.getDimension(R.dimen.chip_corner_radius_default) 
+        chip.shapeAppearanceModel = ShapeAppearanceModel.builder()
+            .setAllCornerSizes(cornerRadius)
+            .build()
+
         if (chip.id == R.id.addCustomChip) return
 
-        val context = requireContext()
         val primaryDarkColor = ContextCompat.getColor(context, R.color.primary_dark)
         val defaultBackgroundColor = ContextCompat.getColor(context, R.color.white)
         val defaultTextColor = ContextCompat.getColor(context, R.color.dark_gray)
         val whiteColor = ContextCompat.getColor(context, android.R.color.white)
+        val strokeColor = ContextCompat.getColor(context, R.color.chip_stroke_selector)
 
         val backgroundStateList = ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
@@ -97,7 +106,8 @@ class FifthScreen : BaseBindingFragment<FragmentFifthScreenBinding>(FragmentFift
 
         chip.chipBackgroundColor = backgroundStateList
         chip.setTextColor(textStateList)
-        chip.chipStrokeWidth = 0f
+        chip.chipStrokeWidth = resources.getDimension(R.dimen.chip_stroke_width_default)
+        chip.chipStrokeColor = ColorStateList.valueOf(strokeColor)
         chip.isChipIconVisible = false
     }
 
@@ -110,33 +120,34 @@ class FifthScreen : BaseBindingFragment<FragmentFifthScreenBinding>(FragmentFift
     }
 
     private fun showAddCustomIngredientDialog() {
-        val builder = AlertDialog.Builder(requireContext())
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.layout_edit_field_bottom_sheet, null)
-        
-        val tvTitle = dialogView.findViewById<TextView>(R.id.tvSheetTitle)
-        val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvSheetSubtitle)
-        val til = dialogView.findViewById<TextInputLayout>(R.id.textInputLayout)
-        val etValue = dialogView.findViewById<TextInputEditText>(R.id.etFieldValue)
-        val btnSave = dialogView.findViewById<MaterialButton>(R.id.btnSave)
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.layout_dialog_add_exclusion, null)
+        val etIngredient = dialogView.findViewById<TextInputEditText>(R.id.etIngredientName)
+        val btnAdd = dialogView.findViewById<MaterialButton>(R.id.btnAdd)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
 
-        tvTitle.text = "Add Exclusion"
-        tvSubtitle.text = "Enter an ingredient you want to avoid"
-        etValue.hint = "e.g. Cilantro, Peanuts"
-        
-        builder.setView(dialogView)
-        val dialog = builder.create()
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        btnSave.setOnClickListener {
-            val ingredient = etValue.text.toString().trim()
+        btnCancel.setOnClickListener {
+            hideKeyboard(etIngredient)
+            dialog.dismiss()
+        }
+
+        btnAdd.setOnClickListener {
+            val ingredient = etIngredient.text.toString().trim()
             if (ingredient.isNotEmpty()) {
+                hideKeyboard(etIngredient)
                 addCustomChipToGroup(ingredient, true)
                 dialog.dismiss()
-            } else {
-                til.error = "Please enter an ingredient"
             }
         }
+        
         dialog.show()
+        etIngredient.requestFocus()
+        showKeyboard(etIngredient)
     }
 
     private fun addCustomChipToGroup(ingredient: String, isChecked: Boolean) {
@@ -151,6 +162,18 @@ class FifthScreen : BaseBindingFragment<FragmentFifthScreenBinding>(FragmentFift
         // Add before the "Add Custom" button
         val index = binding.ingredientsChipGroup.childCount - 1
         binding.ingredientsChipGroup.addView(chip, index)
+    }
+
+    private fun showKeyboard(view: View) {
+        view.post {
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+        }
+    }
+
+    private fun hideKeyboard(view: View) {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun clearClickListeners() {

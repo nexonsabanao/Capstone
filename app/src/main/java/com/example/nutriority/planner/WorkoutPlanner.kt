@@ -20,15 +20,28 @@ class WorkoutPlanner @Inject constructor(
     private val application: Application
 ) {
 
-    private val weeklySchedule = listOf(
-        "Full Body",  // Day 1
-        "Rest Day",   // Day 2
-        "Abs",        // Day 3
-        "Upper Body", // Day 4
-        "Rest Day",   // Day 5
-        "Legs",       // Day 6
-        "Core"        // Day 7
-    )
+    /**
+     * Generates a 4-week focus-rotating schedule.
+     * Day 3 is always Abs (replacing Core).
+     * Day 4 rotates through specific upper body parts since generic "Upper Body" was removed.
+     */
+    private fun getFocusForDay(week: Int, dayInWeek: Int): String {
+        return when (dayInWeek) {
+            0 -> "Full Body"
+            1 -> "Rest Day"
+            2 -> "Abs" // Core is same as Abs
+            3 -> when (week) {
+                0 -> "Chest"
+                1 -> "Back"
+                2 -> "Shoulders"
+                else -> "Arms"
+            }
+            4 -> "Rest Day"
+            5 -> "Legs"
+            6 -> "Rest Day"
+            else -> "Rest Day"
+        }
+    }
 
     suspend fun planWorkouts(user: User): WorkoutPlan {
         workoutRepository.ensureLibraryIsLoaded()
@@ -42,12 +55,14 @@ class WorkoutPlanner @Inject constructor(
         val sessions = mutableListOf<WorkoutSession>()
         val allWorkouts = mutableListOf<Workout>()
         val allAssignments = mutableListOf<WorkoutExercise>()
+        val usedExerciseIds = mutableSetOf<String>()
 
         val seed = user.id.hashCode().toLong()
         val random = Random(seed)
 
         for (week in 0 until 4) {
-            weeklySchedule.forEachIndexed { dayInWeek, focus ->
+            for (dayInWeek in 0 until 7) {
+                val focus = getFocusForDay(week, dayInWeek)
                 val totalDayIndex = (week * 7) + dayInWeek
                 
                 if (focus == "Rest Day") {
@@ -61,8 +76,12 @@ class WorkoutPlanner @Inject constructor(
                         focus = focus,
                         difficulty = userDifficulty,
                         exercisePool = pool,
-                        random = random
+                        random = random,
+                        usedExerciseIds = usedExerciseIds
                     )
+                    
+                    // Track used exercises to prioritize variety in future sessions
+                    usedExerciseIds.addAll(generated.exerciseAssignments.map { it.assignment.exerciseId })
 
                     allWorkouts.add(generated.workout)
                     allAssignments.addAll(generated.exerciseAssignments.map { it.assignment })
@@ -100,7 +119,6 @@ class WorkoutPlanner @Inject constructor(
             }
         }
 
-        // Batch update to database for better performance and consistency
         workoutRepository.updateWorkoutsWithExercises(allWorkouts, allAssignments)
 
         return WorkoutPlan(sessions.sumOf { it.caloriesBurned }, sessions)

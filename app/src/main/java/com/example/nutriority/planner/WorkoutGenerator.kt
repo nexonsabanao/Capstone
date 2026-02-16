@@ -19,13 +19,15 @@ class WorkoutGenerator @Inject constructor() {
     /**
      * Generates a complete workout based on the specific structure.
      * Dynamic counts and intensities based on difficulty (Activity Level).
+     * @param usedExerciseIds Set of IDs that have already been used in the current plan to prioritize variety.
      */
     fun generatePersonalizedWorkout(
         id: Int,
         focus: String,
         difficulty: String,
         exercisePool: List<Exercise>,
-        random: Random
+        random: Random,
+        usedExerciseIds: Set<String> = emptySet()
     ): WorkoutWithExercises {
         
         val workoutName = "$difficulty $focus Routine"
@@ -55,7 +57,7 @@ class WorkoutGenerator @Inject constructor() {
 
         // 2. Add Warmup (Smart Scaling)
         val numWarmup = if (difficulty == "Advanced") 3 else 2
-        warmupPool.shuffled(random).take(numWarmup).forEach { ex ->
+        pickExercises(warmupPool, numWarmup, usedExerciseIds, random).forEach { ex ->
             assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "warmup", order++, difficulty), ex))
         }
 
@@ -67,13 +69,13 @@ class WorkoutGenerator @Inject constructor() {
             else -> 4
         }
         
-        mainPool.shuffled(random).take(numMain).forEach { ex ->
+        pickExercises(mainPool, numMain, usedExerciseIds, random).forEach { ex ->
             assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "Exercise", order++, difficulty), ex))
         }
 
         // 4. Add Cooldown (Smart Scaling)
         val numCooldown = if (difficulty == "Advanced") 1 else 2
-        cooldownPool.shuffled(random).take(numCooldown).forEach { ex ->
+        pickExercises(cooldownPool, numCooldown, usedExerciseIds, random).forEach { ex ->
             assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "cooldown", order++, difficulty), ex))
         }
 
@@ -81,6 +83,24 @@ class WorkoutGenerator @Inject constructor() {
         workout.duration = WorkoutUtil.calculateTotalDuration(assignments, true)
 
         return WorkoutWithExercises(workout, assignments)
+    }
+
+    /**
+     * Prioritizes unused exercises while maintaining randomness.
+     */
+    private fun pickExercises(
+        pool: List<Exercise>,
+        count: Int,
+        usedIds: Set<String>,
+        random: Random
+    ): List<Exercise> {
+        if (pool.isEmpty()) return emptyList()
+        
+        val unused = pool.filter { !usedIds.contains(it.id) }.shuffled(random)
+        val used = pool.filter { usedIds.contains(it.id) }.shuffled(random)
+        
+        // Combine them: Unused first, then used if we need more
+        return (unused + used).take(count)
     }
 
     private fun createAssignment(workoutId: Int, ex: Exercise, category: String, order: Int, difficulty: String): WorkoutExercise {

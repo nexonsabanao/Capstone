@@ -112,13 +112,13 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                     }
                 }
 
-                // Global Data Ready check to hide ALL progress bars if we know sync/load is done
+                // Global Data Ready check - now only for cases where data remains empty
                 launch {
                     homeViewModel.isDataReady.collect { isReady ->
                         if (isReady) {
-                            binding.mealsProgressBar.isVisible = false
-                            binding.workoutsProgressBar.isVisible = false
-                            binding.articlesProgressBar.isVisible = false
+                            if (mealAdapter.itemCount == 0) binding.mealsProgressBar.isVisible = false
+                            if (workoutAdapter.itemCount == 0) binding.workoutsProgressBar.isVisible = false
+                            if (articleAdapter.itemCount == 0) binding.articlesProgressBar.isVisible = false
                         }
                     }
                 }
@@ -127,7 +127,10 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                 launch {
                     homeViewModel.allMeals.collect { meals ->
                         mealAdapter.submitList(meals)
-                        binding.mealsRecyclerView.isVisible = meals.isNotEmpty()
+                        if (meals.isNotEmpty()) {
+                            binding.mealsRecyclerView.isVisible = true
+                            binding.mealsProgressBar.isVisible = false
+                        }
                         binding.tvNoMeals.isVisible = meals.isEmpty() && homeViewModel.isDataReady.value
                     }
                 }
@@ -145,6 +148,7 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                                 if (workouts.size > 1) binding.workoutsIndicator.createIndicators(workouts.size, 0)
                             }
                             binding.workoutsRecyclerView.visibility = View.VISIBLE
+                            binding.workoutsProgressBar.isVisible = false
                         }
                     }
                 }
@@ -155,6 +159,7 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                         if (articles.isNotEmpty()) {
                             articleAdapter.submitList(articles)
                             binding.articlesRecyclerView.visibility = View.VISIBLE
+                            binding.articlesProgressBar.isVisible = false
                         }
                     }
                 }
