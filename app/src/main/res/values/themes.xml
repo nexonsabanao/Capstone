@@ -13,12 +13,13 @@
         <item name="colorSecondary">@color/secondary_dark</item>
         <item name="colorOnSecondary">@color/white</item>
         <item name="colorControlActivated">@color/primary_dark</item>
-
         <!-- Force surfaces to be pure white -->
         <item name="colorSurface">@android:color/white</item>
         <item name="colorSurfaceVariant">@android:color/white</item>
 
-        <!-- surfaceTint removed to resolve linking error -->
+        <item name="elevationOverlayEnabled">false</item>
+
+        <item name="elevationOverlayColor">@android:color/transparent</item>
 
         <item name="colorSurfaceContainer">@android:color/white</item>
         <item name="colorSurfaceContainerLowest">@android:color/white</item>
