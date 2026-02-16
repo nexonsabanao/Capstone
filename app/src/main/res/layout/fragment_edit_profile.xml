@@ -239,6 +239,10 @@
                         layout="@layout/item_edit_profile_field" />
 
                     <include
+                        android:id="@+id/rowExclusions"
+                        layout="@layout/item_edit_profile_field" />
+
+                    <include
                         android:id="@+id/rowActivity"
                         layout="@layout/item_edit_profile_field" />
 

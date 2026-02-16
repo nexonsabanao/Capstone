@@ -25,6 +25,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -77,6 +78,9 @@ class EditProfileFragment : Fragment() {
 
         binding.rowDiet.tvLabel.text = "Preferred Diet"
         binding.rowDiet.ivIcon.setImageResource(R.drawable.ic_award_meal_24)
+
+        binding.rowExclusions.tvLabel.text = "Excluded Ingredients"
+        binding.rowExclusions.ivIcon.setImageResource(R.drawable.ic_allergy)
     }
 
     private fun setupClickListeners() {
@@ -151,6 +155,18 @@ class EditProfileFragment : Fragment() {
             }
         }
 
+        binding.rowExclusions.root.setOnClickListener {
+            val currentExclusions = currentUser?.excludedIngredients?.joinToString(", ") ?: ""
+            showEditBottomSheet("Exclusions", "Enter ingredients to exclude (comma separated)", currentExclusions, InputType.TYPE_CLASS_TEXT) { newVal ->
+                val newList = newVal.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                if (newList != currentUser?.excludedIngredients) {
+                    showUpdateOptionsDialog("Excluded Ingredients") { shouldRestart ->
+                        updateUserField(shouldRestart) { it.copy(excludedIngredients = newList) }
+                    }
+                }
+            }
+        }
+
         binding.btnLogout.setOnClickListener {
             showLogoutConfirmation()
         }
@@ -220,20 +236,38 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun performFullDataWipe() {
-        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            restartApp()
+            return
+        }
+        
         val uid = user.uid
         val db = FirebaseFirestore.getInstance()
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
+                // 1. Attempt to delete from Firestore first
                 db.collection("users").document(uid).delete()
-                profileViewModel.clearAllLocalData()
+                
+                // 2. Attempt to delete the Auth user
                 user.delete().addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Toast.makeText(requireContext(), "Account Wiped Successfully", Toast.LENGTH_SHORT).show()
-                        restartApp()
+                        // Success path
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            profileViewModel.clearAllLocalData()
+                            Toast.makeText(requireContext(), "Account Wiped Successfully", Toast.LENGTH_SHORT).show()
+                            restartApp()
+                        }
                     } else {
-                        Toast.makeText(requireContext(), "Error: Re-login required to delete account.", Toast.LENGTH_LONG).show()
+                        // Failure path
+                        val exception = task.exception
+                        if (exception is FirebaseAuthRecentLoginRequiredException) {
+                            Toast.makeText(requireContext(), "Sensitive action! Please log in again to delete your account.", Toast.LENGTH_LONG).show()
+                            logout() // Log them out so they can sign in fresh
+                        } else {
+                            Toast.makeText(requireContext(), "Error: ${exception?.message}", Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -263,6 +297,7 @@ class EditProfileFragment : Fragment() {
                 binding.rowActivity.tvValue.text = it.activityLevel
                 binding.rowGoal.tvValue.text = it.goal
                 binding.rowDiet.tvValue.text = it.preferredDiet
+                binding.rowExclusions.tvValue.text = if (it.excludedIngredients.isEmpty()) "None" else it.excludedIngredients.joinToString(", ")
                 binding.tvGenderValue.text = it.gender
 
                 if (it.profileImageUrl.isNotEmpty()) {
@@ -306,7 +341,7 @@ class EditProfileFragment : Fragment() {
         
         btnSave.setOnClickListener {
             val newVal = etValue.text.toString()
-            if (newVal.isNotBlank()) {
+            if (newVal.isNotBlank() || title == "Exclusions") {
                 onSave(newVal)
                 dialog.dismiss()
             } else {

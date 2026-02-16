@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/app_background">
 
-    <!-- Header Section (UNCHANGED) -->
+    <!-- Header Section -->
     <LinearLayout
         android:id="@+id/header_container"
         android:layout_width="match_parent"
@@ -205,6 +205,38 @@
             </HorizontalScrollView>
         </LinearLayout>
 
+        <!-- Search Bar for Exercises -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/searchCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:strokeColor="#EEEEEE"
+            app:strokeWidth="1dp"
+            app:layout_constraintTop_toBottomOf="@id/filtersScroll">
+
+            <EditText
+                android:id="@+id/etSearchExercises"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@android:color/transparent"
+                android:drawableStart="@drawable/ic_search"
+                android:drawablePadding="12dp"
+                android:drawableTint="@color/primary_dark"
+                android:hint="Search exercises..."
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:paddingHorizontal="20dp"
+                android:textSize="14sp"
+                android:textColor="@color/primary_dark"
+                android:textColorHint="#9E9E9E" />
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Exercises List -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvSelectExercises"
@@ -214,7 +246,7 @@
             android:clipToPadding="false"
             android:paddingBottom="100dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/filtersScroll"
+            app:layout_constraintTop_toBottomOf="@id/searchCard"
             tools:listitem="@layout/item_selectable_exercise" />
 
         <!-- Footer Action -->

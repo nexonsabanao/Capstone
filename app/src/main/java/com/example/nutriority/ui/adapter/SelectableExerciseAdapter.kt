@@ -17,6 +17,7 @@ class SelectableExerciseAdapter(
     private var selectedExercises = mutableListOf<Exercise>() 
     private var currentCategory = "Exercise"
     private var currentTarget: String? = null
+    private var currentSearchQuery: String = ""
     private var displayList = listOf<Exercise>()
 
     fun setData(exercises: List<Exercise>, initialSelected: List<Exercise>) {
@@ -28,6 +29,11 @@ class SelectableExerciseAdapter(
     fun setFilter(category: String, target: String?) {
         currentCategory = category
         currentTarget = target
+        updateDisplayList()
+    }
+
+    fun setSearchQuery(query: String) {
+        currentSearchQuery = query.lowercase().trim()
         updateDisplayList()
     }
 
@@ -48,8 +54,13 @@ class SelectableExerciseAdapter(
             // Target muscle filtering
             val targetMatch = if (currentTarget == null) true 
                              else exercise.target.contains(currentTarget!!, ignoreCase = true)
+
+            // Search filtering
+            val searchMatch = if (currentSearchQuery.isEmpty()) true
+                             else exercise.name.lowercase().contains(currentSearchQuery) || 
+                                  exercise.target.lowercase().contains(currentSearchQuery)
             
-            categoryMatch && targetMatch
+            categoryMatch && targetMatch && searchMatch
         }
 
         displayList = filtered.sortedWith(

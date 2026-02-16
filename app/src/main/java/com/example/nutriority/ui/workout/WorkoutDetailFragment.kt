@@ -7,8 +7,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asFlow
@@ -28,6 +30,7 @@ import com.example.nutriority.ui.adapter.SelectableExerciseAdapter
 import com.example.nutriority.ui.adapter.WorkoutItem
 import com.example.nutriority.ui.util.BaseBindingFragment
 import com.example.nutriority.ui.util.ImageUtil
+import com.example.nutriority.ui.util.KeyboardUtil
 import com.example.nutriority.ui.util.WorkoutUtil
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -196,6 +199,18 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
             setupTargetChips(dialogBinding, allExercisesList, selectableAdapter)
 
             selectableAdapter.setData(allExercisesList, workoutWithExercises.exerciseAssignments.map { it.exercise.copy(category = it.assignment.category) })
+
+            dialogBinding.etSearchExercises.doAfterTextChanged { query ->
+                selectableAdapter.setSearchQuery(query?.toString() ?: "")
+            }
+
+            dialogBinding.etSearchExercises.setOnEditorActionListener { v, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+                    KeyboardUtil.hideKeyboard(v)
+                    v.clearFocus()
+                    true
+                } else false
+            }
 
             dialogBinding.btnSave.setOnClickListener {
                 val name = if (isEditable) dialogBinding.etWorkoutName.text.toString() else workoutName
