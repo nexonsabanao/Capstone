@@ -5,6 +5,8 @@ import com.example.nutriority.data.local.WorkoutDao
 import com.example.nutriority.data.model.Exercise
 import com.example.nutriority.data.model.Workout
 import com.example.nutriority.data.model.WorkoutExercise
+import com.example.nutriority.data.model.WorkoutExerciseWithDetail
+import com.example.nutriority.ui.util.WorkoutUtil
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
@@ -103,6 +105,14 @@ class RecommendedWorkoutRepository @Inject constructor(
         addGroup(warmupData, "warmup")
         addGroup(exercisesData, "Exercise")
         addGroup(cooldownData, "cooldown")
+
+        // CRITICAL: Calculate consistent duration using WorkoutUtil instead of relying solely on the Firestore field
+        // This prevents the "jumping" duration when a workout is opened and recalculated in the detail view.
+        val detailAssignments = assignments.map { assignment ->
+            val exercise = allExercises.find { it.id == assignment.exerciseId } ?: Exercise(id = assignment.exerciseId)
+            WorkoutExerciseWithDetail(assignment, exercise)
+        }
+        officialWorkout.duration = WorkoutUtil.calculateTotalDuration(detailAssignments, officialWorkout.includeWarmupCooldown)
 
         return officialWorkout to assignments
     }

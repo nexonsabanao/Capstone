@@ -20,7 +20,7 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnBack.setOnClickListener {
-            parentFragmentManager.setFragmentResult("navigationRequestPrevious", Bundle())
+            parentFragmentManager.setFragmentResult("navigationRequestLogin", Bundle())
         }
 
         binding.etEmail.doAfterTextChanged { binding.tvError.isVisible = false }
@@ -43,7 +43,7 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
         }
 
         binding.btnDone.setOnClickListener {
-            parentFragmentManager.setFragmentResult("navigationRequestPrevious", Bundle())
+            parentFragmentManager.setFragmentResult("navigationRequestLogin", Bundle())
         }
     }
 

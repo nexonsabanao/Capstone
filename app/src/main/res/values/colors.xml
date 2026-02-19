@@ -18,4 +18,8 @@
     <color name="secondary_dark">#1D1D1D</color>
     <color name="secondary_blue">#00A4B9</color>
 
+    <!-- Chip Checked State Colors -->
+    <color name="chip_checked_stroke">#FF5252</color>
+    <color name="chip_checked_background">#0DFF5252</color> <!-- ~5% Opacity Red -->
+
 </resources>

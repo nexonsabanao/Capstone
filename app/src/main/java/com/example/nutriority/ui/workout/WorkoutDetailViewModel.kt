@@ -124,6 +124,11 @@ class WorkoutDetailViewModel @Inject constructor(
                 session.cooldown?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "cooldown")) }
 
                 val detail = WorkoutWithExercises(mappedWorkout, assignments)
+                
+                // CRITICAL: Re-calculate duration with safe WorkoutUtil to clean any bad data
+                val safeDuration = WorkoutUtil.calculateTotalDuration(detail.exerciseAssignments, mappedWorkout.includeWarmupCooldown)
+                detail.workout.duration = safeDuration
+
                 _workout.value = detail
                 
                 if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
@@ -136,6 +141,15 @@ class WorkoutDetailViewModel @Inject constructor(
                 workoutRepository.getWorkoutWithExercises(workoutId)
                     .distinctUntilChanged()
                     .collectLatest { detail ->
+                        if (detail != null) {
+                            // CRITICAL: Clean duration data on load
+                            val safeDuration = WorkoutUtil.calculateTotalDuration(detail.exerciseAssignments, detail.workout.includeWarmupCooldown)
+                            if (detail.workout.duration != safeDuration) {
+                                detail.workout.duration = safeDuration
+                                launch { workoutRepository.updateWorkout(detail.workout) }
+                            }
+                        }
+
                         _workout.value = detail
                         
                         if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
@@ -171,13 +185,21 @@ class WorkoutDetailViewModel @Inject constructor(
         session.exercises?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "Exercise", order++)) }
         session.cooldown?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "cooldown", order++)) }
         
+        // Calculate duration properly instead of relying on the planner's estimate
+        val tempDetails = mutableListOf<WorkoutExerciseWithDetail>()
+        for (a in assignments) {
+            val ex = workoutRepository.getExerciseById(a.exerciseId) ?: Exercise(id = a.exerciseId, name = "Unknown")
+            tempDetails.add(WorkoutExerciseWithDetail(a, ex))
+        }
+        val safeDuration = WorkoutUtil.calculateTotalDuration(tempDetails, includeWarmup)
+
         val workout = Workout(
             id = workoutId,
             name = session.focus,
             description = session.description,
             category = "Personalized",
             difficulty = if (session.focus.contains("Beginner")) "Beginner" else if (session.focus.contains("Advanced")) "Advanced" else "Intermediate",
-            duration = "${session.durationMinutes} min",
+            duration = safeDuration,
             imageName = "img_gym_bg",
             includeWarmupCooldown = includeWarmup
         )

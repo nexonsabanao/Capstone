@@ -88,26 +88,12 @@ class FifthScreen : BaseBindingFragment<FragmentFifthScreenBinding>(FragmentFift
 
         if (chip.id == R.id.addCustomChip) return
 
-        val primaryDarkColor = ContextCompat.getColor(context, R.color.primary_dark)
-        val defaultBackgroundColor = ContextCompat.getColor(context, R.color.white)
-        val defaultTextColor = ContextCompat.getColor(context, R.color.dark_gray)
-        val whiteColor = ContextCompat.getColor(context, android.R.color.white)
-        val strokeColor = ContextCompat.getColor(context, R.color.chip_stroke_selector)
-
-        val backgroundStateList = ColorStateList(
-            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
-            intArrayOf(primaryDarkColor, defaultBackgroundColor)
-        )
-
-        val textStateList = ColorStateList(
-            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
-            intArrayOf(whiteColor, defaultTextColor)
-        )
-
-        chip.chipBackgroundColor = backgroundStateList
-        chip.setTextColor(textStateList)
+        // Color Logic updated to use selectors from resources which now support the red style
+        chip.chipBackgroundColor = ContextCompat.getColorStateList(context, R.color.chip_background_selector)
+        chip.setTextColor(ContextCompat.getColorStateList(context, R.color.chip_text_selector))
+        chip.chipStrokeColor = ContextCompat.getColorStateList(context, R.color.chip_stroke_selector)
+        
         chip.chipStrokeWidth = resources.getDimension(R.dimen.chip_stroke_width_default)
-        chip.chipStrokeColor = ColorStateList.valueOf(strokeColor)
         chip.isChipIconVisible = false
     }
 

@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -63,9 +64,20 @@ class WorkoutCompleteFragment : Fragment() {
         }
         
         binding.btnFinish.setOnClickListener {
-            viewModel.stopWorkout(save = true)
-            navigationViewModel.setTab(0) 
+            finishAndGoHome()
         }
+
+        // Prevent back press from leaving this screen without cleaning up
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finishAndGoHome()
+            }
+        })
+    }
+
+    private fun finishAndGoHome() {
+        viewModel.stopWorkout(save = true)
+        navigationViewModel.resetToHome()
     }
 
     override fun onResume() {
@@ -238,7 +250,7 @@ class WorkoutCompleteFragment : Fragment() {
     }
 
     private fun updateBmi(weightKg: Double) {
-        if (userHeight <= 0) return
+        if (!isAdded || userHeight <= 0) return
         val bmi = weightKg / (userHeight / 100.0).pow(2)
         binding.tvBmiValue.text = String.format("%.1f", bmi)
         
