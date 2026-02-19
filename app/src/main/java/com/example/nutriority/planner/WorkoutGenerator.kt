@@ -56,7 +56,7 @@ class WorkoutGenerator @Inject constructor() {
         var order = 0
 
         // 2. Add Warmup (Smart Scaling)
-        val numWarmup = if (difficulty == "Advanced") 3 else 2
+        val numWarmup = if (difficulty == "Advanced") 2 else 2
         pickExercises(warmupPool, numWarmup, usedExerciseIds, random).forEach { ex ->
             assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "warmup", order++, difficulty), ex))
         }
@@ -64,8 +64,8 @@ class WorkoutGenerator @Inject constructor() {
         // 3. Add Main Exercises (Genius Scaling)
         val numMain = when (difficulty) {
             "Beginner" -> random.nextInt(3, 4)
-            "Intermediate" -> random.nextInt(4, 6)
-            "Advanced" -> random.nextInt(5, 7)
+            "Intermediate" -> random.nextInt(3, 5)
+            "Advanced" -> random.nextInt(3, 6)
             else -> 4
         }
         
@@ -133,8 +133,8 @@ class WorkoutGenerator @Inject constructor() {
         val duration = when {
             isMain -> ""
             difficulty == "Beginner" -> "1 min"
-            difficulty == "Intermediate" -> "2 min"
-            difficulty == "Advanced" -> "3 min"
+            difficulty == "Intermediate" -> "1 min"
+            difficulty == "Advanced" -> "1 min"
             else -> "1 min"
         }
 

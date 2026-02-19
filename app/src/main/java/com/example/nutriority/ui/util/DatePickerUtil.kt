@@ -5,12 +5,6 @@ import android.content.Context
 import java.util.Calendar
 
 object DatePickerUtil {
-    /**
-     * Shows a standard DatePickerDialog.
-     * @param context The context to show the dialog in.
-     * @param initialDateMillis The initial date to show in the picker. If null, defaults to today.
-     * @param onDateSelected Callback invoked when a date is picked, returning the time in milliseconds.
-     */
     fun showDatePicker(
         context: Context,
         initialDateMillis: Long?,
@@ -28,15 +22,32 @@ object DatePickerUtil {
             { _, selectedYear, selectedMonth, selectedDay ->
                 val selectedCalendar = Calendar.getInstance()
                 selectedCalendar.set(selectedYear, selectedMonth, selectedDay)
-                // Ensure time components are cleared for a "pure" date if needed, 
-                // but standard picker sets them to 0 anyway.
                 onDateSelected(selectedCalendar.timeInMillis)
             },
             year, month, day
         )
         
-        // Prevent selecting future dates (typical for birthdays)
-        datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
+        // --- AGE RESTRICTION --- 
+        val today = Calendar.getInstance()
+
+        // Max date: 17 years ago from today
+        val maxDate = Calendar.getInstance().apply {
+            add(Calendar.YEAR, -17)
+        }
+        datePickerDialog.datePicker.maxDate = maxDate.timeInMillis
+
+        // Min date: 28 years ago from today
+        val minDate = Calendar.getInstance().apply {
+            add(Calendar.YEAR, -28)
+        }
+        datePickerDialog.datePicker.minDate = minDate.timeInMillis
+
+        // Set initial display to a valid date within the range (e.g., 22 years old)
+        if (initialDateMillis == null) {
+            val initial = Calendar.getInstance().apply { add(Calendar.YEAR, -22) }
+            datePickerDialog.updateDate(initial.get(Calendar.YEAR), initial.get(Calendar.MONTH), initial.get(Calendar.DAY_OF_MONTH))
+        }
+
         datePickerDialog.show()
     }
 }

@@ -18,6 +18,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.nutriority.R
 import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.data.model.User
@@ -95,7 +97,6 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
     private fun observeNavigationData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Observe the bundled request to prevent flickering
                 navigationViewModel.workoutNavRequest.collect { request ->
                     if (request.workoutId != -1) {
                         viewModel.resolveWorkout(request.workoutId, request.session)
@@ -300,7 +301,15 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
                     workout?.let {
                         binding.tvToolbarTitle.text = it.workout.name
                         binding.workoutTitle.text = it.workout.name
-                        binding.workoutBannerImage.setImageResource(ImageUtil.getWorkoutImageResource(it.workout.targetMuscle, it.workout.name, it.workout.difficulty))
+                        
+                        // FIX: Use Glide to load banner image to avoid "too large bitmap" crash
+                        val resId = ImageUtil.getWorkoutImageResource(it.workout.targetMuscle, it.workout.name, it.workout.difficulty)
+                        Glide.with(this@WorkoutDetailFragment)
+                            .load(resId)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .centerCrop()
+                            .into(binding.workoutBannerImage)
+
                         isSettingInitialState = true
                         binding.switchIncludeWarmupCooldown.isChecked = it.workout.includeWarmupCooldown
                         isSettingInitialState = false
@@ -312,7 +321,6 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Atomic combined observation
                 combine(
                     viewModel.isWorkoutActive, 
                     viewModel.activeWorkoutId, 

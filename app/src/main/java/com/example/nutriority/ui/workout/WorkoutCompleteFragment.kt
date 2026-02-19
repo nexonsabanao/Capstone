@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.workout
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,10 +10,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.nutriority.R
 import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.databinding.FragmentWorkoutCompleteBinding
@@ -57,46 +61,68 @@ class WorkoutCompleteFragment : Fragment() {
         observeSummary()
         setupWeightLogging()
         
-        // Accurate real-time calendar
         profileViewModel.sessionLogs.observe(viewLifecycleOwner) { logs ->
             setupCalendar(logs)
         }
         
         binding.btnFinish.setOnClickListener {
-            viewModel.stopWorkout(save = true)
-            navigationViewModel.setTab(0) 
+            finishAndGoHome()
         }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finishAndGoHome()
+            }
+        })
+    }
+
+    private fun finishAndGoHome() {
+        viewModel.stopWorkout(save = true)
+        navigationViewModel.resetToHome()
     }
 
     override fun onResume() {
         super.onResume()
-        // Trigger celebration on resume to ensure it shows up after transitions
         viewLifecycleOwner.lifecycleScope.launch {
-            // Wait for fragment transition to complete
-            delay(600)
+            delay(300) 
             startCelebration()
         }
     }
 
     private fun observeSummary() {
-        viewModel.latestSessionLog.observe(viewLifecycleOwner) { log: WorkoutSessionLog? ->
-            log?.let {
-                binding.tvStatExercises.text = it.exercisesDone.toString()
-                binding.tvStatTime.text = viewModel.formatElapsedTime(it.durationSeconds)
-                binding.tvWorkoutSummary.text = it.workoutName
-                binding.tvStatCalories.text = it.caloriesBurned.toString()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.sessionSummary.collect { summary ->
+                    summary?.let {
+                        binding.tvStatExercises.text = it.exercisesDone.toString()
+                        binding.tvStatTime.text = viewModel.formatElapsedTime(it.timeSeconds)
+                        binding.tvWorkoutSummary.text = it.workoutName
+                        binding.tvStatCalories.text = it.caloriesBurned.toString()
 
-                // Set dynamic banner image using the utility
-                val resId = ImageUtil.getWorkoutImageResource("", it.workoutName, it.difficulty)
-                binding.ivWorkoutBanner.setImageResource(resId)
+                        val resId = ImageUtil.getWorkoutImageResource("", it.workoutName, it.difficulty)
+                        binding.ivWorkoutBanner.setImageResource(resId)
+                    }
+                }
             }
+        }
+    }
+
+    private fun playWorkoutCompleteSound() {
+        try {
+            val mp = MediaPlayer.create(requireContext(), R.raw.workout_complete)
+            mp.setVolume(1.0f, 1.0f) // Set to max relative volume
+            mp.setOnCompletionListener { it.release() }
+            mp.start()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
     private fun startCelebration() {
         if (_binding == null) return
         
-        // Intensified celebration: more duration, bigger particles
+        playWorkoutCompleteSound()
+        
         val party = Party(
             speed = 15f,
             maxSpeed = 45f,
@@ -209,11 +235,9 @@ class WorkoutCompleteFragment : Fragment() {
                 isUpdatingWeight = true
                 val currentInput = binding.etWeight.text.toString().toDoubleOrNull() ?: 0.0
                 if (checkedId == R.id.btnLb) {
-                    // Switch to LB: multiply by 2.20462
                     binding.etWeight.setText(String.format("%.1f", currentInput * 2.20462))
                     binding.tvWeightUnitLabel.text = "lb"
                 } else {
-                    // Switch back to KG: divide by 2.20462
                     binding.etWeight.setText(String.format("%.1f", currentInput / 2.20462))
                     binding.tvWeightUnitLabel.text = "kg"
                 }
@@ -238,7 +262,7 @@ class WorkoutCompleteFragment : Fragment() {
     }
 
     private fun updateBmi(weightKg: Double) {
-        if (userHeight <= 0) return
+        if (!isAdded || userHeight <= 0) return
         val bmi = weightKg / (userHeight / 100.0).pow(2)
         binding.tvBmiValue.text = String.format("%.1f", bmi)
         

@@ -72,7 +72,8 @@ class WorkoutDetailViewModel @Inject constructor(
         val exercisesDone: Int, 
         val totalExercises: Int,
         val timeSeconds: Long, 
-        val metValue: Double
+        val caloriesBurned: Int,
+        val difficulty: String
     )
     private val _sessionSummary = MutableStateFlow<SessionSummary?>(null)
     val sessionSummary = _sessionSummary.asStateFlow()
@@ -100,7 +101,6 @@ class WorkoutDetailViewModel @Inject constructor(
         workoutJob?.cancel()
         _isLoading.value = true
         _workout.value = null
-        _sessionSummary.value = null
         
         workoutJob = viewModelScope.launch {
             if (session != null) {
@@ -124,6 +124,11 @@ class WorkoutDetailViewModel @Inject constructor(
                 session.cooldown?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "cooldown")) }
 
                 val detail = WorkoutWithExercises(mappedWorkout, assignments)
+                
+                // CRITICAL: Re-calculate duration with safe WorkoutUtil to clean any bad data
+                val safeDuration = WorkoutUtil.calculateTotalDuration(detail.exerciseAssignments, mappedWorkout.includeWarmupCooldown)
+                detail.workout.duration = safeDuration
+
                 _workout.value = detail
                 
                 if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
@@ -136,6 +141,15 @@ class WorkoutDetailViewModel @Inject constructor(
                 workoutRepository.getWorkoutWithExercises(workoutId)
                     .distinctUntilChanged()
                     .collectLatest { detail ->
+                        if (detail != null) {
+                            // CRITICAL: Clean duration data on load
+                            val safeDuration = WorkoutUtil.calculateTotalDuration(detail.exerciseAssignments, detail.workout.includeWarmupCooldown)
+                            if (detail.workout.duration != safeDuration) {
+                                detail.workout.duration = safeDuration
+                                launch { workoutRepository.updateWorkout(detail.workout) }
+                            }
+                        }
+
                         _workout.value = detail
                         
                         if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
@@ -171,13 +185,21 @@ class WorkoutDetailViewModel @Inject constructor(
         session.exercises?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "Exercise", order++)) }
         session.cooldown?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "cooldown", order++)) }
         
+        // Calculate duration properly instead of relying on the planner's estimate
+        val tempDetails = mutableListOf<WorkoutExerciseWithDetail>()
+        for (a in assignments) {
+            val ex = workoutRepository.getExerciseById(a.exerciseId) ?: Exercise(id = a.exerciseId, name = "Unknown")
+            tempDetails.add(WorkoutExerciseWithDetail(a, ex))
+        }
+        val safeDuration = WorkoutUtil.calculateTotalDuration(tempDetails, includeWarmup)
+
         val workout = Workout(
             id = workoutId,
             name = session.focus,
             description = session.description,
             category = "Personalized",
             difficulty = if (session.focus.contains("Beginner")) "Beginner" else if (session.focus.contains("Advanced")) "Advanced" else "Intermediate",
-            duration = "${session.durationMinutes} min",
+            duration = safeDuration,
             imageName = "img_gym_bg",
             includeWarmupCooldown = includeWarmup
         )
@@ -228,6 +250,7 @@ class WorkoutDetailViewModel @Inject constructor(
         val doneCount = _completedExercisesCount.value
         val totalCount = current.exerciseAssignments.size
         val dayIdx = _activeDayIndex.value
+        val cals = (current.workout.metValue * 3.5 * 70 / 200 * (timeSecs / 60.0)).toInt()
         
         viewModelScope.launch {
             val sessionLog = WorkoutSessionLog(
@@ -237,7 +260,7 @@ class WorkoutDetailViewModel @Inject constructor(
                 exercisesDone = doneCount,
                 totalExercises = totalCount,
                 durationSeconds = timeSecs,
-                caloriesBurned = (current.workout.metValue * 3.5 * 70 / 200 * (timeSecs / 60.0)).toInt(),
+                caloriesBurned = cals,
                 difficulty = current.workout.difficulty
             )
             workoutRepository.insertSessionLog(sessionLog)
@@ -249,12 +272,14 @@ class WorkoutDetailViewModel @Inject constructor(
                 }
             }
             
+            // Set session summary BEFORE stopping, so it can be used by the summary screen
             _sessionSummary.value = SessionSummary(
                 workoutName = current.workout.name,
                 exercisesDone = doneCount,
                 totalExercises = totalCount,
                 timeSeconds = timeSecs,
-                metValue = current.workout.metValue
+                caloriesBurned = cals,
+                difficulty = current.workout.difficulty
             )
 
             stopWorkout(save = true)
@@ -284,7 +309,7 @@ class WorkoutDetailViewModel @Inject constructor(
             
             _completedExercisesCount.value = 0
             _activeWorkoutDetail.value = null
-            _sessionSummary.value = null
+            // We DO NOT clear _sessionSummary here anymore, so it survives navigation to summary screen
         }
     }
 

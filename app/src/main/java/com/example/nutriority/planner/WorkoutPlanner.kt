@@ -212,9 +212,10 @@ class WorkoutPlanner @Inject constructor(
     )
 
     private fun mapActivityLevelToDifficulty(activityLevel: String) = when (activityLevel) {
-        "Sedentary", "Lightly active" -> "Beginner"
-        "Active" -> "Intermediate"
-        else -> "Advanced"
+        "Sedentary" -> "Beginner"
+        "Lightly active" -> "Intermediate"
+        "Active" -> "Advanced"
+        else -> "Beginner"
     }
 
     private fun createErrorPlan(message: String) = WorkoutPlan(0, List(28) { index ->

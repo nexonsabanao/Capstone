@@ -74,14 +74,14 @@ class AgeFragment : BaseBindingFragment<FragmentAgeBinding>(FragmentAgeBinding::
         if (selectedDateInMillis == null) return false
 
         return when {
-            calculatedAge < 15 -> {
-                binding.tvDateError.text = "You must be at least 15 years old"
+            calculatedAge < 17 -> {
+                binding.tvDateError.text = "You must be at least 17 years old"
                 binding.tvDateError.visibility = View.VISIBLE
                 binding.nextButton.isEnabled = false
                 false
             }
-            calculatedAge > 100 -> {
-                binding.tvDateError.text = "Please enter a valid birthdate"
+            calculatedAge > 28 -> {
+                binding.tvDateError.text = "Age must be 28 or below"
                 binding.tvDateError.visibility = View.VISIBLE
                 binding.nextButton.isEnabled = false
                 false

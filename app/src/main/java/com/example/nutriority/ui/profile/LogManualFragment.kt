@@ -58,9 +58,19 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
 
     private fun setupDropdown() {
         val items = listOf("Breakfast", "Lunch", "Dinner")
-        // Use the custom list_item layout to fix the pinkish color and styling
         val adapter = ArrayAdapter(requireContext(), R.layout.list_item, items)
         binding.spinnerMealTime.setAdapter(adapter)
+        
+        // Fix for the dropdown showing only the selected item after first click
+        binding.spinnerMealTime.setOnClickListener {
+            binding.spinnerMealTime.showDropDown()
+        }
+        
+        // Ensure that when an item is selected, the text is set WITHOUT filtering
+        binding.spinnerMealTime.setOnItemClickListener { _, _, position, _ ->
+            val selectedItem = adapter.getItem(position)
+            binding.spinnerMealTime.setText(selectedItem, false)
+        }
     }
 
     private fun setupClickListeners() {
@@ -102,7 +112,6 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
         binding.tvIngredientEmpty.isVisible = ingredientsList.isEmpty()
 
         ingredientsList.forEachIndexed { index, ingredient ->
-            // Create a horizontal layout for the ingredient and a delete button
             val itemLayout = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.HORIZONTAL
                 layoutParams = LinearLayout.LayoutParams(
@@ -152,7 +161,6 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Pass manual calories to repository
                 mealRepository.logManualMeal(title, protein, carbs, fats, mealTime, ingredientsList, calories)
                 Toast.makeText(requireContext(), "Meal logged successfully!", Toast.LENGTH_SHORT).show()
                 navigationViewModel.goBack()

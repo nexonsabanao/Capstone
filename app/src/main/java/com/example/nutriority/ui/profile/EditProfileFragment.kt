@@ -100,8 +100,13 @@ class EditProfileFragment : Fragment() {
 
         binding.rowAge.root.setOnClickListener { 
             DatePickerUtil.showDatePicker(requireContext(), currentUser?.birthDate) { selection ->
-                if (selection != currentUser?.birthDate) {
-                    updateUserField(false) { it.copy(birthDate = selection) }
+                val age = calculateAgeFromMillis(selection)
+                if (age in 17..28) {
+                    if (selection != currentUser?.birthDate) {
+                        updateUserField(false) { it.copy(birthDate = selection) }
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Age must be between 17 and 28 years old", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -176,6 +181,16 @@ class EditProfileFragment : Fragment() {
         binding.btnDeleteAccount.setOnClickListener {
             showDeleteAccountConfirmation()
         }
+    }
+
+    private fun calculateAgeFromMillis(millis: Long): Int {
+        val dob = Calendar.getInstance().apply { timeInMillis = millis }
+        val today = Calendar.getInstance()
+        var age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR)
+        if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
+            age--
+        }
+        return age
     }
 
     private fun showUpdateOptionsDialog(fieldName: String, onSelection: (Boolean) -> Unit) {
@@ -274,7 +289,6 @@ class EditProfileFragment : Fragment() {
 
         user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
             if (reauthTask.isSuccessful) {
-                // Now that we are re-authenticated, delete the account
                 performImmediateDeletion()
             } else {
                 Toast.makeText(requireContext(), "Verification failed: ${reauthTask.exception?.message}", Toast.LENGTH_LONG).show()
