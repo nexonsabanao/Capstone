@@ -371,7 +371,7 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
                     val total = workout?.exerciseAssignments?.size ?: 1
                     (done.toFloat() / total) * 100
                 }.collect { progress ->
-                    binding.workoutProgress.progress = progress.toInt()
+                    binding.workoutProgress.progress = progress.toFloat()
                 }
             }
         }
