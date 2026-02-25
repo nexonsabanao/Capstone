@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -64,6 +65,20 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
         observeNavigationData()
         observeViewModel()
         setupClickListeners()
+        setupOnBackPressed()
+    }
+
+    private fun setupOnBackPressed() {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (viewModel.isWorkoutActive.value && viewModel.activeWorkoutId.value == viewModel.workout.value?.workout?.id) {
+                    showEndWorkoutBottomSheet()
+                } else {
+                    isEnabled = false
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     private fun setupToolbar() {
@@ -166,6 +181,7 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
         dialog.setOnCancelListener { viewModel.resumeWorkout() }
         view.findViewById<MaterialButton>(R.id.btnDiscard).setOnClickListener {
             viewModel.stopWorkout(false); dialog.dismiss()
+            navigationViewModel.goBack()
         }
         view.findViewById<MaterialButton>(R.id.btnSaveFinish).setOnClickListener {
             viewModel.finishWorkout(); navigationViewModel.navigateToWorkoutComplete(); dialog.dismiss()
@@ -351,9 +367,11 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.completedExercisesCount.collect { done ->
-                    val total = viewModel.workout.value?.exerciseAssignments?.size ?: 1
-                    binding.workoutProgress.progress = (done.toFloat() / total) * 100
+                combine(viewModel.completedExercisesCount, viewModel.workout) { done, workout ->
+                    val total = workout?.exerciseAssignments?.size ?: 1
+                    (done.toFloat() / total) * 100
+                }.collect { progress ->
+                    binding.workoutProgress.progress = progress.toInt()
                 }
             }
         }

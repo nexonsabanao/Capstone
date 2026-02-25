@@ -35,7 +35,7 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
             }
 
             if (!isValidEmail(email)) {
-                showError("Please enter a valid CVSU student email")
+                showError("Please enter a valid CVSU student email (xxxx@cvsu.edu.ph)")
                 return@setOnClickListener
             }
 
@@ -75,6 +75,7 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
     }
 
     private fun isValidEmail(email: String): Boolean {
-        return email.startsWith("tmc.") && email.endsWith("@cvsu.edu.ph")
+        val lowerEmail = email.lowercase().trim()
+        return lowerEmail.endsWith("@cvsu.edu.ph")
     }
 }

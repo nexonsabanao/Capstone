@@ -4,15 +4,16 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.data.model.Workout
 import com.example.nutriority.databinding.LayoutTrainerWorkoutsBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.WorkoutAdapter
 import com.example.nutriority.ui.home.HomeViewModel
-import com.example.nutriority.ui.profile.ProfileViewModel
 import com.example.nutriority.ui.util.BaseBindingFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -24,7 +25,7 @@ class TrainerWorkoutsFragment : BaseBindingFragment<LayoutTrainerWorkoutsBinding
 
     private val homeViewModel: HomeViewModel by activityViewModels()
     private val navigationViewModel: NavigationViewModel by activityViewModels()
-    private val profileViewModel: ProfileViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
 
     private val workoutAdapter by lazy {
         WorkoutAdapter { workout -> navigationViewModel.navigateToWorkoutDetail(workout.id) }
@@ -54,48 +55,34 @@ class TrainerWorkoutsFragment : BaseBindingFragment<LayoutTrainerWorkoutsBinding
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Combine unfiltered workouts from HomeViewModel and the UI state from ProfileViewModel
-                // This approach is more stable and avoids complex type inference issues
+                // Combine workouts from HomeViewModel and the User from UserViewModel
                 combine(
                     homeViewModel.unfilteredWorkouts,
-                    profileViewModel.uiState
-                ) { workouts, profileState ->
-                    workouts to profileState.user
+                    userViewModel.user.asFlow()
+                ) { workouts, user ->
+                    workouts to user
                 }.collectLatest { (workouts, user) ->
-                    // Filter for official workouts
+                    // 1. Filter for official workouts only
                     val officialWorkouts = workouts.filter { it.category == "Official" || it.id in 1..25 }
 
-                    if (officialWorkouts.isNotEmpty()) {
-                        val filteredList = if (user != null) {
-                            val allowedDifficulties = when (user.activityLevel) {
-                                "Sedentary" -> listOf("Beginner")
-                                "Lightly active" -> listOf("Beginner", "Intermediate")
-                                "Active" -> listOf("Intermediate", "Advanced")
-                                else -> listOf("Beginner", "Intermediate", "Advanced")
-                            }
-                            
-                            val filtered = officialWorkouts.filter { it.difficulty in allowedDifficulties }
-                            if (filtered.isEmpty()) officialWorkouts.take(10) else filtered
-                        } else {
-                            officialWorkouts.take(10)
+                    if (officialWorkouts.isNotEmpty() && user != null) {
+                        // 2. Determine allowed difficulties based on user activity level (lowercase for safety)
+                        val activity = user.activityLevel.lowercase().trim()
+                        val allowedDifficulties = when {
+                            activity.contains("sedentary") -> listOf("Beginner")
+                            activity.contains("lightly active") -> listOf("Beginner", "Intermediate")
+                            activity.contains("active") -> listOf("Intermediate", "Advanced")
+                            else -> listOf("Beginner") // Safe default
                         }
+                        
+                        // 3. Apply the strict filter
+                        val filteredList = officialWorkouts.filter { it.difficulty in allowedDifficulties }
 
+                        // 4. Update UI
                         workoutAdapter.submitList(filteredList)
                         binding.loadingProgress.visibility = View.GONE
                         binding.contentScrollView.visibility = View.VISIBLE
                     } else if (homeViewModel.isDataReady.value) {
-                        binding.loadingProgress.visibility = View.GONE
-                        binding.contentScrollView.visibility = View.VISIBLE
-                    }
-                }
-            }
-        }
-
-        // Secondary observer for isDataReady to ensure loading progress is hidden correctly
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                homeViewModel.isDataReady.collect { isReady ->
-                    if (isReady) {
                         binding.loadingProgress.visibility = View.GONE
                         binding.contentScrollView.visibility = View.VISIBLE
                     }

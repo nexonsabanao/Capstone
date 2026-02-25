@@ -4,19 +4,21 @@
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00FFFFFF</color>
 
-    <!-- Add your new custom color here -->
+    <!-- Core App Colors -->
     <color name="green">#00A78B</color>
     <color name="dark_gray">#2d1809</color>
     <color name="light_green">#fbffe2</color>
-    <!-- A calm blue -->
-    <!-- A warning orange -->
-    <color name="bmi_obese">#E74C3C</color>       <!-- A stronger red/orange -->
+    <color name="bmi_obese">#E74C3C</color>
     <color name="app_background">#F5F5F5</color>
     <color name="ic_launcher_background">#FDFDFD</color>
 
     <color name="primary_dark">#2A2A2A</color>
     <color name="secondary_dark">#1D1D1D</color>
     <color name="secondary_blue">#00A4B9</color>
+
+    <!-- Missing Chip Colors -->
+    <color name="chip_checked_background">#E0F2F1</color> <!-- Light green/teal background -->
+    <color name="chip_checked_stroke">#00A78B</color>     <!-- Same as green -->
 
     <!-- Exclusion Chip Colors -->
     <color name="exclusion_chip_checked_stroke">#FF5252</color>

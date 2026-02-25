@@ -14,6 +14,7 @@ import com.example.nutriority.data.model.User
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.databinding.FragmentSignUpBinding
 import com.example.nutriority.ui.util.KeyboardUtil
+import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,9 +31,6 @@ class SignUpFragment : Fragment() {
     @Inject lateinit var userRepository: UserRepository
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-
-    private var pendingEmail: String? = null
-    private var pendingPass: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,24 +57,15 @@ class SignUpFragment : Fragment() {
 
         binding.btnSignUp.setOnClickListener { 
             KeyboardUtil.hideKeyboard(requireActivity())
-            validateInputsAndProceed() 
-        }
-        
-        // This button now triggers the official Firebase Verification Link
-        binding.btnSendCode.setOnClickListener { 
-            KeyboardUtil.hideKeyboard(requireActivity())
-            performRegistrationAndSendLink() 
+            validateAndRegister() 
         }
         
         binding.btnVerify.setOnClickListener {
-            // After sending link, user just needs to go to login
             parentFragmentManager.setFragmentResult("navigationRequestLogin", Bundle())
         }
     }
 
     private fun resetState() {
-        pendingEmail = null
-        pendingPass = null
         if (_binding != null) {
             binding.etEmail.text?.clear()
             binding.etPassword.text?.clear()
@@ -93,85 +82,45 @@ class SignUpFragment : Fragment() {
 
     private fun handleBackAction() {
         if (binding.layoutVerification.isVisible) {
-            binding.layoutVerification.isVisible = false
-            binding.inputContainer.isVisible = true
-            binding.tvTitle.text = "Create Account"
-            binding.tvSubtitle.isVisible = true
-            binding.tvError.isVisible = false
+            resetState()
         } else {
             parentFragmentManager.setFragmentResult("navigationRequestPrevious", Bundle())
         }
     }
 
-    private fun validateInputsAndProceed() {
+    private fun validateAndRegister() {
         val email = binding.etEmail.text.toString().lowercase().trim()
         val password = binding.etPassword.text.toString().trim()
         val confirmPass = binding.etConfirmPassword.text.toString().trim()
 
         when {
             email.isBlank() -> showError("Please enter your CVSU email")
-            !isValidStudentEmail(email) -> showError("Invalid: Use CVSU student email (tmc.xxxx@cvsu.edu.ph)")
+            !isValidStudentEmail(email) -> showError("Invalid: Use CVSU student email (xxxx@cvsu.edu.ph)")
             password.length < 8 -> showError("Password must be at least 8 characters")
             !password.any { it.isUpperCase() } -> showError("Password must contain an upper case character")
             !password.any { it.isDigit() } -> showError("Password must contain a numeric character")
             password != confirmPass -> showError("Passwords do not match")
-            else -> checkEmailAvailability(email, password)
+            else -> performRegistration(email, password)
         }
     }
 
-    private fun checkEmailAvailability(email: String, pass: String) {
+    private fun performRegistration(email: String, pass: String) {
         binding.btnSignUp.isEnabled = false
-        binding.btnSignUp.text = "CHECKING EMAIL..."
-
-        auth.fetchSignInMethodsForEmail(email).addOnCompleteListener { task ->
-            if (_binding == null) return@addOnCompleteListener
-
-            binding.btnSignUp.isEnabled = true
-            binding.btnSignUp.text = "CONTINUE"
-
-            if (task.isSuccessful) {
-                val methods = task.result?.signInMethods ?: emptyList()
-                if (methods.isEmpty()) {
-                    pendingEmail = email
-                    pendingPass = pass
-                    
-                    // Switch to Verification Link View
-                    binding.inputContainer.isVisible = false
-                    binding.layoutVerification.isVisible = true
-                    binding.tvTitle.text = "Verify Email"
-                    binding.tvSubtitle.isVisible = false
-                    binding.tvError.isVisible = false
-                    
-                    // UI adjustment for Link Flow
-                    binding.pinInputLayout.isVisible = false
-                    binding.tvVerifySubtitle.text = "Click below to register and send a verification link to your student email."
-                    binding.btnSendCode.text = "SEND VERIFICATION LINK"
-                    binding.btnVerify.isVisible = false
-                } else {
-                    showError("Email is already registered. Please login.")
-                }
-            } else {
-                showError("Error: ${task.exception?.message}")
-            }
-        }
-    }
-
-    private fun performRegistrationAndSendLink() {
-        val email = pendingEmail ?: return
-        val pass = pendingPass ?: return
-
-        binding.btnSendCode.isEnabled = false
-        binding.btnSendCode.text = "REGISTERING..."
+        binding.btnSignUp.text = "REGISTERING..."
 
         auth.createUserWithEmailAndPassword(email, pass)
             .addOnCompleteListener { task ->
+                if (_binding == null) return@addOnCompleteListener
+                
                 if (task.isSuccessful) {
                     val firebaseUser = auth.currentUser
+                    
                     firebaseUser?.sendEmailVerification()?.addOnCompleteListener { verifyTask ->
                         if (_binding == null) return@addOnCompleteListener
                         
                         if (verifyTask.isSuccessful) {
                             viewLifecycleOwner.lifecycleScope.launch {
+                                // Initialize local user record
                                 val newUser = User(
                                     id = 1,
                                     gender = "",
@@ -187,28 +136,36 @@ class SignUpFragment : Fragment() {
                                 )
                                 userRepository.insertUser(newUser)
                                 
-                                // Show Success UI
-                                binding.tvVerifySubtitle.text = "A verification link has been sent to $email. Please check your inbox and verify your account before logging in."
-                                binding.btnSendCode.isVisible = false
+                                // Show Verification UI immediately with the custom message
+                                binding.inputContainer.isVisible = false
+                                binding.layoutVerification.isVisible = true
+                                binding.tvTitle.text = "Verify Email"
+                                binding.tvSubtitle.isVisible = false
+                                
+                                // INTEGRATED MESSAGE WITH EXPIRATION INFO
+                                binding.tvVerifySubtitle.text = "Welcome to Nutriority! A verification link has been sent to $email.\n\nPlease check your CVSU inbox (and spam folder) to verify your account.\n\nNote: This link will expire in 72 hours for your security."
+                                
+                                binding.btnSendCode.isVisible = false 
                                 binding.btnVerify.isVisible = true
                                 binding.btnVerify.text = "GO TO LOGIN"
+                                
                                 Toast.makeText(requireContext(), "Verification email sent!", Toast.LENGTH_LONG).show()
                             }
                         } else {
-                            showError("Failed to send link: ${verifyTask.exception?.message}")
-                            binding.btnSendCode.isEnabled = true
-                            binding.btnSendCode.text = "RETRY"
+                            showError("Account created, but failed to send verification link: ${verifyTask.exception?.message}")
+                            binding.btnSignUp.isEnabled = true
+                            binding.btnSignUp.text = "RETRY SENDING LINK"
                         }
                     }
                 } else {
                     val exception = task.exception
                     if (exception is FirebaseAuthUserCollisionException) {
-                        showError("This email is already in use.")
+                        showError("This email is already in use. Try logging in.")
                     } else {
                         showError("Registration failed: ${exception?.message}")
                     }
-                    binding.btnSendCode.isEnabled = true
-                    binding.btnSendCode.text = "SEND VERIFICATION LINK"
+                    binding.btnSignUp.isEnabled = true
+                    binding.btnSignUp.text = "CONTINUE"
                 }
             }
     }
@@ -220,7 +177,7 @@ class SignUpFragment : Fragment() {
 
     private fun isValidStudentEmail(email: String): Boolean {
         val lowerEmail = email.lowercase().trim()
-        return lowerEmail.startsWith("tmc.") && lowerEmail.endsWith("@cvsu.edu.ph")
+        return lowerEmail.endsWith("@cvsu.edu.ph")
     }
 
     override fun onDestroyView() {

@@ -104,62 +104,34 @@ class WorkoutDetailViewModel @Inject constructor(
         
         workoutJob = viewModelScope.launch {
             if (session != null) {
-                // First check if this personalized workout already exists in DB to get preferences
+                // If session is provided (Personalized workout), ensure it's synced to DB first
                 val existing = workoutRepository.getWorkoutWithExercises(workoutId).first()
-                
-                val mappedWorkout = Workout(
-                    id = workoutId,
-                    name = session.focus,
-                    description = session.description,
-                    category = "Personalized",
-                    difficulty = if (session.focus.contains("Beginner")) "Beginner" else if (session.focus.contains("Advanced")) "Advanced" else "Intermediate",
-                    duration = "${session.durationMinutes} min",
-                    imageName = "img_gym_bg",
-                    includeWarmupCooldown = existing?.workout?.includeWarmupCooldown ?: true
-                )
-
-                val assignments = mutableListOf<WorkoutExerciseWithDetail>()
-                session.warmup?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "warmup")) }
-                session.exercises?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "Exercise")) }
-                session.cooldown?.forEach { pe -> assignments.add(mapPlannerToDetail(workoutId, pe, "cooldown")) }
-
-                val detail = WorkoutWithExercises(mappedWorkout, assignments)
-                
-                // CRITICAL: Re-calculate duration with safe WorkoutUtil to clean any bad data
-                val safeDuration = WorkoutUtil.calculateTotalDuration(detail.exerciseAssignments, mappedWorkout.includeWarmupCooldown)
-                detail.workout.duration = safeDuration
-
-                _workout.value = detail
-                
-                if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
-                    _activeWorkoutDetail.value = detail
-                }
-
-                _isLoading.value = false
-                launch { syncSessionToDb(workoutId, session, mappedWorkout.includeWarmupCooldown) }
-            } else {
-                workoutRepository.getWorkoutWithExercises(workoutId)
-                    .distinctUntilChanged()
-                    .collectLatest { detail ->
-                        if (detail != null) {
-                            // CRITICAL: Clean duration data on load
-                            val safeDuration = WorkoutUtil.calculateTotalDuration(detail.exerciseAssignments, detail.workout.includeWarmupCooldown)
-                            if (detail.workout.duration != safeDuration) {
-                                detail.workout.duration = safeDuration
-                                launch { workoutRepository.updateWorkout(detail.workout) }
-                            }
-                        }
-
-                        _workout.value = detail
-                        
-                        if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
-                            _activeWorkoutDetail.value = detail
-                        }
-                        
-                        _completedExercisesCount.value = detail?.exerciseAssignments?.count { it.assignment.isCompleted } ?: 0
-                        _isLoading.value = false
-                    }
+                syncSessionToDb(workoutId, session, existing?.workout?.includeWarmupCooldown ?: true)
             }
+
+            // Use collectLatest on the repository flow to handle real-time updates (like exercise completion)
+            // This fixes the bug where personalized workouts didn't update the UI when an exercise was done.
+            workoutRepository.getWorkoutWithExercises(workoutId)
+                .distinctUntilChanged()
+                .collectLatest { detail ->
+                    if (detail != null) {
+                        // CRITICAL: Clean duration data on load
+                        val safeDuration = WorkoutUtil.calculateTotalDuration(detail.exerciseAssignments, detail.workout.includeWarmupCooldown)
+                        if (detail.workout.duration != safeDuration) {
+                            detail.workout.duration = safeDuration
+                            launch { workoutRepository.updateWorkout(detail.workout) }
+                        }
+                    }
+
+                    _workout.value = detail
+                    
+                    if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
+                        _activeWorkoutDetail.value = detail
+                    }
+                    
+                    _completedExercisesCount.value = detail?.exerciseAssignments?.count { it.assignment.isCompleted } ?: 0
+                    _isLoading.value = false
+                }
         }
     }
 
@@ -179,11 +151,26 @@ class WorkoutDetailViewModel @Inject constructor(
     }
 
     private suspend fun syncSessionToDb(workoutId: Int, session: WorkoutSession, includeWarmup: Boolean) {
+        // Fetch existing assignments to preserve completion status
+        val existingWorkout = workoutRepository.getWorkoutWithExercises(workoutId).first()
+        val existingAssignments = existingWorkout?.exerciseAssignments ?: emptyList()
+
         val assignments = mutableListOf<WorkoutExercise>()
         var order = 0
-        session.warmup?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "warmup", order++)) }
-        session.exercises?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "Exercise", order++)) }
-        session.cooldown?.forEach { ex -> assignments.add(createWorkoutExercise(workoutId, ex, "cooldown", order++)) }
+        
+        fun getCompletedStatus(exId: String, cat: String): Boolean {
+            return existingAssignments.find { it.assignment.exerciseId == exId && it.assignment.category == cat }?.assignment?.isCompleted ?: false
+        }
+
+        session.warmup?.forEach { ex -> 
+            assignments.add(createWorkoutExercise(workoutId, ex, "warmup", order++, getCompletedStatus(ex.exerciseId, "warmup"))) 
+        }
+        session.exercises?.forEach { ex -> 
+            assignments.add(createWorkoutExercise(workoutId, ex, "Exercise", order++, getCompletedStatus(ex.exerciseId, "Exercise"))) 
+        }
+        session.cooldown?.forEach { ex -> 
+            assignments.add(createWorkoutExercise(workoutId, ex, "cooldown", order++, getCompletedStatus(ex.exerciseId, "cooldown"))) 
+        }
         
         // Calculate duration properly instead of relying on the planner's estimate
         val tempDetails = mutableListOf<WorkoutExerciseWithDetail>()
@@ -206,7 +193,13 @@ class WorkoutDetailViewModel @Inject constructor(
         workoutRepository.updateWorkoutWithExercises(workout, assignments)
     }
 
-    private fun createWorkoutExercise(workoutId: Int, pe: com.example.nutriority.planner.PlannerExercise, category: String, order: Int): WorkoutExercise {
+    private fun createWorkoutExercise(
+        workoutId: Int, 
+        pe: com.example.nutriority.planner.PlannerExercise, 
+        category: String, 
+        order: Int,
+        isCompleted: Boolean = false
+    ): WorkoutExercise {
         return WorkoutExercise(
             workoutId = workoutId,
             exerciseId = pe.exerciseId,
@@ -215,7 +208,8 @@ class WorkoutDetailViewModel @Inject constructor(
             reps = pe.reps,
             duration = pe.duration,
             rest = pe.rest,
-            order = order
+            order = order,
+            isCompleted = isCompleted
         )
     }
 

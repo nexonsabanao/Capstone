@@ -238,7 +238,7 @@ class SeventhScreen : BaseBindingFragment<FragmentSeventhScreenBinding>(Fragment
             "Weight: ${user.weightKg.toInt()} kg"
         }
 
-        val initial = listOf("Gender: ${user.gender}", height, weight)
+        val initial = listOf("Sex: ${user.gender}", height, weight)
         val details = mutableListOf("Activity: ${user.activityLevel}", "Diet: ${user.preferredDiet}")
 
         if (user.excludedIngredients.isNotEmpty()) {

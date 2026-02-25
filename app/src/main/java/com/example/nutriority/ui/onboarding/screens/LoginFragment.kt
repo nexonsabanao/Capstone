@@ -45,7 +45,7 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
             when {
                 email.isBlank() -> showError("Email is required")
                 password.isBlank() -> showError("Password is required")
-                !isValidStudentEmail(email) -> showError("Access restricted: Use student email (tmc.xxxx@cvsu.edu.ph)")
+                !isValidStudentEmail(email) -> showError("Access restricted: Use student email (xxxx@cvsu.edu.ph)")
                 else -> performFirebaseLogin(email, password)
             }
         }
@@ -124,5 +124,5 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
         binding.tvError.isVisible = true
     }
 
-    private fun isValidStudentEmail(email: String): Boolean = email.startsWith("tmc.") && email.endsWith("@cvsu.edu.ph")
+    private fun isValidStudentEmail(email: String): Boolean = email.endsWith("@cvsu.edu.ph")
 }

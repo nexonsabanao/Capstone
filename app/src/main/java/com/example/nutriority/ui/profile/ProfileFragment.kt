@@ -262,17 +262,12 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
             .map { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }
             .toSet()
 
-        if (logDates.isEmpty()) {
-            binding.historyCard.tvStreakCount.text = "0"
-            binding.historyCard.tvStreakLabel.text = "day"
-            return
-        }
-            
         var streak = 0
         val checkCal = Calendar.getInstance()
         val todayKey = getDayKey(checkCal)
         
-        if (!logDates.contains(todayKey)) {
+        val loggedToday = logDates.contains(todayKey)
+        if (!loggedToday) {
             checkCal.add(Calendar.DAY_OF_YEAR, -1)
         }
 
@@ -283,6 +278,13 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         
         binding.historyCard.tvStreakCount.text = streak.toString()
         binding.historyCard.tvStreakLabel.text = if (streak <= 1) "day" else "days"
+        
+        // Red only when streak is 0 (broken)
+        if (streak == 0) {
+            binding.historyCard.tvStreakCount.setTextColor(Color.parseColor("#E74C3C"))
+        } else {
+            binding.historyCard.tvStreakCount.setTextColor(Color.parseColor("#212121"))
+        }
     }
 
     private fun getDayKey(cal: Calendar) = "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}"

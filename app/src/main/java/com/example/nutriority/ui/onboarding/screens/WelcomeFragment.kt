@@ -49,22 +49,46 @@ class WelcomeFragment : BaseBindingFragment<FragmentWelcomeBinding>(FragmentWelc
 
     private fun showTermsDialog() {
         val termsAndServicesText = """
-            Welcome to Nutriority.
-            
-            By using our app, you agree to these terms. Please read them carefully.
-            
-            1. Using our Services
-            You must follow any policies made available to you within the Services. Don't misuse our Services. For example, don’t interfere with our Services or try to access them using a method other than the interface and the instructions that we provide.
-            
-            2. Your Nutriority Account
-            You may need a Nutriority Account in order to use some of our Services. You may create your own Nutriority Account, or your Nutriority Account may be assigned to you by an administrator, such as your employer or educational institution.
-            
-            3. Privacy and Copyright Protection
-            Nutriority’s privacy policies explain how we treat your personal data and protect your privacy when you use our Services.
+            Welcome to Nutriority! By using this app, you agree to the following terms. Please read them carefully.
+
+            1. Who Can Use This App
+            Nutriority is exclusively available to currently enrolled students of Cavite State University – Trece Martires City Campus. You must use your valid CvSU credentials or information to register and access the app.
+
+            2. Health Disclaimer
+            ⚠ IMPORTANT: Nutriority is NOT recommended for users with health problems or injuries.
+
+            The workout plans and nutrition content in this app are for general wellness purposes only and do not constitute medical advice. Do not use this app if you have any of the following:
+            - Pre-existing medical conditions (e.g., heart disease, diabetes, hypertension)
+            - Current or recent injuries (e.g., joint, muscle, or spinal injuries)
+            - Any condition for which a doctor has advised you to avoid physical activity
+            - Pregnancy or postpartum recovery
+
+            If you are unsure whether this app is safe for you, please consult a licensed healthcare professional before use. Stop using the app immediately and seek medical attention if you feel pain, dizziness, or discomfort.
+
+            3. User Responsibilities
+            By using Nutriority, you agree to:
+            - Provide honest and accurate information about yourself
+            - Use the app only for personal health and fitness purposes
+            - Not share your account with others
+            - Not misuse or attempt to damage the app or its data
+
+            4. Privacy
+            Any personal information you provide (such as your name, age, and health data) will only be used to operate and improve Nutriority. Your data will not be shared with third parties outside of CvSU without your consent.
+
+            5. Limitation of Liability
+            Nutriority and its developers are not liable for any injury, health issue, or damages that may result from using the app. You use the app at your own risk.
+
+            6. Changes to These Terms
+            We may update these Terms from time to time. Continued use of the app after any changes means you accept the updated Terms.
+
+            7. Contact
+            For questions or concerns, please reach out to the Nutriority team through your CvSU campus channels.
+
+            By using Nutriority, you confirm that you have read and agree to these Terms and Conditions.
             """.trimIndent()
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Terms and Services")
+            .setTitle("Terms and Conditions")
             .setMessage(termsAndServicesText)
             .setPositiveButton("OK", null)
             .show()
