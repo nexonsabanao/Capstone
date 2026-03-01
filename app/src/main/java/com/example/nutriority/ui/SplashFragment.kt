@@ -21,6 +21,7 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -56,10 +57,24 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
 
                     // 2. Auth & Onboarding Check
                     val firebaseUser = FirebaseAuth.getInstance().currentUser
+                    
+                    // NEW: Force a token refresh/reload to verify if account still exists
+                    val isAccountValid = if (firebaseUser != null) {
+                        try {
+                            firebaseUser.reload().await()
+                            true
+                        } catch (e: Exception) {
+                            // Account likely deleted or disabled
+                            FirebaseAuth.getInstance().signOut()
+                            userRepository.deleteAll()
+                            false
+                        }
+                    } else false
+
                     val sharedPref = requireActivity().getSharedPreferences("onBoarding", Context.MODE_PRIVATE)
                     val isOnboardingFinished = sharedPref.getBoolean("Finished", false)
 
-                    val destination = if (firebaseUser != null && isOnboardingFinished) {
+                    val destination = if (isAccountValid && isOnboardingFinished) {
                         val localUser = userRepository.getInitialUser() ?: run {
                             userRepository.restoreUserFromCloud()
                             userRepository.getInitialUser()

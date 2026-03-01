@@ -39,7 +39,7 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
                 return@setOnClickListener
             }
 
-            sendPasswordResetEmail(email)
+            verifyAndSendResetEmail(email)
         }
 
         binding.btnDone.setOnClickListener {
@@ -47,8 +47,34 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
         }
     }
 
-    private fun sendPasswordResetEmail(email: String) {
+    private fun verifyAndSendResetEmail(email: String) {
         binding.btnSendCodeInitial.isEnabled = false
+        binding.btnSendCodeInitial.text = "VERIFYING..."
+
+        // Check if the account exists first
+        auth.fetchSignInMethodsForEmail(email).addOnCompleteListener { checkTask ->
+            if (context == null) return@addOnCompleteListener
+
+            if (checkTask.isSuccessful) {
+                val signInMethods = checkTask.result?.signInMethods
+                
+                if (signInMethods.isNullOrEmpty()) {
+                    // No account found for this email
+                    binding.btnSendCodeInitial.isEnabled = true
+                    binding.btnSendCodeInitial.text = "SEND RESET LINK"
+                    showError("This email is not registered with a Nutriority account.")
+                } else {
+                    // Account exists, proceed to send reset email
+                    sendPasswordResetEmail(email)
+                }
+            } else {
+                // If checking fails (e.g. network error), try sending anyway as a fallback
+                sendPasswordResetEmail(email)
+            }
+        }
+    }
+
+    private fun sendPasswordResetEmail(email: String) {
         binding.btnSendCodeInitial.text = "SENDING..."
 
         auth.sendPasswordResetEmail(email)
