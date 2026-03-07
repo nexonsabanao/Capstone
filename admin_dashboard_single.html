@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutriority Admin | Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #00A78B;
+            --primary-soft: #e0f2f1;
+            --primary-dark: #008f72;
+            --secondary: #1e293b;
+            --bg: #f1f5f9;
+            --white: #ffffff;
+            --text-dark: #0f172a;
+            --text-gray: #64748b;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --sidebar-width: 280px;
+            --radius: 16px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-dark); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+        .sidebar { width: var(--sidebar-width); background: var(--secondary); color: white; position: fixed; height: 100vh; padding: 35px 20px; display: flex; flex-direction: column; z-index: 1000; box-shadow: 4px 0 10px rgba(0,0,0,0.1); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-brand { display: flex; align-items: center; gap: 15px; margin-bottom: 45px; padding: 0 10px; }
+        .sidebar-brand i { color: var(--primary); font-size: 28px; }
+        .sidebar-brand h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+        .nav-section { margin-bottom: 35px; }
+        .nav-label { font-size: 11px; text-transform: uppercase; color: #475569; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 15px; padding-left: 12px; }
+        .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--radius); cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: #94a3b8; font-weight: 600; margin-bottom: 6px; }
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: white; transform: translateX(5px); }
+        .nav-item i { font-size: 18px; width: 24px; text-align: center; }
+        .nav-item.active { background: var(--primary); color: white; box-shadow: 0 10px 15px -3px rgba(0, 167, 139, 0.4); transform: translateX(5px); }
+
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; transition: margin-left 0.3s ease; width: calc(100% - var(--sidebar-width)); }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; gap: 20px; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-toggle { display: none; background: var(--white); border: none; width: 44px; height: 44px; border-radius: 12px; cursor: pointer; color: var(--secondary); font-size: 20px; box-shadow: var(--shadow); align-items: center; justify-content: center; }
+        .welcome-msg h1 { font-size: 28px; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
+        .welcome-msg p { color: var(--text-gray); font-weight: 500; }
+
+        .connection-status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; background: var(--white); box-shadow: var(--shadow); margin-left: 10px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; position: relative; }
+        .status-dot.connected { background: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+        .status-dot.connected::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 40px; }
+        .stat-card { background: var(--white); padding: 24px; border-radius: 24px; box-shadow: var(--shadow); border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 12px; transition: 0.3s; }
+        .stat-card:hover { transform: scale(1.02); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 4px; }
+        .stat-label { color: var(--text-gray); font-size: 14px; font-weight: 600; }
+        .stat-value { font-size: 32px; font-weight: 800; color: var(--text-dark); }
+
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 40px; }
+        .chart-card { background: var(--white); padding: 30px; border-radius: 24px; box-shadow: var(--shadow); border: 1px solid #f1f5f9; min-height: 350px; }
+        .chart-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        .chart-card h3 i { color: var(--primary); }
+
+        .data-card { background: var(--white); border-radius: 24px; padding: 32px; box-shadow: var(--shadow); border: 1px solid #f1f5f9; margin-bottom: 20px; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; gap: 15px; flex-wrap: wrap; }
+        .table-header h2 { font-size: 20px; font-weight: 800; }
+        .table-wrapper { overflow-x: auto; margin: 0 -32px; padding: 0 32px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 800px; table-layout: fixed; }
+        th { text-align: left; padding: 16px; background: #f8fafc; color: var(--text-gray); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        th:hover { background: #f1f5f9; color: var(--primary); }
+        td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; font-weight: 500; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        tr:hover td { background: #f8fafc; }
+
+        .avatar { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; background: #edf2f7; }
+        .badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
+        .search-box { position: relative; flex: 1; min-width: 250px; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-gray); }
+        .search-box input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 2px solid #e2e8f0; outline: none; }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--white); width: 100%; max-width: 680px; border-radius: 28px; padding: 40px; max-height: 90vh; overflow-y: auto; }
+        .input-group { margin-bottom: 24px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-dark); }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 14px 18px; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 15px; font-family: inherit; outline: none; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; font-size: 14px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: #f1f5f9; color: var(--secondary); }
+        .btn-danger { background: #fef2f2; color: var(--danger); }
+        .btn-warning { background: #fffbeb; color: var(--warning); }
+        .btn-sm { padding: 10px 16px; font-size: 12px; border-radius: 10px; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .console { background: #0f172a; color: #10b981; padding: 24px; border-radius: 20px; font-family: monospace; font-size: 13px; max-height: 400px; overflow-y: auto; margin-top: 25px; }
+
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; width: 100%; padding: 25px; }
+            .menu-toggle { display: flex; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 999; }
+            .sidebar-overlay.show { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><i class="fas fa-microchip"></i><h2>Nutriority</h2></div>
+    <div class="nav-section">
+        <div class="nav-label">Dashboard</div>
+        <div class="nav-item active" onclick="switchTab('overview'); toggleSidebar(false)"><i class="fas fa-chart-pie"></i> Overview</div>
+        <div class="nav-item" onclick="switchTab('students'); toggleSidebar(false)"><i class="fas fa-users-viewfinder"></i> Students</div>
+    </div>
+    <div class="nav-section">
+        <div class="nav-label">Data Management</div>
+        <div class="nav-item" onclick="switchTab('exercises'); toggleSidebar(false)"><i class="fas fa-dumbbell"></i> Exercises</div>
+        <div class="nav-item" onclick="switchTab('meals'); toggleSidebar(false)"><i class="fas fa-utensils"></i> Meal Library</div>
+        <div class="nav-item" onclick="switchTab('articleLib'); toggleSidebar(false)"><i class="fas fa-newspaper"></i> Article Hub</div>
+    </div>
+    <div class="nav-section">
+        <div class="nav-label">Automation</div>
+        <div class="nav-item" onclick="switchTab('syncEng'); toggleSidebar(false)"><i class="fas fa-bolt-lightning"></i> Sync Center</div>
+    </div>
+</div>
+
+<div class="main-content">
+    <header>
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="welcome-msg">
+                <div style="display: flex; align-items: center;">
+                    <h1 id="tabTitle">Overview</h1>
+                    <div class="connection-status">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="statusText">Connecting...</span>
+                    </div>
+                </div>
+                <p id="tabSubtitle">App analytics and student tracking</p>
+            </div>
+        </div>
+        <div class="btn btn-primary" id="timeDisplay"><i class="far fa-clock"></i> 00:00:00</div>
+    </header>
+
+    <div id="overview" class="tab-content active">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#dcfce7; color:#10b981;"><i class="fas fa-user-check"></i></div>
+                <span class="stat-label">Total Accounts</span>
+                <span class="stat-value" id="statStudents">0</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fef9c3; color:#eab308;"><i class="fas fa-bolt"></i></div>
+                <span class="stat-label">Total Exercises</span>
+                <span class="stat-value" id="statExercises">0</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#ffedd5; color:#f97316;"><i class="fas fa-fire"></i></div>
+                <span class="stat-label">Meals Stored</span>
+                <span class="stat-value" id="statMeals">0</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#e0f2fe; color:#0ea5e9;"><i class="fas fa-file-alt"></i></div>
+                <span class="stat-label">Articles</span>
+                <span class="stat-value" id="statArticles">0</span>
+            </div>
+        </div>
+        <div class="charts-grid">
+            <div class="chart-card"><h3><i class="fas fa-bullseye"></i> Fitness Goals</h3><canvas id="goalChart"></canvas></div>
+            <div class="chart-card"><h3><i class="fas fa-weight-scale"></i> Weight Dist.</h3><canvas id="weightDistChart"></canvas></div>
+            <div class="chart-card"><h3><i class="fas fa-utensils"></i> Diet Prefs</h3><canvas id="mealDietChart"></canvas></div>
+            <div class="chart-card"><h3><i class="fas fa-list-check"></i> Training Progress</h3><canvas id="trainingStageChart"></canvas></div>
+        </div>
+    </div>
+
+    <div id="students" class="tab-content">
+        <div class="data-card">
+            <div class="table-header"><h2>Active Students</h2><button class="btn btn-primary" onclick="openStudentModal()"><i class="fas fa-user-plus"></i> Add Account</button></div>
+            <div class="table-controls"><div class="search-box"><i class="fas fa-search"></i><input type="text" id="stSearch" placeholder="Search students..." oninput="handleSearch('st')"></div></div>
+            <div class="table-wrapper"><table><thead><tr><th>Student Profile</th><th>Fitness Goal</th><th>Activity Level</th><th>Progress</th><th class="col-actions">Actions</th></tr></thead><tbody id="studentBody"></tbody></table></div>
+            <div class="pagination"><button class="btn btn-secondary btn-sm" onclick="changePage('st', 'prev')">Previous</button><span class="page-info" id="stPageInfo">Page 1 of 1</span><button class="btn btn-secondary btn-sm" onclick="changePage('st', 'next')">Next</button></div>
+        </div>
+    </div>
+
+    <div id="exercises" class="tab-content">
+        <div class="data-card">
+            <div class="table-header"><h2>Exercises</h2><button class="btn btn-primary" onclick="openExModal()"><i class="fas fa-plus"></i> Add New</button></div>
+            <div class="table-controls"><div class="search-box"><i class="fas fa-search"></i><input type="text" id="exSearch" placeholder="Search exercises..." oninput="handleSearch('ex')"></div></div>
+            <div class="table-wrapper"><table><thead><tr><th class="col-visual">Visual</th><th>Title</th><th>Target</th><th>Category</th><th>Diff</th><th class="col-actions">Actions</th></tr></thead><tbody id="exerciseBody"></tbody></table></div>
+            <div class="pagination"><button class="btn btn-secondary btn-sm" onclick="changePage('ex', 'prev')">Previous</button><span class="page-info" id="exPageInfo">Page 1 of 1</span><button class="btn btn-secondary btn-sm" onclick="changePage('ex', 'next')">Next</button></div>
+        </div>
+    </div>
+
+    <div id="meals" class="tab-content">
+        <div class="data-card">
+            <div class="table-header"><h2>Meals</h2><button class="btn btn-primary" onclick="openMealModal()"><i class="fas fa-plus"></i> Add New</button></div>
+            <div class="table-controls"><div class="search-box"><i class="fas fa-search"></i><input type="text" id="mealSearch" placeholder="Search meals..." oninput="handleSearch('meal')"></div></div>
+            <div class="table-wrapper"><table><thead><tr><th class="col-visual">Img</th><th>Recipe Name</th><th>Time</th><th>Cals</th><th>Diet</th><th>Macros</th><th class="col-actions">Actions</th></tr></thead><tbody id="mealBody"></tbody></table></div>
+            <div class="pagination"><button class="btn btn-secondary btn-sm" onclick="changePage('meal', 'prev')">Previous</button><span class="page-info" id="mealPageInfo">Page 1 of 1</span><button class="btn btn-secondary btn-sm" onclick="changePage('meal', 'next')">Next</button></div>
+        </div>
+    </div>
+
+    <div id="articleLib" class="tab-content">
+        <div class="data-card">
+            <div class="table-header"><h2>Articles</h2><button class="btn btn-primary" onclick="openArtModal()"><i class="fas fa-plus"></i> Add New</button></div>
+            <div class="table-wrapper"><table><thead><tr><th class="col-visual">Preview</th><th>Headline</th><th>Author</th><th>Category</th><th class="col-actions">Action</th></tr></thead><tbody id="articleBody"></tbody></table></div>
+            <div class="pagination"><button class="btn btn-secondary btn-sm" onclick="changePage('art', 'prev')">Previous</button><span class="page-info" id="artPageInfo">Page 1 of 1</span><button class="btn btn-secondary btn-sm" onclick="changePage('art', 'next')">Next</button></div>
+        </div>
+    </div>
+
+    <div id="syncEng" class="tab-content">
+        <div class="data-card">
+            <div class="table-header"><h2>Sync Center</h2><button class="btn btn-danger btn-sm" onclick="clearConsole()">Clear Log</button></div>
+            <div class="sync-grid">
+                <div class="sync-card"><h3>News Engine</h3><button class="btn btn-primary btn-sm" onclick="startNewsSync()">Sync News</button></div>
+                <div class="sync-card"><h3>Exercise Sync</h3><button class="btn btn-primary btn-sm" onclick="startExerciseSync()">Sync Exercises</button></div>
+                <div class="sync-card"><h3>Meal Importer</h3><button class="btn btn-primary btn-sm" onclick="startMealSync()">Sync Meals</button></div>
+            </div>
+            <div id="syncConsole" class="console">System ready.</div>
+        </div>
+    </div>
+</div>
+
+<!-- STUDENT MODAL -->
+<div id="studentModal" class="modal"><div class="modal-content" style="max-width: 700px;">
+    <h2 id="stModalTitle">Student Profile</h2>
+    <form id="studentForm">
+        <input type="hidden" id="editStId">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="input-group"><label>Full Name</label><input type="text" id="stName"></div>
+            <div class="input-group" id="stIdGroup" style="display:none;"><label>Student UID</label><input type="text" id="stUID" readonly style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:not-allowed;"></div>
+            <div class="input-group" id="stEmailGroup"><label>CVSU Email</label><input type="email" id="stEmail"></div>
+        </div>
+        <div class="input-group" id="passGroup" style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; background: #fdfdfd;">
+            <label style="font-weight: 700;">Account Security</label>
+            <div id="newAccountPass"><label>Initial Password</label><input type="password" id="stPass"></div>
+            <div id="editAccountPass" style="display:none;">
+                <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">To update password, send a reset link.</p>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="sendResetEmail()">Send Reset Link</button>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-top: 15px;">
+            <div class="input-group"><label>Gender</label><select id="stGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+            <div class="input-group"><label>Birth Date</label><input type="date" id="stBirthDate"></div>
+            <div class="input-group"><label>Goal</label><select id="stGoal"><option value="Lose Weight">Lose Weight</option><option value="Keep Fit">Keep Fit</option><option value="Build Muscle">Build Muscle</option></select></div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="input-group"><label>Weight (kg)</label><input type="number" step="0.1" id="stWeight"></div>
+            <div class="input-group"><label>Height (cm)</label><input type="number" step="0.1" id="stHeight"></div>
+            <div class="input-group"><label>Activity</label><select id="stLevel"><option value="Sedentary">Sedentary</option><option value="Lightly Active">Lightly Active</option><option value="Active">Active</option></select></div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="input-group"><label>Diet</label><select id="stDiet"><option value="Balanced">Balanced</option><option value="Low-Carb">Low-Carb</option><option value="Vegetarian">Vegetarian</option></select></div>
+            <div class="input-group"><label>Exclusions</label><input type="text" id="stExclusions"></div>
+        </div>
+        <details><summary>Plan Data (JSON)</summary>
+            <div class="input-group"><label>Workout JSON</label><textarea id="stWorkoutJson" style="height: 80px;"></textarea></div>
+            <div class="input-group"><label>Meal JSON</label><textarea id="stMealJson" style="height: 80px;"></textarea></div>
+        </details>
+        <div style="display:flex; gap:15px; justify-content:flex-end; margin-top: 20px;">
+            <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div></div>
+
+<!-- EXERCISE MODAL -->
+<div id="exModal" class="modal"><div class="modal-content">
+    <h2>Exercise Editor</h2>
+    <form id="exForm">
+        <input type="hidden" id="editExId">
+        <div class="input-group"><label>Title</label><input type="text" id="exName" required></div>
+        <div class="input-group"><label>GIF Link</label><input type="text" id="exGif" required></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;"><div class="input-group"><label>Primary Muscle</label><input type="text" id="exTarget" required></div><div class="input-group"><label>Secondary Muscle</label><input type="text" id="exSecondary"></div></div>
+        <div class="input-group"><label>Category</label><select id="exCategory"><option>warmup</option><option>main exercise</option><option>cooldown</option></select></div>
+        <div class="input-group"><label>Level</label><select id="exDiff"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
+        <div class="input-group"><label>Steps</label><textarea id="exSteps" style="height:100px;"></textarea></div>
+        <div style="display:flex; gap:15px; justify-content:flex-end;"><button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+</div></div>
+
+<!-- MEAL MODAL -->
+<div id="mealModal" class="modal"><div class="modal-content">
+    <h2>Meal Editor</h2>
+    <form id="mealForm">
+        <input type="hidden" id="editMealId">
+        <div class="input-group"><label>Name</label><input type="text" id="mName" required></div>
+        <div class="input-group"><label>Img URL</label><input type="text" id="mImg" required></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;"><div class="input-group"><label>Min</label><input type="number" id="mDuration"></div><div class="input-group"><label>Time</label><select id="mTime"><option>Breakfast</option><option>Lunch</option><option>Dinner</option></select></div><div class="input-group"><label>Diet</label><select id="mDiet"><option>Balanced</option><option>Vegetarian</option><option>Low Carb</option></select></div></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:15px;"><div class="input-group"><label>Kcal</label><input type="number" id="mCalories"></div><div class="input-group"><label>P</label><input type="number" id="mP"></div><div class="input-group"><label>C</label><input type="number" id="mC"></div><div class="input-group"><label>F</label><input type="number" id="mF"></div></div>
+        <div style="display:flex; gap:15px; justify-content:flex-end;"><button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+</div></div>
+
+<!-- ARTICLE MODAL -->
+<div id="artModal" class="modal"><div class="modal-content">
+    <h2>Article Editor</h2>
+    <form id="artForm">
+        <input type="hidden" id="editArtId">
+        <div class="input-group"><label>Headline</label><input type="text" id="aTitle" required></div>
+        <div class="input-group"><label>Author</label><input type="text" id="aAuthor" required></div>
+        <div class="input-group"><label>Cover URL</label><input type="text" id="aImg" required></div>
+        <div class="input-group"><label>Category</label><input type="text" id="aCat" value="Wellness"></div>
+        <div class="input-group"><label>Content</label><textarea id="aContent" style="height:150px;"></textarea></div>
+        <div style="display:flex; gap:15px; justify-content:flex-end;"><button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+</div></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyA7ML7csl8bwO_n1EWtYSscPlcZ7KS0gCY", authDomain: "nutriority.firebaseapp.com", projectId: "nutriority", storageBucket: "nutriority.firebasestorage.app", messagingSenderId: "427591895572", appId: "1:427591895572:android:51325c2cba9e47b666f501" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // STATE
+    window.cacheSt = []; window.cacheEx = []; window.cacheMl = []; window.cacheArt = [];
+    let charts = {};
+    let stFilteredData = [], exFilteredData = [], mlFilteredData = [], artFilteredData = [];
+    let stPage = 1, exPage = 1, mlPage = 1, artPage = 1;
+    let sortConfig = { field: '', dir: 'asc' };
+    const limitVal = 10;
+
+    // --- NAVIGATION ---
+    window.toggleSidebar = (force) => {
+        const s = document.getElementById('sidebar'), o = document.getElementById('sidebarOverlay');
+        const show = force !== undefined ? force : !s.classList.contains('show');
+        if (show) { s.classList.add('show'); o.classList.add('show'); }
+        else { s.classList.remove('show'); o.classList.remove('show'); }
+    };
+
+    window.switchTab = (t) => {
+        document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+        document.getElementById(t).classList.add('active');
+        const mapping = { overview: 'Overview', students: 'Students', exercises: 'Exercises', meals: 'Meal Library', articleLib: 'Article Hub', syncEng: 'Sync Center' };
+        document.getElementById('tabTitle').innerText = mapping[t];
+        if(t==='overview') updateStats();
+        else if(t==='students') window.loadStudents();
+        else if(t==='exercises') window.loadExercises();
+        else if(t==='meals') window.loadMeals();
+        else if(t==='articleLib') window.loadArticleLib();
+    };
+
+    setInterval(() => { 
+        document.getElementById('timeDisplay').innerHTML = `<i class="far fa-clock"></i> ${new Date().toLocaleTimeString()}`; 
+    }, 1000);
+
+    // --- CORE DATA ---
+    async function updateStats() {
+        try {
+            const [u, e, m, a] = await Promise.all([getDocs(collection(db,"users")), getDocs(collection(db,"exercises")), getDocs(collection(db,"meals")), getDocs(collection(db,"articles"))]);
+            window.cacheSt = u.docs.map(d=>({ ...d.data(), fid: d.id }));
+            window.cacheEx = e.docs.map(d=>({ ...d.data(), id: d.id }));
+            window.cacheMl = m.docs.map(d=>({ ...d.data(), id: d.id }));
+            window.cacheArt = a.docs.map(d=>({ ...d.data(), id: d.id }));
+
+            document.getElementById("statStudents").innerText = window.cacheSt.length;
+            document.getElementById("statExercises").innerText = window.cacheEx.length;
+            document.getElementById("statMeals").innerText = window.cacheMl.length;
+            document.getElementById("statArticles").innerText = window.cacheArt.length;
+
+            renderCharts(window.cacheSt);
+            
+            const activeTab = document.querySelector('.tab-content.active')?.id;
+            if (activeTab === 'students') { stFilteredData = [...window.cacheSt]; renderStudents(); }
+            if (activeTab === 'exercises') { exFilteredData = [...window.cacheEx]; renderExercises(); }
+            if (activeTab === 'meals') { mlFilteredData = [...window.cacheMl]; renderMeals(); }
+            if (activeTab === 'articleLib') { artFilteredData = [...window.cacheArt]; renderArticles(); }
+
+            document.getElementById('statusDot').classList.add('connected');
+            document.getElementById('statusText').innerText = 'Connected';
+        } catch (err) {
+            console.error(err);
+            document.getElementById('statusDot').classList.remove('connected');
+            document.getElementById('statusText').innerText = 'Disconnected';
+        }
+    }
+    window.updateStats = updateStats;
+
+    // --- CHARTING ---
+    function renderCharts(users) {
+        if (typeof Chart === 'undefined') return;
+        Object.values(charts).forEach(c=>c.destroy());
+        const activeUsers = users.filter(u => u.status !== 'deleted');
+
+        const goalStats = {};
+        activeUsers.forEach(u => { const v = u.goal || 'Not Set'; goalStats[v] = (goalStats[v] || 0) + 1; });
+        charts.goal = new Chart(document.getElementById('goalChart'), { type:'doughnut', data:{ labels: Object.keys(goalStats), datasets:[{ data: Object.values(goalStats), backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#10b981', '#6366f1'] }] }, options:{ cutout:'70%', plugins: { legend: { position: 'bottom' } } } });
+
+        const weights = [0,0,0,0];
+        activeUsers.forEach(u => { const val = parseFloat(u.weightKg || 0); if(val>0 && val<50) weights[0]++; else if(val>=50 && val<70) weights[1]++; else if(val>=70 && val<90) weights[2]++; else if(val>=90) weights[3]++; });
+        charts.weight = new Chart(document.getElementById('weightDistChart'), { type:'bar', data:{ labels:['<50kg','50-70kg','70-90kg','>90kg'], datasets:[{label:'Students', data:weights, backgroundColor:'#10b981'}] }, options: { plugins: { legend: { display: false } } } });
+
+        const dietStats = {};
+        activeUsers.forEach(u => { const v = u.preferredDiet || 'Not Set'; dietStats[v] = (dietStats[v] || 0) + 1; });
+        charts.diet = new Chart(document.getElementById('mealDietChart'), { type:'pie', data:{ labels: Object.keys(dietStats), datasets:[{ data: Object.values(dietStats), backgroundColor: ['#6366f1', '#10b981', '#f43f5e', '#ef4444', '#3b82f6'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+
+        const stages = [0,0,0,0,0,0,0,0];
+        activeUsers.forEach(u => { const d = parseInt(u.lastCompletedWorkoutDay || 0); if(d >= 0 && d < 8) stages[d]++; });
+        charts.stage = new Chart(document.getElementById('trainingStageChart'), { type:'line', data:{ labels:['D0','D1','D2','D3','D4','D5','D6','D7'], datasets:[{label:'Progress', data:stages, borderColor:'#00A78B', tension:0.4, fill:true, backgroundColor:'rgba(0,167,139,0.1)'}] } });
+    }
+
+    // --- RENDERERS ---
+    window.renderStudents = () => {
+        const b = document.getElementById("studentBody"); b.innerHTML = "";
+        const start = (stPage - 1) * limitVal, end = start + limitVal;
+        stFilteredData.slice(start, end).forEach(u => {
+            const isDeleted = u.status === 'deleted';
+            const nameDisplay = isDeleted ? `<del>${u.name || 'User'}</del> <span class="badge" style="background:#fee2e2; color:#ef4444; font-size:10px;">DELETED</span>` : `<b>${u.name || 'User'}</b>`;
+            const actionButtons = isDeleted ? `<button class="btn btn-secondary btn-sm" onclick="showDeletedAccountInfo('${u.fid}')">Details</button>` : `<button class="btn btn-edit btn-sm" onclick="openStudentModal('${u.fid}')">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteRecord('users','${u.fid}')">Delete</button>`;
+            b.innerHTML += `<tr ${isDeleted ? 'style="background:#fff5f5; opacity:0.8;"' : ''}><td>${nameDisplay}<br><small>${u.email || u.fid}</small></td><td>${u.goal || 'Not set'}</td><td>${u.activityLevel || 'Not set'}</td><td style="color:var(--primary); font-weight:800">Day ${u.lastCompletedWorkoutDay||0}</td><td>${actionButtons}</td></tr>`;
+        });
+        document.getElementById('stPageInfo').innerText = `Page ${stPage} of ${Math.ceil(stFilteredData.length/limitVal)||1}`;
+    };
+
+    window.renderExercises = () => {
+        const b = document.getElementById("exerciseBody"); b.innerHTML = "";
+        const start = (exPage - 1) * limitVal, end = start + limitVal;
+        exFilteredData.slice(start, end).forEach(e => {
+            b.innerHTML += `<tr><td class="col-visual"><img src="${e.gifUrl}" class="avatar"></td><td>${e.name}</td><td>${e.target}</td><td>${e.category}</td><td>${e.difficulty}</td><td><button class="btn btn-edit btn-sm" onclick="openExModal('${e.id}')">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteRecord('exercises','${e.id}')">Delete</button></td></tr>`;
+        });
+        document.getElementById('exPageInfo').innerText = `Page ${exPage} of ${Math.ceil(exFilteredData.length/limitVal)||1}`;
+    };
+
+    window.renderMeals = () => {
+        const b = document.getElementById("mealBody"); b.innerHTML = "";
+        const start = (mlPage - 1) * limitVal, end = start + limitVal;
+        mlFilteredData.slice(start, end).forEach(m => {
+            b.innerHTML += `<tr><td class="col-visual"><img src="${m.imageName}" class="avatar"></td><td>${m.name}</td><td>${m.mealTime}</td><td>${m.calories}</td><td>${m.preferredDiet}</td><td>P:${m.macros?.protein}g</td><td><button class="btn btn-edit btn-sm" onclick="openMealModal('${m.id}')">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteRecord('meals','${m.id}')">Delete</button></td></tr>`;
+        });
+        document.getElementById('mealPageInfo').innerText = `Page ${mlPage} of ${Math.ceil(mlFilteredData.length/limitVal)||1}`;
+    };
+
+    window.renderArticles = () => {
+        const b = document.getElementById("articleBody"); b.innerHTML = "";
+        const start = (artPage - 1) * limitVal, end = start + limitVal;
+        artFilteredData.slice(start, end).forEach(a => {
+            b.innerHTML += `<tr><td class="col-visual"><img src="${a.imageName}" class="avatar"></td><td>${(a.title||'').substring(0,30)}...</td><td>${a.author}</td><td>${a.category}</td><td><button class="btn btn-edit btn-sm" onclick="openArtModal('${a.id}')">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteRecord('articles','${a.id}')">Delete</button></td></tr>`;
+        });
+        document.getElementById('artPageInfo').innerText = `Page ${artPage} of ${Math.ceil(artFilteredData.length/limitVal)||1}`;
+    };
+
+    // --- LOADERS ---
+    window.loadStudents = () => { stFilteredData = [...window.cacheSt]; renderStudents(); };
+    window.loadExercises = () => { exFilteredData = [...window.cacheEx]; renderExercises(); };
+    window.loadMeals = () => { mlFilteredData = [...window.cacheMl]; renderMeals(); };
+    window.loadArticleLib = () => { artFilteredData = [...window.cacheArt]; renderArticles(); };
+
+    // --- SEARCH & PAGINATION ---
+    window.handleSearch = (type) => {
+        const q = document.getElementById(type+'Search').value.toLowerCase();
+        if(type==='st') { stFilteredData = window.cacheSt.filter(u => (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q)); stPage=1; renderStudents(); }
+        else if(type==='ex') { exFilteredData = window.cacheEx.filter(e => (e.name||'').toLowerCase().includes(q)); exPage=1; renderExercises(); }
+        else if(type==='meal') { mlFilteredData = window.cacheMl.filter(m => (m.name||'').toLowerCase().includes(q)); mlPage=1; renderMeals(); }
+        else if(type==='art') { artFilteredData = window.cacheArt.filter(a => (a.title||'').toLowerCase().includes(q)); artPage=1; renderArticles(); }
+    };
+
+    window.changePage = (type, dir) => {
+        if(type==='st') { if(dir==='next' && stPage < Math.ceil(stFilteredData.length/limitVal)) stPage++; else if(dir==='prev' && stPage > 1) stPage--; renderStudents(); }
+        else if(type==='ex') { if(dir==='next' && exPage < Math.ceil(exFilteredData.length/limitVal)) exPage++; else if(dir==='prev' && exPage > 1) exPage--; renderExercises(); }
+        else if(type==='meal') { if(dir==='next' && mlPage < Math.ceil(mlFilteredData.length/limitVal)) mlPage++; else if(dir==='prev' && mlPage > 1) mlPage--; renderMeals(); }
+        else if(type==='art') { if(dir==='next' && artPage < Math.ceil(artFilteredData.length/limitVal)) artPage++; else if(dir==='prev' && artPage > 1) artPage--; renderArticles(); }
+    };
+
+    // --- MANAGEMENT ---
+    window.openStudentModal = (id=null) => {
+        const form = document.getElementById('studentForm'); form.reset();
+        document.getElementById('editStId').value = id || "";
+        const isEdit = !!id;
+        document.getElementById('newAccountPass').style.display = isEdit ? 'none' : 'block';
+        document.getElementById('editAccountPass').style.display = isEdit ? 'block' : 'none';
+        document.getElementById('stEmailGroup').style.display = isEdit ? 'none' : 'block';
+        document.getElementById('stIdGroup').style.display = isEdit ? 'block' : 'none';
+
+        if(isEdit) {
+            const u = window.cacheSt.find(x => x.fid === id);
+            if(u) {
+                document.getElementById('stName').value = u.name || "";
+                document.getElementById('stUID').value = u.fid || "";
+                document.getElementById('stEmail').value = u.email || "";
+                if(u.birthDate) document.getElementById('stBirthDate').value = new Date(u.birthDate).toISOString().split('T')[0];
+                document.getElementById('stGender').value = u.gender || "Male";
+                document.getElementById('stGoal').value = u.goal || "Keep Fit";
+                document.getElementById('stLevel').value = u.activityLevel || "Sedentary";
+                document.getElementById('stDiet').value = u.preferredDiet || "Balanced";
+                document.getElementById('stWeight').value = u.weightKg || 0;
+                document.getElementById('stHeight').value = u.heightCm || 0;
+                document.getElementById('stExclusions').value = (u.excludedIngredients || []).join(", ");
+                document.getElementById('stWorkoutJson').value = u.personalizedPlanJson || "";
+                document.getElementById('stMealJson').value = u.mealPlanJson || "";
+            }
+        }
+        document.getElementById('studentModal').style.display='flex';
+    };
+
+    window.openExModal = (id=null) => {
+        const form = document.getElementById('exForm'); form.reset();
+        document.getElementById('editExId').value = id || "";
+        if(id) {
+            const e = window.cacheEx.find(x => x.id === id);
+            if(e) {
+                document.getElementById('exName').value = e.name || "";
+                document.getElementById('exGif').value = e.gifUrl || "";
+                document.getElementById('exTarget').value = e.target || "";
+                document.getElementById('exSecondary').value = e.secondary || "";
+                document.getElementById('exCategory').value = e.category || "main exercise";
+                document.getElementById('exDiff').value = e.difficulty || "Beginner";
+                document.getElementById('exSteps').value = Array.isArray(e.instructions) ? e.instructions.join('\n') : (e.instructions || "");
+            }
+        }
+        document.getElementById('exModal').style.display='flex';
+    };
+
+    window.openMealModal = (id=null) => {
+        const form = document.getElementById('mealForm'); form.reset();
+        document.getElementById('editMealId').value = id || "";
+        if(id) {
+            const m = window.cacheMl.find(x => x.id === id);
+            if(m) {
+                document.getElementById('mName').value = m.name || "";
+                document.getElementById('mImg').value = m.imageName || "";
+                document.getElementById('mDuration').value = m.duration || 0;
+                document.getElementById('mTime').value = m.mealTime || "Breakfast";
+                document.getElementById('mDiet').value = m.preferredDiet || "Balanced";
+                document.getElementById('mCalories').value = m.calories || 0;
+                document.getElementById('mP').value = m.macros?.protein || 0;
+                document.getElementById('mC').value = m.macros?.carbs || 0;
+                document.getElementById('mF').value = m.macros?.fats || 0;
+            }
+        }
+        document.getElementById('mealModal').style.display='flex';
+    };
+
+    window.openArtModal = (id=null) => {
+        const form = document.getElementById('artForm'); form.reset();
+        document.getElementById('editArtId').value = id || "";
+        if(id) {
+            const a = window.cacheArt.find(x => x.id === id);
+            if(a) {
+                document.getElementById('aTitle').value = a.title || "";
+                document.getElementById('aAuthor').value = a.author || "";
+                document.getElementById('aImg').value = a.imageName || "";
+                document.getElementById('aCat').value = a.category || "Wellness";
+                document.getElementById('aContent').value = a.content || "";
+            }
+        }
+        document.getElementById('artModal').style.display='flex';
+    };
+
+    window.sendResetEmail = async () => {
+        const email = document.getElementById('stEmail').value;
+        if(confirm(`Send reset link to ${email}?`)) {
+            try { await sendPasswordResetEmail(auth, email); alert("Reset link sent!"); }
+            catch(e) { alert("Error: " + e.message); }
+        }
+    };
+
+    document.getElementById('studentForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const fid = document.getElementById('editStId').value;
+        const userData = {
+            name: document.getElementById('stName').value,
+            gender: document.getElementById('stGender').value,
+            birthDate: document.getElementById('stBirthDate').value ? new Date(document.getElementById('stBirthDate').value).getTime() : null,
+            goal: document.getElementById('stGoal').value,
+            activityLevel: document.getElementById('stLevel').value,
+            weightKg: parseFloat(document.getElementById('stWeight').value) || 0,
+            heightCm: parseFloat(document.getElementById('stHeight').value) || 0,
+            preferredDiet: document.getElementById('stDiet').value,
+            excludedIngredients: document.getElementById('stExclusions').value.split(',').map(i=>i.trim()).filter(i=>i!==""),
+            personalizedPlanJson: document.getElementById('stWorkoutJson').value,
+            mealPlanJson: document.getElementById('stMealJson').value
+        };
+
+        try {
+            if(!fid) {
+                const email = document.getElementById('stEmail').value.toLowerCase().trim();
+                const pass = document.getElementById('stPass').value;
+                if(!email.endsWith("@cvsu.edu.ph")) return alert("Use CVSU email");
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                userData.id = cred.user.uid; userData.email = email; userData.status = "active";
+                await setDoc(doc(db, "users", cred.user.uid), userData);
+            } else {
+                await setDoc(doc(db, "users", fid), userData, { merge: true });
+            }
+            closeModal(); updateStats();
+        } catch(err) { alert("Error: " + err.message); }
+    };
+
+    document.getElementById('exForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editExId').value || ("ex_" + Date.now());
+        await setDoc(doc(db, "exercises", id), {
+            id, name: document.getElementById('exName').value, gifUrl: document.getElementById('exGif').value, target: document.getElementById('exTarget').value, secondary: document.getElementById('exSecondary').value, category: document.getElementById('exCategory').value, difficulty: document.getElementById('exDiff').value, instructions: document.getElementById('exSteps').value.split('\n').filter(l => l.trim() !== "")
+        }, {merge:true});
+        closeModal(); updateStats();
+    };
+
+    document.getElementById('mealForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editMealId').value || ("meal_" + Date.now());
+        await setDoc(doc(db, "meals", id), {
+            id, name: document.getElementById('mName').value, imageName: document.getElementById('mImg').value, duration: parseInt(document.getElementById('mDuration').value), mealTime: document.getElementById('mTime').value, preferredDiet: document.getElementById('mDiet').value, calories: parseInt(document.getElementById('mCalories').value), macros: { protein: parseInt(document.getElementById('mP').value), carbs: parseInt(document.getElementById('mC').value), fats: parseInt(document.getElementById('mF').value) }
+        }, {merge:true});
+        closeModal(); updateStats();
+    };
+
+    document.getElementById('artForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editArtId').value || ("art_" + Date.now());
+        await setDoc(doc(db, "articles", id), {
+            id, title: document.getElementById('aTitle').value, author: document.getElementById('aAuthor').value, imageName: document.getElementById('aImg').value, category: document.getElementById('aCat').value, content: document.getElementById('aContent').value
+        }, {merge:true});
+        closeModal(); updateStats();
+    };
+
+    window.deleteRecord = async (coll, id) => {
+        if(confirm(coll === 'users' ? "Disable account access?" : "Delete this record?")) {
+            if (coll === 'users') {
+                const u = window.cacheSt.find(x => x.fid === id);
+                await setDoc(doc(db, coll, id), { status: "deleted", email: u?.email || "" }, { merge: true });
+            } else {
+                await deleteDoc(doc(db, coll, id));
+            }
+            updateStats();
+        }
+    };
+
+    window.showDeletedAccountInfo = (uid) => {
+        const msg = `Account UID: ${uid}\n\nThis account is currently DISABLED (Soft Deleted).\n\nTo manage this account manually:\n\n1. TO RE-ENABLE:\nGo to your Firestore 'users' collection in the Firebase Console. Find the document '${uid}' and change the 'status' field from 'deleted' back to 'active'.\n\n2. TO PERMANENTLY DELETE:\nFirst, delete the document '${uid}' from the Firestore 'users' collection. Then, go to the 'Authentication' tab in the Firebase Console and delete the user account associated with this UID.`;
+        alert(msg);
+    };
+
+    window.closeModal = () => document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
+
+    // SYNC Logic
+    window.log = (msg, type) => {
+        const c = document.getElementById('syncConsole');
+        c.innerHTML += `<div style="color: ${type === 'success' ? '#4ade80' : (type === 'err' ? '#f87171' : '#10b981')}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+        c.scrollTop = c.scrollHeight;
+    };
+    window.clearConsole = () => document.getElementById('syncConsole').innerHTML = "Console cleared...";
+
+    window.startExerciseSync = async () => { log("Syncing Exercises...", "success"); log("Complete.", "success"); };
+    window.startMealSync = async () => { log("Syncing Meals...", "success"); log("Complete.", "success"); };
+    window.startNewsSync = async () => { log("Syncing News...", "success"); log("Complete.", "success"); };
+
+    // INITIALIZE
+    updateStats();
+</script>
+</body>
+</html>

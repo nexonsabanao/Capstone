@@ -71,8 +71,10 @@ function renderCharts(users) {
     if (typeof Chart === 'undefined') return;
     Object.values(charts).forEach(c=>c.destroy());
 
+    const activeUsers = users.filter(u => u.status !== 'deleted');
+
     const goalStats = {};
-    users.forEach(u => {
+    activeUsers.forEach(u => {
         const val = String(u.goal || 'Not Set').trim();
         goalStats[val] = (goalStats[val] || 0) + 1;
     });
@@ -93,7 +95,7 @@ function renderCharts(users) {
     }
 
     const weights = [0,0,0,0];
-    users.forEach(u => { 
+    activeUsers.forEach(u => { 
         const w = parseFloat(u.weightKg || 0); 
         if(w > 0 && w < 50) weights[0]++; 
         else if(w >= 50 && w < 70) weights[1]++; 
@@ -114,7 +116,7 @@ function renderCharts(users) {
     }
 
     const dietStats = {};
-    users.forEach(u => {
+    activeUsers.forEach(u => {
         const val = String(u.preferredDiet || 'Not Set').trim();
         dietStats[val] = (dietStats[val] || 0) + 1;
     });
@@ -135,7 +137,7 @@ function renderCharts(users) {
     }
 
     const stages = [0,0,0,0,0,0,0,0];
-    users.forEach(u => { 
+    activeUsers.forEach(u => { 
         const d = parseInt(u.lastCompletedWorkoutDay || 0); 
         if(d >= 0 && d < 8) stages[d]++; 
     });
@@ -152,24 +154,48 @@ function renderCharts(users) {
     }
 }
 
+function showDeletedAccountInfo(uid) {
+    const msg = `This account has been disabled (Soft Deleted).
+
+To manage this further, please use the Firebase Console:
+
+1. RE-ENABLE ACCOUNT:
+Go to your Firestore 'users' collection, find document '${uid}', and change the 'status' field from 'deleted' back to 'active'.
+
+2. PERMANENT DELETE:
+First, delete document '${uid}' from your Firestore 'users' collection. 
+Then, go to the 'Authentication' tab in Firebase Console and delete the user with UID '${uid}'.
+
+This dashboard only handles 'Soft Deletion' to preserve security and app logic.`;
+    alert(msg);
+}
+window.showDeletedAccountInfo = showDeletedAccountInfo;
+
 function renderStudents() {
     const b = document.getElementById("studentBody"); 
     if (!b) return;
     b.innerHTML = "";
     const start = (stPage - 1) * limitVal, end = start + limitVal;
     stFilteredData.slice(start, end).forEach(u => {
-        // Use fid (Firestore ID) as fallback for missing email
+        const isDeleted = u.status === 'deleted';
         const emailFallback = u.email || `ID: ${u.fid || 'Unknown'}`;
         const nameFallback = u.name || "User";
         
-        b.innerHTML += `<tr>
-            <td data-label="Student"><b>${nameFallback}</b><br><small>${emailFallback}</small></td>
+        const rowStyle = isDeleted ? 'style="background: #fff5f5; opacity: 0.8;"' : '';
+        const nameDisplay = isDeleted ? `<del>${nameFallback}</del> <span class="badge" style="background:#fee2e2; color:#ef4444; font-size:10px; padding:2px 6px">DELETED</span>` : `<b>${nameFallback}</b>`;
+        
+        const actionButtons = isDeleted 
+            ? `<button class="btn btn-secondary btn-sm" onclick="showDeletedAccountInfo('${u.fid}')">Details</button>`
+            : `<button class="btn btn-edit btn-sm" onclick="openStudentModal('${u.fid}')">Edit</button>
+               <button class="btn btn-danger btn-sm" onclick="deleteRecord('users','${u.fid}')">Delete</button>`;
+
+        b.innerHTML += `<tr ${rowStyle}>
+            <td data-label="Student">${nameDisplay}<br><small>${emailFallback}</small></td>
             <td data-label="Goal"><span class="badge" style="background:#f1f5f9">${u.goal || 'Not set'}</span></td>
             <td data-label="Activity">${u.activityLevel || 'Not set'}</td>
             <td data-label="Progress" style="color:var(--primary); font-weight:800">Day ${u.lastCompletedWorkoutDay||0}</td>
             <td data-label="Actions">
-                <button class="btn btn-edit btn-sm" onclick="openStudentModal('${u.fid}')">Edit</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteRecord('users','${u.fid}')">Delete</button>
+                ${actionButtons}
             </td>
         </tr>`;
     });
