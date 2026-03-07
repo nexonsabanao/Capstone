@@ -14,11 +14,12 @@ import com.example.nutriority.data.model.User
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.databinding.FragmentSignUpBinding
 import com.example.nutriority.ui.util.KeyboardUtil
-import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
@@ -100,7 +101,37 @@ class SignUpFragment : Fragment() {
             !password.any { it.isUpperCase() } -> showError("Password must contain an upper case character")
             !password.any { it.isDigit() } -> showError("Password must contain a numeric character")
             password != confirmPass -> showError("Passwords do not match")
-            else -> performRegistration(email, password)
+            else -> checkDeletedStatusAndRegister(email, password)
+        }
+    }
+
+    private fun checkDeletedStatusAndRegister(email: String, pass: String) {
+        binding.btnSignUp.isEnabled = false
+        binding.btnSignUp.text = "VERIFYING..."
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Pre-check Firestore for deleted status
+                val query = FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .whereEqualTo("email", email)
+                    .limit(1)
+                    .get()
+                    .await()
+
+                if (!query.isEmpty) {
+                    val status = query.documents[0].getString("status")
+                    if (status == "deleted") {
+                        showError("This email is associated with a disabled account. Please contact support.")
+                        binding.btnSignUp.isEnabled = true
+                        binding.btnSignUp.text = "CONTINUE"
+                        return@launch
+                    }
+                }
+                performRegistration(email, pass)
+            } catch (e: Exception) {
+                performRegistration(email, pass)
+            }
         }
     }
 
@@ -114,36 +145,24 @@ class SignUpFragment : Fragment() {
                 
                 if (task.isSuccessful) {
                     val firebaseUser = auth.currentUser
-                    
                     firebaseUser?.sendEmailVerification()?.addOnCompleteListener { verifyTask ->
                         if (_binding == null) return@addOnCompleteListener
                         
                         if (verifyTask.isSuccessful) {
                             viewLifecycleOwner.lifecycleScope.launch {
-                                // Initialize local user record
                                 val newUser = User(
                                     id = 1,
-                                    gender = "",
-                                    birthDate = null,
-                                    heightCm = 0.0,
-                                    weightKg = 0.0,
-                                    unitSystem = "METRIC",
-                                    activityLevel = "",
-                                    goal = "",
-                                    preferredDiet = "",
-                                    excludedIngredients = emptyList(),
+                                    email = email,
+                                    status = "active",
                                     lastCompletedWorkoutDay = 0
                                 )
                                 userRepository.insertUser(newUser)
                                 
-                                // Show Verification UI immediately with the custom message
                                 binding.inputContainer.isVisible = false
                                 binding.layoutVerification.isVisible = true
                                 binding.tvTitle.text = "Verify Email"
                                 binding.tvSubtitle.isVisible = false
-                                
-                                // INTEGRATED MESSAGE WITH EXPIRATION INFO
-                                binding.tvVerifySubtitle.text = "Welcome to Nutriority! A verification link has been sent to $email.\n\nPlease check your CVSU inbox (and spam folder) to verify your account.\n\nNote: This link will expire in 72 hours for your security."
+                                binding.tvVerifySubtitle.text = "Welcome to Nutriority! A verification link has been sent to $email.\n\nPlease check your CVSU inbox (and spam folder) to verify your account."
                                 
                                 binding.btnSendCode.isVisible = false 
                                 binding.btnVerify.isVisible = true
@@ -152,20 +171,36 @@ class SignUpFragment : Fragment() {
                                 Toast.makeText(requireContext(), "Verification email sent!", Toast.LENGTH_LONG).show()
                             }
                         } else {
-                            showError("Account created, but failed to send verification link: ${verifyTask.exception?.message}")
+                            showError("Failed to send verification link: ${verifyTask.exception?.message}")
                             binding.btnSignUp.isEnabled = true
-                            binding.btnSignUp.text = "RETRY SENDING LINK"
+                            binding.btnSignUp.text = "RETRY"
                         }
                     }
                 } else {
                     val exception = task.exception
                     if (exception is FirebaseAuthUserCollisionException) {
-                        showError("This email is already in use. Try logging in.")
+                        // Double check if this collision is with a deleted account
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            val query = FirebaseFirestore.getInstance()
+                                .collection("users")
+                                .whereEqualTo("email", email)
+                                .limit(1)
+                                .get()
+                                .await()
+                            
+                            if (!query.isEmpty && query.documents[0].getString("status") == "deleted") {
+                                showError("This account has been disabled. Please contact support.")
+                            } else {
+                                showError("This email is already in use. Try logging in.")
+                            }
+                            binding.btnSignUp.isEnabled = true
+                            binding.btnSignUp.text = "CONTINUE"
+                        }
                     } else {
                         showError("Registration failed: ${exception?.message}")
+                        binding.btnSignUp.isEnabled = true
+                        binding.btnSignUp.text = "CONTINUE"
                     }
-                    binding.btnSignUp.isEnabled = true
-                    binding.btnSignUp.text = "CONTINUE"
                 }
             }
     }
@@ -175,10 +210,7 @@ class SignUpFragment : Fragment() {
         binding.tvError.isVisible = true
     }
 
-    private fun isValidStudentEmail(email: String): Boolean {
-        val lowerEmail = email.lowercase().trim()
-        return lowerEmail.endsWith("@cvsu.edu.ph")
-    }
+    private fun isValidStudentEmail(email: String): Boolean = email.lowercase().trim().endsWith("@cvsu.edu.ph")
 
     override fun onDestroyView() {
         super.onDestroyView()

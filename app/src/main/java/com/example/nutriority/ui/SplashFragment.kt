@@ -16,7 +16,10 @@ import com.example.nutriority.databinding.FragmentSplashBinding
 import com.example.nutriority.ui.util.BaseBindingFragment
 import com.example.nutriority.planner.WorkoutPlan
 import com.example.nutriority.planner.WorkoutPlanner
+import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -40,13 +43,11 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 val startTime = System.currentTimeMillis()
                 try {
-                    // 1. FAST CHECK: If data exists, skip mandatory wait
+                    // 1. Initial Library Sync
                     val hasExercises = withContext(Dispatchers.IO) {
                         workoutRepository.getAllExercises().first().isNotEmpty()
                     }
-
                     if (!hasExercises) {
-                        // Only perform block-level sync if library is totally empty
                         coroutineScope {
                             awaitAll(
                                 async { workoutRepository.syncExercisesFromCloud() },
@@ -55,34 +56,54 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
                         }
                     }
 
-                    // 2. Auth & Onboarding Check
-                    val firebaseUser = FirebaseAuth.getInstance().currentUser
-                    
-                    // NEW: Force a token refresh/reload to verify if account still exists
-                    val isAccountValid = if (firebaseUser != null) {
+                    // 2. Auth & Status Validation
+                    val auth = FirebaseAuth.getInstance()
+                    val firebaseUser = auth.currentUser
+                    var isAccountValid = firebaseUser != null
+                    var isMarkedDeleted = false
+
+                    if (firebaseUser != null) {
                         try {
                             firebaseUser.reload().await()
-                            true
-                        } catch (e: Exception) {
-                            // Account likely deleted or disabled
-                            FirebaseAuth.getInstance().signOut()
-                            userRepository.deleteAll()
-                            false
-                        }
-                    } else false
 
+                            val doc = FirebaseFirestore.getInstance()
+                                .collection("users")
+                                .document(firebaseUser.uid)
+                                .get()
+                                .await()
+
+                            if (doc.exists()) {
+                                val status = doc.getString("status")
+                                if (status == "deleted") {
+                                    isMarkedDeleted = true
+                                    isAccountValid = false
+                                }
+                            }
+                        } catch (e: Exception) {
+                            if (e is FirebaseAuthInvalidUserException) {
+                                isAccountValid = false
+                            } else if (e is FirebaseNetworkException) {
+                                isAccountValid = true // Allow offline access
+                            }
+                        }
+                    }
+
+                    if (isMarkedDeleted || (firebaseUser != null && !isAccountValid)) {
+                        auth.signOut()
+                        userRepository.deleteAll()
+                    }
+
+                    // 3. Navigation Decision
                     val sharedPref = requireActivity().getSharedPreferences("onBoarding", Context.MODE_PRIVATE)
                     val isOnboardingFinished = sharedPref.getBoolean("Finished", false)
 
-                    val destination = if (isAccountValid && isOnboardingFinished) {
-                        val localUser = userRepository.getInitialUser() ?: run {
-                            userRepository.restoreUserFromCloud()
-                            userRepository.getInitialUser()
-                        }
+                    val destination = if (isAccountValid) {
+                        // Check if we have local or cloud data to skip onboarding
+                        val localUser = userRepository.getInitialUser()
 
-                        if (localUser != null) {
-                            // Background Hydration (Non-blocking)
-                            if (!localUser.personalizedPlanJson.isNullOrBlank()) {
+                        if (localUser != null || isOnboardingFinished) {
+                            // If local data exists, we proceed to Home
+                            if (localUser != null && !localUser.personalizedPlanJson.isNullOrBlank()) {
                                 launch(Dispatchers.IO) {
                                     try {
                                         val plan = gson.fromJson(localUser.personalizedPlanJson, WorkoutPlan::class.java)
@@ -92,28 +113,27 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
                             }
                             R.id.action_splashFragment_to_mainTabsFragment
                         } else {
-                            R.id.action_splashFragment_to_viewPagerFragment
+                            // No local data, try to restore from cloud
+                            val restored = userRepository.restoreUserFromCloud()
+                            if (restored) {
+                                // Mark onboarding as finished locally if we restored a profile
+                                sharedPref.edit().putBoolean("Finished", true).apply()
+                                R.id.action_splashFragment_to_mainTabsFragment
+                            } else {
+                                R.id.action_splashFragment_to_viewPagerFragment
+                            }
                         }
                     } else {
-                        // If not logged in OR onboarding not finished, go to onboarding/login
                         R.id.action_splashFragment_to_viewPagerFragment
                     }
 
-                    // 3. Ensure a minimum 2-second delay
                     val elapsedTime = System.currentTimeMillis() - startTime
-                    if (elapsedTime < 2000) {
-                        delay(2000 - elapsedTime)
-                    }
+                    if (elapsedTime < 2000) delay(2000 - elapsedTime)
 
                     navigateTo(destination)
 
                 } catch (e: Exception) {
-                    Log.e("Splash", "Optimized navigation failed", e)
-                    // Ensure minimum delay even on error
-                    val elapsedTime = System.currentTimeMillis() - startTime
-                    if (elapsedTime < 2000) {
-                        delay(2000 - elapsedTime)
-                    }
+                    Log.e("Splash", "Nav error", e)
                     navigateTo(R.id.action_splashFragment_to_viewPagerFragment)
                 }
             }

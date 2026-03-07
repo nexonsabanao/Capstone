@@ -15,9 +15,11 @@ import com.example.nutriority.ui.util.KeyboardUtil
 import com.example.nutriority.planner.WorkoutPlan
 import com.example.nutriority.planner.WorkoutPlanner
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -63,11 +65,41 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
         showAuthOverlay(true)
 
         auth.signInWithEmailAndPassword(email, password)
-            .addOnSuccessListener { restoreAndProceed() }
+            .addOnSuccessListener { 
+                checkAccountStatusAndProceed()
+            }
             .addOnFailureListener {
                 showAuthOverlay(false)
                 showError("Invalid email or password.")
             }
+    }
+
+    private fun checkAccountStatusAndProceed() {
+        val uid = auth.currentUser?.uid ?: return
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Check Firestore for deleted status
+                val doc = FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(uid)
+                    .get()
+                    .await()
+                
+                val status = doc.getString("status")
+                if (status == "deleted") {
+                    auth.signOut()
+                    showAuthOverlay(false)
+                    showError("This account has been disabled by the administrator.")
+                } else {
+                    restoreAndProceed()
+                }
+            } catch (e: Exception) {
+                auth.signOut()
+                showAuthOverlay(false)
+                showError("Login verification failed. Please try again.")
+            }
+        }
     }
 
     private fun restoreAndProceed() {
@@ -81,10 +113,8 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
                     )
                 }
                 
-                // Recalculate and update stats after history is restored
                 userRepository.recalculateUserStats()
 
-                // Inflate the restored plan into the workout DB silently
                 val user = userRepository.getInitialUser()
                 if (user != null && !user.personalizedPlanJson.isNullOrBlank()) {
                     try {

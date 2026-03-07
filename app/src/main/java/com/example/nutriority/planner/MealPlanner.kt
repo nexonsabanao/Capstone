@@ -34,7 +34,16 @@ class MealPlanner @Inject constructor(
 
         // 1. Pre-filter by exclusions and diet once
         val filteredMeals = allMeals.filter { meal ->
-            val isExcluded = excludedIngredients.any { ex -> meal.ingredients.any { it.contains(ex, true) } }
+            // Improved exclusion logic to handle plurals like "Egg" vs "Eggs"
+            val isExcluded = excludedIngredients.any { excluded ->
+                val normalizedExcluded = normalizeIngredient(excluded)
+                meal.ingredients.any { ingredient ->
+                    val normalizedIngredient = normalizeIngredient(ingredient)
+                    normalizedIngredient.contains(normalizedExcluded, true) || 
+                    normalizedExcluded.contains(normalizedIngredient, true)
+                }
+            }
+            
             if (isExcluded) return@filter false
 
             if (meal.preferredDiet.isNotEmpty() && !meal.preferredDiet.equals("Balanced", true)) {
@@ -61,8 +70,6 @@ class MealPlanner @Inject constructor(
             if (bestMealsForTime.isNotEmpty()) {
                 val chosenMeal = bestMealsForTime.random()
                 plannedMeals.add(chosenMeal)
-                // Don't remove if we want potential duplicates across days, 
-                // but keep it for within-day variety
                 availableMeals.remove(chosenMeal) 
             }
         }
@@ -70,6 +77,26 @@ class MealPlanner @Inject constructor(
         return plannedMeals
     }
 
-    private fun containsMeat(meal: Meal): Boolean = meal.ingredients.any { it.contains("chicken", true) || it.contains("beef", true) || it.contains("pork", true) }
-    private fun isLowCarb(meal: Meal): Boolean = !meal.ingredients.any { it.contains("bread", true) || it.contains("pasta", true) || it.contains("rice", true) || it.contains("potato", true) }
+    /**
+     * Basic normalization to handle plurals and casing.
+     * Converts to lowercase and strips trailing 's'.
+     */
+    private fun normalizeIngredient(input: String): String {
+        val lower = input.lowercase().trim()
+        return if (lower.endsWith("s") && lower.length > 3) {
+            lower.substring(0, lower.length - 1)
+        } else {
+            lower
+        }
+    }
+
+    private fun containsMeat(meal: Meal): Boolean = meal.ingredients.any { 
+        val norm = normalizeIngredient(it)
+        norm.contains("chicken") || norm.contains("beef") || norm.contains("pork") 
+    }
+    
+    private fun isLowCarb(meal: Meal): Boolean = !meal.ingredients.any { 
+        val norm = normalizeIngredient(it)
+        norm.contains("bread") || norm.contains("pasta") || norm.contains("rice") || norm.contains("potato") 
+    }
 }

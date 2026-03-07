@@ -7,7 +7,6 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -27,7 +26,6 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -65,30 +63,31 @@ class EditProfileFragment : Fragment() {
     private fun setupFieldStaticContent() {
         binding.rowAge.tvLabel.text = "Birthday"
         binding.rowAge.ivIcon.setImageResource(R.drawable.ic_calendar)
+        
+        binding.rowGender.tvLabel.text = "Sex"
+        binding.rowGender.ivIcon.setImageResource(R.drawable.outline_account_circle_50)
 
         binding.rowWeight.tvLabel.text = "Weight"
         binding.rowWeight.ivIcon.setImageResource(R.drawable.ic_scale_24)
-
+        
         binding.rowHeight.tvLabel.text = "Height"
         binding.rowHeight.ivIcon.setImageResource(R.drawable.ic_height_24)
-
+        
         binding.rowActivity.tvLabel.text = "Activity Level"
         binding.rowActivity.ivIcon.setImageResource(R.drawable.ic_exercise_24)
-
+        
         binding.rowGoal.tvLabel.text = "Goal"
         binding.rowGoal.ivIcon.setImageResource(R.drawable.ic_fitness_24)
-
+        
         binding.rowDiet.tvLabel.text = "Preferred Diet"
         binding.rowDiet.ivIcon.setImageResource(R.drawable.ic_award_meal_24)
-
+        
         binding.rowExclusions.tvLabel.text = "Excluded Ingredients"
         binding.rowExclusions.ivIcon.setImageResource(R.drawable.ic_allergy)
     }
 
     private fun setupClickListeners() {
-        binding.btnBack.setOnClickListener {
-            navigationViewModel.goBack()
-        }
+        binding.btnBack.setOnClickListener { navigationViewModel.goBack() }
 
         binding.rowName.setOnClickListener { 
             showEditBottomSheet("Full Name", "What should we call you?", currentUser?.name ?: "", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS) { newVal ->
@@ -103,10 +102,19 @@ class EditProfileFragment : Fragment() {
                 val age = calculateAgeFromMillis(selection)
                 if (age in 17..28) {
                     if (selection != currentUser?.birthDate) {
-                        updateUserField(false) { it.copy(birthDate = selection) }
+                        handleFieldUpdateWithPlanChoice("Birthday") { it.copy(birthDate = selection) }
                     }
                 } else {
                     Toast.makeText(requireContext(), "Age must be between 17 and 28 years old", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
+        binding.rowGender.root.setOnClickListener {
+            val options = arrayOf("Male", "Female")
+            showOptionsBottomSheet("Sex", "Select your biological sex", options) { selection ->
+                if (selection != currentUser?.gender) {
+                    handleFieldUpdateWithPlanChoice("Sex") { it.copy(gender = selection) }
                 }
             }
         }
@@ -115,7 +123,7 @@ class EditProfileFragment : Fragment() {
             showEditBottomSheet("Weight", "Enter your weight in kg", currentUser?.weightKg?.toString() ?: "", InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL) { newVal ->
                 val newWeight = newVal.toDoubleOrNull() ?: 0.0
                 if (newWeight != currentUser?.weightKg) {
-                    updateUserField(false) { it.copy(weightKg = newWeight) }
+                    handleFieldUpdateWithPlanChoice("Weight") { it.copy(weightKg = newWeight) }
                 }
             }
         }
@@ -124,40 +132,34 @@ class EditProfileFragment : Fragment() {
             showEditBottomSheet("Height", "Enter your height in cm", currentUser?.heightCm?.toString() ?: "", InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL) { newVal ->
                 val newHeight = newVal.toDoubleOrNull() ?: 0.0
                 if (newHeight != currentUser?.heightCm) {
-                    updateUserField(false) { it.copy(heightCm = newHeight) }
+                    handleFieldUpdateWithPlanChoice("Height") { it.copy(heightCm = newHeight) }
                 }
             }
         }
 
         binding.rowActivity.root.setOnClickListener { 
-            val options = arrayOf("Sedentary", "Lightly active", "Active")
+            val options = arrayOf("Sedentary", "Lightly Active", "Active")
             showOptionsBottomSheet("Activity Level", "Choose your daily activity level", options) { selection ->
                 if (selection != currentUser?.activityLevel) {
-                    showUpdateOptionsDialog("Activity Level") { shouldRestart ->
-                        updateUserField(shouldRestart) { it.copy(activityLevel = selection) }
-                    }
+                    handleFieldUpdateWithPlanChoice("Activity Level") { it.copy(activityLevel = selection) }
                 }
             }
         }
 
         binding.rowGoal.root.setOnClickListener { 
-            val options = arrayOf("Lose weight", "Keep fit", "Build muscle")
+            val options = arrayOf("Lose Weight", "Keep Fit", "Build Muscle")
             showOptionsBottomSheet("Main Goal", "What do you want to achieve?", options) { selection ->
                 if (selection != currentUser?.goal) {
-                    showUpdateOptionsDialog("Goal") { shouldRestart ->
-                        updateUserField(shouldRestart) { it.copy(goal = selection) }
-                    }
+                    handleFieldUpdateWithPlanChoice("Goal") { it.copy(goal = selection) }
                 }
             }
         }
 
         binding.rowDiet.root.setOnClickListener { 
-            val options = arrayOf("Balanced", "Low Carb", "Vegetarian")
+            val options = arrayOf("Balanced", "Low-Carb", "Vegetarian")
             showOptionsBottomSheet("Preferred Diet", "Choose a nutrition style", options) { selection ->
                 if (selection != currentUser?.preferredDiet) {
-                    showUpdateOptionsDialog("Preferred Diet") { shouldRestart ->
-                        updateUserField(shouldRestart) { it.copy(preferredDiet = selection) }
-                    }
+                    handleFieldUpdateWithPlanChoice("Preferred Diet") { it.copy(preferredDiet = selection) }
                 }
             }
         }
@@ -167,19 +169,33 @@ class EditProfileFragment : Fragment() {
             showEditBottomSheet("Exclusions", "Enter ingredients to exclude (comma separated)", currentExclusions, InputType.TYPE_CLASS_TEXT) { newVal ->
                 val newList = newVal.split(",").map { it.trim() }.filter { it.isNotEmpty() }
                 if (newList != currentUser?.excludedIngredients) {
-                    showUpdateOptionsDialog("Excluded Ingredients") { shouldRestart ->
-                        updateUserField(shouldRestart) { it.copy(excludedIngredients = newList) }
-                    }
+                    handleFieldUpdateWithPlanChoice("Exclusions") { it.copy(excludedIngredients = newList) }
                 }
             }
         }
 
-        binding.btnLogout.setOnClickListener {
-            showLogoutConfirmation()
-        }
+        binding.btnLogout.setOnClickListener { showLogoutConfirmation() }
+        binding.btnDeleteAccount.setOnClickListener { showDeleteAccountConfirmation() }
+    }
 
-        binding.btnDeleteAccount.setOnClickListener {
-            showDeleteAccountConfirmation()
+    private fun isPlanReady(user: User?): Boolean {
+        if (user == null) return false
+        return user.birthDate != null && 
+               user.heightCm > 0 && 
+               user.weightKg > 0 && 
+               user.gender.isNotBlank() && 
+               user.activityLevel.isNotBlank() && 
+               user.goal.isNotBlank() &&
+               user.preferredDiet.isNotBlank()
+    }
+
+    private fun handleFieldUpdateWithPlanChoice(fieldName: String, updateAction: (User) -> User) {
+        if (isPlanReady(currentUser)) {
+            showUpdateOptionsDialog(fieldName) { shouldRestart ->
+                updateUserField(shouldRestart, updateAction)
+            }
+        } else {
+            updateUserField(false, updateAction)
         }
     }
 
@@ -187,16 +203,13 @@ class EditProfileFragment : Fragment() {
         val dob = Calendar.getInstance().apply { timeInMillis = millis }
         val today = Calendar.getInstance()
         var age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR)
-        if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
-            age--
-        }
+        if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) age--
         return age
     }
 
     private fun showUpdateOptionsDialog(fieldName: String, onSelection: (Boolean) -> Unit) {
         val builder = AlertDialog.Builder(requireContext())
         val dialogView = layoutInflater.inflate(R.layout.dialog_plan_update_choice, null)
-        
         val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
         val btnUpdate = dialogView.findViewById<MaterialButton>(R.id.btnUpdatePlan)
         val btnKeep = dialogView.findViewById<MaterialButton>(R.id.btnKeepCurrent)
@@ -206,23 +219,11 @@ class EditProfileFragment : Fragment() {
 
         builder.setView(dialogView)
         val dialog = builder.create()
-        
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        btnUpdate.setOnClickListener {
-            onSelection(true)
-            dialog.dismiss()
-        }
-
-        btnKeep.setOnClickListener {
-            onSelection(false)
-            dialog.dismiss()
-        }
-
-        btnCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
+        btnUpdate.setOnClickListener { onSelection(true); dialog.dismiss() }
+        btnKeep.setOnClickListener { onSelection(false); dialog.dismiss() }
+        btnCancel.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
 
@@ -246,7 +247,7 @@ class EditProfileFragment : Fragment() {
     private fun showDeleteAccountConfirmation() {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Account")
-            .setMessage("This will permanently erase your account and ALL your progress. You will not be able to log back in. Are you sure?")
+            .setMessage("This will permanently erase your account and ALL your progress. Are you sure?")
             .setPositiveButton("DELETE PERMANENTLY") { _, _ -> showSilentReauthDialog() }
             .setNegativeButton("CANCEL", null)
             .show()
@@ -255,29 +256,21 @@ class EditProfileFragment : Fragment() {
     private fun showSilentReauthDialog() {
         val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
         val dialogView = layoutInflater.inflate(R.layout.layout_edit_field_bottom_sheet, null)
-        
-        val tvTitle = dialogView.findViewById<TextView>(R.id.tvSheetTitle)
-        val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvSheetSubtitle)
         val etValue = dialogView.findViewById<TextInputEditText>(R.id.etFieldValue)
         val til = dialogView.findViewById<TextInputLayout>(R.id.textInputLayout)
         val btnSave = dialogView.findViewById<MaterialButton>(R.id.btnSave)
 
-        tvTitle.text = "Verify Password"
-        tvSubtitle.text = "Please enter your password to confirm account deletion."
+        dialogView.findViewById<TextView>(R.id.tvSheetTitle).text = "Verify Password"
+        dialogView.findViewById<TextView>(R.id.tvSheetSubtitle).text = "Please enter your password to confirm account deletion."
         etValue.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         etValue.hint = "Password"
         btnSave.text = "CONFIRM & DELETE"
         
         btnSave.setOnClickListener {
             val password = etValue.text.toString()
-            if (password.isNotBlank()) {
-                dialog.dismiss()
-                performReauthAndDeletion(password)
-            } else {
-                til.error = "Password is required"
-            }
+            if (password.isNotBlank()) { dialog.dismiss(); performReauthAndDeletion(password) }
+            else til.error = "Password is required"
         }
-        
         dialog.setContentView(dialogView)
         dialog.show()
     }
@@ -286,26 +279,16 @@ class EditProfileFragment : Fragment() {
         val user = FirebaseAuth.getInstance().currentUser ?: return
         val email = user.email ?: return
         val credential = EmailAuthProvider.getCredential(email, password)
-
         user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
-            if (reauthTask.isSuccessful) {
-                performImmediateDeletion()
-            } else {
-                Toast.makeText(requireContext(), "Verification failed: ${reauthTask.exception?.message}", Toast.LENGTH_LONG).show()
-            }
+            if (reauthTask.isSuccessful) performImmediateDeletion()
+            else Toast.makeText(requireContext(), "Verification failed: ${reauthTask.exception?.message}", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun performImmediateDeletion() {
-        val user = FirebaseAuth.getInstance().currentUser
-        if (user == null) {
-            restartApp()
-            return
-        }
-        
+        val user = FirebaseAuth.getInstance().currentUser ?: return
         val uid = user.uid
         val db = FirebaseFirestore.getInstance()
-
         user.delete().addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 viewLifecycleOwner.lifecycleScope.launch {
@@ -314,13 +297,9 @@ class EditProfileFragment : Fragment() {
                         profileViewModel.clearAllLocalData()
                         Toast.makeText(requireContext(), "Account wiped successfully.", Toast.LENGTH_SHORT).show()
                         restartApp()
-                    } catch (e: Exception) {
-                        restartApp()
-                    }
+                    } catch (e: Exception) { restartApp() }
                 }
-            } else {
-                Toast.makeText(requireContext(), "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-            }
+            } else Toast.makeText(requireContext(), "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -336,24 +315,18 @@ class EditProfileFragment : Fragment() {
             currentUser = user
             user?.let {
                 binding.tvNameValue.text = if (it.name.isBlank()) "User" else it.name
-                
                 val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
                 binding.rowAge.tvValue.text = it.birthDate?.let { date -> sdf.format(Date(date)) } ?: "Not set"
-                
+                binding.rowGender.tvValue.text = it.gender
                 binding.rowWeight.tvValue.text = "${it.weightKg} kg"
                 binding.rowHeight.tvValue.text = "${it.heightCm} cm"
                 binding.rowActivity.tvValue.text = it.activityLevel
                 binding.rowGoal.tvValue.text = it.goal
                 binding.rowDiet.tvValue.text = it.preferredDiet
                 binding.rowExclusions.tvValue.text = if (it.excludedIngredients.isEmpty()) "None" else it.excludedIngredients.joinToString(", ")
-                binding.tvGenderValue.text = it.gender
 
                 if (it.profileImageUrl.isNotEmpty()) {
-                    Glide.with(this)
-                        .load(it.profileImageUrl)
-                        .placeholder(R.drawable.logo)
-                        .circleCrop()
-                        .into(binding.profileImage)
+                    Glide.with(this).load(it.profileImageUrl).placeholder(R.drawable.logo).circleCrop().into(binding.profileImage)
                 }
             }
         }
@@ -365,38 +338,28 @@ class EditProfileFragment : Fragment() {
             if (restartPlan) {
                 userViewModel.restartWorkoutPlan()
                 Toast.makeText(requireContext(), "Profile updated and plan refreshed", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
-            }
+            } else Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun showEditBottomSheet(title: String, subtitle: String, currentVal: String, inputType: Int, onSave: (String) -> Unit) {
         val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
         val view = layoutInflater.inflate(R.layout.layout_edit_field_bottom_sheet, null)
-        
-        val tvTitle = view.findViewById<TextView>(R.id.tvSheetTitle)
-        val tvSubtitle = view.findViewById<TextView>(R.id.tvSheetSubtitle)
         val etValue = view.findViewById<TextInputEditText>(R.id.etFieldValue)
         val til = view.findViewById<TextInputLayout>(R.id.textInputLayout)
         val btnSave = view.findViewById<MaterialButton>(R.id.btnSave)
 
-        tvTitle.text = "Edit $title"
-        tvSubtitle.text = subtitle
+        view.findViewById<TextView>(R.id.tvSheetTitle).text = "Edit $title"
+        view.findViewById<TextView>(R.id.tvSheetSubtitle).text = subtitle
         etValue.inputType = inputType
         etValue.setText(currentVal)
         etValue.setSelection(etValue.text?.length ?: 0)
         
         btnSave.setOnClickListener {
             val newVal = etValue.text.toString()
-            if (newVal.isNotBlank() || title == "Exclusions") {
-                onSave(newVal)
-                dialog.dismiss()
-            } else {
-                til.error = "Field cannot be empty"
-            }
+            if (newVal.isNotBlank() || title == "Exclusions") { onSave(newVal); dialog.dismiss() }
+            else til.error = "Field cannot be empty"
         }
-
         dialog.setContentView(view)
         dialog.show()
     }
@@ -404,30 +367,20 @@ class EditProfileFragment : Fragment() {
     private fun showOptionsBottomSheet(title: String, subtitle: String, options: Array<String>, onSelect: (String) -> Unit) {
         val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
         val view = layoutInflater.inflate(R.layout.layout_edit_field_bottom_sheet, null)
-        
-        val tvTitle = view.findViewById<TextView>(R.id.tvSheetTitle)
-        val tvSubtitle = view.findViewById<TextView>(R.id.tvSheetSubtitle)
-        val til = view.findViewById<TextInputLayout>(R.id.textInputLayout)
-        val btnSave = view.findViewById<MaterialButton>(R.id.btnSave)
-        
-        til.visibility = View.GONE
-        btnSave.visibility = View.GONE
-        
-        tvTitle.text = title
-        tvSubtitle.text = subtitle
-        
         val container = view.findViewById<ViewGroup>(R.id.optionsContainer) ?: (view as ViewGroup)
+        
+        view.findViewById<TextView>(R.id.tvSheetTitle).text = title
+        view.findViewById<TextView>(R.id.tvSheetSubtitle).text = subtitle
+        view.findViewById<View>(R.id.textInputLayout).visibility = View.GONE
+        view.findViewById<View>(R.id.btnSave).visibility = View.GONE
+        
         options.forEach { option ->
             val itemView = layoutInflater.inflate(R.layout.item_selection_option, container, false)
             val tvOption = itemView.findViewById<TextView>(R.id.tvOptionText)
             tvOption.text = option
-            itemView.setOnClickListener {
-                onSelect(option)
-                dialog.dismiss()
-            }
+            itemView.setOnClickListener { onSelect(option); dialog.dismiss() }
             container.addView(itemView)
         }
-
         dialog.setContentView(view)
         dialog.show()
     }

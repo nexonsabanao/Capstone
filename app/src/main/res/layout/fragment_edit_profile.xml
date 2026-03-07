@@ -157,48 +157,16 @@
                         layout="@layout/item_edit_profile_field" />
 
                     <include
+                        android:id="@+id/rowGender"
+                        layout="@layout/item_edit_profile_field" />
+
+                    <include
                         android:id="@+id/rowWeight"
                         layout="@layout/item_edit_profile_field" />
 
                     <include
                         android:id="@+id/rowHeight"
                         layout="@layout/item_edit_profile_field" />
-
-                    <LinearLayout
-                        android:id="@+id/rowGender"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.6"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:padding="16dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_lock"
-                            app:tint="#757575" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_weight="1"
-                            android:fontFamily="sans-serif"
-                            android:text="@string/sex"
-                            android:textColor="#212121"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/tvGenderValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif"
-                            android:textColor="#212121"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            tools:text="Male" />
-                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

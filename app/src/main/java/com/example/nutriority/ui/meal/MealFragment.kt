@@ -1,8 +1,10 @@
 package com.example.nutriority.ui.meal
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.PopupMenu
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
@@ -15,6 +17,7 @@ import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentMealBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.util.BaseBindingFragment
+import com.google.android.material.button.MaterialButton
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -81,11 +84,36 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
         if (user.preferredDiet.isBlank()) missingFields.add("Preferred Diet")
 
         if (missingFields.isNotEmpty()) {
-            val message = "Please complete your profile first. Missing: ${missingFields.joinToString(", ")}"
-            Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+            showProfileIncompleteDialog(missingFields)
         } else {
             mealViewModel.generateNewMealPlan()
         }
+    }
+
+    private fun showProfileIncompleteDialog(missingFields: List<String>) {
+        val builder = AlertDialog.Builder(requireContext())
+        val dialogView = layoutInflater.inflate(R.layout.dialog_profile_incomplete, null)
+        
+        val tvMissing = dialogView.findViewById<TextView>(R.id.tvMissingFields)
+        val btnGoToProfile = dialogView.findViewById<MaterialButton>(R.id.btnGoToProfile)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+
+        tvMissing.text = "Missing: ${missingFields.joinToString(", ")}"
+
+        builder.setView(dialogView)
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnGoToProfile.setOnClickListener {
+            dialog.dismiss()
+            navigationViewModel.navigateToEditProfile()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun showPopupMenu(view: View) {

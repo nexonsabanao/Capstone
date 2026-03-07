@@ -35,11 +35,19 @@ class ViewPagerFragment : Fragment() {
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (binding.viewPager.currentItem > 0) {
-                    navigateToPreviousScreen()
-                } else {
-                    isEnabled = false
-                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                val currentItem = binding.viewPager.currentItem
+                
+                when {
+                    currentItem == 2 -> { // From ForgotPassword, go to Login
+                        binding.viewPager.setCurrentItem(0, false)
+                    }
+                    currentItem > 0 -> {
+                        navigateToPreviousScreen()
+                    }
+                    else -> {
+                        isEnabled = false
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
                 }
             }
         })
@@ -53,8 +61,6 @@ class ViewPagerFragment : Fragment() {
 
         binding.viewPager.adapter = adapter
         binding.viewPager.isUserInputEnabled = false
-
-        // This will create a fading animation between fragments
         binding.viewPager.setPageTransformer(FadePageTransformer())
         binding.viewPager.offscreenPageLimit = 9
     }
@@ -101,21 +107,18 @@ class ViewPagerFragment : Fragment() {
             navigateToPreviousScreen()
         }
 
-        // Jump directly to Login (Position 0)
         childFragmentManager.setFragmentResultListener("navigationRequestLogin", this) { _, _ ->
             if (canNavigate()) {
                 binding.viewPager.setCurrentItem(0, false)
             }
         }
 
-        // Jump directly to ForgotPassword (Position 2)
         childFragmentManager.setFragmentResultListener("navigationRequestForgotPassword", this) { _, _ ->
             if (canNavigate()) {
                 binding.viewPager.setCurrentItem(2, false)
             }
         }
 
-        // Jump directly to Welcome (Position 3), skipping SignUp and ForgotPassword
         childFragmentManager.setFragmentResultListener("navigationRequestWelcome", this) { _, _ ->
             if (canNavigate()) {
                 binding.viewPager.setCurrentItem(3, false)

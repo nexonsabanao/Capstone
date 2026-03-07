@@ -32,7 +32,6 @@ window.openStudentModal = (id=null) => {
                 document.getElementById('stUID').value = u.fid || "";
                 document.getElementById('stEmail').value = u.email || "";
                 
-                // Set birthdate (convert timestamp to YYYY-MM-DD)
                 if (u.birthDate) {
                     const date = new Date(u.birthDate);
                     document.getElementById('stBirthDate').value = date.toISOString().split('T')[0];
@@ -82,7 +81,6 @@ document.getElementById('studentForm').onsubmit = async (e) => {
     e.preventDefault(); 
     const fid = document.getElementById('editStId').value; 
     
-    // Parse birthDate to timestamp
     const birthDateInput = document.getElementById('stBirthDate').value;
     const birthDateTimestamp = birthDateInput ? new Date(birthDateInput).getTime() : null;
 
@@ -119,9 +117,14 @@ document.getElementById('studentForm').onsubmit = async (e) => {
             userData.id = uid;
             userData.email = email;
             userData.lastCompletedWorkoutDay = 0;
+            userData.status = "active";
             await setDoc(doc(db, "users", uid), userData);
             alert("Account created!");
         } else {
+            // Ensure email is preserved on edit
+            const u = window.cacheSt.find(x => x.fid === fid);
+            if (u && u.email) userData.email = u.email;
+            
             await setDoc(doc(db, "users", fid), userData, { merge: true });
             alert("Profile updated!");
         }
@@ -137,15 +140,24 @@ document.getElementById('studentForm').onsubmit = async (e) => {
 window.deleteRecord = async (coll, id) => {
     let msg = "Delete this record?";
     if (coll === 'users') {
-        msg = "Are you sure? This will delete the Student's Profile data. \n\nNote: For security, you must manually delete the login account from the Firebase Console (Authentication tab).";
+        msg = "Are you sure? This will disable account access. \n\nNote: You should also manually delete the record from Firebase Console (Authentication).";
     }
 
     if(confirm(msg)) { 
         try {
-            await deleteDoc(doc(db, coll, id)); 
+            if (coll === 'users') {
+                // Find user in cache to get their email
+                const u = window.cacheSt.find(x => x.fid === id);
+                const updateData = { status: "deleted" };
+                if (u && u.email) updateData.email = u.email; // Ensure email is present for block-checks
+                
+                await setDoc(doc(db, coll, id), updateData, { merge: true });
+            } else {
+                await deleteDoc(doc(db, coll, id));
+            }
             if (window.updateStats) window.updateStats(); 
         } catch (e) {
-            alert("Delete failed: " + e.message);
+            alert("Operation failed: " + e.message);
         }
     }
 };

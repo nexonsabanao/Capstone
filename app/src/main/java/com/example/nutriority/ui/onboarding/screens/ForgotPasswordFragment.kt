@@ -5,11 +5,15 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.lifecycleScope
 import com.example.nutriority.databinding.FragmentForgotPasswordBinding
 import com.example.nutriority.ui.util.BaseBindingFragment
 import com.example.nutriority.ui.util.KeyboardUtil
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @AndroidEntryPoint
 class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding>(FragmentForgotPasswordBinding::inflate) {
@@ -19,6 +23,14 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Listen for page selection to reset UI when the user navigates to this fragment in ViewPager
+        parentFragmentManager.setFragmentResultListener("pageSelected", viewLifecycleOwner) { _, bundle ->
+            val position = bundle.getInt("position", -1)
+            if (position == 2) { // Position 2 is ForgotPasswordFragment
+                resetUI()
+            }
+        }
+
         binding.btnBack.setOnClickListener {
             parentFragmentManager.setFragmentResult("navigationRequestLogin", Bundle())
         }
@@ -27,7 +39,7 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
 
         binding.btnSendCodeInitial.setOnClickListener {
             KeyboardUtil.hideKeyboard(requireActivity())
-            val email = binding.etEmail.text.toString().trim()
+            val email = binding.etEmail.text.toString().lowercase().trim()
 
             if (email.isBlank()) {
                 showError("Please enter your email address")
@@ -39,7 +51,7 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
                 return@setOnClickListener
             }
 
-            verifyAndSendResetEmail(email)
+            checkAccountAndProceed(email)
         }
 
         binding.btnDone.setOnClickListener {
@@ -47,28 +59,58 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
         }
     }
 
-    private fun verifyAndSendResetEmail(email: String) {
+    override fun onResume() {
+        super.onResume()
+        resetUI()
+    }
+
+    private fun resetUI() {
+        // Use 'view' check instead of private '_binding'
+        if (view != null) {
+            binding.layoutStepEmail.visibility = View.VISIBLE
+            binding.layoutStepSuccess.visibility = View.GONE
+            binding.tvError.isVisible = false
+            binding.etEmail.text?.clear()
+            binding.btnSendCodeInitial.isEnabled = true
+            binding.btnSendCodeInitial.text = "SEND RESET LINK"
+            binding.tvSubtitle.text = "Enter your student email address and we'll send you a link to reset your password."
+        }
+    }
+
+    private fun checkAccountAndProceed(email: String) {
         binding.btnSendCodeInitial.isEnabled = false
         binding.btnSendCodeInitial.text = "VERIFYING..."
 
-        // Check if the account exists first
-        auth.fetchSignInMethodsForEmail(email).addOnCompleteListener { checkTask ->
-            if (context == null) return@addOnCompleteListener
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val query = FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .whereEqualTo("email", email)
+                    .limit(1)
+                    .get()
+                    .await()
 
-            if (checkTask.isSuccessful) {
-                val signInMethods = checkTask.result?.signInMethods
-                
-                if (signInMethods.isNullOrEmpty()) {
-                    // No account found for this email
-                    binding.btnSendCodeInitial.isEnabled = true
-                    binding.btnSendCodeInitial.text = "SEND RESET LINK"
-                    showError("This email is not registered with a Nutriority account.")
-                } else {
-                    // Account exists, proceed to send reset email
+                if (!query.isEmpty) {
+                    val doc = query.documents[0]
+                    val status = doc.getString("status")
+                    if (status == "deleted") {
+                        showError("This account has been disabled. Please contact the administrator.")
+                        binding.btnSendCodeInitial.isEnabled = true
+                        binding.btnSendCodeInitial.text = "SEND RESET LINK"
+                        return@launch
+                    }
                     sendPasswordResetEmail(email)
+                } else {
+                    val signInMethods = auth.fetchSignInMethodsForEmail(email).await().signInMethods
+                    if (signInMethods.isNullOrEmpty()) {
+                        showError("This email is not registered with a Nutriority account.")
+                        binding.btnSendCodeInitial.isEnabled = true
+                        binding.btnSendCodeInitial.text = "SEND RESET LINK"
+                    } else {
+                        sendPasswordResetEmail(email)
+                    }
                 }
-            } else {
-                // If checking fails (e.g. network error), try sending anyway as a fallback
+            } catch (e: Exception) {
                 sendPasswordResetEmail(email)
             }
         }
@@ -79,7 +121,8 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
 
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
-                if (context == null) return@addOnCompleteListener
+                // Use 'view' check instead of private '_binding'
+                if (context == null || view == null) return@addOnCompleteListener
                 
                 binding.btnSendCodeInitial.isEnabled = true
                 binding.btnSendCodeInitial.text = "SEND RESET LINK"
@@ -87,7 +130,7 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
                 if (task.isSuccessful) {
                     binding.layoutStepEmail.visibility = View.GONE
                     binding.layoutStepSuccess.visibility = View.VISIBLE
-                    binding.tvSubtitle.text = "A password reset link has been sent to $email. Please check your inbox or SPAM folder and follow the instructions."
+                    binding.tvSubtitle.text = "A password reset link has been sent to $email. Please check your inbox or SPAM folder."
                     Toast.makeText(requireContext(), "Reset link sent!", Toast.LENGTH_LONG).show()
                 } else {
                     showError("Error: ${task.exception?.message}")
@@ -101,7 +144,6 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
     }
 
     private fun isValidEmail(email: String): Boolean {
-        val lowerEmail = email.lowercase().trim()
-        return lowerEmail.endsWith("@cvsu.edu.ph")
+        return email.endsWith("@cvsu.edu.ph")
     }
 }

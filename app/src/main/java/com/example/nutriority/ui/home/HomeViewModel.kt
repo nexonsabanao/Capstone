@@ -45,13 +45,11 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            // Non-blocking syncs to ensure UI shows cached data immediately
             launch { try { articleRepository.syncArticlesFromCloud() } catch (e: Exception) {} }
             launch { try { mealRepository.syncMealsFromCloud() } catch (e: Exception) {} }
             launch { try { workoutRepository.syncExercisesFromCloud() } catch (e: Exception) {} }
             launch { try { recommendedWorkoutRepository.syncOfficialWorkoutsFromCloud() } catch (e: Exception) {} }
             
-            // Give a small delay to allow local Room data to emit at least once
             delay(500)
             _isDataReady.value = true
         }
@@ -59,30 +57,30 @@ class HomeViewModel @Inject constructor(
         allMeals = combine(mealRepository.allMeals, userRepository.getUser) { meals, user ->
             if (user == null || meals.isEmpty()) return@combine meals
 
-            // 1. Filter by Preferred Diet
             var filtered = if (user.preferredDiet.isNotEmpty() && !user.preferredDiet.equals("Balanced", ignoreCase = true)) {
                 meals.filter { it.preferredDiet.equals(user.preferredDiet, ignoreCase = true) }
             } else {
                 meals
             }
 
-            // Fallback: If no meals match the specific diet, show all available meals (Balanced + others)
             if (filtered.isEmpty()) {
                 filtered = meals
             }
 
-            // 2. Filter by Excluded Ingredients
+            // Improved Filtering by Excluded Ingredients (Plural handling)
             if (user.excludedIngredients.isNotEmpty()) {
                 filtered = filtered.filter { meal ->
                     user.excludedIngredients.none { excluded ->
+                        val normalizedExcluded = normalizeIngredient(excluded)
                         meal.ingredients.any { ingredient -> 
-                            ingredient.contains(excluded, ignoreCase = true) 
+                            val normalizedIngredient = normalizeIngredient(ingredient)
+                            normalizedIngredient.contains(normalizedExcluded, ignoreCase = true) ||
+                            normalizedExcluded.contains(normalizedIngredient, ignoreCase = true)
                         }
                     }
                 }
             }
 
-            // 3. Sort by Time of Day
             val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
             val timePriority = when {
                 currentHour in 5..10 -> listOf("Breakfast", "Lunch", "Dinner")
@@ -167,5 +165,17 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = "1800-2200 kcal / day"
         )
+    }
+
+    /**
+     * Normalizes ingredient strings to handle plurals (strips trailing 's').
+     */
+    private fun normalizeIngredient(input: String): String {
+        val lower = input.lowercase().trim()
+        return if (lower.endsWith("s") && lower.length > 3) {
+            lower.substring(0, lower.length - 1)
+        } else {
+            lower
+        }
     }
 }

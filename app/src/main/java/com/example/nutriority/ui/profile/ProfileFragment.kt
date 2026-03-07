@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.profile
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TableRow
 import android.widget.TextView
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
@@ -18,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
+import com.example.nutriority.data.model.User
 import com.example.nutriority.data.model.WorkoutSessionLog
 import com.example.nutriority.data.model.DailyMealLog
 import com.example.nutriority.databinding.FragmentProfileBinding
@@ -29,6 +32,7 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -76,7 +80,9 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         }
 
         binding.calorieCard.root.findViewById<View>(R.id.btnLogFood)?.setOnClickListener {
-            navigationViewModel.navigateToLogManual()
+            if (isProfileComplete()) {
+                navigationViewModel.navigateToLogManual()
+            }
         }
         
         binding.historyCard.btnShowRecords.setOnClickListener {
@@ -110,8 +116,57 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         }
     }
 
+    private fun isProfileComplete(): Boolean {
+        val user = profileViewModel.uiState.value.user
+        if (user == null) {
+            Toast.makeText(requireContext(), "Loading user profile...", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        val missingFields = mutableListOf<String>()
+        if (user.birthDate == null) missingFields.add("Birth Date")
+        if (user.heightCm <= 0) missingFields.add("Height")
+        if (user.weightKg <= 0) missingFields.add("Weight")
+        if (user.gender.isBlank()) missingFields.add("Gender")
+        if (user.activityLevel.isBlank()) missingFields.add("Activity Level")
+        if (user.goal.isBlank()) missingFields.add("Fitness Goal")
+
+        return if (missingFields.isNotEmpty()) {
+            showProfileIncompleteDialog(missingFields)
+            false
+        } else {
+            true
+        }
+    }
+
+    private fun showProfileIncompleteDialog(missingFields: List<String>) {
+        val builder = AlertDialog.Builder(requireContext())
+        val dialogView = layoutInflater.inflate(R.layout.dialog_profile_incomplete, null)
+        
+        val tvMissing = dialogView.findViewById<TextView>(R.id.tvMissingFields)
+        val btnGoToProfile = dialogView.findViewById<MaterialButton>(R.id.btnGoToProfile)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+
+        tvMissing.text = "Missing: ${missingFields.joinToString(", ")}"
+
+        builder.setView(dialogView)
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnGoToProfile.setOnClickListener {
+            dialog.dismiss()
+            navigationViewModel.navigateToEditProfile()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
     private fun showWeightLogBottomSheet() {
-        val currentWeight = profileViewModel.getUser.value?.weightKg ?: 60.0
+        val currentWeight = profileViewModel.uiState.value.user?.weightKg ?: 60.0
         val bottomSheet = WeightLogBottomSheetFragment(currentWeight) { weight, date ->
             profileViewModel.logWeight(weight, date)
         }
@@ -121,21 +176,17 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Main UI State observation following the MealFragment pattern
                 launch {
                     profileViewModel.uiState.collectLatest { state ->
-                        // Show loading indicator until initial DB fetch is complete
                         if (state.isInitialLoading) {
                             return@collectLatest
                         }
 
-                        // Update User Info
                         state.user?.let { user ->
                             binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", user.weightKg)
                             updateCalorieCard(user, state.todayMealLogs)
                         }
 
-                        // Update Meal Log List
                         loggedFoodAdapter.submitList(state.todayMealLogs)
                         val hasLogs = state.todayMealLogs.isNotEmpty()
                         binding.tvFoodTitle.isVisible = hasLogs
@@ -143,7 +194,6 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
                     }
                 }
 
-                // Observations for less critical/historical data
                 launch {
                     profileViewModel.sessionLogs.observe(viewLifecycleOwner) { logs ->
                         updateActivityStats(logs)
@@ -279,7 +329,6 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         binding.historyCard.tvStreakCount.text = streak.toString()
         binding.historyCard.tvStreakLabel.text = if (streak <= 1) "day" else "days"
         
-        // Red only when streak is 0 (broken)
         if (streak == 0) {
             binding.historyCard.tvStreakCount.setTextColor(Color.parseColor("#E74C3C"))
         } else {

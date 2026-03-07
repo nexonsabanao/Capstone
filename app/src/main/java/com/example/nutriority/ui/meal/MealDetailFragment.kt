@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.meal
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,6 +24,7 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.button.MaterialButton
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -67,17 +69,69 @@ class MealDetailFragment : BaseBindingFragment<FragmentMealDetailBinding>(Fragme
 
     private fun setupLogButton() {
         binding.btnLogMeal.setOnClickListener {
-            currentMeal?.let { meal ->
-                profileViewModel.logMeal(meal)
-                binding.btnLogMeal.apply {
-                    text = "LOGGED"
-                    isEnabled = false
-                    alpha = 0.7f
-                    setIconResource(R.drawable.ic_check_circle)
+            if (isProfileComplete()) {
+                currentMeal?.let { meal ->
+                    profileViewModel.logMeal(meal)
+                    binding.btnLogMeal.apply {
+                        text = "LOGGED"
+                        isEnabled = false
+                        alpha = 0.7f
+                        setIconResource(R.drawable.ic_check_circle)
+                    }
+                    Toast.makeText(requireContext(), "${meal.name} added to profile", Toast.LENGTH_SHORT).show()
                 }
-                Toast.makeText(requireContext(), "${meal.name} added to profile", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun isProfileComplete(): Boolean {
+        // Use the observed UI state to get current user data
+        val user = profileViewModel.uiState.value.user
+        if (user == null) {
+            Toast.makeText(requireContext(), "Loading user profile...", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        val missingFields = mutableListOf<String>()
+        if (user.birthDate == null) missingFields.add("Birth Date")
+        if (user.heightCm <= 0) missingFields.add("Height")
+        if (user.weightKg <= 0) missingFields.add("Weight")
+        if (user.gender.isBlank()) missingFields.add("Gender")
+        if (user.activityLevel.isBlank()) missingFields.add("Activity Level")
+        if (user.goal.isBlank()) missingFields.add("Fitness Goal")
+
+        return if (missingFields.isNotEmpty()) {
+            showProfileIncompleteDialog(missingFields)
+            false
+        } else {
+            true
+        }
+    }
+
+    private fun showProfileIncompleteDialog(missingFields: List<String>) {
+        val builder = AlertDialog.Builder(requireContext())
+        val dialogView = layoutInflater.inflate(R.layout.dialog_profile_incomplete, null)
+        
+        val tvMissing = dialogView.findViewById<TextView>(R.id.tvMissingFields)
+        val btnGoToProfile = dialogView.findViewById<MaterialButton>(R.id.btnGoToProfile)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+
+        tvMissing.text = "Missing: ${missingFields.joinToString(", ")}"
+
+        builder.setView(dialogView)
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnGoToProfile.setOnClickListener {
+            dialog.dismiss()
+            navigationViewModel.navigateToEditProfile()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun observeMealData() {

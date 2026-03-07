@@ -23,17 +23,20 @@ class UserRepository @Inject constructor(
         return userDao.getUserById()
     }
 
-    /**
-     * Inserts user locally AND syncs to Firestore.
-     */
     suspend fun insertUser(user: User): Boolean {
-        // 1. Save locally to Room
         val localSuccess = userDao.insertUser(user) > 0
         
-        // 2. Sync to cloud if authenticated
         auth.currentUser?.uid?.let { uid ->
+            // First, fetch current cloud status to avoid overwriting a "deleted" status
+            val currentDoc = try { 
+                db.collection("users").document(uid).get().await() 
+            } catch (e: Exception) { null }
+            
+            val cloudStatus = currentDoc?.getString("status") ?: user.status
+
             val userMap = hashMapOf(
-                "id" to user.id,
+                "id" to uid,
+                "email" to user.email,
                 "name" to user.name,
                 "profileImageUrl" to user.profileImageUrl, 
                 "gender" to user.gender,
@@ -48,6 +51,7 @@ class UserRepository @Inject constructor(
                 "personalizedPlanJson" to user.personalizedPlanJson,
                 "mealPlanJson" to user.mealPlanJson,
                 "lastCompletedWorkoutDay" to user.lastCompletedWorkoutDay,
+                "status" to cloudStatus, // Preserve the "deleted" status if set by admin
                 "totalCaloriesBurned" to user.totalCaloriesBurned,
                 "totalWorkoutMinutes" to user.totalWorkoutMinutes,
                 "totalWorkoutsCompleted" to user.totalWorkoutsCompleted
@@ -59,9 +63,6 @@ class UserRepository @Inject constructor(
         return localSuccess
     }
 
-    /**
-     * Fetches user profile from Firestore and saves it to local Room DB.
-     */
     suspend fun restoreUserFromCloud(): Boolean {
         val uid = auth.currentUser?.uid ?: return false
         return try {
@@ -70,6 +71,7 @@ class UserRepository @Inject constructor(
             if (data != null) {
                 val restoredUser = User(
                     id = 1,
+                    email = data["email"] as? String ?: "",
                     name = data["name"] as? String ?: "",
                     profileImageUrl = data["profileImageUrl"] as? String ?: "", 
                     gender = data["gender"] as? String ?: "",
@@ -84,6 +86,7 @@ class UserRepository @Inject constructor(
                     personalizedPlanJson = data["personalizedPlanJson"] as? String,
                     mealPlanJson = data["mealPlanJson"] as? String,
                     lastCompletedWorkoutDay = (data["lastCompletedWorkoutDay"] as? Number)?.toInt() ?: 0,
+                    status = data["status"] as? String ?: "active",
                     totalCaloriesBurned = (data["totalCaloriesBurned"] as? Number)?.toInt() ?: 0,
                     totalWorkoutMinutes = (data["totalWorkoutMinutes"] as? Number)?.toLong() ?: 0L,
                     totalWorkoutsCompleted = (data["totalWorkoutsCompleted"] as? Number)?.toInt() ?: 0
@@ -96,10 +99,6 @@ class UserRepository @Inject constructor(
         }
     }
 
-    /**
-     * Recalculates stats from session history logs. 
-     * Useful if some session logs were synced but user profile stats were not updated.
-     */
     suspend fun recalculateUserStats() {
         val user = userDao.getUserById() ?: return
         val sessionLogs = workoutDao.getAllSessionLogs().first()
@@ -109,7 +108,6 @@ class UserRepository @Inject constructor(
         var completedCount = 0
         
         sessionLogs.forEach { log ->
-            // Don't count "Weight Log" or "Daily Activity" placeholders as actual workouts
             if (log.workoutId > 0 || log.totalExercises > 0) {
                 totalCals += log.caloriesBurned
                 totalSecs += log.durationSeconds

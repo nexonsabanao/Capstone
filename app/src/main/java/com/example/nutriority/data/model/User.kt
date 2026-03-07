@@ -11,6 +11,7 @@ import com.google.firebase.firestore.PropertyName
 data class User(
     @PrimaryKey(autoGenerate = false)
     val id: Int = 1,
+    var email: String = "",
     var name: String = "",
     var profileImageUrl: String = "",
     var gender: String = "",
@@ -25,6 +26,7 @@ data class User(
     var personalizedPlanJson: String? = null,
     var mealPlanJson: String? = null,
     var lastCompletedWorkoutDay: Int = 0,
+    var status: String = "active", // Added status field
     
     // Progress Stats
     var totalCaloriesBurned: Int = 0,
