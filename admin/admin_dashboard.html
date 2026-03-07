@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutriority Admin | Command Center</title>
+    <!-- Modern Font and Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="admin_dashboard.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <i class="fas fa-microchip"></i>
+        <h2>Nutriority</h2>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">Dashboard</div>
+        <div class="nav-item active" onclick="switchTab('overview'); toggleSidebar(false)"><i class="fas fa-chart-pie"></i> Overview</div>
+        <div class="nav-item" onclick="switchTab('students'); toggleSidebar(false)"><i class="fas fa-users-viewfinder"></i> Students</div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">Data Management</div>
+        <div class="nav-item" onclick="switchTab('exercises'); toggleSidebar(false)"><i class="fas fa-dumbbell"></i> Exercises</div>
+        <div class="nav-item" onclick="switchTab('meals'); toggleSidebar(false)"><i class="fas fa-utensils"></i> Meal Library</div>
+        <div class="nav-item" onclick="switchTab('articleLib'); toggleSidebar(false)"><i class="fas fa-newspaper"></i> Article Hub</div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">Automation</div>
+        <div class="nav-item" onclick="switchTab('syncEng'); toggleSidebar(false)"><i class="fas fa-bolt-lightning"></i> Sync Center</div>
+    </div>
+</div>
+
+<div class="main-content">
+    <header>
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="welcome-msg">
+                <div style="display: flex; align-items: center;">
+                    <h1 id="tabTitle">Overview</h1>
+                    <div class="connection-status" id="dbStatus">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="statusText">Connecting...</span>
+                    </div>
+                </div>
+                <p id="tabSubtitle" class="tab-subtitle-p">App analytics and student tracking</p>
+            </div>
+        </div>
+        <div class="btn btn-primary" id="timeDisplay"><i class="far fa-clock"></i> 00:00:00</div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <div id="overview" class="tab-content active">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#dcfce7; color:#10b981;"><i class="fas fa-user-check"></i></div>
+                <span class="stat-label">Total Accounts</span>
+                <span class="stat-value" id="statStudents">0</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fef9c3; color:#eab308;"><i class="fas fa-bolt"></i></div>
+                <span class="stat-label">Total Exercises</span>
+                <span class="stat-value" id="statExercises">0</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#ffedd5; color:#f97316;"><i class="fas fa-fire"></i></div>
+                <span class="stat-label">Meals Stored</span>
+                <span class="stat-value" id="statMeals">0</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#e0f2fe; color:#0ea5e9;"><i class="fas fa-file-alt"></i></div>
+                <span class="stat-label">Articles</span>
+                <span class="stat-value" id="statArticles">0</span>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3><i class="fas fa-bullseye"></i> Fitness Goals Breakdown</h3>
+                <canvas id="goalChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-weight-scale"></i> Weight Distribution</h3>
+                <canvas id="weightDistChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-utensils"></i> Student Diet Preferences</h3>
+                <canvas id="mealDietChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-list-check"></i> Training Progress</h3>
+                <canvas id="trainingStageChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- STUDENTS -->
+    <div id="students" class="tab-content">
+        <div class="data-card">
+            <div class="table-header">
+                <h2>Active Students</h2>
+                <button class="btn btn-primary" onclick="openStudentModal()"><i class="fas fa-user-plus"></i> Add Account</button>
+            </div>
+            <div class="table-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="stSearch" placeholder="Search students..." oninput="handleSearch('st')">
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr>
+                        <th>Student Profile</th>
+                        <th>Fitness Goal</th>
+                        <th>Activity Level</th>
+                        <th>Progress</th>
+                        <th class="col-actions">Actions</th>
+                    </tr></thead>
+                    <tbody id="studentBody"></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="stPagination">
+                <button class="btn btn-secondary btn-sm" onclick="changePage('st', 'prev')"><i class="fas fa-chevron-left"></i> Previous</button>
+                <span class="page-info" id="stPageInfo">Page 1 of 1</span>
+                <button class="btn btn-secondary btn-sm" onclick="changePage('st', 'next')">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXERCISES -->
+    <div id="exercises" class="tab-content">
+        <div class="data-card">
+            <div class="table-header">
+                <h2>Exercise Global Database</h2>
+                <button class="btn btn-primary" onclick="openExModal()"><i class="fas fa-plus"></i> Add New</button>
+            </div>
+
+            <div class="table-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="exSearch" placeholder="Search exercises..." oninput="handleSearch('ex')">
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr>
+                        <th class="col-visual">Visual</th>
+                        <th onclick="sortData('exercises', 'name')">Title <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('exercises', 'target')">Target <i class="fas fa-sort"></i></th>
+                        <th class="col-badge" onclick="sortData('exercises', 'category')">Category <i class="fas fa-sort"></i></th>
+                        <th class="col-badge" onclick="sortData('exercises', 'difficulty')">Diff <i class="fas fa-sort"></i></th>
+                        <th class="col-actions">Actions</th>
+                    </tr></thead>
+                    <tbody id="exerciseBody"></tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="exPagination">
+                <button class="btn btn-secondary btn-sm" onclick="changePage('ex', 'prev')"><i class="fas fa-chevron-left"></i> Previous</button>
+                <span class="page-info" id="exPageInfo">Page 1 of 1</span>
+                <button class="btn btn-secondary btn-sm" onclick="changePage('ex', 'next')">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEALS -->
+    <div id="meals" class="tab-content">
+        <div class="data-card">
+            <div class="table-header">
+                <h2>Meal & Recipe Library</h2>
+                <button class="btn btn-primary" onclick="openMealModal()"><i class="fas fa-plus"></i> Add New</button>
+            </div>
+
+            <div class="table-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="mealSearch" placeholder="Search meals..." oninput="handleSearch('meal')">
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr>
+                        <th class="col-visual">Img</th>
+                        <th onclick="sortData('meals', 'name')">Recipe Name <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('meals', 'mealTime')">Time/Dur <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('meals', 'calories')">Calories <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('meals', 'preferredDiet')">Diet <i class="fas fa-sort"></i></th>
+                        <th>Macros</th>
+                        <th class="col-actions">Actions</th>
+                    </tr></thead>
+                    <tbody id="mealBody"></tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="mealPagination">
+                <button class="btn btn-secondary btn-sm" onclick="changePage('meal', 'prev')"><i class="fas fa-chevron-left"></i> Previous</button>
+                <span class="page-info" id="mealPageInfo">Page 1 of 1</span>
+                <button class="btn btn-secondary btn-sm" onclick="changePage('meal', 'next')">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ARTICLES -->
+    <div id="articleLib" class="tab-content">
+        <div class="data-card">
+            <div class="table-header">
+                <h2>Content Hub: Articles</h2>
+                <button class="btn btn-primary" onclick="openArtModal()"><i class="fas fa-plus"></i> Add New</button>
+            </div>
+            <div class="table-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="artSearch" placeholder="Search articles by headline or category..." oninput="handleSearch('art')">
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr>
+                        <th class="col-visual">Preview</th>
+                        <th onclick="sortData('articleLib', 'title')">Headline <i class="fas fa-sort"></i></th>
+                        <th onclick="sortData('articleLib', 'author')">Author <i class="fas fa-sort"></i></th>
+                        <th class="col-badge" onclick="sortData('articleLib', 'category')">Category <i class="fas fa-sort"></i></th>
+                        <th class="col-actions">Action</th>
+                    </tr></thead>
+                    <tbody id="articleBody"></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="artPagination">
+                <button class="btn btn-secondary btn-sm" onclick="changePage('art', 'prev')"><i class="fas fa-chevron-left"></i> Previous</button>
+                <span class="page-info" id="artPageInfo">Page 1 of 1</span>
+                <button class="btn btn-secondary btn-sm" onclick="changePage('art', 'next')">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SYNC CENTER -->
+    <div id="syncEng" class="tab-content">
+        <div class="data-card">
+            <div class="table-header">
+                <h2>Universal Sync & Automation HUB</h2>
+                <button class="btn btn-danger btn-sm" onclick="clearConsole()"><i class="fas fa-eraser"></i> Clear Log</button>
+            </div>
+
+            <div class="sync-grid">
+                <!-- NEWS SYNC -->
+                <div class="sync-card news">
+                    <h3><i class="fas fa-newspaper" style="color:#3b82f6"></i> Health News Engine</h3>
+                    <p>Fetches the latest health and fitness articles from NewsAPI. Requires a valid API key.</p>
+                    <div class="input-group" style="margin-bottom:0">
+                        <input type="password" id="newsToken" placeholder="Enter NewsAPI Key">
+                    </div>
+                    <div class="sync-actions">
+                        <button class="btn btn-primary" onclick="startNewsSync()"><i class="fas fa-rotate"></i> Sync Articles</button>
+                        <button class="btn btn-warning" onclick="confirmWipe('articles')"><i class="fas fa-trash-can"></i> Wipe Articles</button>
+                    </div>
+                </div>
+
+                <!-- EXERCISE SYNC -->
+                <div class="sync-card">
+                    <h3><i class="fas fa-dumbbell" style="color:#10b981"></i> Exercise Dataset Sync</h3>
+                    <p>Imports a comprehensive list of exercises, targets, and GIFs from the global open dataset.</p>
+                    <div class="sync-actions">
+                        <button class="btn btn-primary" onclick="startExerciseSync()"><i class="fas fa-cloud-arrow-down"></i> Sync All Exercises</button>
+                        <button class="btn btn-warning" onclick="confirmWipe('exercises')"><i class="fas fa-trash-can"></i> Wipe Exercises</button>
+                    </div>
+                </div>
+
+                <!-- MEAL SYNC -->
+                <div class="sync-card meal">
+                    <h3><i class="fas fa-utensils" style="color:#f97316"></i> Meal DB Importer</h3>
+                    <p>Syncs local and international cuisine (Filipino specialized) with macros and instructions.</p>
+                    <div class="sync-actions">
+                        <button class="btn btn-primary" onclick="startMealSync()"><i class="fas fa-bowl-food"></i> Import Recipes</button>
+                        <button class="btn btn-warning" onclick="confirmWipe('meals')"><i class="fas fa-trash-can"></i> Wipe Meals</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="syncConsole" class="console">System ready. Waiting for task initialization...</div>
+        </div>
+    </div>
+</div>
+
+<!-- MODALS -->
+<div id="studentModal" class="modal"><div class="modal-content" style="max-width: 700px;">
+    <h2 id="stModalTitle">Student Profile</h2>
+    <form id="studentForm">
+        <input type="hidden" id="editStId">
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="input-group"><label>Full Name</label><input type="text" id="stName"></div>
+            <div class="input-group" id="stIdGroup" style="display:none;"><label>Student UID (Read Only)</label><input type="text" id="stUID" readonly style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:not-allowed;"></div>
+            <div class="input-group" id="stEmailGroup"><label>CVSU Email</label><input type="email" id="stEmail"></div>
+        </div>
+
+        <div class="input-group" id="passGroup" style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; background: #fdfdfd;">
+            <label style="margin-bottom: 10px; display: block; font-weight: 700;">Account Security</label>
+            <div id="newAccountPass">
+                <label style="font-size: 12px;">Initial Password (For New Accounts)</label>
+                <input type="password" id="stPass">
+            </div>
+            <div id="editAccountPass" style="display:none;">
+                <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">To update the password, send a reset link to the student's email.</p>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="sendResetEmail()"><i class="fas fa-envelope"></i> Send Password Reset Link</button>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-top: 15px;">
+            <div class="input-group"><label>Gender</label><select id="stGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+            <div class="input-group"><label>Birth Date</label><input type="date" id="stBirthDate"></div>
+            <div class="input-group"><label>Goal</label><select id="stGoal">
+                <option value="Lose Weight">Lose Weight</option>
+                <option value="Keep Fit">Keep Fit</option>
+                <option value="Build Muscle">Build Muscle</option>
+            </select></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;">
+            <div class="input-group"><label>Weight (kg)</label><input type="number" step="0.1" id="stWeight"></div>
+            <div class="input-group"><label>Height (cm)</label><input type="number" step="0.1" id="stHeight"></div>
+            <div class="input-group"><label>Activity</label><select id="stLevel">
+                <option value="Sedentary">Sedentary</option>
+                <option value="Lightly Active">Lightly Active</option>
+                <option value="Active">Active</option>
+            </select></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="input-group"><label>Diet</label><select id="stDiet">
+                <option value="Balanced">Balanced</option>
+                <option value="Low-Carb">Low-Carb</option>
+                <option value="Vegetarian">Vegetarian</option>
+            </select></div>
+            <div class="input-group"><label>Exclusions (Comma separated)</label><input type="text" id="stExclusions"></div>
+        </div>
+
+        <details class="advanced-json" style="margin-bottom: 20px;">
+            <summary style="cursor: pointer; padding: 10px; background: #f8fafc; border-radius: 8px; font-weight: 600; color: var(--primary);">
+                <i class="fas fa-json"></i> View/Edit Plan Data (JSON)
+            </summary>
+            <div style="padding-top: 15px;">
+                <div class="input-group"><label>Workout Plan JSON</label><textarea id="stWorkoutJson" style="height: 100px; font-family: monospace; font-size: 11px;"></textarea></div>
+                <div class="input-group"><label>Meal Plan JSON</label><textarea id="stMealJson" style="height: 100px; font-family: monospace; font-size: 11px;"></textarea></div>
+            </div>
+        </details>
+
+        <div style="display:flex; gap:15px; justify-content:flex-end;">
+            <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div></div>
+
+<div id="exModal" class="modal"><div class="modal-content">
+    <h2>Exercise Editor</h2>
+    <form id="exForm">
+        <input type="hidden" id="editExId">
+        <div class="input-group"><label>Title</label><input type="text" id="exName" required></div>
+        <div class="input-group"><label>GIF Link</label><input type="text" id="exGif" required></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="input-group"><label>Primary Muscle</label><input type="text" id="exTarget" required></div>
+            <div class="input-group"><label>Secondary Muscle</label><input type="text" id="exSecondary"></div>
+        </div>
+        <div class="input-group"><label>Category</label><select id="exCategory"><option>warmup</option><option>main exercise</option><option>cooldown</option></select></div>
+        <div class="input-group"><label>Level</label><select id="exDiff"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
+        <div class="input-group"><label>Execution Steps</label><textarea id="exSteps" style="height:120px;"></textarea></div>
+        <div style="display:flex; gap:15px; justify-content:flex-end;">
+            <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div></div>
+
+<div id="mealModal" class="modal"><div class="modal-content">
+    <h2>Meal & Nutrition Editor</h2>
+    <form id="mealForm">
+        <input type="hidden" id="editMealId">
+        <div class="input-group"><label>Recipe Name</label><input type="text" id="mName" required></div>
+        <div class="input-group"><label>Image URL</label><input type="text" id="mImg" required></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;" class="form-row-3">
+            <div class="input-group"><label>Prep Duration (min)</label><input type="number" id="mDuration" required></div>
+            <div class="input-group"><label>Meal Time</label><select id="mTime"><option>Breakfast</option><option>Lunch</option><option>Dinner</option></select></div>
+            <div class="input-group"><label>Diet Preference</label><select id="mDiet"><option>Balanced</option><option>Vegetarian</option><option>Low Carb</option></select></div>
+        </div>
+        <div class="input-group"><label>Total Calories</label><input type="number" id="mCalories" required></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;" class="form-row-3">
+            <div class="input-group"><label>Protein (g)</label><input type="number" id="mP"></div>
+            <div class="input-group"><label>Carbs (g)</label><input type="number" id="mC"></div>
+            <div class="input-group"><label>Fats (g)</label><input type="number" id="mF"></div>
+        </div>
+        <div class="input-group"><label>Ingredients (Comma separated)</label><textarea id="mIng" style="height:80px;"></textarea></div>
+        <div class="input-group"><label>Directions</label><textarea id="mInst" style="height:120px;"></textarea></div>
+        <div style="display:flex; gap:15px; justify-content:flex-end;">
+            <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Recipe</button>
+        </div>
+    </form>
+</div></div>
+
+<div id="artModal" class="modal"><div class="modal-content">
+    <h2>Article Editor</h2>
+    <form id="artForm">
+        <input type="hidden" id="editArtId">
+        <div class="input-group"><label>Headline</label><input type="text" id="aTitle" required></div>
+        <div class="input-group"><label>Author</label><input type="text" id="aAuthor" required></div>
+        <div class="input-group"><label>Article URL</label><input type="text" id="aUrl"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="input-group"><label>Source</label><input type="text" id="aSource"></div>
+            <div class="input-group"><label>Date (ISO Format)</label><input type="text" id="aDate"></div>
+        </div>
+        <div class="input-group"><label>Cover Image URL</label><input type="text" id="aImg" required></div>
+        <div class="input-group"><label>Category</label><input type="text" id="aCat" value="Wellness"></div>
+        <div class="input-group"><label>Description</label><textarea id="aDesc" style="height:80px;"></textarea></div>
+        <div class="input-group"><label>Full Content</label><textarea id="aContent" style="height:200px;"></textarea></div>
+        <div style="display:flex; gap:15px; justify-content:flex-end;">
+            <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Publish Article</button>
+        </div>
+    </form>
+</div></div>
+
+<script type="module" src="admin_dashboard.js"></script>
+</body>
+</html>

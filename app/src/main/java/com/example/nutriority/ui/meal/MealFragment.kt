@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nutriority.R
+import com.example.nutriority.data.UserViewModel
 import com.example.nutriority.databinding.FragmentMealBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.util.BaseBindingFragment
@@ -25,6 +26,7 @@ import java.util.Locale
 @AndroidEntryPoint
 class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBinding::inflate) {
 
+    private val userViewModel: UserViewModel by activityViewModels()
     private val mealViewModel: MealViewModel by activityViewModels()
     private val navigationViewModel: NavigationViewModel by activityViewModels()
 
@@ -56,9 +58,34 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
     }
 
     private fun setupClickListeners() {
-        binding.nextButton.setOnClickListener { mealViewModel.generateNewMealPlan() }
+        binding.nextButton.setOnClickListener { validateAndGenerateMealPlan() }
         binding.doneButton.setOnClickListener { navigationViewModel.resetToHome() }
         binding.btnMenu.setOnClickListener { showPopupMenu(it) }
+    }
+
+    private fun validateAndGenerateMealPlan() {
+        val user = userViewModel.user.value
+        if (user == null) {
+            Toast.makeText(requireContext(), "Error: User data not found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Check for mandatory data
+        val missingFields = mutableListOf<String>()
+        if (user.birthDate == null) missingFields.add("Birth Date")
+        if (user.heightCm <= 0) missingFields.add("Height")
+        if (user.weightKg <= 0) missingFields.add("Weight")
+        if (user.gender.isBlank()) missingFields.add("Gender")
+        if (user.activityLevel.isBlank()) missingFields.add("Activity Level")
+        if (user.goal.isBlank()) missingFields.add("Fitness Goal")
+        if (user.preferredDiet.isBlank()) missingFields.add("Preferred Diet")
+
+        if (missingFields.isNotEmpty()) {
+            val message = "Please complete your profile first. Missing: ${missingFields.joinToString(", ")}"
+            Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+        } else {
+            mealViewModel.generateNewMealPlan()
+        }
     }
 
     private fun showPopupMenu(view: View) {
@@ -69,6 +96,10 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
                 R.id.action_delete_plan -> {
                     mealViewModel.deleteMealPlan()
                     Toast.makeText(requireContext(), "Meal plan deleted", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.action_regenerate -> {
+                    validateAndGenerateMealPlan()
                     true
                 }
                 else -> false
@@ -82,7 +113,6 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     mealViewModel.uiState.collectLatest { state ->
-                        // Only show the UI once we've finished the initial database fetch
                         if (state.isInitialLoading) {
                             binding.loadingProgressBar.isVisible = true
                             binding.initialView.isVisible = false

@@ -67,12 +67,80 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
+    <!-- INITIAL VIEW (No plan) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/initialView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:padding="24dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_container"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/ivNoPlan"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/ic_exercise_24"
+            app:tint="@color/green"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tvNoPlanTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvNoPlanTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="No Workout Plan Yet"
+            android:textColor="#212121"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/ivNoPlan"
+            app:layout_constraintBottom_toTopOf="@id/tvNoPlanDesc"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvNoPlanDesc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="We'll create a 4-week workout routine tailored to your fitness goal and level. Complete your profile first to get the best results."
+            android:textColor="#757575"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/tvNoPlanTitle"
+            app:layout_constraintBottom_toTopOf="@id/btnGenerate"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGenerate"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="32dp"
+            android:backgroundTint="@color/primary_dark"
+            android:text="GENERATE WORKOUT PLAN"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="20dp"
+            app:layout_constraintTop_toBottomOf="@id/tvNoPlanDesc"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvWorkoutPlan"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:paddingBottom="24dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

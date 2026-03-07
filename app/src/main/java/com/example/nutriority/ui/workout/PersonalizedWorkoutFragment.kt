@@ -3,6 +3,7 @@ package com.example.nutriority.ui.workout
 import android.os.Bundle
 import android.view.View
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -40,8 +41,36 @@ class PersonalizedWorkoutFragment : BaseBindingFragment<FragmentPersonalizedWork
             showPopupMenu(it)
         }
 
+        binding.btnGenerate.setOnClickListener {
+            validateAndGeneratePlan()
+        }
+
         setupRecyclerView()
         observeViewModel()
+    }
+
+    private fun validateAndGeneratePlan() {
+        val user = userViewModel.user.value
+        if (user == null) {
+            Toast.makeText(requireContext(), "Error: User data not found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Check for mandatory data
+        val missingFields = mutableListOf<String>()
+        if (user.birthDate == null) missingFields.add("Birth Date")
+        if (user.heightCm <= 0) missingFields.add("Height")
+        if (user.weightKg <= 0) missingFields.add("Weight")
+        if (user.gender.isBlank()) missingFields.add("Gender")
+        if (user.activityLevel.isBlank()) missingFields.add("Activity Level")
+        if (user.goal.isBlank()) missingFields.add("Fitness Goal")
+
+        if (missingFields.isNotEmpty()) {
+            val message = "Please complete your profile first. Missing: ${missingFields.joinToString(", ")}"
+            Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+        } else {
+            userViewModel.restartWorkoutPlan()
+        }
     }
 
     private fun showPopupMenu(view: View) {
@@ -50,7 +79,7 @@ class PersonalizedWorkoutFragment : BaseBindingFragment<FragmentPersonalizedWork
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_restart -> {
-                    userViewModel.restartWorkoutPlan()
+                    validateAndGeneratePlan()
                     true
                 }
                 else -> false
@@ -101,22 +130,26 @@ class PersonalizedWorkoutFragment : BaseBindingFragment<FragmentPersonalizedWork
                     if (state.isInitialLoading) {
                         binding.progressBar.isVisible = true
                         binding.rvWorkoutPlan.isVisible = false
+                        binding.initialView.isVisible = false
                         binding.tvTitle.isVisible = false
+                        binding.btnMenu.isVisible = false
                         return@collectLatest
                     }
 
                     binding.progressBar.isVisible = state.isLoading
+                    binding.initialView.isVisible = !state.hasPlan && !state.isLoading
                     binding.rvWorkoutPlan.isVisible = state.hasPlan && !state.isLoading
                     binding.tvTitle.isVisible = state.hasPlan && !state.isLoading
-                    binding.btnMenu.isEnabled = !state.isLoading
+                    
+                    // Hide menu if there's no plan and we're not currently generating/loading
+                    binding.btnMenu.isVisible = state.hasPlan
 
                     if (state.hasPlan) {
                         workoutAdapter.updateLastCompletedDay(state.lastCompletedDay)
                         workoutAdapter.submitList(state.sessions)
                         updateHeaderText(state.sessions, state.lastCompletedDay, state.currentWeek)
                     } else {
-                        // Handle no plan state if needed
-                        binding.tvTitle.text = "No Workout Plan Generated"
+                        binding.tvTitle.text = "Workout Plan"
                     }
                 }
             }
