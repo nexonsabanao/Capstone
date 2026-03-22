@@ -176,32 +176,28 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    profileViewModel.uiState.collectLatest { state ->
-                        if (state.isInitialLoading) {
-                            return@collectLatest
-                        }
+                // Observe UI State directly (usually contains meals)
+                profileViewModel.uiState.collectLatest { state ->
+                    // 1. Update meal list immediately
+                    loggedFoodAdapter.submitList(state.todayMealLogs)
+                    val hasLogs = state.todayMealLogs.isNotEmpty()
+                    binding.tvFoodTitle.isVisible = hasLogs
+                    binding.rvLoggedFood.isVisible = hasLogs
 
-                        state.user?.let { user ->
-                            binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", user.weightKg)
-                            updateCalorieCard(user, state.todayMealLogs)
-                            updateWeightChartFromLogs(state.sessionLogs, user.weightKg)
-                        }
-
-                        loggedFoodAdapter.submitList(state.todayMealLogs)
-                        val hasLogs = state.todayMealLogs.isNotEmpty()
-                        binding.tvFoodTitle.isVisible = hasLogs
-                        binding.rvLoggedFood.isVisible = hasLogs
+                    // 2. Update weight chart if logs exist
+                    state.user?.let { user ->
+                        updateWeightChartFromLogs(state.sessionLogs, user.weightKg)
                     }
                 }
+            }
+        }
 
-                launch {
-                    profileViewModel.sessionLogs.observe(viewLifecycleOwner) { logs ->
-                        updateActivityStats(logs)
-                        setupCalendar(logs)
-                        updateStreak(logs)
-                    }
-                }
+        // Observe User separately to avoid blocking the Meal Logs display
+        profileViewModel.getUser.observe(viewLifecycleOwner) { user ->
+            user?.let {
+                binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", it.weightKg)
+                // Re-calculate calories whenever user data (like weight) or meal logs change
+                updateCalorieCard(it, profileViewModel.uiState.value.todayMealLogs)
             }
         }
     }
@@ -433,13 +429,6 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         calCard.caloriesLeft.text = left.toString()
         calCard.caloriesPercentage.text = "$percentage%"
         calCard.circleCalories.progress = percentage.toFloat()
-        
-        calCard.root.findViewById<TextView>(R.id.foodHeader).parent.run {
-            if (this is ViewGroup) {
-                val kcalText = this.getChildAt(1) as? TextView
-                kcalText?.text = "$totalLogged kcal"
-            }
-        }
 
         val totalP = logs.sumOf { it.protein }
         val totalC = logs.sumOf { it.carbs }
