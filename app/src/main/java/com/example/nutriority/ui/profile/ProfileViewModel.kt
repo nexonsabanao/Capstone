@@ -33,7 +33,6 @@ class ProfileViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences 
 ) : ViewModel() {
 
-    // Main UI State following MealFragment pattern
     val uiState: StateFlow<ProfileUiState> = combine(
         userRepository.getUser,
         mealRepository.getLogsForToday(),
@@ -51,11 +50,8 @@ class ProfileViewModel @Inject constructor(
         initialValue = ProfileUiState(isInitialLoading = true)
     )
 
-    // Legacy LiveData if needed for specific triggers
     val getUser: LiveData<User?> = userRepository.getUser.asLiveData()
     val sessionLogs: LiveData<List<WorkoutSessionLog>> = workoutRepository.getAllSessionLogs().asLiveData()
-    val todayMealLogs: LiveData<List<DailyMealLog>> = mealRepository.getLogsForToday().asLiveData()
-    val allMealLogs: LiveData<List<DailyMealLog>> = mealRepository.getAllLogs().asLiveData()
 
     fun updateWeight(weightKg: Double) {
         viewModelScope.launch {
@@ -66,30 +62,51 @@ class ProfileViewModel @Inject constructor(
 
     fun logWeight(weightKg: Double, dateMillis: Long) {
         viewModelScope.launch {
-            val today = Calendar.getInstance().apply {
+            val targetCal = Calendar.getInstance().apply { 
+                timeInMillis = dateMillis
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val targetStart = targetCal.timeInMillis
+            val todayStart = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
             }.timeInMillis
 
-            if (dateMillis >= today) {
+            if (targetStart >= todayStart) {
                 updateWeight(weightKg)
             }
             
-            workoutRepository.insertSessionLog(
-                WorkoutSessionLog(
-                    workoutId = 0,
-                    workoutName = "Weight Log",
-                    caloriesBurned = 0,
-                    durationSeconds = 0,
-                    date = dateMillis,
-                    exercisesDone = 0,
-                    totalExercises = 0,
-                    difficulty = "N/A",
-                    weightKg = weightKg
+            val allLogs = workoutRepository.getAllSessionLogs().first()
+            val dayLogs = allLogs.filter { 
+                val logCal = Calendar.getInstance().apply { timeInMillis = it.date }
+                logCal.get(Calendar.YEAR) == targetCal.get(Calendar.YEAR) &&
+                logCal.get(Calendar.DAY_OF_YEAR) == targetCal.get(Calendar.DAY_OF_YEAR)
+            }
+
+            if (dayLogs.isNotEmpty()) {
+                dayLogs.forEach { log ->
+                    workoutRepository.insertSessionLog(log.copy(weightKg = weightKg))
+                }
+            } else {
+                workoutRepository.insertSessionLog(
+                    WorkoutSessionLog(
+                        workoutId = 0,
+                        workoutName = "Weight Log",
+                        caloriesBurned = 0,
+                        durationSeconds = 0,
+                        date = dateMillis,
+                        exercisesDone = 0,
+                        totalExercises = 0,
+                        difficulty = "N/A",
+                        weightKg = weightKg
+                    )
                 )
-            )
+            }
         }
     }
 

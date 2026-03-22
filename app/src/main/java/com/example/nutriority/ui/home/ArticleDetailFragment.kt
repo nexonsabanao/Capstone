@@ -2,17 +2,23 @@ package com.example.nutriority.ui.home
 
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.example.nutriority.R
 import com.example.nutriority.data.model.Article
 import com.example.nutriority.databinding.FragmentArticleDetailBinding
@@ -20,6 +26,7 @@ import com.example.nutriority.ui.NavigationViewModel
 import com.google.android.material.appbar.AppBarLayout
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -77,8 +84,17 @@ class ArticleDetailFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 navigationViewModel.selectedArticleJson.collect { json ->
                     if (json != null) {
+                        binding.articleProgressBar.isVisible = true
+                        binding.articleContentLayout.isVisible = false
+                        
                         currentArticle = Gson().fromJson(json, Article::class.java)
                         displayArticleDetails()
+                        
+                        delay(300)
+                        
+                        binding.articleProgressBar.isVisible = false
+                        binding.articleContentLayout.isVisible = true
+                        
                         binding.nestedScrollView.scrollTo(0, 0)
                         binding.appBarLayout.setExpanded(true)
                     }
@@ -95,7 +111,6 @@ class ArticleDetailFragment : Fragment() {
             binding.articleAuthor.text = article.author
             binding.articleSource.text = article.source.ifEmpty { "Wellness" }
             
-            // Format the date string (e.g., "2026-01-30T00:53:23Z" -> "Jan 30, 2026")
             if (article.date.isNotEmpty()) {
                 try {
                     val sdfIn = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
@@ -110,7 +125,6 @@ class ArticleDetailFragment : Fragment() {
             binding.articleDescription.text = article.description
             binding.articleContent.text = article.content
 
-            // Make the source/URL link clickable
             if (article.articleUrl.isNotEmpty()) {
                 binding.articleUrl.text = "Read full article on ${article.source.ifEmpty { "Source" }}"
                 binding.articleUrl.setOnClickListener {
@@ -126,11 +140,35 @@ class ArticleDetailFragment : Fragment() {
                 binding.articleUrl.visibility = View.GONE
             }
 
+            // Show loading for the image
+            binding.imageProgressBar.isVisible = true
             Glide.with(this)
                 .load(article.imageName)
                 .centerCrop()
-                .placeholder(R.drawable.img_balanced_diet)
-                .error(R.drawable.img_balanced_diet)
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        binding.imageProgressBar.isVisible = false
+                        // Set a fallback error image if needed
+                        binding.articleImage.setImageResource(R.drawable.img_balanced_diet)
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        binding.imageProgressBar.isVisible = false
+                        return false
+                    }
+                })
                 .into(binding.articleImage)
         }
     }

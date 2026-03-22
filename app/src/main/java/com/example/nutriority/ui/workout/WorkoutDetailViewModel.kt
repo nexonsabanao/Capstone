@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -180,6 +181,13 @@ class WorkoutDetailViewModel @Inject constructor(
         }
         val safeDuration = WorkoutUtil.calculateTotalDuration(tempDetails, includeWarmup)
 
+        // Set MET value based on difficulty for more accurate calorie burn
+        val metValue = when {
+            session.focus.contains("Advanced", ignoreCase = true) -> 8.0
+            session.focus.contains("Beginner", ignoreCase = true) -> 4.0
+            else -> 6.0 // Intermediate
+        }
+
         val workout = Workout(
             id = workoutId,
             name = session.focus,
@@ -188,7 +196,8 @@ class WorkoutDetailViewModel @Inject constructor(
             difficulty = if (session.focus.contains("Beginner")) "Beginner" else if (session.focus.contains("Advanced")) "Advanced" else "Intermediate",
             duration = safeDuration,
             imageName = "img_gym_bg",
-            includeWarmupCooldown = includeWarmup
+            includeWarmupCooldown = includeWarmup,
+            metValue = metValue
         )
         workoutRepository.updateWorkoutWithExercises(workout, assignments)
     }
@@ -239,34 +248,71 @@ class WorkoutDetailViewModel @Inject constructor(
     }
 
     fun finishWorkout() {
+        finishWorkoutWithWeight(null)
+    }
+
+    fun finishWorkoutWithWeight(weightKg: Double?) {
         val current = _activeWorkoutDetail.value ?: _workout.value ?: return
         val timeSecs = _elapsedTimeSeconds.value
         val doneCount = _completedExercisesCount.value
         val totalCount = current.exerciseAssignments.size
         val dayIdx = _activeDayIndex.value
-        val cals = (current.workout.metValue * 3.5 * 70 / 200 * (timeSecs / 60.0)).toInt()
         
         viewModelScope.launch {
-            val sessionLog = WorkoutSessionLog(
-                workoutId = current.workout.id,
-                workoutName = current.workout.name,
-                date = System.currentTimeMillis(),
-                exercisesDone = doneCount,
-                totalExercises = totalCount,
-                durationSeconds = timeSecs,
-                caloriesBurned = cals,
-                difficulty = current.workout.difficulty
-            )
+            val user = userRepository.getInitialUser()
+            // Use provided weight, then user's saved weight, then fallback to 70kg
+            val finalWeight = weightKg ?: user?.weightKg ?: 70.0
+            
+            // Formula: Calories = (MET * 3.5 * weightKg / 200) * durationInMinutes
+            val durationMinutes = timeSecs / 60.0
+            val cals = (current.workout.metValue * 3.5 * finalWeight / 200.0 * durationMinutes).toInt()
+
+            // Update user weight if a weight was provided
+            if (weightKg != null && user != null) {
+                userRepository.insertUser(user.copy(weightKg = weightKg))
+            }
+
+            val now = System.currentTimeMillis()
+            val targetCal = Calendar.getInstance().apply { timeInMillis = now }
+            val existingLogs = workoutRepository.getAllSessionLogs().first()
+            val existingTodayLog = existingLogs.find { 
+                val logCal = Calendar.getInstance().apply { timeInMillis = it.date }
+                logCal.get(Calendar.YEAR) == targetCal.get(Calendar.YEAR) &&
+                logCal.get(Calendar.DAY_OF_YEAR) == targetCal.get(Calendar.DAY_OF_YEAR) &&
+                it.workoutId == current.workout.id
+            }
+
+            val sessionLog = if (existingTodayLog != null) {
+                existingTodayLog.copy(
+                    exercisesDone = doneCount,
+                    totalExercises = totalCount,
+                    durationSeconds = timeSecs,
+                    caloriesBurned = cals,
+                    weightKg = finalWeight,
+                    date = now 
+                )
+            } else {
+                WorkoutSessionLog(
+                    workoutId = current.workout.id,
+                    workoutName = current.workout.name,
+                    date = now,
+                    exercisesDone = doneCount,
+                    totalExercises = totalCount,
+                    durationSeconds = timeSecs,
+                    caloriesBurned = cals,
+                    difficulty = current.workout.difficulty,
+                    weightKg = finalWeight
+                )
+            }
+            
             workoutRepository.insertSessionLog(sessionLog)
 
-            if (dayIdx != -1) {
-                val user = userRepository.getInitialUser()
-                if (user != null && dayIdx == user.lastCompletedWorkoutDay) {
+            if (dayIdx != -1 && user != null) {
+                if (dayIdx == user.lastCompletedWorkoutDay) {
                     userRepository.insertUser(user.copy(lastCompletedWorkoutDay = dayIdx + 1))
                 }
             }
             
-            // Set session summary BEFORE stopping, so it can be used by the summary screen
             _sessionSummary.value = SessionSummary(
                 workoutName = current.workout.name,
                 exercisesDone = doneCount,
@@ -303,7 +349,6 @@ class WorkoutDetailViewModel @Inject constructor(
             
             _completedExercisesCount.value = 0
             _activeWorkoutDetail.value = null
-            // We DO NOT clear _sessionSummary here anymore, so it survives navigation to summary screen
         }
     }
 

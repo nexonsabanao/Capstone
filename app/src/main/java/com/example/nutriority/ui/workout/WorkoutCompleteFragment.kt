@@ -77,6 +77,15 @@ class WorkoutCompleteFragment : Fragment() {
     }
 
     private fun finishAndGoHome() {
+        // Log weight when finish is clicked
+        val weightStr = binding.etWeight.text.toString()
+        val weightInput = weightStr.toDoubleOrNull()
+        if (weightInput != null) {
+            val isKg = binding.weightToggleGroup.checkedButtonId == R.id.btnKg
+            val weightInKg = if (isKg) weightInput else weightInput / 2.20462
+            profileViewModel.logWeight(weightInKg, System.currentTimeMillis())
+        }
+
         viewModel.stopWorkout(save = true)
         navigationViewModel.resetToHome()
     }
@@ -256,6 +265,8 @@ class WorkoutCompleteFragment : Fragment() {
                 val weightInKg = if (isKg) inputWeight else inputWeight / 2.20462
                 
                 updateBmi(weightInKg)
+                // We keep updating user weight here for real-time BMI, 
+                // but the "log" (history entry) is handled in finishAndGoHome
                 profileViewModel.updateWeight(weightInKg)
             }
         })

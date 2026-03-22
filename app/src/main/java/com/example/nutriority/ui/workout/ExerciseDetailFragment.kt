@@ -438,7 +438,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
             30L -> R.id.chip_30s
             45L -> R.id.chip_45s
             60L -> R.id.chip_1m
-            else -> R.id.chip_recd
+            else -> R.id.chip_30s
         }
         timeChipGroup.check(chipIdToCheck)
 

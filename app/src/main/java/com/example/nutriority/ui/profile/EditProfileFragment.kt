@@ -124,6 +124,8 @@ class EditProfileFragment : Fragment() {
                 val newWeight = newVal.toDoubleOrNull() ?: 0.0
                 if (newWeight != currentUser?.weightKg) {
                     handleFieldUpdateWithPlanChoice("Weight") { it.copy(weightKg = newWeight) }
+                    // CRITICAL: Log weight so the graph updates immediately
+                    profileViewModel.logWeight(newWeight, System.currentTimeMillis())
                 }
             }
         }

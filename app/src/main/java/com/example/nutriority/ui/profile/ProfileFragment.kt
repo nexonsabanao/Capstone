@@ -185,6 +185,7 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
                         state.user?.let { user ->
                             binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", user.weightKg)
                             updateCalorieCard(user, state.todayMealLogs)
+                            updateWeightChartFromLogs(state.sessionLogs, user.weightKg)
                         }
 
                         loggedFoodAdapter.submitList(state.todayMealLogs)
@@ -198,7 +199,6 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
                     profileViewModel.sessionLogs.observe(viewLifecycleOwner) { logs ->
                         updateActivityStats(logs)
                         setupCalendar(logs)
-                        updateWeightChartFromLogs(logs)
                         updateStreak(logs)
                     }
                 }
@@ -338,7 +338,7 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
 
     private fun getDayKey(cal: Calendar) = "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}"
 
-    private fun updateWeightChartFromLogs(logs: List<WorkoutSessionLog>) {
+    private fun updateWeightChartFromLogs(logs: List<WorkoutSessionLog>, currentWeight: Double) {
         val chart = binding.weightCard.lineChart
         chart.description.isEnabled = false
         chart.legend.isEnabled = false
@@ -346,6 +346,20 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         val marker = WeightMarkerView(requireContext(), R.layout.layout_weight_marker)
         marker.chartView = chart
         chart.marker = marker
+
+        // GROUP BY DAY to avoid duplicate points on the graph
+        val groupedLogs = logs.filter { it.weightKg > 0 }
+            .groupBy { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }
+            .map { it.value.maxByOrNull { log -> log.date }!! }
+            .sortedBy { it.date }
+
+        val allWeights = groupedLogs.map { it.weightKg }.toMutableList()
+        if (currentWeight > 0) allWeights.add(currentWeight)
+        
+        if (allWeights.isNotEmpty()) {
+            binding.weightCard.tvHeaviestWeight.text = String.format("%.1f", allWeights.maxOrNull() ?: 0.0)
+            binding.weightCard.tvLightestWeight.text = String.format("%.1f", allWeights.minOrNull() ?: 0.0)
+        }
 
         chart.xAxis.apply {
             setDrawGridLines(false)
@@ -355,7 +369,7 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
             granularity = 1f
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
-                    val entryLogs = logs.filter { it.weightKg > 0 }.sortedBy { it.date }
+                    val entryLogs = groupedLogs
                     if (value.toInt() < 0 || value.toInt() >= entryLogs.size) return ""
                     val cal = Calendar.getInstance().apply { timeInMillis = entryLogs[value.toInt()].date }
                     return String.format("%02d", cal.get(Calendar.DAY_OF_MONTH))
@@ -371,19 +385,12 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         }
         chart.axisRight.isEnabled = false
 
-        val weightLogs = logs.filter { it.weightKg > 0 }.sortedBy { it.date }
         val weightEntries = ArrayList<com.github.mikephil.charting.data.Entry>()
-        
-        weightLogs.takeLast(7).forEachIndexed { i, log -> 
+        groupedLogs.takeLast(7).forEachIndexed { i, log -> 
             weightEntries.add(com.github.mikephil.charting.data.Entry(i.toFloat(), log.weightKg.toFloat(), log.date)) 
         }
 
         if (weightEntries.isNotEmpty()) {
-            val maxWeight = weightLogs.maxOf { it.weightKg }
-            val minWeight = weightLogs.minOf { it.weightKg }
-            binding.weightCard.tvHeaviestWeight.text = String.format("%.1f", maxWeight)
-            binding.weightCard.tvLightestWeight.text = String.format("%.1f", minWeight)
-
             val dataSet = LineDataSet(weightEntries, "Weight").apply {
                 color = ContextCompat.getColor(requireContext(), R.color.green)
                 lineWidth = 3f
@@ -406,7 +413,10 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
             }
             
             chart.data = LineData(dataSet)
+            chart.notifyDataSetChanged()
             chart.invalidate()
+        } else {
+            chart.clear()
         }
     }
 

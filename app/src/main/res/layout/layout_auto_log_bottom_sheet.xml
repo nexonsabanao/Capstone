@@ -116,14 +116,6 @@
                     app:singleSelection="true">
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_recd"
-                        style="@style/FilterChip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="REC'D"
-                        android:checked="true" />
-
-                    <com.google.android.material.chip.Chip
                         android:id="@+id/chip_15s"
                         style="@style/FilterChip"
                         android:layout_width="wrap_content"
@@ -135,7 +127,8 @@
                         style="@style/FilterChip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="30 sec" />
+                        android:text="30 sec"
+                        android:checked="true" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chip_45s"
