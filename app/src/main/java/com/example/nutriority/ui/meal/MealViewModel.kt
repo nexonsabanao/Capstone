@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nutriority.data.model.Meal
+import com.example.nutriority.data.model.DailyMealLog
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.planner.PlannerService
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
@@ -35,7 +37,7 @@ data class MealUiState(
     val targetProtein: Int = 0,
     val targetCarbs: Int = 0,
     val targetFat: Int = 0,
-    val isInitialLoading: Boolean = true // Flag for first database fetch
+    val isInitialLoading: Boolean = true 
 )
 
 @HiltViewModel
@@ -52,19 +54,17 @@ class MealViewModel @Inject constructor(
 
     val uiState: StateFlow<MealUiState> = combine(
         userRepository.getUser, 
+        mealRepository.getAllLogs(),
         _isGenerating
-    ) { user, isGenerating ->
+    ) { user, logs, isGenerating ->
         if (user == null) {
-            // No user data yet - still loading from database
             MealUiState(isInitialLoading = true)
         } else {
             val planJson = user.mealPlanJson
             if (planJson == null) {
-                // User exists but has no meal plan
                 MealUiState(isGenerating = isGenerating, isInitialLoading = false)
             } else {
-                // User exists and has a plan
-                val items = parseMealPlan(planJson)
+                val items = parseMealPlan(planJson, logs)
                 val isExpired = checkPlanExpired()
                 
                 val dailyCalories = plannerService.calculateDailyTarget(user)
@@ -74,7 +74,7 @@ class MealViewModel @Inject constructor(
                     items = items,
                     isGenerating = isGenerating,
                     isPlanExpired = isExpired,
-                    hasPlan = items.isNotEmpty(),
+                    hasPlan = items.any { it is MealListItem.MealItem },
                     targetCalories = dailyCalories,
                     targetProtein = macros.proteinGrams,
                     targetCarbs = macros.carbsGrams,
@@ -94,19 +94,34 @@ class MealViewModel @Inject constructor(
             _isGenerating.value = true
             try {
                 val user = userRepository.getInitialUser() ?: return@launch
-                val dailyCalories = plannerService.calculateDailyTarget(user)
-                val mealPool = mealRepository.getAllMealsList()
-                val weekPlan = withContext(Dispatchers.Default) {
-                    (0 until 7).map {
-                        async { 
-                            plannerService.mealPlanner.planMeals(dailyCalories, user.preferredDiet, user.excludedIngredients, mealPool) 
-                        }
-                    }.awaitAll()
-                }
-                val json = Gson().toJson(weekPlan)
                 
-                userRepository.insertUser(user.copy(mealPlanJson = json))
-                savePlanStartDate(LocalDate.now().toString())
+                var mealPool = mealRepository.getAllMealsList()
+                if (mealPool.isEmpty()) {
+                    mealRepository.syncMealsFromCloud()
+                    mealPool = mealRepository.getAllMealsList()
+                }
+
+                if (mealPool.isEmpty()) {
+                    _isGenerating.value = false
+                    return@launch
+                }
+
+                val dailyCalories = plannerService.calculateDailyTarget(user)
+                
+                val weekPlan = withContext(Dispatchers.Default) {
+                    plannerService.mealPlanner.planWeek(
+                        dailyCalories, 
+                        user.preferredDiet, 
+                        user.excludedIngredients, 
+                        mealPool
+                    )
+                }
+
+                if (weekPlan.any { it.isNotEmpty() }) {
+                    val json = Gson().toJson(weekPlan)
+                    userRepository.insertUser(user.copy(mealPlanJson = json))
+                    savePlanStartDate(LocalDate.now().toString())
+                }
             } catch (e: Exception) {
             } finally {
                 _isGenerating.value = false
@@ -114,7 +129,7 @@ class MealViewModel @Inject constructor(
         }
     }
 
-    private fun parseMealPlan(json: String): List<MealListItem> {
+    private fun parseMealPlan(json: String, logs: List<DailyMealLog>): List<MealListItem> {
         return try {
             val gson = Gson()
             val plan: List<List<Meal>> = gson.fromJson(json, object : com.google.gson.reflect.TypeToken<List<List<Meal>>>() {}.type)
@@ -124,7 +139,12 @@ class MealViewModel @Inject constructor(
 
             plan.forEachIndexed { dayIndex, dayMeals ->
                 val targetDate = startDate.plusDays(dayIndex.toLong())
-                val dateHeader = if (dayIndex == 0) "Today" else if (dayIndex == 1) "Tomorrow" else targetDate.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+                val dateHeader = when (dayIndex) {
+                    0 -> "Today"
+                    1 -> "Tomorrow"
+                    else -> targetDate.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+                }
+                
                 items.add(MealListItem.HeaderItem("$dateHeader, ${targetDate.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${targetDate.dayOfMonth}", dayIndex))
 
                 dayMeals.sortedBy {
@@ -135,7 +155,14 @@ class MealViewModel @Inject constructor(
                         else -> 4
                     }
                 }.forEach { meal ->
-                    items.add(MealListItem.MealItem(meal, dayIndex))
+                    // Check if this specific meal on this specific day has been logged
+                    // We check if any log entry matches the mealId and the targetDate
+                    val isLogged = logs.any { log ->
+                        val logDate = LocalDate.ofInstant(java.time.Instant.ofEpochMilli(log.date), ZoneId.systemDefault())
+                        log.mealId == meal.id && logDate == targetDate
+                    }
+                    
+                    items.add(MealListItem.MealItem(meal, dayIndex, isLogged))
                 }
             }
             items
@@ -162,10 +189,62 @@ class MealViewModel @Inject constructor(
 
     fun swapMeal(mealToReplace: Meal, dayIndex: Int) {
         viewModelScope.launch {
+            val user = userRepository.getInitialUser() ?: return@launch
             val allMeals = mealRepository.getAllMealsList()
-            val options = allMeals.filter { it.mealTime == mealToReplace.mealTime && it.id != mealToReplace.id }
+            
+            val options = allMeals.filter { meal ->
+                meal.mealTime.equals(mealToReplace.mealTime, ignoreCase = true) && 
+                meal.id != mealToReplace.id &&
+                isMealCompatible(meal, user.preferredDiet, user.excludedIngredients)
+            }
+            
             _swapState.value = MealSwapState(mealToReplace, dayIndex, options)
         }
+    }
+
+    private fun isMealCompatible(meal: Meal, preferredDiet: String, excludedIngredients: List<String>): Boolean {
+        val isExcluded = excludedIngredients.any { excluded ->
+            val normalizedExcluded = normalizeIngredient(excluded)
+            meal.ingredients.any { ingredient ->
+                val normalizedIngredient = normalizeIngredient(ingredient)
+                normalizedIngredient.contains(normalizedExcluded, true) || 
+                normalizedExcluded.contains(normalizedIngredient, true)
+            }
+        }
+        if (isExcluded) return false
+
+        if (preferredDiet.isNotBlank() && !preferredDiet.equals("Balanced", ignoreCase = true)) {
+            if (meal.preferredDiet.isNotBlank() && 
+                !meal.preferredDiet.equals("Balanced", ignoreCase = true) && 
+                !meal.preferredDiet.equals(preferredDiet, ignoreCase = true)) {
+                return false
+            }
+        }
+
+        return when (preferredDiet.lowercase()) {
+            "vegetarian" -> !containsMeat(meal)
+            "low carb", "low-carb" -> isLowCarb(meal)
+            else -> true 
+        }
+    }
+
+    private fun normalizeIngredient(input: String): String {
+        val lower = input.lowercase().trim()
+        return if (lower.endsWith("s") && lower.length > 3) {
+            lower.substring(0, lower.length - 1)
+        } else {
+            lower
+        }
+    }
+
+    private fun containsMeat(meal: Meal): Boolean = meal.ingredients.any { 
+        val norm = normalizeIngredient(it)
+        norm.contains("chicken") || norm.contains("beef") || norm.contains("pork") 
+    }
+    
+    private fun isLowCarb(meal: Meal): Boolean = !meal.ingredients.any { 
+        val norm = normalizeIngredient(it)
+        norm.contains("bread") || norm.contains("pasta") || norm.contains("rice") || norm.contains("potato") 
     }
 
     fun onSwapMealSelected(oldMeal: Meal, newMeal: Meal, dayIndex: Int) {

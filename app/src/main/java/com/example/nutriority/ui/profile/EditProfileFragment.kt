@@ -338,8 +338,9 @@ class EditProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             userViewModel.updateOnboardingDataSuspend(action)
             if (restartPlan) {
-                userViewModel.restartWorkoutPlan()
-                Toast.makeText(requireContext(), "Profile updated and plan refreshed", Toast.LENGTH_SHORT).show()
+                // Fix: Restart BOTH workout and meal plans when profile is updated
+                userViewModel.restartAllPlans()
+                Toast.makeText(requireContext(), "Profile updated and plans refreshed", Toast.LENGTH_SHORT).show()
             } else Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
         }
     }

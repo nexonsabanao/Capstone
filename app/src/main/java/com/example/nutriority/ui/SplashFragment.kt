@@ -43,16 +43,24 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 val startTime = System.currentTimeMillis()
                 try {
-                    // 1. Initial Library Sync
+                    // 1. Initial Library Sync - Ensure both exercises and meals are present
                     val hasExercises = withContext(Dispatchers.IO) {
                         workoutRepository.getAllExercises().first().isNotEmpty()
                     }
-                    if (!hasExercises) {
+                    val hasMeals = withContext(Dispatchers.IO) {
+                        mealRepository.getAllMealsList().isNotEmpty()
+                    }
+
+                    if (!hasExercises || !hasMeals) {
                         coroutineScope {
-                            awaitAll(
-                                async { workoutRepository.syncExercisesFromCloud() },
-                                async { mealRepository.syncMealsFromCloud() }
-                            )
+                            val syncTasks = mutableListOf<Deferred<Unit>>()
+                            if (!hasExercises) {
+                                syncTasks.add(async { workoutRepository.syncExercisesFromCloud() })
+                            }
+                            if (!hasMeals) {
+                                syncTasks.add(async { mealRepository.syncMealsFromCloud() })
+                            }
+                            syncTasks.awaitAll()
                         }
                     }
 

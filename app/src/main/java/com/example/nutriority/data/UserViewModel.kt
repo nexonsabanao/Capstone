@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.nutriority.data.model.User
+import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.planner.PlannerService
 import com.example.nutriority.planner.WorkoutPlan
@@ -18,11 +19,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val repository: UserRepository,
+    private val mealRepository: MealRepository,
     private val workoutPlanner: WorkoutPlanner,
     private val plannerService: PlannerService,
     private val gson: Gson
@@ -35,12 +38,9 @@ class UserViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
-        // We only sync if the plan is found in the user object but exercises might be missing.
-        // This is safer than syncing on every single startup.
         viewModelScope.launch {
             val currentUser = repository.getInitialUser()
             if (currentUser != null && !currentUser.personalizedPlanJson.isNullOrBlank()) {
-                // Background check/sync - won't block the UI
                 workoutPlanner.syncPlanToDatabase(gson.fromJson(currentUser.personalizedPlanJson, WorkoutPlan::class.java))
             }
         }
@@ -61,24 +61,62 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun restartWorkoutPlan() {
+    fun restartAllPlans() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 val currentUser = repository.getInitialUser() ?: return@launch
                 
+                // 1. Restart Workout Plan
                 val workoutPlan = withContext(Dispatchers.Default) {
                     workoutPlanner.planWorkouts(currentUser)
                 }
                 val workoutJson = gson.toJson(workoutPlan)
                 
+                // 2. Restart Meal Plan
+                val dailyCalories = plannerService.calculateDailyTarget(currentUser)
+                val mealPool = mealRepository.getAllMealsList()
+                val weekPlan = withContext(Dispatchers.Default) {
+                    plannerService.mealPlanner.planWeek(
+                        dailyCalories,
+                        currentUser.preferredDiet,
+                        currentUser.excludedIngredients,
+                        mealPool
+                    )
+                }
+                val mealJson = gson.toJson(weekPlan)
+                
                 val updatedUser = currentUser.copy(
                     personalizedPlanJson = workoutJson,
+                    mealPlanJson = mealJson,
                     lastCompletedWorkoutDay = 0
                 )
                 
                 repository.insertUser(updatedUser)
-                // sync is already done in planWorkouts
+                // Note: savePlanStartDate logic is usually in MealViewModel, 
+                // but since we update user here, it will trigger UI refresh.
+                // We should also ideally update the shared pref for start date.
+            } catch (e: Exception) {
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun restartWorkoutPlan() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val currentUser = repository.getInitialUser() ?: return@launch
+                val workoutPlan = withContext(Dispatchers.Default) {
+                    workoutPlanner.planWorkouts(currentUser)
+                }
+                val workoutJson = gson.toJson(workoutPlan)
+                val updatedUser = currentUser.copy(
+                    personalizedPlanJson = workoutJson,
+                    lastCompletedWorkoutDay = 0
+                )
+                repository.insertUser(updatedUser)
             } catch (e: Exception) {
             } finally {
                 _isLoading.value = false

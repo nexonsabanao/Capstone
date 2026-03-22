@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -22,8 +23,8 @@ sealed class MealListItem {
         override val id: String = dateText
     }
 
-    data class MealItem(val meal: Meal, val dayIndex: Int) : MealListItem() {
-        override val id: String = meal.name + meal.mealTime + dayIndex
+    data class MealItem(val meal: Meal, val dayIndex: Int, val isLogged: Boolean = false) : MealListItem() {
+        override val id: String = meal.name + meal.mealTime + dayIndex + isLogged
     }
 }
 
@@ -80,11 +81,23 @@ class GeneratedMealPlanAdapter(
         private val mealTime: TextView = itemView.findViewById(R.id.meal_time)
         private val mealName: TextView = itemView.findViewById(R.id.meal_name)
         private val swapButton: ImageView = itemView.findViewById(R.id.reorder_button)
+        
+        // New views for logged status
+        private val loggedOverlay: View = itemView.findViewById(R.id.logged_overlay)
+        private val checkBadge: ImageView = itemView.findViewById(R.id.iv_check_badge)
+        private val loggedStatusText: TextView = itemView.findViewById(R.id.tv_logged_status)
 
         fun bind(item: MealListItem.MealItem) {
             val meal = item.meal
             mealName.text = meal.name
             mealTime.text = meal.mealTime
+            
+            // Logged UI logic
+            loggedOverlay.isVisible = item.isLogged
+            checkBadge.isVisible = item.isLogged
+            loggedStatusText.isVisible = item.isLogged
+            swapButton.isVisible = !item.isLogged // Hide swap if already logged
+            
             Glide.with(itemView.context)
                 .load(meal.imageName)
                 .placeholder(R.drawable.bg_meal_placeholder)

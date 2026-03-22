@@ -85,7 +85,10 @@ class MealSwapBottomSheetFragment(
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val meal = meals[position]
             holder.name.text = meal.name
-            holder.time.text = "25 min"
+            
+            // Fix: Use the actual duration from the meal model
+            val duration = if (meal.duration > 0) meal.duration else 10
+            holder.time.text = "$duration min"
             
             Glide.with(holder.itemView.context)
                 .load(meal.imageName)

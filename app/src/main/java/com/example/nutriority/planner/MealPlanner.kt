@@ -13,14 +13,40 @@ class MealPlanner @Inject constructor(
 ) {
 
     /**
-     * Optimized meal planning.
-     * @param mealPool Optional pre-fetched list of all meals to avoid repeated DB hits.
+     * Generates a full 7-day meal plan with variety.
+     */
+    suspend fun planWeek(
+        dailyCalories: Int,
+        preferredDiet: String,
+        excludedIngredients: List<String>,
+        mealPool: List<Meal>? = null
+    ): List<List<Meal>> {
+        val allMeals = mealPool ?: mealRepository.getAllMealsList()
+        val usedMealIds = mutableSetOf<String>()
+        val weekPlan = mutableListOf<List<Meal>>()
+
+        repeat(7) {
+            val dayMeals = planMeals(dailyCalories, preferredDiet, excludedIngredients, allMeals, usedMealIds)
+            weekPlan.add(dayMeals)
+            // track used meals to encourage variety across the week
+            usedMealIds.addAll(dayMeals.map { it.id })
+            
+            // If we've used a lot of meals, we might want to allow some repeats if the pool is small
+            // but for 7 days (21 meals), if the filtered pool has > 30 meals, it should be fine.
+        }
+        return weekPlan
+    }
+
+    /**
+     * Optimized meal planning for a single day.
+     * @param usedMealIds Optional set of IDs to avoid for variety.
      */
     suspend fun planMeals(
         dailyCalories: Int, 
         preferredDiet: String, 
         excludedIngredients: List<String>,
-        mealPool: List<Meal>? = null
+        mealPool: List<Meal>? = null,
+        usedMealIds: Set<String> = emptySet()
     ): List<Meal> {
         val splits = listOf(0.30, 0.35, 0.35) // Breakfast, Lunch, Dinner percentages
         val targetCalories = splits.map { (dailyCalories * it).toInt() }
@@ -34,7 +60,6 @@ class MealPlanner @Inject constructor(
 
         // 1. Pre-filter by exclusions and diet once
         val filteredMeals = allMeals.filter { meal ->
-            // Improved exclusion logic to handle plurals like "Egg" vs "Eggs"
             val isExcluded = excludedIngredients.any { excluded ->
                 val normalizedExcluded = normalizeIngredient(excluded)
                 meal.ingredients.any { ingredient ->
@@ -46,8 +71,12 @@ class MealPlanner @Inject constructor(
             
             if (isExcluded) return@filter false
 
-            if (meal.preferredDiet.isNotEmpty() && !meal.preferredDiet.equals("Balanced", true)) {
-                if (!meal.preferredDiet.equals(preferredDiet, true)) return@filter false
+            if (preferredDiet.isNotBlank() && !preferredDiet.equals("Balanced", ignoreCase = true)) {
+                if (meal.preferredDiet.isNotBlank() && 
+                    !meal.preferredDiet.equals("Balanced", ignoreCase = true) && 
+                    !meal.preferredDiet.equals(preferredDiet, ignoreCase = true)) {
+                    return@filter false
+                }
             }
 
             when (preferredDiet.lowercase()) {
@@ -62,25 +91,31 @@ class MealPlanner @Inject constructor(
         val plannedMeals = mutableListOf<Meal>()
 
         mealTimes.zip(targetCalories).forEach { (time, targetCal) ->
-            val bestMealsForTime = availableMeals
-                .filter { it.mealTime.equals(time, ignoreCase = true) }
-                .sortedBy { abs(it.calories - targetCal) } 
-                .take(15) 
+            val timeMatchingMeals = availableMeals.filter { it.mealTime.equals(time, ignoreCase = true) }
+            
+            if (timeMatchingMeals.isNotEmpty()) {
+                // Prioritize variety: try to pick from meals not used yet in the week
+                val unusedOptions = timeMatchingMeals.filter { !usedMealIds.contains(it.id) }
+                
+                // If we have enough unused options, pick from them. Otherwise, use all available for this time.
+                val poolToPickFrom = if (unusedOptions.size >= 3) unusedOptions else timeMatchingMeals
 
-            if (bestMealsForTime.isNotEmpty()) {
-                val chosenMeal = bestMealsForTime.random()
-                plannedMeals.add(chosenMeal)
-                availableMeals.remove(chosenMeal) 
+                val bestMealsForTime = poolToPickFrom
+                    .sortedBy { abs(it.calories - targetCal) } 
+                    .take(10) // Take top 10 closest to target calories
+
+                if (bestMealsForTime.isNotEmpty()) {
+                    val chosenMeal = bestMealsForTime.random()
+                    plannedMeals.add(chosenMeal)
+                    // Remove from available so we don't pick the same meal twice in the SAME day
+                    availableMeals.removeAll { it.id == chosenMeal.id }
+                }
             }
         }
 
         return plannedMeals
     }
 
-    /**
-     * Basic normalization to handle plurals and casing.
-     * Converts to lowercase and strips trailing 's'.
-     */
     private fun normalizeIngredient(input: String): String {
         val lower = input.lowercase().trim()
         return if (lower.endsWith("s") && lower.length > 3) {
