@@ -85,26 +85,85 @@
         </div>
 
         <div class="charts-grid">
-            <div class="chart-card">
-                <h3><i class="fas fa-bullseye"></i> Fitness Goals Breakdown</h3>
-                <canvas id="goalChart"></canvas>
+            <!-- Row 1: High Level Progress -->
+            <div class="chart-card wide">
+                <div class="chart-header">
+                    <h3><i class="fas fa-list-check"></i> 4-Week Training Journey</h3>
+                    <p class="chart-subtitle">Aggregate completion stages of the 28-day program</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="trainingStageChart"></canvas>
+                </div>
             </div>
+
+            <!-- Row 2: Profile & Nutrition -->
             <div class="chart-card">
-                <h3><i class="fas fa-weight-scale"></i> Weight Distribution</h3>
-                <canvas id="weightDistChart"></canvas>
+                <div class="chart-header">
+                    <h3><i class="fas fa-bullseye"></i> Student Objectives</h3>
+                    <p class="chart-subtitle">Breakdown of primary fitness goals</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="goalChart"></canvas>
+                </div>
             </div>
+
             <div class="chart-card">
-                <h3><i class="fas fa-utensils"></i> Student Diet Preferences</h3>
-                <canvas id="mealDietChart"></canvas>
+                <div class="chart-header">
+                    <h3><i class="fas fa-utensils"></i> Nutritional Preferences</h3>
+                    <p class="chart-subtitle">Preferred dietary plans across users</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="mealDietChart"></canvas>
+                </div>
             </div>
+
+            <!-- Row 3: Physical & Activity -->
             <div class="chart-card">
-                <h3><i class="fas fa-list-check"></i> Training Progress</h3>
-                <canvas id="trainingStageChart"></canvas>
+                <div class="chart-header">
+                    <h3><i class="fas fa-person-running"></i> Activity Distribution</h3>
+                    <p class="chart-subtitle">Student physical activity intensity levels</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="activityChart"></canvas>
+                </div>
             </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fas fa-weight-scale"></i> Weight Ranges</h3>
+                    <p class="chart-subtitle">Distribution of student weight categories</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="weightDistChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Row 4: Constraints & Demographics -->
+            <div class="chart-card wide">
+                <div class="chart-header">
+                    <h3><i class="fas fa-ban"></i> Top 10 Dietary Exclusions</h3>
+                    <p class="chart-subtitle">The most frequently avoided ingredients among students</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="exclusionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card wide">
+                <div class="chart-header">
+                    <h3><i class="fas fa-venus-mars"></i> Demographic Breakdown</h3>
+                    <p class="chart-subtitle">Gender distribution of registered students</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="genderChart"></canvas>
+                </div>
+            </div>
+            
         </div>
     </div>
 
-    <!-- STUDENTS -->
+    <!-- STUDENTS, EXERCISES, MEALS, ARTICLES TAB CONTENT -->
+    <!-- (Keeping existing structures for these tabs) -->
     <div id="students" class="tab-content">
         <div class="data-card">
             <div class="table-header">
@@ -137,21 +196,18 @@
         </div>
     </div>
 
-    <!-- EXERCISES -->
     <div id="exercises" class="tab-content">
         <div class="data-card">
             <div class="table-header">
                 <h2>Exercise Global Database</h2>
                 <button class="btn btn-primary" onclick="openExModal()"><i class="fas fa-plus"></i> Add New</button>
             </div>
-
             <div class="table-controls">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" id="exSearch" placeholder="Search exercises..." oninput="handleSearch('ex')">
                 </div>
             </div>
-
             <div class="table-wrapper">
                 <table>
                     <thead><tr>
@@ -165,7 +221,6 @@
                     <tbody id="exerciseBody"></tbody>
                 </table>
             </div>
-
             <div class="pagination" id="exPagination">
                 <button class="btn btn-secondary btn-sm" onclick="changePage('ex', 'prev')"><i class="fas fa-chevron-left"></i> Previous</button>
                 <span class="page-info" id="exPageInfo">Page 1 of 1</span>
@@ -174,21 +229,18 @@
         </div>
     </div>
 
-    <!-- MEALS -->
     <div id="meals" class="tab-content">
         <div class="data-card">
             <div class="table-header">
                 <h2>Meal & Recipe Library</h2>
                 <button class="btn btn-primary" onclick="openMealModal()"><i class="fas fa-plus"></i> Add New</button>
             </div>
-
             <div class="table-controls">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" id="mealSearch" placeholder="Search meals..." oninput="handleSearch('meal')">
                 </div>
             </div>
-
             <div class="table-wrapper">
                 <table>
                     <thead><tr>
@@ -203,7 +255,6 @@
                     <tbody id="mealBody"></tbody>
                 </table>
             </div>
-
             <div class="pagination" id="mealPagination">
                 <button class="btn btn-secondary btn-sm" onclick="changePage('meal', 'prev')"><i class="fas fa-chevron-left"></i> Previous</button>
                 <span class="page-info" id="mealPageInfo">Page 1 of 1</span>
@@ -212,7 +263,6 @@
         </div>
     </div>
 
-    <!-- ARTICLES -->
     <div id="articleLib" class="tab-content">
         <div class="data-card">
             <div class="table-header">
@@ -252,12 +302,10 @@
                 <h2>Universal Sync & Automation HUB</h2>
                 <button class="btn btn-danger btn-sm" onclick="clearConsole()"><i class="fas fa-eraser"></i> Clear Log</button>
             </div>
-
             <div class="sync-grid">
-                <!-- NEWS SYNC -->
                 <div class="sync-card news">
                     <h3><i class="fas fa-newspaper" style="color:#3b82f6"></i> Health News Engine</h3>
-                    <p>Fetches the latest health and fitness articles from NewsAPI. Requires a valid API key.</p>
+                    <p>Fetches the latest health and fitness articles from NewsAPI.</p>
                     <div class="input-group" style="margin-bottom:0">
                         <input type="password" id="newsToken" placeholder="Enter NewsAPI Key">
                     </div>
@@ -266,28 +314,23 @@
                         <button class="btn btn-warning" onclick="confirmWipe('articles')"><i class="fas fa-trash-can"></i> Wipe Articles</button>
                     </div>
                 </div>
-
-                <!-- EXERCISE SYNC -->
                 <div class="sync-card">
                     <h3><i class="fas fa-dumbbell" style="color:#10b981"></i> Exercise Dataset Sync</h3>
-                    <p>Imports a comprehensive list of exercises, targets, and GIFs from the global open dataset.</p>
+                    <p>Imports exercises, targets, and GIFs from the global open dataset.</p>
                     <div class="sync-actions">
                         <button class="btn btn-primary" onclick="startExerciseSync()"><i class="fas fa-cloud-arrow-down"></i> Sync All Exercises</button>
                         <button class="btn btn-warning" onclick="confirmWipe('exercises')"><i class="fas fa-trash-can"></i> Wipe Exercises</button>
                     </div>
                 </div>
-
-                <!-- MEAL SYNC -->
                 <div class="sync-card meal">
                     <h3><i class="fas fa-utensils" style="color:#f97316"></i> Meal DB Importer</h3>
-                    <p>Syncs local and international cuisine (Filipino specialized) with macros and instructions.</p>
+                    <p>Syncs specialized recipes with macros and instructions.</p>
                     <div class="sync-actions">
                         <button class="btn btn-primary" onclick="startMealSync()"><i class="fas fa-bowl-food"></i> Import Recipes</button>
                         <button class="btn btn-warning" onclick="confirmWipe('meals')"><i class="fas fa-trash-can"></i> Wipe Meals</button>
                     </div>
                 </div>
             </div>
-
             <div id="syncConsole" class="console">System ready. Waiting for task initialization...</div>
         </div>
     </div>
@@ -298,13 +341,11 @@
     <h2 id="stModalTitle">Student Profile</h2>
     <form id="studentForm">
         <input type="hidden" id="editStId">
-        
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="input-group"><label>Full Name</label><input type="text" id="stName"></div>
             <div class="input-group" id="stIdGroup" style="display:none;"><label>Student UID (Read Only)</label><input type="text" id="stUID" readonly style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:not-allowed;"></div>
             <div class="input-group" id="stEmailGroup"><label>CVSU Email</label><input type="email" id="stEmail"></div>
         </div>
-
         <div class="input-group" id="passGroup" style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; background: #fdfdfd;">
             <label style="margin-bottom: 10px; display: block; font-weight: 700;">Account Security</label>
             <div id="newAccountPass">
@@ -316,7 +357,6 @@
                 <button type="button" class="btn btn-secondary btn-sm" onclick="sendResetEmail()"><i class="fas fa-envelope"></i> Send Password Reset Link</button>
             </div>
         </div>
-
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-top: 15px;">
             <div class="input-group"><label>Gender</label><select id="stGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
             <div class="input-group"><label>Birth Date</label><input type="date" id="stBirthDate"></div>
@@ -326,7 +366,6 @@
                 <option value="Build Muscle">Build Muscle</option>
             </select></div>
         </div>
-
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;">
             <div class="input-group"><label>Weight (kg)</label><input type="number" step="0.1" id="stWeight"></div>
             <div class="input-group"><label>Height (cm)</label><input type="number" step="0.1" id="stHeight"></div>
@@ -336,7 +375,6 @@
                 <option value="Active">Active</option>
             </select></div>
         </div>
-
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="input-group"><label>Diet</label><select id="stDiet">
                 <option value="Balanced">Balanced</option>
@@ -345,7 +383,6 @@
             </select></div>
             <div class="input-group"><label>Exclusions (Comma separated)</label><input type="text" id="stExclusions"></div>
         </div>
-
         <details class="advanced-json" style="margin-bottom: 20px;">
             <summary style="cursor: pointer; padding: 10px; background: #f8fafc; border-radius: 8px; font-weight: 600; color: var(--primary);">
                 <i class="fas fa-json"></i> View/Edit Plan Data (JSON)
@@ -355,7 +392,6 @@
                 <div class="input-group"><label>Meal Plan JSON</label><textarea id="stMealJson" style="height: 100px; font-family: monospace; font-size: 11px;"></textarea></div>
             </div>
         </details>
-
         <div style="display:flex; gap:15px; justify-content:flex-end;">
             <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
             <button type="submit" class="btn btn-primary">Save Changes</button>

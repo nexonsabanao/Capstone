@@ -15,12 +15,6 @@ class WorkoutGenerator @Inject constructor() {
 
     enum class MovementType { PUSH, PULL, LEGS, CORE, FULL_BODY, UNKNOWN }
     enum class ExerciseRole { COMPOUND, ISOLATION, FINISHER_CORE, WARMUP, COOLDOWN }
-
-    /**
-     * Generates a complete workout based on the specific structure.
-     * Dynamic counts and intensities based on difficulty (Activity Level).
-     * @param usedExerciseIds Set of IDs that have already been used in the current plan to prioritize variety.
-     */
     fun generatePersonalizedWorkout(
         id: Int,
         focus: String,

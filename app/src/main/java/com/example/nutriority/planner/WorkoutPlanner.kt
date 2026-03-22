@@ -29,7 +29,7 @@ class WorkoutPlanner @Inject constructor(
         return when (dayInWeek) {
             0 -> "Full Body"
             1 -> "Rest Day"
-            2 -> "Abs" // Core is same as Abs
+            2 -> "Abs"
             3 -> when (week) {
                 0 -> "Chest"
                 1 -> "Back"
@@ -191,7 +191,7 @@ class WorkoutPlanner @Inject constructor(
         }
     }
 
-    private fun mapToPlannerExercise(assignment: com.example.nutriority.data.model.WorkoutExercise, allExercises: List<Exercise>): PlannerExercise {
+    private fun mapToPlannerExercise(assignment: WorkoutExercise, allExercises: List<Exercise>): PlannerExercise {
         val exercise = allExercises.find { it.id == assignment.exerciseId }
         return PlannerExercise(
             name = exercise?.name ?: "Unknown Exercise",

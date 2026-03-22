@@ -1,7 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Add queries for Google Sign-In package visibility -->
     <queries>
         <package android:name="com.google.android.gms" />
     </queries>
@@ -18,7 +17,6 @@
         android:theme="@style/Theme.Nutriority"
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
-
         <!-- Launcher Activity -->
         <activity
             android:name=".MainActivity"
@@ -32,7 +30,5 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
     </application>
-
 </manifest>
