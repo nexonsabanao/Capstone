@@ -149,27 +149,19 @@ class SignUpFragment : Fragment() {
                         if (_binding == null) return@addOnCompleteListener
                         
                         if (verifyTask.isSuccessful) {
-                            viewLifecycleOwner.lifecycleScope.launch {
-                                val newUser = User(
-                                    id = 1,
-                                    email = email,
-                                    status = "active",
-                                    lastCompletedWorkoutDay = 0
-                                )
-                                userRepository.insertUser(newUser)
-                                
-                                binding.inputContainer.isVisible = false
-                                binding.layoutVerification.isVisible = true
-                                binding.tvTitle.text = "Verify Email"
-                                binding.tvSubtitle.isVisible = false
-                                binding.tvVerifySubtitle.text = "Welcome to Nutriority! A verification link has been sent to $email.\n\nPlease check your CVSU inbox (and spam folder) to verify your account."
-                                
-                                binding.btnSendCode.isVisible = false 
-                                binding.btnVerify.isVisible = true
-                                binding.btnVerify.text = "GO TO LOGIN"
-                                
-                                Toast.makeText(requireContext(), "Verification email sent!", Toast.LENGTH_LONG).show()
-                            }
+                            // Account creation in Firestore removed. 
+                            // It will be created in LoginFragment after email verification.
+                            binding.inputContainer.isVisible = false
+                            binding.layoutVerification.isVisible = true
+                            binding.tvTitle.text = "Verify Email"
+                            binding.tvSubtitle.isVisible = false
+                            binding.tvVerifySubtitle.text = "Welcome to Nutriority! A verification link has been sent to $email.\n\nPlease check your CVSU inbox (and spam folder) to verify your account."
+                            
+                            binding.btnSendCode.isVisible = false 
+                            binding.btnVerify.isVisible = true
+                            binding.btnVerify.text = "GO TO LOGIN"
+                            
+                            Toast.makeText(requireContext(), "Verification email sent!", Toast.LENGTH_LONG).show()
                         } else {
                             showError("Failed to send verification link: ${verifyTask.exception?.message}")
                             binding.btnSignUp.isEnabled = true

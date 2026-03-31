@@ -6,6 +6,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
+import com.example.nutriority.data.model.User
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
@@ -75,25 +76,42 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
     }
 
     private fun checkAccountStatusAndProceed() {
-        val uid = auth.currentUser?.uid ?: return
+        val firebaseUser = auth.currentUser ?: return
+        val uid = firebaseUser.uid
         
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Check Firestore for deleted status
+                // 1. Force reload to get latest verification status
+                firebaseUser.reload().await()
+                
+                // 2. Check if email is verified
+                if (!firebaseUser.isEmailVerified) {
+                    auth.signOut()
+                    showAuthOverlay(false)
+                    showError("Please verify your email before logging in. Check your CVSU inbox.")
+                    return@launch
+                }
+
+                // 3. Check Firestore for deleted status
                 val doc = FirebaseFirestore.getInstance()
                     .collection("users")
                     .document(uid)
                     .get()
                     .await()
                 
-                val status = doc.getString("status")
-                if (status == "deleted") {
-                    auth.signOut()
-                    showAuthOverlay(false)
-                    showError("This account has been disabled by the administrator.")
-                } else {
-                    restoreAndProceed()
+                if (doc.exists()) {
+                    val status = doc.getString("status")
+                    if (status == "deleted") {
+                        auth.signOut()
+                        showAuthOverlay(false)
+                        showError("This account has been disabled by the administrator.")
+                        return@launch
+                    }
                 }
+                
+                // Proceed to data restoration or new user creation
+                restoreAndProceed()
+                
             } catch (e: Exception) {
                 auth.signOut()
                 showAuthOverlay(false)
@@ -103,30 +121,46 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
     }
 
     private fun restoreAndProceed() {
+        val firebaseUser = auth.currentUser ?: return
+        
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                coroutineScope {
-                    awaitAll(
-                        async { userRepository.restoreUserFromCloud() },
-                        async { workoutRepository.restoreHistoryFromCloud() },
-                        async { mealRepository.restoreMealsFromCloud() }
-                    )
-                }
+                // Try to restore existing data
+                val restored = userRepository.restoreUserFromCloud()
                 
-                userRepository.recalculateUserStats()
-
-                val user = userRepository.getInitialUser()
-                if (user != null && !user.personalizedPlanJson.isNullOrBlank()) {
-                    try {
-                        val plan = gson.fromJson(user.personalizedPlanJson, WorkoutPlan::class.java)
-                        workoutPlanner.syncPlanToDatabase(plan)
-                    } catch (e: Exception) { }
+                if (restored) {
+                    // Existing user - sync their historical data
+                    coroutineScope {
+                        awaitAll(
+                            async { workoutRepository.restoreHistoryFromCloud() },
+                            async { mealRepository.restoreMealsFromCloud() }
+                        )
+                    }
+                    userRepository.recalculateUserStats()
+                    
+                    val localUser = userRepository.getInitialUser()
+                    if (localUser != null && !localUser.personalizedPlanJson.isNullOrBlank()) {
+                        try {
+                            val plan = gson.fromJson(localUser.personalizedPlanJson, WorkoutPlan::class.java)
+                            workoutPlanner.syncPlanToDatabase(plan)
+                        } catch (e: Exception) { }
+                    }
+                } else {
+                    // New user - First time login after email verification
+                    // Create their profile record now
+                    val newUser = User(
+                        id = 1,
+                        email = firebaseUser.email ?: "",
+                        status = "active",
+                        lastCompletedWorkoutDay = 0
+                    )
+                    userRepository.insertUser(newUser)
                 }
 
                 updateOverlayToSuccess()
-                delay(1500)
+                delay(1000)
             } catch (e: Exception) {
-                Log.e("Login", "Restore error", e)
+                Log.e("Login", "Restoration/Creation error", e)
             } finally {
                 showAuthOverlay(false)
                 parentFragmentManager.setFragmentResult("navigationRequestWelcome", Bundle())

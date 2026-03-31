@@ -346,22 +346,27 @@ function renderCharts(users) {
     }
 
     // 7. Gender Distribution
-    const genderStats = {};
+    const genderCounts = { 'Male': 0, 'Female': 0, 'Not Specified': 0 };
     activeUsers.forEach(u => {
-        const val = String(u.gender || 'Not Specified').trim();
-        genderStats[val] = (genderStats[val] || 0) + 1;
+        let val = String(u.gender || 'Not Specified').trim();
+        if (val !== 'Male' && val !== 'Female') val = 'Not Specified';
+        genderCounts[val]++;
     });
 
     const genderCtx = document.getElementById('genderChart');
     if (genderCtx) {
+        const labels = ['Male', 'Female', 'Not Specified'];
+        const data = labels.map(l => genderCounts[l]);
+        const colors = ['#0ea5e9', '#ec4899', '#94a3b8']; // Blue for Male, Pink for Female, Gray for Unspecified
+
         charts.gender = new Chart(genderCtx, {
             type: 'bar',
             data: {
-                labels: Object.keys(genderStats),
+                labels: labels,
                 datasets: [{
                     label: 'Students',
-                    data: Object.values(genderStats),
-                    backgroundColor: ['#0ea5e9', '#ec4899', '#94a3b8'],
+                    data: data,
+                    backgroundColor: colors,
                     borderRadius: 10,
                     barThickness: 30
                 }]
@@ -369,9 +374,20 @@ function renderCharts(users) {
             options: {
                 indexAxis: 'y',
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => ` ${context.raw} Students`
+                        }
+                    }
+                },
                 scales: {
-                    x: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                    x: { 
+                        beginAtZero: true, 
+                        grid: { color: '#f1f5f9' },
+                        ticks: { stepSize: 1 }
+                    },
                     y: { grid: { display: false } }
                 }
             }
