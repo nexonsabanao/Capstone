@@ -110,13 +110,11 @@ class WorkoutDetailViewModel @Inject constructor(
                 syncSessionToDb(workoutId, session, existing?.workout?.includeWarmupCooldown ?: true)
             }
 
-            // Use collectLatest on the repository flow to handle real-time updates (like exercise completion)
-            // This fixes the bug where personalized workouts didn't update the UI when an exercise was done.
+            // Fixed observation: Use collectLatest but handle UI refresh immediately on change
             workoutRepository.getWorkoutWithExercises(workoutId)
                 .distinctUntilChanged()
                 .collectLatest { detail ->
                     if (detail != null) {
-                        // CRITICAL: Clean duration data on load
                         val safeDuration = WorkoutUtil.calculateTotalDuration(detail.exerciseAssignments, detail.workout.includeWarmupCooldown)
                         if (detail.workout.duration != safeDuration) {
                             detail.workout.duration = safeDuration
@@ -435,8 +433,8 @@ class WorkoutDetailViewModel @Inject constructor(
     }
 
     fun updateExerciseCompletion(workoutId: Int, exerciseId: String, category: String, completed: Boolean) {
-        if (_isWorkoutActive.value && _activeWorkoutId.value != workoutId) return
-        
+        // BUG FIX: Allow completion update even if it's the active workout session
+        // This ensures the local database is updated immediately when a set is finished.
         viewModelScope.launch {
             workoutRepository.updateExerciseCompletion(workoutId, exerciseId, category, completed)
         }

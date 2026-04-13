@@ -3,6 +3,7 @@ package com.example.nutriority.ui.workout
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -253,7 +254,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
                     binding.bottomBar.visibility = if (isResting) View.GONE else View.VISIBLE
                     
                     if (!isResting) {
-                        if (currentSets.all { it.isCompleted }) {
+                        if (currentSets.isNotEmpty() && currentSets.all { it.isCompleted }) {
                             val currentPos = navigationViewModel.exercisePosition.value
                             val total = navigationViewModel.totalExercises.value
                             if (currentPos != -1 && total != -1 && currentPos < total) {
@@ -347,6 +348,9 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         val index = currentSets.indexOfFirst { it.isActive }
         if (index == -1) return
 
+        // Stop current auto-log timer just in case it was triggered manually
+        workoutViewModel.stopAutoLogTimer()
+
         playSetCompleteSound()
 
         val mutableSets = currentSets.toMutableList()
@@ -378,12 +382,12 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         if (mutableSets.all { it.isCompleted }) {
             workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true)
             if (!isRestOn) {
-                val currentPos = navigationViewModel.exercisePosition.value
-                val total = navigationViewModel.totalExercises.value
-                if (currentPos != -1 && total != -1 && currentPos < total) {
-                    finishOrNext()
-                }
+                // BUG FIX: If rest is OFF, go to next exercise immediately
+                finishOrNext()
             }
+        } else if (!isRestOn && isAutoLogOn) {
+            // BUG FIX: If rest is OFF but auto-log is ON, start timer for next set manually
+            startAutoLogTimerIfNeeded()
         }
     }
 
@@ -406,15 +410,12 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
                 workoutViewModel.startRestTimer(restSecs.toLong())
             }
         } else {
-            val currentPos = navigationViewModel.exercisePosition.value
-            val total = navigationViewModel.totalExercises.value
-            if (currentPos != -1 && total != -1 && currentPos < total) {
-                finishOrNext()
-            }
+            finishOrNext()
         }
     }
 
     private fun finishOrNext() {
+        workoutViewModel.stopAutoLogTimer() // Stop any running auto-log timers before navigating
         val currentPos = navigationViewModel.exercisePosition.value
         val total = navigationViewModel.totalExercises.value
         val isLast = currentPos != -1 && total != -1 && currentPos >= total
@@ -429,7 +430,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
 
     private fun showAutoLogBottomSheet() {
         val dialog = BottomSheetDialog(requireContext())
-        val view = layoutInflater.inflate(R.layout.layout_auto_log_bottom_sheet, null)
+        val view = layoutInflater.inflate(R.layout.layout_auto_log_bottom_sheet, binding.root as? ViewGroup, false)
 
         val switchAutoLog = view.findViewById<MaterialSwitch>(R.id.switchAutoLog)
         val timeChipGroup = view.findViewById<ChipGroup>(R.id.timeChipGroup)
@@ -471,7 +472,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
 
     private fun startAutoLogTimerIfNeeded() {
         if (!isAutoLogOn || workoutViewModel.isResting.value) return
-        val activeSet = currentSets.find { it.isActive } ?: return
+        if (!currentSets.any { it.isActive }) return
         workoutViewModel.startAutoLogTimer(autoLogTimeSeconds) {
             // Safety check before performing UI updates from a background timer callback
             if (_binding != null && isAdded) {
