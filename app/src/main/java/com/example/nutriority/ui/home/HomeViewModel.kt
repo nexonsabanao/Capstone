@@ -31,7 +31,7 @@ class HomeViewModel @Inject constructor(
     private val mealRepository: MealRepository,
     private val workoutRepository: WorkoutRepository,
     private val articleRepository: ArticleRepository,
-    private val userRepository: UserRepository,
+    userRepository: UserRepository,
     private val recommendedWorkoutRepository: RecommendedWorkoutRepository
 ) : ViewModel() {
 
@@ -44,11 +44,17 @@ class HomeViewModel @Inject constructor(
     val calorieGoal: StateFlow<String>
 
     init {
+        // Start real-time Firestore listeners
+        mealRepository.startRealtimeMealSync(viewModelScope)
+        articleRepository.startRealtimeArticleSync(viewModelScope)
+        workoutRepository.startRealtimeExerciseSync(viewModelScope)
+        userRepository.startRealtimeUserSync(viewModelScope)
+
         viewModelScope.launch {
-            launch { try { articleRepository.syncArticlesFromCloud() } catch (e: Exception) {} }
-            launch { try { mealRepository.syncMealsFromCloud() } catch (e: Exception) {} }
-            launch { try { workoutRepository.syncExercisesFromCloud() } catch (e: Exception) {} }
-            launch { try { recommendedWorkoutRepository.syncOfficialWorkoutsFromCloud() } catch (e: Exception) {} }
+            launch { try { articleRepository.syncArticlesFromCloud() } catch (_: Exception) {} }
+            launch { try { mealRepository.syncMealsFromCloud() } catch (_: Exception) {} }
+            launch { try { workoutRepository.syncExercisesFromCloud() } catch (_: Exception) {} }
+            launch { try { recommendedWorkoutRepository.syncOfficialWorkoutsFromCloud() } catch (_: Exception) {} }
             
             delay(500)
             _isDataReady.value = true
@@ -82,11 +88,11 @@ class HomeViewModel @Inject constructor(
             }
 
             val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-            val timePriority = when {
-                currentHour in 5..10 -> listOf("Breakfast", "Lunch", "Dinner")
-                currentHour in 11..15 -> listOf("Lunch", "Dinner", "Breakfast")
-                currentHour in 16..21 -> listOf("Dinner", "Breakfast", "Lunch")
-                else -> listOf("Breakfast", "Lunch", "Dinner") 
+            val timePriority = when (currentHour) {
+                in 5..10 -> listOf("Breakfast", "Lunch", "Dinner")
+                in 11..15 -> listOf("Lunch", "Dinner", "Breakfast")
+                in 16..21 -> listOf("Dinner", "Breakfast", "Lunch")
+                else -> listOf("Breakfast", "Lunch", "Dinner")
             }
 
             filtered.sortedWith(compareBy<Meal> { meal ->
@@ -116,7 +122,7 @@ class HomeViewModel @Inject constructor(
             workoutRepository.allWorkouts, 
             userRepository.getUser
         ) { workouts, user ->
-            if (user == null || workouts.isEmpty()) return@combine emptyList<Workout>()
+            if (user == null || workouts.isEmpty()) return@combine emptyList()
             
             val stableWorkouts = workouts.sortedBy { it.id }
             val officialOnly = stableWorkouts.filter { it.id in 1..25 }
@@ -173,7 +179,7 @@ class HomeViewModel @Inject constructor(
     private fun normalizeIngredient(input: String): String {
         val lower = input.lowercase().trim()
         return if (lower.endsWith("s") && lower.length > 3) {
-            lower.substring(0, lower.length - 1)
+            lower.dropLast(1)
         } else {
             lower
         }

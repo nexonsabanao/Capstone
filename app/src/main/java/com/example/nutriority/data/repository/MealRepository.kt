@@ -9,9 +9,12 @@ import com.example.nutriority.data.model.DailyMealLog
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 
@@ -42,6 +45,29 @@ class MealRepository(
 
     fun getMealById(mealId: String): Flow<Meal?> {
         return mealDao.getMealById(mealId)
+    }
+
+    /**
+     * Starts a live Firestore listener to keep the local meal library updated in real-time.
+     */
+    fun startRealtimeMealSync(scope: CoroutineScope) {
+        db.collection("meals").addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.e("MealRepo", "Meal sync failed", e)
+                return@addSnapshotListener
+            }
+            
+            snapshot?.let {
+                val cloudMeals = it.toObjects(Meal::class.java)
+                scope.launch(Dispatchers.IO) {
+                    if (cloudMeals.isNotEmpty()) {
+                        mealDao.deleteAllMeals()
+                        mealDao.insertAllMeals(cloudMeals)
+                        Log.d("MealRepo", "Real-time meal sync: ${cloudMeals.size} meals updated")
+                    }
+                }
+            }
+        }
     }
 
     suspend fun syncMealsFromCloud() {

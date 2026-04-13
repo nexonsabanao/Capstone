@@ -88,6 +88,33 @@ class WorkoutRepository(
         workoutDao.updateWorkoutsWithExercises(workouts, workoutExercises)
     }
 
+    /**
+     * Starts a live Firestore listener to keep the local exercise library updated in real-time.
+     */
+    fun startRealtimeExerciseSync(scope: CoroutineScope) {
+        db.collection("exercises").addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.e("WorkoutRepo", "Exercise sync failed", e)
+                return@addSnapshotListener
+            }
+            
+            snapshot?.let {
+                val cloudExercises = it.toObjects(Exercise::class.java)
+                scope.launch(Dispatchers.IO) {
+                    if (cloudExercises.isNotEmpty()) {
+                        cloudExercises.forEachIndexed { index, exercise ->
+                            if (exercise.id.isEmpty()) {
+                                exercise.id = it.documents[index].id
+                            }
+                        }
+                        workoutDao.insertAllExercises(cloudExercises)
+                        Log.d("WorkoutRepo", "Real-time exercise sync: ${cloudExercises.size} exercises updated")
+                    }
+                }
+            }
+        }
+    }
+
     suspend fun syncExercisesFromCloud() {
         try {
             val exerciseSnapshot = db.collection("exercises").get().await()

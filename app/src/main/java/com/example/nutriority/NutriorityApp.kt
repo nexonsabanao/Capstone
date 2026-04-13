@@ -33,7 +33,7 @@ class NutriorityApp : Application() {
                 workoutRepository.syncExercisesFromCloud()
                 mealRepository.syncMealsFromCloud()
                 recommendedWorkoutRepository.syncOfficialWorkoutsFromCloud()
-            } catch (e: Exception) { }
+            } catch (_: Exception) { }
         }
     }
 }

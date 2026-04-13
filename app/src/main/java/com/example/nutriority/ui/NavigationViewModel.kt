@@ -125,7 +125,14 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
         if (currentWorkout != null && currentPos != -1 && total != -1 && currentPos < total) {
             val include = currentWorkout.workout.includeWarmupCooldown
             val assignments = currentWorkout.exerciseAssignments.sortedBy { it.assignment.order }
-            val filtered = if (include) assignments else assignments.filter { it.assignment.category.equals("Exercise", true) }
+            
+            // Fix: ensure the filtering here matches the filtering in WorkoutDetailFragment updateDisplayList
+            val filtered = if (include) {
+                assignments
+            } else {
+                assignments.filter { it.assignment.category.equals("Exercise", true) }
+            }
+            
             val nextAssignment = filtered.getOrNull(currentPos) 
             
             if (nextAssignment != null) {

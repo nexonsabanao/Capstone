@@ -1,12 +1,16 @@
 package com.example.nutriority.data.repository
 
+import android.util.Log
 import com.example.nutriority.data.model.User
 import com.example.nutriority.data.local.UserDao
 import com.example.nutriority.data.local.WorkoutDao
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -21,6 +25,49 @@ class UserRepository @Inject constructor(
 
     suspend fun getInitialUser(): User? {
         return userDao.getUserById()
+    }
+
+    /**
+     * Starts a live Firestore listener to keep the local user profile updated in real-time.
+     * This is useful if an admin changes user status or stats from the dashboard.
+     */
+    fun startRealtimeUserSync(scope: CoroutineScope) {
+        val uid = auth.currentUser?.uid ?: return
+        db.collection("users").document(uid).addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.e("UserRepo", "User sync failed", e)
+                return@addSnapshotListener
+            }
+            
+            snapshot?.data?.let { data ->
+                val updatedUser = User(
+                    id = 1,
+                    email = data["email"] as? String ?: "",
+                    name = data["name"] as? String ?: "",
+                    profileImageUrl = data["profileImageUrl"] as? String ?: "", 
+                    gender = data["gender"] as? String ?: "",
+                    birthDate = (data["birthDate"] as? Number)?.toLong(),
+                    heightCm = (data["heightCm"] as? Number)?.toDouble() ?: 0.0,
+                    weightKg = (data["weightKg"] as? Number)?.toDouble() ?: 0.0,
+                    unitSystem = data["unitSystem"] as? String ?: "METRIC",
+                    activityLevel = data["activityLevel"] as? String ?: "",
+                    goal = data["goal"] as? String ?: "",
+                    preferredDiet = data["preferredDiet"] as? String ?: "",
+                    excludedIngredients = (data["excludedIngredients"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
+                    personalizedPlanJson = data["personalizedPlanJson"] as? String,
+                    mealPlanJson = data["mealPlanJson"] as? String,
+                    lastCompletedWorkoutDay = (data["lastCompletedWorkoutDay"] as? Number)?.toInt() ?: 0,
+                    status = data["status"] as? String ?: "active",
+                    totalCaloriesBurned = (data["totalCaloriesBurned"] as? Number)?.toInt() ?: 0,
+                    totalWorkoutMinutes = (data["totalWorkoutMinutes"] as? Number)?.toLong() ?: 0L,
+                    totalWorkoutsCompleted = (data["totalWorkoutsCompleted"] as? Number)?.toInt() ?: 0
+                )
+                scope.launch(Dispatchers.IO) {
+                    userDao.insertUser(updatedUser)
+                    Log.d("UserRepo", "Real-time user profile sync: Done")
+                }
+            }
+        }
     }
 
     suspend fun insertUser(user: User): Boolean {
