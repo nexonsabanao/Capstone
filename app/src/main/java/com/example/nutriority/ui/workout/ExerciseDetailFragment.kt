@@ -277,6 +277,8 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
     }
 
     private fun updateAndSubmitList(updated: List<ExerciseSet>) {
+        if (_binding == null) return // Safety check to prevent crash if fragment is detached
+        
         currentSets = updated.mapIndexed { i, s -> s.copy(setNumber = i + 1) }
         if (!currentSets.any { it.isActive } && currentSets.isNotEmpty()) {
             val next = currentSets.indexOfFirst { !it.isCompleted }
@@ -471,7 +473,10 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         if (!isAutoLogOn || workoutViewModel.isResting.value) return
         val activeSet = currentSets.find { it.isActive } ?: return
         workoutViewModel.startAutoLogTimer(autoLogTimeSeconds) {
-            logSetAndAdvance()
+            // Safety check before performing UI updates from a background timer callback
+            if (_binding != null && isAdded) {
+                logSetAndAdvance()
+            }
         }
     }
 
