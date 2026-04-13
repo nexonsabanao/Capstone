@@ -213,7 +213,10 @@
                             android:textSize="14sp" 
                             android:textColor="#212121" 
                             android:fontFamily="sans-serif-medium" 
-                            android:layout_marginBottom="8dp"/>
+                            android:layout_marginBottom="8dp"
+                            android:drawablePadding="10dp"
+                            app:drawableStartCompat="@drawable/bg_circle_green"/>
+                        
                         <TextView 
                             android:id="@+id/tvFatPercent"
                             android:layout_width="wrap_content" 
@@ -222,7 +225,10 @@
                             android:textSize="14sp" 
                             android:textColor="#212121" 
                             android:fontFamily="sans-serif-medium" 
-                            android:layout_marginBottom="8dp"/>
+                            android:layout_marginBottom="8dp"
+                            android:drawablePadding="10dp"
+                            app:drawableStartCompat="@drawable/bg_circle_orange"/>
+                        
                         <TextView 
                             android:id="@+id/tvCarbPercent"
                             android:layout_width="wrap_content" 
@@ -230,7 +236,9 @@
                             android:text="Carb: 28g" 
                             android:textSize="14sp" 
                             android:textColor="#212121" 
-                            android:fontFamily="sans-serif-medium"/>
+                            android:fontFamily="sans-serif-medium"
+                            android:drawablePadding="10dp"
+                            app:drawableStartCompat="@drawable/bg_circle_blue"/>
                         
                     </LinearLayout>
                 </LinearLayout>

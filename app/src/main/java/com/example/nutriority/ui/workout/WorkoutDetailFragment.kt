@@ -168,8 +168,14 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
         dialog.setContentView(view)
 
         val workout = viewModel.workout.value ?: return
-        val total = workout.exerciseAssignments.size
-        val done = viewModel.completedExercisesCount.value
+        val include = workout.workout.includeWarmupCooldown
+        val filtered = if (include) {
+            workout.exerciseAssignments
+        } else {
+            workout.exerciseAssignments.filter { it.assignment.category.equals("Exercise", true) }
+        }
+        val total = filtered.size
+        val done = filtered.count { it.assignment.isCompleted }
         val progress = if (total > 0) (done * 100) / total else 0
 
         view.findViewById<TextView>(R.id.tvSubtitle).text = "($done from $total completed - $progress%)"
@@ -318,7 +324,6 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
                         binding.tvToolbarTitle.text = it.workout.name
                         binding.workoutTitle.text = it.workout.name
                         
-                        // FIX: Use Glide to load banner image to avoid "too large bitmap" crash
                         val resId = ImageUtil.getWorkoutImageResource(it.workout.targetMuscle, it.workout.name, it.workout.difficulty)
                         Glide.with(this@WorkoutDetailFragment)
                             .load(resId)
@@ -330,6 +335,17 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
                         binding.switchIncludeWarmupCooldown.isChecked = it.workout.includeWarmupCooldown
                         isSettingInitialState = false
                         updateDisplayList(it, it.workout.includeWarmupCooldown)
+                        
+                        // Update progress bar based on filtered list consistency
+                        val include = it.workout.includeWarmupCooldown
+                        val filtered = if (include) {
+                            it.exerciseAssignments
+                        } else {
+                            it.exerciseAssignments.filter { assignment -> assignment.assignment.category.equals("Exercise", true) }
+                        }
+                        val total = filtered.size.coerceAtLeast(1)
+                        val done = filtered.count { assignment -> assignment.assignment.isCompleted }
+                        binding.workoutProgress.progress = (done.toFloat() / total) * 100
                     }
                 }
             }
@@ -362,17 +378,6 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.elapsedTimeSeconds.collect { binding.tvActiveTimer.text = viewModel.formatElapsedTime(it) }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(viewModel.completedExercisesCount, viewModel.workout) { done, workout ->
-                    val total = workout?.exerciseAssignments?.size ?: 1
-                    (done.toFloat() / total) * 100
-                }.collect { progress ->
-                    binding.workoutProgress.progress = progress
-                }
             }
         }
     }

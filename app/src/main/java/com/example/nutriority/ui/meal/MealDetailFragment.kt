@@ -201,7 +201,7 @@ class MealDetailFragment : BaseBindingFragment<FragmentMealDetailBinding>(Fragme
         }
 
         val dataSet = PieDataSet(entries, "").apply {
-            colors = listOf(Color.parseColor("#4CAF50"), Color.parseColor("#2196F3"), Color.parseColor("#FF5722"))
+            colors = listOf(Color.parseColor("#4CAF50"), Color.parseColor("#2196F3"), Color.parseColor("#FF9800"))
             setDrawValues(false)
         }
 

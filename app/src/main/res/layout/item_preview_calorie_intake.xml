@@ -154,15 +154,19 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/macroTitle">
 
-                <include layout="@layout/item_macro_progress" />
+                <include
+                    android:id="@+id/macroProtein"
+                    layout="@layout/item_macro_progress" />
 
                 <include
+                    android:id="@+id/macroCarbs"
                     layout="@layout/item_macro_progress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp" />
 
                 <include
+                    android:id="@+id/macroFats"
                     layout="@layout/item_macro_progress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -206,9 +210,13 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:id="@+id/tv_total_kcal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_rounded_orange_light"
                 android:fontFamily="sans-serif"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
                 android:textStyle="bold"
                 android:textColor="@color/green"
                 android:textSize="18sp"

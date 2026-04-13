@@ -26,6 +26,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import androidx.core.content.edit
 
 @AndroidEntryPoint
 class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplashBinding::inflate) {
@@ -116,7 +117,7 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
                                     try {
                                         val plan = gson.fromJson(localUser.personalizedPlanJson, WorkoutPlan::class.java)
                                         workoutPlanner.syncPlanToDatabase(plan)
-                                    } catch (e: Exception) { }
+                                    } catch (_: Exception) { }
                                 }
                             }
                             R.id.action_splashFragment_to_mainTabsFragment
@@ -125,7 +126,7 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
                             val restored = userRepository.restoreUserFromCloud()
                             if (restored) {
                                 // Mark onboarding as finished locally if we restored a profile
-                                sharedPref.edit().putBoolean("Finished", true).apply()
+                                sharedPref.edit { putBoolean("Finished", true) }
                                 R.id.action_splashFragment_to_mainTabsFragment
                             } else {
                                 R.id.action_splashFragment_to_viewPagerFragment

@@ -130,7 +130,7 @@ class MainTabsFragment : BaseBindingFragment<FragmentMainTabsBinding>(FragmentMa
         })
     }
 
-    private inner class TabsAdapter(fragment: androidx.fragment.app.Fragment) : FragmentStateAdapter(fragment) {
+    private class TabsAdapter(fragment: androidx.fragment.app.Fragment) : FragmentStateAdapter(fragment) {
         override fun getItemCount(): Int = 15
 
         override fun createFragment(position: Int): androidx.fragment.app.Fragment = when (position) {

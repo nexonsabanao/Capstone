@@ -176,37 +176,41 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Observe UI State directly (usually contains meals)
                 profileViewModel.uiState.collectLatest { state ->
-                    // 1. Update meal list immediately
+                    if (state.isInitialLoading) return@collectLatest
+
                     loggedFoodAdapter.submitList(state.todayMealLogs)
                     val hasLogs = state.todayMealLogs.isNotEmpty()
                     binding.tvFoodTitle.isVisible = hasLogs
                     binding.rvLoggedFood.isVisible = hasLogs
 
-                    // 2. Update weight chart if logs exist
                     state.user?.let { user ->
+                        binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", user.weightKg)
+                        updateCalorieCard(user, state.todayMealLogs)
                         updateWeightChartFromLogs(state.sessionLogs, user.weightKg)
                     }
-                }
-            }
-        }
 
-        // Observe User separately to avoid blocking the Meal Logs display
-        profileViewModel.getUser.observe(viewLifecycleOwner) { user ->
-            user?.let {
-                binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", it.weightKg)
-                // Re-calculate calories whenever user data (like weight) or meal logs change
-                updateCalorieCard(it, profileViewModel.uiState.value.todayMealLogs)
+                    updateActivityStats(state.sessionLogs)
+                    setupCalendar(state.sessionLogs)
+                    updateStreak(state.sessionLogs)
+                }
             }
         }
     }
 
     private fun updateActivityStats(logs: List<WorkoutSessionLog>) {
-        val workoutLogs = logs.filter { it.workoutId > 0 }
-        val totalWorkouts = workoutLogs.size
-        val totalCalories = workoutLogs.sumOf { it.caloriesBurned }
-        val totalMinutes = workoutLogs.sumOf { it.durationSeconds } / 60
+        val workoutLogs = logs.filter { it.workoutId != 0 }
+        
+        val today = Calendar.getInstance()
+        val todayLogs = workoutLogs.filter {
+            val logCal = Calendar.getInstance().apply { timeInMillis = it.date }
+            logCal.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+            logCal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)
+        }
+
+        val totalWorkouts = todayLogs.size
+        val totalCalories = todayLogs.sumOf { it.caloriesBurned }
+        val totalMinutes = todayLogs.sumOf { it.durationSeconds } / 60
 
         binding.tvWorkoutsCount.text = totalWorkouts.toString()
         binding.tvKcalCount.text = totalCalories.toString()
@@ -343,7 +347,6 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         marker.chartView = chart
         chart.marker = marker
 
-        // GROUP BY DAY to avoid duplicate points on the graph
         val groupedLogs = logs.filter { it.weightKg > 0 }
             .groupBy { getDayKey(Calendar.getInstance().apply { timeInMillis = it.date }) }
             .map { it.value.maxByOrNull { log -> log.date }!! }
@@ -429,6 +432,9 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         calCard.caloriesLeft.text = left.toString()
         calCard.caloriesPercentage.text = "$percentage%"
         calCard.circleCalories.progress = percentage.toFloat()
+        
+        val tvTotalKcal = calCard.root.findViewById<TextView>(R.id.tv_total_kcal)
+        tvTotalKcal?.text = "$totalLogged kcal"
 
         val totalP = logs.sumOf { it.protein }
         val totalC = logs.sumOf { it.carbs }
@@ -438,15 +444,15 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         val targetC = (goalCalories * 0.50 / 4).toInt()
         val targetF = (goalCalories * 0.35 / 9).toInt()
 
-        val macroListContainer = calCard.macroCard.getChildAt(0) as ViewGroup
-        val macroLayout = macroListContainer.getChildAt(2) as LinearLayout
+        // Set different colors for macro progress bars
+        val macroLayout = calCard.macroProtein.root.parent as LinearLayout
         
-        updateMacroItem(macroLayout.getChildAt(0) as ViewGroup, "PROTEIN", totalP, targetP)
-        updateMacroItem(macroLayout.getChildAt(1) as ViewGroup, "CARBS", totalC, targetC)
-        updateMacroItem(macroLayout.getChildAt(2) as ViewGroup, "FATS", totalF, targetF)
+        updateMacroItem(calCard.macroProtein.root, "PROTEIN", totalP, targetP, R.drawable.progress_bar_protein)
+        updateMacroItem(calCard.macroCarbs.root, "CARBS", totalC, targetC, R.drawable.progress_bar_carbs)
+        updateMacroItem(calCard.macroFats.root, "FATS", totalF, targetF, R.drawable.progress_bar_fats)
     }
 
-    private fun updateMacroItem(container: ViewGroup, label: String, current: Int, target: Int) {
+    private fun updateMacroItem(container: View, label: String, current: Int, target: Int, drawableRes: Int) {
         val labelTv = container.findViewById<TextView>(R.id.macro_label)
         val valueTv = container.findViewById<TextView>(R.id.macro_value)
         val progress = container.findViewById<ProgressBar>(R.id.progressBar)
@@ -455,5 +461,6 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         valueTv?.text = "$current/${target}g"
         progress?.max = target
         progress?.progress = current
+        progress?.progressDrawable = ContextCompat.getDrawable(requireContext(), drawableRes)
     }
 }
