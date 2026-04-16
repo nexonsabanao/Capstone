@@ -235,6 +235,28 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
                 } else false
             }
 
+            dialogBinding.btnReset.setOnClickListener {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    dialogBinding.loadingProgress.visibility = View.VISIBLE
+                    dialogBinding.contentLayout.visibility = View.GONE
+                    
+                    val originalAssignments = viewModel.getOriginalAssignments(workoutWithExercises.workout.id)
+                    if (originalAssignments.isNotEmpty()) {
+                        // Create a temporary list of exercises matching the original assignments
+                        val originalExercises = originalAssignments.mapNotNull { assignment ->
+                            allExercisesList.find { it.id == assignment.exerciseId }?.copy(category = assignment.category)
+                        }
+                        selectableAdapter.setData(allExercisesList, originalExercises)
+                        showToast("Workout reset to default")
+                    } else {
+                        showToast("Could not fetch original workout")
+                    }
+                    
+                    dialogBinding.loadingProgress.visibility = View.GONE
+                    dialogBinding.contentLayout.visibility = View.VISIBLE
+                }
+            }
+
             dialogBinding.btnSave.setOnClickListener {
                 val name = if (isEditable) dialogBinding.etWorkoutName.text.toString() else workoutName
                 if (name.isBlank()) return@setOnClickListener

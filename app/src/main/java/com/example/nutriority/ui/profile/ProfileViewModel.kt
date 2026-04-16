@@ -22,7 +22,7 @@ data class ProfileUiState(
     val user: User? = null,
     val todayMealLogs: List<DailyMealLog> = emptyList(),
     val sessionLogs: List<WorkoutSessionLog> = emptyList(),
-    val isInitialLoading: Boolean = true
+    val isLoading: Boolean = false
 )
 
 @HiltViewModel
@@ -35,19 +35,32 @@ class ProfileViewModel @Inject constructor(
 
     val uiState: StateFlow<ProfileUiState> = combine(
         userRepository.getUser,
-        mealRepository.getLogsForToday(),
+        mealRepository.getAllLogs(),
         workoutRepository.getAllSessionLogs()
-    ) { user, meals, sessions ->
+    ) { user, allMeals, sessions ->
+        // Filter for today's meals here to ensure it's always recalculated on any data change
+        val today = Calendar.getInstance()
+        today.set(Calendar.HOUR_OF_DAY, 0)
+        today.set(Calendar.MINUTE, 0)
+        today.set(Calendar.SECOND, 0)
+        today.set(Calendar.MILLISECOND, 0)
+        val start = today.timeInMillis
+        
+        today.add(Calendar.DAY_OF_MONTH, 1)
+        val end = today.timeInMillis
+
+        val todayMeals = allMeals.filter { it.date in start until end }
+
         ProfileUiState(
             user = user,
-            todayMealLogs = meals,
+            todayMealLogs = todayMeals,
             sessionLogs = sessions,
-            isInitialLoading = user == null
+            isLoading = user == null
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = ProfileUiState(isInitialLoading = true)
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ProfileUiState(isLoading = true)
     )
 
     val getUser: LiveData<User?> = userRepository.getUser.asLiveData()

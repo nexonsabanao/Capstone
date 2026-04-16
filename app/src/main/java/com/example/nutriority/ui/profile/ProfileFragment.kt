@@ -95,12 +95,12 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
                 binding.historyCard.textHistoryTitle.text = "History"
             }
             
-            profileViewModel.sessionLogs.value?.let { setupCalendar(it) }
+            setupCalendar(profileViewModel.uiState.value.sessionLogs)
         }
 
         binding.historyCard.btnPrevMonth.setOnClickListener {
             currentDisplayDate.add(Calendar.MONTH, -1)
-            profileViewModel.sessionLogs.value?.let { setupCalendar(it) }
+            setupCalendar(profileViewModel.uiState.value.sessionLogs)
         }
 
         binding.historyCard.btnNextMonth.setOnClickListener {
@@ -111,7 +111,7 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
                 (nextMonth.get(Calendar.MONTH) == Calendar.getInstance().get(Calendar.MONTH) && 
                  nextMonth.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR))) {
                 currentDisplayDate.add(Calendar.MONTH, 1)
-                profileViewModel.sessionLogs.value?.let { setupCalendar(it) }
+                setupCalendar(profileViewModel.uiState.value.sessionLogs)
             }
         }
     }
@@ -177,8 +177,8 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 profileViewModel.uiState.collectLatest { state ->
-                    if (state.isInitialLoading) return@collectLatest
-
+                    // Removed the return if isLoading to ensure UI updates as soon as partial data is available
+                    
                     loggedFoodAdapter.submitList(state.todayMealLogs)
                     val hasLogs = state.todayMealLogs.isNotEmpty()
                     binding.tvFoodTitle.isVisible = hasLogs
