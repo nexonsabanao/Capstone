@@ -22,7 +22,8 @@ data class ProfileUiState(
     val user: User? = null,
     val todayMealLogs: List<DailyMealLog> = emptyList(),
     val sessionLogs: List<WorkoutSessionLog> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isMealsLoading: Boolean = true
 )
 
 @HiltViewModel
@@ -33,10 +34,21 @@ class ProfileViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences 
 ) : ViewModel() {
 
+    // Isolate the flows to ensure they start emitting immediately and don't block each other
+    private val userFlow = userRepository.getUser
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    // Using null as initial value to represent the "loading" state from database
+    private val mealsFlow = mealRepository.getAllLogs()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    private val sessionsFlow = workoutRepository.getAllSessionLogs()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     val uiState: StateFlow<ProfileUiState> = combine(
-        userRepository.getUser,
-        mealRepository.getAllLogs(),
-        workoutRepository.getAllSessionLogs()
+        userFlow,
+        mealsFlow,
+        sessionsFlow
     ) { user, allMeals, sessions ->
         // Filter for today's meals here to ensure it's always recalculated on any data change
         val today = Calendar.getInstance()
@@ -49,18 +61,19 @@ class ProfileViewModel @Inject constructor(
         today.add(Calendar.DAY_OF_MONTH, 1)
         val end = today.timeInMillis
 
-        val todayMeals = allMeals.filter { it.date in start until end }
+        val todayMeals = allMeals?.filter { it.date in start until end } ?: emptyList()
 
         ProfileUiState(
             user = user,
             todayMealLogs = todayMeals,
             sessionLogs = sessions,
-            isLoading = user == null
+            isLoading = user == null,
+            isMealsLoading = allMeals == null
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ProfileUiState(isLoading = true)
+        started = SharingStarted.Eagerly,
+        initialValue = ProfileUiState(isLoading = true, isMealsLoading = true)
     )
 
     val getUser: LiveData<User?> = userRepository.getUser.asLiveData()

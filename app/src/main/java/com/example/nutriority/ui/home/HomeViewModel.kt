@@ -35,8 +35,8 @@ class HomeViewModel @Inject constructor(
     private val recommendedWorkoutRepository: RecommendedWorkoutRepository
 ) : ViewModel() {
 
-    val allMeals: StateFlow<List<Meal>>
-    val allWorkouts: StateFlow<List<Workout>> 
+    val allMeals: StateFlow<List<Meal>?>
+    val allWorkouts: StateFlow<List<Workout>?> 
     val unfilteredWorkouts: StateFlow<List<Workout>> 
     val allArticles: StateFlow<List<Article>>
     private val _isDataReady = MutableStateFlow(false)
@@ -103,7 +103,7 @@ class HomeViewModel @Inject constructor(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = null // Changed to null to indicate loading
         )
 
         allArticles = articleRepository.allArticles.stateIn(
@@ -150,7 +150,7 @@ class HomeViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = null // Changed to null to indicate loading
         )
 
         allWorkouts = recommendedWorkouts
@@ -173,9 +173,6 @@ class HomeViewModel @Inject constructor(
         )
     }
 
-    /**
-     * Normalizes ingredient strings to handle plurals (strips trailing 's').
-     */
     private fun normalizeIngredient(input: String): String {
         val lower = input.lowercase().trim()
         return if (lower.endsWith("s") && lower.length > 3) {

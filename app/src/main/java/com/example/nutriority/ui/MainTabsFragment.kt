@@ -59,10 +59,9 @@ class MainTabsFragment : BaseBindingFragment<FragmentMainTabsBinding>(FragmentMa
     private fun setupViewPager() {
         binding.viewPager.apply {
             adapter = TabsAdapter(this@MainTabsFragment)
-            offscreenPageLimit = 2 // Minimized to reduce overlapping memory/view overhead
+            offscreenPageLimit = 4 
             isUserInputEnabled = false
-            
-            // Fix: Use a PageTransformer to ensure inactive pages are fully hidden
+
             setPageTransformer { page, position ->
                 page.alpha = if (position == 0f) 1f else 0f
                 page.visibility = if (position == 0f) View.VISIBLE else View.GONE

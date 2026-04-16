@@ -112,33 +112,37 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                     }
                 }
 
-                // Global Data Ready check - now only for cases where data remains empty
+                // Global Data Ready check - simplified as specific loaders take over
                 launch {
                     homeViewModel.isDataReady.collect { isReady ->
                         if (isReady) {
-                            if (mealAdapter.itemCount == 0) binding.mealsProgressBar.isVisible = false
-                            if (workoutAdapter.itemCount == 0) binding.workoutsProgressBar.isVisible = false
                             if (articleAdapter.itemCount == 0) binding.articlesProgressBar.isVisible = false
                         }
                     }
                 }
 
-                // Meals
+                // Meals Loader Fix
                 launch {
                     homeViewModel.allMeals.collect { meals ->
-                        mealAdapter.submitList(meals)
-                        if (meals.isNotEmpty()) {
+                        if (meals == null) {
+                            binding.mealsProgressBar.isVisible = true
+                            binding.mealsRecyclerView.isVisible = false
+                        } else {
+                            mealAdapter.submitList(meals)
                             binding.mealsRecyclerView.isVisible = true
                             binding.mealsProgressBar.isVisible = false
+                            binding.tvNoMeals.isVisible = meals.isEmpty() && homeViewModel.isDataReady.value
                         }
-                        binding.tvNoMeals.isVisible = meals.isEmpty() && homeViewModel.isDataReady.value
                     }
                 }
 
-                // Workouts
+                // Workouts Loader Fix
                 launch {
                     homeViewModel.allWorkouts.collect { workouts ->
-                        if (workouts.isNotEmpty()) {
+                        if (workouts == null) {
+                            binding.workoutsProgressBar.isVisible = true
+                            binding.workoutsRecyclerView.isVisible = false
+                        } else {
                             workoutAdapter.submitList(workouts) {
                                 if (isFirstWorkoutLoad) {
                                     binding.workoutsRecyclerView.scrollToPosition(0)
@@ -147,7 +151,7 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                                 binding.workoutsIndicator.visibility = if (workouts.size > 1) View.VISIBLE else View.GONE
                                 if (workouts.size > 1) binding.workoutsIndicator.createIndicators(workouts.size, 0)
                             }
-                            binding.workoutsRecyclerView.visibility = View.VISIBLE
+                            binding.workoutsRecyclerView.isVisible = true
                             binding.workoutsProgressBar.isVisible = false
                         }
                     }

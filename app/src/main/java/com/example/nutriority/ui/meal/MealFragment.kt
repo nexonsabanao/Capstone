@@ -86,6 +86,9 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
         if (missingFields.isNotEmpty()) {
             showProfileIncompleteDialog(missingFields)
         } else {
+            // Immediate UI feedback to prevent perceived delay
+            binding.initialView.isVisible = false
+            binding.loadingProgressBar.isVisible = true
             mealViewModel.generateNewMealPlan()
         }
     }
@@ -155,7 +158,10 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
                         binding.btnMenu.isVisible = state.hasPlan
                         binding.nextButton.isEnabled = !state.isGenerating
                         binding.doneButton.isVisible = state.hasPlan && state.isPlanExpired
-                        binding.nextButton.isVisible = !state.hasPlan || state.isPlanExpired
+                        
+                        // FIX: Ensure button visibility respects the generating state to prevent it from reappearing 
+                        // due to explicit visibility overrides.
+                        binding.nextButton.isVisible = (!state.hasPlan || state.isPlanExpired) && !state.isGenerating
                         
                         mealAdapter.submitList(state.items)
                     }

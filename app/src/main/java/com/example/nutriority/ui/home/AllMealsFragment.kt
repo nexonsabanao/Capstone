@@ -103,7 +103,7 @@ class AllMealsFragment : BaseBindingFragment<FragmentAllMealsBinding>(FragmentAl
                     searchQuery,
                     filterType
                 ) { meals, query, filter ->
-                    val filtered = meals.filter { meal ->
+                    val filtered = meals?.filter { meal ->
                         val matchesSearch = meal.name.lowercase().contains(query) || 
                                           meal.ingredients.any { it.lowercase().contains(query) }
                         val matchesFilter = filter == "All" || meal.mealTime.equals(filter, ignoreCase = true)
@@ -111,16 +111,16 @@ class AllMealsFragment : BaseBindingFragment<FragmentAllMealsBinding>(FragmentAl
                     }
                     
                     val sectionedList = mutableListOf<AllMealItem>()
-                    val groups = filtered.groupBy { it.mealTime }
+                    val groups = filtered?.groupBy { it.mealTime }
                     
                     val order = listOf("Breakfast", "Lunch", "Dinner", "Snack")
                     order.forEach { time ->
-                        groups[time]?.let { mealList ->
+                        groups?.get(time)?.let { mealList ->
                             sectionedList.add(AllMealItem.Header(time))
                             sectionedList.addAll(mealList.map { AllMealItem.MealItem(it) })
                         }
                     }
-                    groups.filterKeys { !order.contains(it) }.forEach { (time, mealList) ->
+                    groups?.filterKeys { !order.contains(it) }?.forEach { (time, mealList) ->
                         sectionedList.add(AllMealItem.Header(time))
                         sectionedList.addAll(mealList.map { AllMealItem.MealItem(it) })
                     }

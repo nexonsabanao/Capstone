@@ -20,7 +20,9 @@ import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 import javax.inject.Inject
 
 data class MealSwapState(
@@ -84,7 +86,9 @@ class MealViewModel @Inject constructor(
                 )
             }
         }
-    }.stateIn(
+    }
+    .flowOn(Dispatchers.Default)
+    .stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
         initialValue = MealUiState(isInitialLoading = true)
@@ -137,16 +141,22 @@ class MealViewModel @Inject constructor(
             val items = mutableListOf<MealListItem>()
             val startDateStr = getPlanStartDate()
             val startDate = if (startDateStr != null) LocalDate.parse(startDateStr) else LocalDate.now()
+            val today = LocalDate.now()
 
             plan.forEachIndexed { dayIndex, dayMeals ->
                 val targetDate = startDate.plusDays(dayIndex.toLong())
-                val dateHeader = when (dayIndex) {
+                val daysDiff = ChronoUnit.DAYS.between(today, targetDate).toInt()
+                
+                val dateHeader = when (daysDiff) {
+                    -1 -> "Yesterday"
                     0 -> "Today"
                     1 -> "Tomorrow"
-                    else -> targetDate.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+                    else -> targetDate.format(DateTimeFormatter.ofPattern("MMMM d", Locale.getDefault()))
                 }
                 
-                items.add(MealListItem.HeaderItem("$dateHeader, ${targetDate.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${targetDate.dayOfMonth}", dayIndex))
+                // Keep the day name (Monday, Tuesday, etc.) for better context
+                val dayName = targetDate.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+                items.add(MealListItem.HeaderItem("$dateHeader, $dayName", dayIndex))
 
                 dayMeals.sortedBy {
                     when(it.mealTime.lowercase()) {
@@ -156,8 +166,6 @@ class MealViewModel @Inject constructor(
                         else -> 4
                     }
                 }.forEach { meal ->
-                    // Check if this specific meal on this specific day has been logged
-                    // We check if any log entry matches the mealId and the targetDate
                     val isLogged = logs.any { log ->
                         val logDate = Instant.ofEpochMilli(log.date).atZone(ZoneId.systemDefault()).toLocalDate()
                         log.mealId == meal.id && logDate == targetDate
@@ -176,6 +184,7 @@ class MealViewModel @Inject constructor(
         val startDateStr = getPlanStartDate() ?: return false
         val startDate = LocalDate.parse(startDateStr)
         val today = LocalDate.now()
+        // Plan expires if today is more than 6 days after the start date
         return ChronoUnit.DAYS.between(startDate, today) >= 7
     }
 

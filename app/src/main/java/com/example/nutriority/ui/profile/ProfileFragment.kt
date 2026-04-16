@@ -177,19 +177,27 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 profileViewModel.uiState.collectLatest { state ->
-                    // Removed the return if isLoading to ensure UI updates as soon as partial data is available
-                    
-                    loggedFoodAdapter.submitList(state.todayMealLogs)
-                    val hasLogs = state.todayMealLogs.isNotEmpty()
-                    binding.tvFoodTitle.isVisible = hasLogs
-                    binding.rvLoggedFood.isVisible = hasLogs
+                    // 1. Meal Loading and Display
+                    if (state.isMealsLoading) {
+                        binding.tvFoodTitle.isVisible = true
+                        binding.tvFoodTitle.text = "Loading meals..."
+                        binding.rvLoggedFood.isVisible = false
+                    } else {
+                        loggedFoodAdapter.submitList(state.todayMealLogs)
+                        val hasLogs = state.todayMealLogs.isNotEmpty()
+                        binding.tvFoodTitle.isVisible = hasLogs
+                        binding.tvFoodTitle.text = "Today's Meals"
+                        binding.rvLoggedFood.isVisible = hasLogs
+                    }
 
+                    // 2. User Stats and Charts
                     state.user?.let { user ->
                         binding.weightCard.tvCurrentWeight.text = String.format("%.1f kg", user.weightKg)
                         updateCalorieCard(user, state.todayMealLogs)
                         updateWeightChartFromLogs(state.sessionLogs, user.weightKg)
                     }
 
+                    // 3. Activity and Calendar
                     updateActivityStats(state.sessionLogs)
                     setupCalendar(state.sessionLogs)
                     updateStreak(state.sessionLogs)
