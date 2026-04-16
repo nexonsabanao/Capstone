@@ -53,14 +53,14 @@
             app:backgroundTint="@color/toggle_button_background_color" />
 
         <Button
-            android:id="@+id/btn_in"
+            android:id="@+id/btn_ft"
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="72dp"
             android:layout_height="40dp"
             android:insetTop="0dp"
             android:insetBottom="0dp"
             android:padding="0dp"
-            android:text="in"
+            android:text="ft"
             android:textColor="@color/toggle_button_text_color"
             android:textSize="12sp"
             app:backgroundTint="@color/toggle_button_background_color" />
@@ -107,8 +107,8 @@
         app:ruler_indicatorColor="@color/green"
         app:ruler_indicatorWidth="4dp"
         app:ruler_maxValue="250"
-        app:ruler_minValue="50"
-        app:ruler_tickInterval="7dp"
+        app:ruler_minValue="100"
+        app:ruler_tickInterval="14dp"
         app:ruler_textColor="#212121"
         app:ruler_tickColor="#E0E0E0"
         app:ruler_majorTickFactor="10"

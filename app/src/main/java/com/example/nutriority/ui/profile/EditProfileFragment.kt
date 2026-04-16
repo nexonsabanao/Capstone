@@ -31,6 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class EditProfileFragment : Fragment() {
@@ -170,7 +171,6 @@ class EditProfileFragment : Fragment() {
 
     private fun showWeightLogBottomSheet() {
         val initialWeight = currentUser?.weightKg ?: 60.0
-        // Fix: Set showDatePicker = false when editing from Profile settings
         val bottomSheet = WeightLogBottomSheetFragment(initialWeight, showDatePicker = false) { weight, date ->
             if (weight != currentUser?.weightKg) {
                 handleFieldUpdateWithPlanChoice("Weight") { it.copy(weightKg = weight) }
@@ -331,7 +331,10 @@ class EditProfileFragment : Fragment() {
                 binding.rowAge.tvValue.text = it.birthDate?.let { date -> sdf.format(Date(date)) } ?: "Not set"
                 binding.rowGender.tvValue.text = it.gender
                 binding.rowWeight.tvValue.text = "${it.weightKg} kg"
-                binding.rowHeight.tvValue.text = "${it.heightCm} cm"
+                
+                // Fix: Round height to nearest whole number for display in the list row
+                binding.rowHeight.tvValue.text = "${it.heightCm.roundToInt()} cm"
+                
                 binding.rowActivity.tvValue.text = it.activityLevel
                 binding.rowGoal.tvValue.text = it.goal
                 binding.rowDiet.tvValue.text = it.preferredDiet

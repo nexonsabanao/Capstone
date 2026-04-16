@@ -10,6 +10,8 @@ import com.example.nutriority.R
 import com.example.nutriority.databinding.LayoutLogHeightBottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.button.MaterialButtonToggleGroup
+import java.util.Locale
+import kotlin.math.roundToInt
 
 class HeightLogBottomSheetFragment(
     private val initialHeightCm: Double,
@@ -22,11 +24,11 @@ class HeightLogBottomSheetFragment(
     private var currentHeightCm: Double = initialHeightCm
     private var isImperial = false
 
-    private val heightCmRange = (50f..250f)
-    private val heightInRange = (20f..100f)
+    private val heightCmRange = (100f..250f)
+    private val heightInchesRange = (40f..98f)
 
     companion object {
-        private const val IN_PER_CM = 0.393701
+        private const val CM_PER_INCH = 2.54
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -61,7 +63,7 @@ class HeightLogBottomSheetFragment(
     private fun setupToggle() {
         binding.heightUnitToggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
-                changeHeightUnit(checkedId == R.id.btn_in)
+                changeHeightUnit(checkedId == R.id.btn_ft)
             }
         }
     }
@@ -72,18 +74,19 @@ class HeightLogBottomSheetFragment(
         val listener = ruler.onValueChangedListener
         ruler.onValueChangedListener = null
 
-        ruler.setMajorTickFactor(10)
-        ruler.labelFormatter = { value -> "${value.toInt()}" }
-
         if (isImperial) {
-            ruler.setMinValue(heightInRange.start)
-            ruler.setMaxValue(heightInRange.endInclusive)
-            ruler.setDecimalPlaces(1)
-            val inches = (currentHeightCm * IN_PER_CM).toFloat()
-            val coercedValue = inches.coerceIn(heightInRange.start, heightInRange.endInclusive)
+            ruler.setMajorTickFactor(12)
+            ruler.labelFormatter = { value -> "${(value / 12).toInt()}'" }
+            ruler.setMinValue(heightInchesRange.start)
+            ruler.setMaxValue(heightInchesRange.endInclusive)
+            ruler.setDecimalPlaces(0)
+            val inches = (currentHeightCm / CM_PER_INCH).toFloat()
+            val coercedValue = inches.coerceIn(heightInchesRange.start, heightInchesRange.endInclusive)
             ruler.setCurrentValue(coercedValue)
             updateHeight(coercedValue)
         } else {
+            ruler.setMajorTickFactor(10)
+            ruler.labelFormatter = { value -> "${value.toInt()}" }
             ruler.setMinValue(heightCmRange.start)
             ruler.setMaxValue(heightCmRange.endInclusive)
             ruler.setDecimalPlaces(0)
@@ -97,14 +100,27 @@ class HeightLogBottomSheetFragment(
     }
 
     private fun updateHeight(value: Float) {
-        currentHeightCm = if (isImperial) (value / IN_PER_CM) else value.toDouble()
-        if (isImperial) {
-            binding.tvHeightValue.text = String.format("%.1f", value)
-            binding.tvUnitLabel.text = "in"
+        // Ensure the stored value is rounded to the nearest whole CM/Inch to avoid decimals
+        currentHeightCm = if (isImperial) {
+            (value * CM_PER_INCH).roundToInt().toDouble()
         } else {
-            binding.tvHeightValue.text = String.format("%.0f", value)
+            value.roundToInt().toDouble()
+        }
+
+        if (isImperial) {
+            binding.tvHeightValue.text = formatInchesToFeetAndInches(value)
+            binding.tvUnitLabel.text = "ft"
+        } else {
+            binding.tvHeightValue.text = value.roundToInt().toString()
             binding.tvUnitLabel.text = "cm"
         }
+    }
+
+    private fun formatInchesToFeetAndInches(totalInches: Float): String {
+        val total = totalInches.roundToInt()
+        val feet = total / 12
+        val inches = total % 12
+        return "$feet'$inches\""
     }
 
     private fun updateButtonTextColors(group: MaterialButtonToggleGroup) {

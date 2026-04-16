@@ -179,7 +179,13 @@ class SecondScreen : BaseBindingFragment<FragmentSecondScreenBinding>(FragmentSe
     }
 
     private fun updateHeight(value: Float) {
-        currentHeightCm = if (isHeightImperial) value * CM_PER_INCH else value.toDouble()
+        // Ensure the stored value is rounded to the nearest whole CM to avoid decimals
+        currentHeightCm = if (isHeightImperial) {
+            (value * CM_PER_INCH).roundToInt().toDouble()
+        } else {
+            value.roundToInt().toDouble()
+        }
+        
         binding.heightValue.text = if (isHeightImperial) formatInchesToFeetAndInches(value) else value.roundToInt().toString()
         binding.heightUnit.text = if (isHeightImperial) "ft" else "cm"
     }
@@ -192,8 +198,9 @@ class SecondScreen : BaseBindingFragment<FragmentSecondScreenBinding>(FragmentSe
     }
 
     private fun formatInchesToFeetAndInches(totalInches: Float): String {
-        val feet = (totalInches / 12).toInt()
-        val inches = (totalInches % 12).roundToInt()
+        val total = totalInches.roundToInt()
+        val feet = total / 12
+        val inches = total % 12
         return "$feet'$inches\""
     }
 
