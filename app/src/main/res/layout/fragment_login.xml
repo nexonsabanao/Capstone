@@ -22,7 +22,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="64dp"
                 android:fontFamily="sans-serif"
-                android:text="CvSU Student Login"
+                android:text="Nutriority"
                 android:textColor="#212121"
                 android:textSize="28sp"
                 android:textStyle="bold"
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:fontFamily="sans-serif-medium"
-                android:text="Login with your university credentials"
+                android:text="Login to your account"
                 android:textColor="#757575"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -95,7 +95,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/cvHealthWarning"
-                tools:text="Invalid CVSU student email"
+                tools:text="Invalid email address"
                 tools:visibility="visible" />
 
             <!-- Email Field -->
@@ -106,7 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="32dp"
                 android:layout_marginTop="24dp"
-                android:hint="CvSU Email"
+                android:hint="Email"
                 app:boxCornerRadiusBottomEnd="16dp"
                 app:boxCornerRadiusBottomStart="16dp"
                 app:boxCornerRadiusTopEnd="16dp"
@@ -238,8 +238,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-black"
-                    android:text="Cavite State University"
-                    android:textColor="@color/green"
+                    android:text="Anytime Fitness"
+                    android:textColor="#6E00B3"
                     android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>

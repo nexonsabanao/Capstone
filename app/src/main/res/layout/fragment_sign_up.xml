@@ -43,7 +43,7 @@
         android:layout_marginTop="8dp"
         android:fontFamily="sans-serif-medium"
         android:gravity="center"
-        android:text="Join the CVSU fitness community"
+        android:text="Join the Nutriority fitness community"
         android:textColor="#757575"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -81,7 +81,7 @@
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="CVSU Email"
+            android:hint="Email"
             app:boxCornerRadiusBottomEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -194,7 +194,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:lineSpacingExtra="4dp"
-            android:text="Click below to register and send a verification link to your CVSU email."
+            android:text="Click below to register and send a verification link to your email."
             android:textColor="#757575"
             android:textSize="14sp" />
 

@@ -23,7 +23,7 @@
     <div class="nav-section">
         <div class="nav-label">Dashboard</div>
         <div class="nav-item active" onclick="switchTab('overview'); toggleSidebar(false)"><i class="fas fa-chart-pie"></i> Overview</div>
-        <div class="nav-item" onclick="switchTab('students'); toggleSidebar(false)"><i class="fas fa-users-viewfinder"></i> Students</div>
+        <div class="nav-item" onclick="switchTab('students'); toggleSidebar(false)"><i class="fas fa-users-viewfinder"></i> Users</div>
     </div>
 
     <div class="nav-section">
@@ -53,7 +53,7 @@
                         <span id="statusText">Connecting...</span>
                     </div>
                 </div>
-                <p id="tabSubtitle" class="tab-subtitle-p">App analytics and student tracking</p>
+                <p id="tabSubtitle" class="tab-subtitle-p">App analytics and user tracking</p>
             </div>
         </div>
         <div class="btn btn-primary" id="timeDisplay"><i class="far fa-clock"></i> 00:00:00</div>
@@ -99,7 +99,7 @@
             <!-- Row 2: Profile & Nutrition -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3><i class="fas fa-bullseye"></i> Student Objectives</h3>
+                    <h3><i class="fas fa-bullseye"></i> User Objectives</h3>
                     <p class="chart-subtitle">Breakdown of primary fitness goals</p>
                 </div>
                 <div class="chart-container">
@@ -121,7 +121,7 @@
             <div class="chart-card">
                 <div class="chart-header">
                     <h3><i class="fas fa-person-running"></i> Activity Distribution</h3>
-                    <p class="chart-subtitle">Student physical activity intensity levels</p>
+                    <p class="chart-subtitle">User physical activity intensity levels</p>
                 </div>
                 <div class="chart-container">
                     <canvas id="activityChart"></canvas>
@@ -131,7 +131,7 @@
             <div class="chart-card">
                 <div class="chart-header">
                     <h3><i class="fas fa-weight-scale"></i> Weight Ranges</h3>
-                    <p class="chart-subtitle">Distribution of student weight categories</p>
+                    <p class="chart-subtitle">Distribution of user weight categories</p>
                 </div>
                 <div class="chart-container">
                     <canvas id="weightDistChart"></canvas>
@@ -142,7 +142,7 @@
             <div class="chart-card wide">
                 <div class="chart-header">
                     <h3><i class="fas fa-ban"></i> Top 10 Dietary Exclusions</h3>
-                    <p class="chart-subtitle">The most frequently avoided ingredients among students</p>
+                    <p class="chart-subtitle">The most frequently avoided ingredients among users</p>
                 </div>
                 <div class="chart-container">
                     <canvas id="exclusionChart"></canvas>
@@ -152,7 +152,7 @@
             <div class="chart-card wide">
                 <div class="chart-header">
                     <h3><i class="fas fa-venus-mars"></i> Demographic Breakdown</h3>
-                    <p class="chart-subtitle">Gender distribution of registered students</p>
+                    <p class="chart-subtitle">Gender distribution of registered users</p>
                 </div>
                 <div class="chart-container">
                     <canvas id="genderChart"></canvas>
@@ -167,19 +167,19 @@
     <div id="students" class="tab-content">
         <div class="data-card">
             <div class="table-header">
-                <h2>Active Students</h2>
+                <h2>Active Users</h2>
                 <button class="btn btn-primary" onclick="openStudentModal()"><i class="fas fa-user-plus"></i> Add Account</button>
             </div>
             <div class="table-controls">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="stSearch" placeholder="Search students..." oninput="handleSearch('st')">
+                    <input type="text" id="stSearch" placeholder="Search users..." oninput="handleSearch('st')">
                 </div>
             </div>
             <div class="table-wrapper">
                 <table>
                     <thead><tr>
-                        <th>Student Profile</th>
+                        <th>User Profile</th>
                         <th>Fitness Goal</th>
                         <th>Activity Level</th>
                         <th>Progress</th>
@@ -338,13 +338,13 @@
 
 <!-- MODALS -->
 <div id="studentModal" class="modal"><div class="modal-content" style="max-width: 700px;">
-    <h2 id="stModalTitle">Student Profile</h2>
+    <h2 id="stModalTitle">User Profile</h2>
     <form id="studentForm">
         <input type="hidden" id="editStId">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="input-group"><label>Full Name</label><input type="text" id="stName"></div>
-            <div class="input-group" id="stIdGroup" style="display:none;"><label>Student UID (Read Only)</label><input type="text" id="stUID" readonly style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:not-allowed;"></div>
-            <div class="input-group" id="stEmailGroup"><label>CVSU Email</label><input type="email" id="stEmail"></div>
+            <div class="input-group" id="stIdGroup" style="display:none;"><label>User UID (Read Only)</label><input type="text" id="stUID" readonly style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:not-allowed;"></div>
+            <div class="input-group" id="stEmailGroup"><label>Email Address</label><input type="email" id="stEmail"></div>
         </div>
         <div class="input-group" id="passGroup" style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; background: #fdfdfd;">
             <label style="margin-bottom: 10px; display: block; font-weight: 700;">Account Security</label>
@@ -353,7 +353,7 @@
                 <input type="password" id="stPass">
             </div>
             <div id="editAccountPass" style="display:none;">
-                <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">To update the password, send a reset link to the student's email.</p>
+                <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">To update the password, send a reset link to the user's email.</p>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="sendResetEmail()"><i class="fas fa-envelope"></i> Send Password Reset Link</button>
             </div>
         </div>

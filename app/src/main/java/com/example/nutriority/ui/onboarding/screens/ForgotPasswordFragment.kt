@@ -46,8 +46,8 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
                 return@setOnClickListener
             }
 
-            if (!isValidEmail(email)) {
-                showError("Please enter a valid CVSU student email (xxxx@cvsu.edu.ph)")
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                showError("Please enter a valid email address")
                 return@setOnClickListener
             }
 
@@ -65,7 +65,6 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
     }
 
     private fun resetUI() {
-        // Use 'view' check instead of private '_binding'
         if (view != null) {
             binding.layoutStepEmail.visibility = View.VISIBLE
             binding.layoutStepSuccess.visibility = View.GONE
@@ -73,7 +72,7 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
             binding.etEmail.text?.clear()
             binding.btnSendCodeInitial.isEnabled = true
             binding.btnSendCodeInitial.text = "SEND RESET LINK"
-            binding.tvSubtitle.text = "Enter your student email address and we'll send you a link to reset your password."
+            binding.tvSubtitle.text = "Enter your email address and we'll send you a link to reset your password."
         }
     }
 
@@ -121,7 +120,6 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
 
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
-                // Use 'view' check instead of private '_binding'
                 if (context == null || view == null) return@addOnCompleteListener
                 
                 binding.btnSendCodeInitial.isEnabled = true
@@ -141,9 +139,5 @@ class ForgotPasswordFragment : BaseBindingFragment<FragmentForgotPasswordBinding
     private fun showError(message: String) {
         binding.tvError.text = message
         binding.tvError.isVisible = true
-    }
-
-    private fun isValidEmail(email: String): Boolean {
-        return email.endsWith("@cvsu.edu.ph")
     }
 }

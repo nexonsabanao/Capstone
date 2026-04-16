@@ -48,7 +48,7 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
             when {
                 email.isBlank() -> showError("Email is required")
                 password.isBlank() -> showError("Password is required")
-                !isValidStudentEmail(email) -> showError("Access restricted: Use student email (xxxx@cvsu.edu.ph)")
+                !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> showError("Please enter a valid email address")
                 else -> performFirebaseLogin(email, password)
             }
         }
@@ -88,7 +88,7 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
                 if (!firebaseUser.isEmailVerified) {
                     auth.signOut()
                     showAuthOverlay(false)
-                    showError("Please verify your email before logging in. Check your CVSU inbox.")
+                    showError("Please verify your email before logging in. Check your inbox.")
                     return@launch
                 }
 
@@ -187,6 +187,4 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
         binding.tvError.text = msg
         binding.tvError.isVisible = true
     }
-
-    private fun isValidStudentEmail(email: String): Boolean = email.endsWith("@cvsu.edu.ph")
 }

@@ -9,7 +9,7 @@ window.openStudentModal = (id=null) => {
     if (!form) return;
     form.reset(); 
     document.getElementById('editStId').value = id || "";
-    document.getElementById('stModalTitle').innerText = id ? "Edit Student Profile" : "Add Student Account";
+    document.getElementById('stModalTitle').innerText = id ? "Edit User Profile" : "Add User Account";
     
     const newPassGroup = document.getElementById('newAccountPass');
     const editPassGroup = document.getElementById('editAccountPass');
@@ -70,7 +70,7 @@ window.sendResetEmail = async () => {
     if (confirm(`Send a password reset link to ${email}?`)) {
         try {
             await sendPasswordResetEmail(auth, email);
-            alert("Success! A password reset link has been sent to the student's CVSU inbox.");
+            alert("Success! A password reset link has been sent to the user's inbox.");
         } catch (e) {
             alert("Error: " + e.message);
         }
@@ -103,10 +103,6 @@ document.getElementById('studentForm').onsubmit = async (e) => {
             const email = document.getElementById('stEmail').value.toLowerCase().trim();
             const password = document.getElementById('stPass').value;
 
-            if (!email.endsWith("@cvsu.edu.ph")) {
-                alert("Invalid: Use CVSU student email (xxxx@cvsu.edu.ph)");
-                return;
-            }
             if (password.length < 8) {
                 alert("Password must be at least 8 characters");
                 return;
@@ -132,7 +128,7 @@ document.getElementById('studentForm').onsubmit = async (e) => {
         window.closeModal(); 
         if (window.updateStats) window.updateStats(); 
     } catch (error) {
-        console.error("Error saving student:", error);
+        console.error("Error saving user:", error);
         alert("Error: " + error.message);
     }
 };

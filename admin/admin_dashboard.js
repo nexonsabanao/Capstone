@@ -131,7 +131,7 @@ function renderCharts(users) {
             data:{
                 labels:['<50kg','50-70kg','70-90kg','>90kg'],
                 datasets:[{
-                    label:'Students',
+                    label:'Users',
                     data:weights,
                     backgroundColor:'rgba(0, 167, 139, 0.7)',
                     hoverBackgroundColor: '#00A78B',
@@ -202,7 +202,7 @@ function renderCharts(users) {
             data:{
                 labels: Array.from({length: 29}, (_, i) => 'D' + i),
                 datasets:[{
-                    label:'Students at Stage',
+                    label:'Users at Stage',
                     data:stages,
                     borderColor:'#00A78B',
                     borderWidth: 3,
@@ -261,7 +261,7 @@ function renderCharts(users) {
             data: {
                 labels: Object.keys(activityStats),
                 datasets: [{
-                    label: 'Students',
+                    label: 'Users',
                     data: Object.values(activityStats),
                     backgroundColor: '#3b82f6',
                     borderRadius: 8,
@@ -326,7 +326,7 @@ function renderCharts(users) {
             data: {
                 labels: sortedExclusions.length > 0 ? sortedExclusions.map(e => `${foodIcons[e[0]] || '🚫'} ${e[0]}`) : ['No exclusions logged'],
                 datasets: [{
-                    label: 'Students Avoiding',
+                    label: 'Users Avoiding',
                     data: sortedExclusions.length > 0 ? sortedExclusions.map(e => e[1]) : [0],
                     backgroundColor: '#f43f5e',
                     borderRadius: 8,
@@ -364,7 +364,7 @@ function renderCharts(users) {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Students',
+                    label: 'Users',
                     data: data,
                     backgroundColor: colors,
                     borderRadius: 10,
@@ -378,7 +378,7 @@ function renderCharts(users) {
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
-                            label: (context) => ` ${context.raw} Students`
+                            label: (context) => ` ${context.raw} Users`
                         }
                     }
                 },
@@ -431,7 +431,7 @@ function renderStudents() {
                <button class="btn btn-danger btn-sm" onclick="deleteRecord('users','${u.fid}')">Delete</button>`;
 
         b.innerHTML += `<tr ${rowStyle}>
-            <td data-label="Student">${nameDisplay}<br><small>${emailFallback}</small></td>
+            <td data-label="User">${nameDisplay}<br><small>${emailFallback}</small></td>
             <td data-label="Goal"><span class="badge" style="background:#f1f5f9">${u.goal || 'Not set'}</span></td>
             <td data-label="Activity">${u.activityLevel || 'Not set'}</td>
             <td data-label="Progress" style="color:var(--primary); font-weight:800">Day ${u.lastCompletedWorkoutDay||0}</td>
@@ -623,7 +623,7 @@ function switchTab(t) {
     const target = document.getElementById(t);
     if (target) target.classList.add('active');
 
-    const mapping = { overview: 'Overview', students: 'Students', exercises: 'Exercises', meals: 'Meal Library', articleLib: 'Article Hub', syncEng: 'Sync Center' };
+    const mapping = { overview: 'Overview', students: 'Users', exercises: 'Exercises', meals: 'Meal Library', articleLib: 'Article Hub', syncEng: 'Sync Center' };
     Array.from(document.querySelectorAll('.nav-item')).find(x => x.textContent.trim().includes(mapping[t]))?.classList.add('active');
 
     const title = document.getElementById('tabTitle');

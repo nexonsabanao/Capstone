@@ -17,6 +17,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
@@ -158,7 +159,7 @@ class MealViewModel @Inject constructor(
                     // Check if this specific meal on this specific day has been logged
                     // We check if any log entry matches the mealId and the targetDate
                     val isLogged = logs.any { log ->
-                        val logDate = LocalDate.ofInstant(java.time.Instant.ofEpochMilli(log.date), ZoneId.systemDefault())
+                        val logDate = Instant.ofEpochMilli(log.date).atZone(ZoneId.systemDefault()).toLocalDate()
                         log.mealId == meal.id && logDate == targetDate
                     }
                     

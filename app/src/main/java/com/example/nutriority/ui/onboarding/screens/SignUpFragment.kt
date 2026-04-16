@@ -95,8 +95,8 @@ class SignUpFragment : Fragment() {
         val confirmPass = binding.etConfirmPassword.text.toString().trim()
 
         when {
-            email.isBlank() -> showError("Please enter your CVSU email")
-            !isValidStudentEmail(email) -> showError("Invalid: Use CVSU student email (xxxx@cvsu.edu.ph)")
+            email.isBlank() -> showError("Please enter your email")
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> showError("Please enter a valid email address")
             password.length < 8 -> showError("Password must be at least 8 characters")
             !password.any { it.isUpperCase() } -> showError("Password must contain an upper case character")
             !password.any { it.isDigit() } -> showError("Password must contain a numeric character")
@@ -149,13 +149,11 @@ class SignUpFragment : Fragment() {
                         if (_binding == null) return@addOnCompleteListener
                         
                         if (verifyTask.isSuccessful) {
-                            // Account creation in Firestore removed. 
-                            // It will be created in LoginFragment after email verification.
                             binding.inputContainer.isVisible = false
                             binding.layoutVerification.isVisible = true
                             binding.tvTitle.text = "Verify Email"
                             binding.tvSubtitle.isVisible = false
-                            binding.tvVerifySubtitle.text = "Welcome to Nutriority! A verification link has been sent to $email.\n\nPlease check your CVSU inbox (and spam folder) to verify your account."
+                            binding.tvVerifySubtitle.text = "Welcome to Nutriority! A verification link has been sent to $email.\n\nPlease check your inbox (and spam folder) to verify your account."
                             
                             binding.btnSendCode.isVisible = false 
                             binding.btnVerify.isVisible = true
@@ -171,7 +169,6 @@ class SignUpFragment : Fragment() {
                 } else {
                     val exception = task.exception
                     if (exception is FirebaseAuthUserCollisionException) {
-                        // Double check if this collision is with a deleted account
                         viewLifecycleOwner.lifecycleScope.launch {
                             val query = FirebaseFirestore.getInstance()
                                 .collection("users")
@@ -201,8 +198,6 @@ class SignUpFragment : Fragment() {
         binding.tvError.text = message
         binding.tvError.isVisible = true
     }
-
-    private fun isValidStudentEmail(email: String): Boolean = email.lowercase().trim().endsWith("@cvsu.edu.ph")
 
     override fun onDestroyView() {
         super.onDestroyView()
