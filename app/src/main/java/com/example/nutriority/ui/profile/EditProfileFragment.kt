@@ -120,23 +120,11 @@ class EditProfileFragment : Fragment() {
         }
 
         binding.rowWeight.root.setOnClickListener { 
-            showEditBottomSheet("Weight", "Enter your weight in kg", currentUser?.weightKg?.toString() ?: "", InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL) { newVal ->
-                val newWeight = newVal.toDoubleOrNull() ?: 0.0
-                if (newWeight != currentUser?.weightKg) {
-                    handleFieldUpdateWithPlanChoice("Weight") { it.copy(weightKg = newWeight) }
-                    // CRITICAL: Log weight so the graph updates immediately
-                    profileViewModel.logWeight(newWeight, System.currentTimeMillis())
-                }
-            }
+            showWeightLogBottomSheet()
         }
 
         binding.rowHeight.root.setOnClickListener { 
-            showEditBottomSheet("Height", "Enter your height in cm", currentUser?.heightCm?.toString() ?: "", InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL) { newVal ->
-                val newHeight = newVal.toDoubleOrNull() ?: 0.0
-                if (newHeight != currentUser?.heightCm) {
-                    handleFieldUpdateWithPlanChoice("Height") { it.copy(heightCm = newHeight) }
-                }
-            }
+            showHeightLogBottomSheet()
         }
 
         binding.rowActivity.root.setOnClickListener { 
@@ -178,6 +166,28 @@ class EditProfileFragment : Fragment() {
 
         binding.btnLogout.setOnClickListener { showLogoutConfirmation() }
         binding.btnDeleteAccount.setOnClickListener { showDeleteAccountConfirmation() }
+    }
+
+    private fun showWeightLogBottomSheet() {
+        val initialWeight = currentUser?.weightKg ?: 60.0
+        // Fix: Set showDatePicker = false when editing from Profile settings
+        val bottomSheet = WeightLogBottomSheetFragment(initialWeight, showDatePicker = false) { weight, date ->
+            if (weight != currentUser?.weightKg) {
+                handleFieldUpdateWithPlanChoice("Weight") { it.copy(weightKg = weight) }
+                profileViewModel.logWeight(weight, date)
+            }
+        }
+        bottomSheet.show(childFragmentManager, "WeightLogBottomSheet")
+    }
+
+    private fun showHeightLogBottomSheet() {
+        val initialHeight = currentUser?.heightCm ?: 170.0
+        val bottomSheet = HeightLogBottomSheetFragment(initialHeight) { height ->
+            if (height != currentUser?.heightCm) {
+                handleFieldUpdateWithPlanChoice("Height") { it.copy(heightCm = height) }
+            }
+        }
+        bottomSheet.show(childFragmentManager, "HeightLogBottomSheet")
     }
 
     private fun isPlanReady(user: User?): Boolean {
@@ -338,7 +348,6 @@ class EditProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             userViewModel.updateOnboardingDataSuspend(action)
             if (restartPlan) {
-                // Fix: Restart BOTH workout and meal plans when profile is updated
                 userViewModel.restartAllPlans()
                 Toast.makeText(requireContext(), "Profile updated and plans refreshed", Toast.LENGTH_SHORT).show()
             } else Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()

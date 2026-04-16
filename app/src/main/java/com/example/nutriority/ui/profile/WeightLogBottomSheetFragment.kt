@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.example.nutriority.R
 import com.example.nutriority.databinding.LayoutLogWeightBottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -16,6 +17,7 @@ import java.util.*
 
 class WeightLogBottomSheetFragment(
     private val initialWeightKg: Double,
+    private val showDatePicker: Boolean = true,
     private val onWeightLogged: (Double, Long) -> Unit
 ) : BottomSheetDialogFragment() {
 
@@ -54,6 +56,7 @@ class WeightLogBottomSheetFragment(
 
     private fun setupInitialState() {
         updateDateDisplay()
+        binding.btnDatePicker.isVisible = showDatePicker
         binding.weightUnitToggle.check(R.id.btn_kg)
         changeWeightUnit(false)
     }
@@ -100,7 +103,6 @@ class WeightLogBottomSheetFragment(
         val listener = ruler.onValueChangedListener
         ruler.onValueChangedListener = null
 
-        // With 1 decimal place, a factor of 10 means labels every 1 unit (1.0, 2.0, etc.)
         ruler.setMajorTickFactor(10)
         ruler.labelFormatter = { value -> "${value.toInt()}" }
 

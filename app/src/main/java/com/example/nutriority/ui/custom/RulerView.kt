@@ -205,6 +205,14 @@ class RulerView @JvmOverloads constructor(
         }
     }
 
+    fun setDecimalPlaces(places: Int) {
+        val oldValue = currentValue.toFloat() / multiplier
+        this.decimalPlaces = places
+        // Re-scale internal values after multiplier changed
+        currentValue = (oldValue * multiplier).roundToInt()
+        invalidate()
+    }
+
     fun setMajorTickFactor(factor: Int) {
         this.majorTickFactor = factor
         invalidate()
