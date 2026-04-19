@@ -46,18 +46,18 @@
 -dontwarn com.bumptech.glide.**
 
 # 6. Firebase & Firestore
--keep class com.google.firebase.** { *; }
+# Firebase SDKs include their own rules. We only need to protect our models.
 -dontwarn com.google.firebase.**
-# Crucial for Firestore to find the empty constructor for your models
 -keepclassmembers class com.example.nutriority.data.model.** {
     public <init>(...);
 }
 
 # 7. MPAndroidChart
--keep class com.github.mikephil.charting.** { *; }
+# Refined to keep only public APIs to fix broad-rule warning
+-keep public class com.github.mikephil.charting.** { public *; }
 -dontwarn com.github.mikephil.charting.**
 
-# 8. Konfetti (Missing in your original)
+# 8. Konfetti
 -keep class nl.dionsegijn.konfetti.** { *; }
 
 # 9. UI Libraries
@@ -69,8 +69,9 @@
 -dontwarn com.scottyab.rootbeer.**
 
 # 11. ViewBinding & Navigation
+# Navigation and ViewBinding rules are largely handled by the Android Gradle Plugin
 -keep class com.example.nutriority.databinding.** { *; }
--keep class androidx.navigation.** { *; }
+-dontwarn androidx.navigation.**
 
 # 12. Kotlin Coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}

@@ -327,7 +327,29 @@ class WorkoutDetailFragment : BaseBindingFragment<FragmentWorkoutDetailBinding>(
                     )
                 }
             },
-            onListUpdated = { list -> viewModel.updateWorkout(viewModel.workout.value!!.workout, list.map { it.assignment }) },
+            onListUpdated = { list -> 
+                // BUG FIX: Ensure we merge with hidden exercises (Warmup/Cooldown) to prevent accidental deletion
+                val currentWorkout = viewModel.workout.value ?: return@ExerciseAdapter
+                val updatedAssignments = list.map { it.assignment }
+                
+                val allExisting = currentWorkout.exerciseAssignments.map { it.assignment }
+                val hiddenAssignments = allExisting.filter { existing ->
+                    updatedAssignments.none { it.exerciseId == existing.exerciseId && it.category == existing.category }
+                }
+                
+                // RECALCULATE ORDERS to prevent "jumping" exercises
+                // We strictly separate order space by category: Warmup (0-99), Exercise (100-199), Cooldown (200+)
+                val combined = (updatedAssignments + hiddenAssignments).sortedWith(compareBy(
+                    { when(it.category.lowercase()) { "warmup" -> 0; "exercise" -> 1; else -> 2 } },
+                    { it.order }
+                ))
+                
+                val finalAssignments = combined.mapIndexed { index, assignment ->
+                    assignment.copy(order = index)
+                }
+                
+                viewModel.updateWorkout(currentWorkout.workout, finalAssignments)
+            },
             onDragStart = { vh -> itemTouchHelper.startDrag(vh) }
         )
         binding.exercisesRecyclerView.apply {

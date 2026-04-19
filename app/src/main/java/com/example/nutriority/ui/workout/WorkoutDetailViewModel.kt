@@ -115,20 +115,37 @@ class WorkoutDetailViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .collectLatest { detail ->
                     if (detail != null) {
-                        val safeDuration = WorkoutUtil.calculateTotalDuration(detail.exerciseAssignments, detail.workout.includeWarmupCooldown)
-                        if (detail.workout.duration != safeDuration) {
-                            detail.workout.duration = safeDuration
-                            launch { workoutRepository.updateWorkout(detail.workout) }
-                        }
-                    }
+                        // FIX: Ensure assignments are always sorted by category and order for UI stability
+                        val sortedAssignments = detail.exerciseAssignments.sortedWith(compareBy(
+                            { when(it.assignment.category.lowercase()) { "warmup" -> 0; "exercise" -> 1; else -> 2 } },
+                            { it.assignment.order }
+                        ))
+                        val sortedDetail = detail.copy(exerciseAssignments = sortedAssignments)
 
-                    _workout.value = detail
-                    
-                    if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
-                        _activeWorkoutDetail.value = detail
+                        val safeDuration = WorkoutUtil.calculateTotalDuration(sortedAssignments, sortedDetail.workout.includeWarmupCooldown)
+                        if (sortedDetail.workout.duration != safeDuration) {
+                            sortedDetail.workout.duration = safeDuration
+                            launch { workoutRepository.updateWorkout(sortedDetail.workout) }
+                        }
+                        
+                        _workout.value = sortedDetail
+                        
+                        if (_isWorkoutActive.value && _activeWorkoutId.value == workoutId) {
+                            _activeWorkoutDetail.value = sortedDetail
+                        }
+                        
+                        // FIX: Accurate completion count based on preference
+                        val include = sortedDetail.workout.includeWarmupCooldown
+                        val filtered = if (include) {
+                            sortedAssignments
+                        } else {
+                            sortedAssignments.filter { it.assignment.category.equals("Exercise", true) }
+                        }
+                        _completedExercisesCount.value = filtered.count { it.assignment.isCompleted }
+                    } else {
+                        _workout.value = null
+                        _completedExercisesCount.value = 0
                     }
-                    
-                    _completedExercisesCount.value = detail?.exerciseAssignments?.count { it.assignment.isCompleted } ?: 0
                     _isLoading.value = false
                 }
         }
@@ -250,20 +267,35 @@ class WorkoutDetailViewModel @Inject constructor(
     }
 
     fun finishWorkoutWithWeight(weightKg: Double?) {
-        val current = _activeWorkoutDetail.value ?: _workout.value ?: return
-        val timeSecs = _elapsedTimeSeconds.value
-        val doneCount = _completedExercisesCount.value
-        val totalCount = current.exerciseAssignments.size
-        val dayIdx = _activeDayIndex.value
-        
         viewModelScope.launch {
+            // BUG FIX: Fetch the ABSOLUTE LATEST state from DB to ensure last exercise completion is caught accurately
+            val currentId = _activeWorkoutId.value
+            if (currentId == -1) return@launch
+            
+            // Short delay to ensure any pending DB writes from updateExerciseCompletion are committed
+            delay(300)
+            
+            val latestDetail = workoutRepository.getWorkoutWithExercises(currentId).first() ?: return@launch
+            val include = latestDetail.workout.includeWarmupCooldown
+            
+            val relevantAssignments = if (include) {
+                latestDetail.exerciseAssignments
+            } else {
+                latestDetail.exerciseAssignments.filter { it.assignment.category.equals("Exercise", true) }
+            }
+            
+            val doneCount = relevantAssignments.count { it.assignment.isCompleted }
+            val totalCount = relevantAssignments.size
+            val timeSecs = _elapsedTimeSeconds.value
+            val dayIdx = _activeDayIndex.value
+            
             val user = userRepository.getInitialUser()
             // Use provided weight, then user's saved weight, then fallback to 70kg
             val finalWeight = weightKg ?: user?.weightKg ?: 70.0
             
             // Formula: Calories = (MET * 3.5 * weightKg / 200) * durationInMinutes
             val durationMinutes = timeSecs / 60.0
-            val cals = (current.workout.metValue * 3.5 * finalWeight / 200.0 * durationMinutes).toInt()
+            val cals = (latestDetail.workout.metValue * 3.5 * finalWeight / 200.0 * durationMinutes).toInt()
 
             // Update user weight if a weight was provided
             if (weightKg != null && user != null) {
@@ -277,7 +309,7 @@ class WorkoutDetailViewModel @Inject constructor(
                 val logCal = Calendar.getInstance().apply { timeInMillis = it.date }
                 logCal.get(Calendar.YEAR) == targetCal.get(Calendar.YEAR) &&
                 logCal.get(Calendar.DAY_OF_YEAR) == targetCal.get(Calendar.DAY_OF_YEAR) &&
-                it.workoutId == current.workout.id
+                it.workoutId == latestDetail.workout.id
             }
 
             val sessionLog = if (existingTodayLog != null) {
@@ -291,14 +323,14 @@ class WorkoutDetailViewModel @Inject constructor(
                 )
             } else {
                 WorkoutSessionLog(
-                    workoutId = current.workout.id,
-                    workoutName = current.workout.name,
+                    workoutId = latestDetail.workout.id,
+                    workoutName = latestDetail.workout.name,
                     date = now,
                     exercisesDone = doneCount,
                     totalExercises = totalCount,
                     durationSeconds = timeSecs,
                     caloriesBurned = cals,
-                    difficulty = current.workout.difficulty,
+                    difficulty = latestDetail.workout.difficulty,
                     weightKg = finalWeight
                 )
             }
@@ -312,12 +344,12 @@ class WorkoutDetailViewModel @Inject constructor(
             }
             
             _sessionSummary.value = SessionSummary(
-                workoutName = current.workout.name,
+                workoutName = latestDetail.workout.name,
                 exercisesDone = doneCount,
                 totalExercises = totalCount,
                 timeSeconds = timeSecs,
                 caloriesBurned = cals,
-                difficulty = current.workout.difficulty
+                difficulty = latestDetail.workout.difficulty
             )
 
             stopWorkout(save = true)
@@ -433,16 +465,25 @@ class WorkoutDetailViewModel @Inject constructor(
     }
 
     fun updateExerciseCompletion(workoutId: Int, exerciseId: String, category: String, completed: Boolean) {
-        // BUG FIX: Allow completion update even if it's the active workout session
-        // This ensures the local database is updated immediately when a set is finished.
         viewModelScope.launch {
             workoutRepository.updateExerciseCompletion(workoutId, exerciseId, category, completed)
         }
     }
 
+    suspend fun updateExerciseCompletionSuspend(workoutId: Int, exerciseId: String, category: String, completed: Boolean) {
+        // BUG FIX: Suspend version ensures the caller can await the DB write
+        workoutRepository.updateExerciseCompletion(workoutId, exerciseId, category, completed)
+    }
+
     fun updateWorkout(workout: Workout, workoutExercises: List<WorkoutExercise>) {
         viewModelScope.launch {
-            workoutRepository.updateWorkoutWithExercises(workout, workoutExercises)
+            // BUG FIX: RE-INDEX TO ENSURE STABILITY and prevent jumping
+            val sortedExercises = workoutExercises.sortedWith(compareBy(
+                { when(it.category.lowercase()) { "warmup" -> 0; "exercise" -> 1; else -> 2 } },
+                { it.order }
+            )).mapIndexed { index, ex -> ex.copy(order = index) }
+
+            workoutRepository.updateWorkoutWithExercises(workout, sortedExercises)
             
             val workoutWithDetails = workoutRepository.getWorkoutWithExercises(workout.id).first()
             if (workoutWithDetails != null) {
