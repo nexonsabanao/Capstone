@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -26,6 +27,7 @@ class MealRepository(
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     val allMeals: Flow<List<Meal>> = mealDao.getAllMeals().map { meals ->
         meals.map {
@@ -129,27 +131,40 @@ class MealRepository(
     }
 
     private suspend fun insertDailyLog(log: DailyMealLog) {
+        // BUG FIX: Offline-first approach. Insert into local DB immediately so UI updates instantly.
+        dailyMealLogDao.insertLog(log)
+
+        // Then sync to Firestore in the background without blocking the caller.
         auth.currentUser?.uid?.let { uid ->
-            try {
-                val logMap = hashMapOf(
-                    "mealId" to log.mealId,
-                    "name" to log.name,
-                    "calories" to log.calories,
-                    "protein" to log.protein,
-                    "carbs" to log.carbs,
-                    "fats" to log.fats,
-                    "mealTime" to log.mealTime,
-                    "date" to log.date,
-                    "imageName" to log.imageName
-                )
-                val docRef = db.collection("users").document(uid).collection("daily_meal_logs").add(logMap).await()
-                // Store with Firestore ID
-                dailyMealLogDao.insertLog(log.copy(firestoreId = docRef.id))
-            } catch (e: Exception) {
-                Log.e("Sync", "Failed to sync meal log", e)
-                dailyMealLogDao.insertLog(log)
+            repositoryScope.launch {
+                try {
+                    val logMap = hashMapOf(
+                        "mealId" to log.mealId,
+                        "name" to log.name,
+                        "calories" to log.calories,
+                        "protein" to log.protein,
+                        "carbs" to log.carbs,
+                        "fats" to log.fats,
+                        "mealTime" to log.mealTime,
+                        "date" to log.date,
+                        "imageName" to log.imageName
+                    )
+                    val docRef = db.collection("users").document(uid).collection("daily_meal_logs").add(logMap).await()
+                    
+                    // After successful cloud sync, update the local entry with the Firestore ID
+                    // We query by date and name to find the newly inserted record
+                    // (Assuming no two meals with exact same name and timestamp are logged simultaneously)
+                    val allLogs = dailyMealLogDao.getAllLogs().first()
+                    val matchingLog = allLogs.find { it.name == log.name && it.date == log.date && it.firestoreId == null }
+                    
+                    matchingLog?.let {
+                        dailyMealLogDao.insertLog(it.copy(firestoreId = docRef.id))
+                    }
+                } catch (e: Exception) {
+                    Log.e("Sync", "Failed to sync meal log background", e)
+                }
             }
-        } ?: dailyMealLogDao.insertLog(log)
+        }
     }
 
     fun getLogsForToday(): Flow<List<DailyMealLog>> {
