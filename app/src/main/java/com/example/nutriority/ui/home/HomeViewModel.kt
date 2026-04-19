@@ -48,6 +48,7 @@ class HomeViewModel @Inject constructor(
         mealRepository.startRealtimeMealSync(viewModelScope)
         articleRepository.startRealtimeArticleSync(viewModelScope)
         workoutRepository.startRealtimeExerciseSync(viewModelScope)
+        workoutRepository.startRealtimeCustomWorkoutSync(viewModelScope)
         userRepository.startRealtimeUserSync(viewModelScope)
 
         viewModelScope.launch {

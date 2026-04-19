@@ -18,14 +18,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WorkoutDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertWorkout(workout: Workout): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertExercise(exercise: Exercise)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertExercise(exercise: Exercise): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllExercises(exercises: List<Exercise>)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllExercises(exercises: List<Exercise>): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWorkoutExercise(workoutExercise: WorkoutExercise)
@@ -99,16 +99,33 @@ interface WorkoutDao {
     @Query("DELETE FROM workouts")
     suspend fun deleteAllWorkouts()
 
+    /**
+     * Safer way to sync exercises without triggering CASCADE DELETE on workout assignments.
+     */
+    @Transaction
+    suspend fun upsertExercises(exercises: List<Exercise>) {
+        exercises.forEach { exercise ->
+            val id = insertExercise(exercise)
+            if (id == -1L) {
+                updateExercise(exercise)
+            }
+        }
+    }
+
     @Transaction
     suspend fun updateWorkoutWithExercises(workout: Workout, workoutExercises: List<WorkoutExercise>) {
-        insertWorkout(workout)
+        if (insertWorkout(workout) == -1L) {
+            updateWorkout(workout)
+        }
         deleteWorkoutExercises(workout.id)
         insertAllWorkoutExercises(workoutExercises)
     }
 
     @Transaction
     suspend fun updateWorkoutsWithExercises(workouts: List<Workout>, workoutExercises: List<WorkoutExercise>) {
-        workouts.forEach { insertWorkout(it) }
+        workouts.forEach { 
+            if (insertWorkout(it) == -1L) updateWorkout(it) 
+        }
         val ids = workouts.map { it.id }
         deleteWorkoutExercisesList(ids)
         insertAllWorkoutExercises(workoutExercises)
