@@ -282,11 +282,15 @@
                     android:layout_marginTop="8dp"
                     android:orientation="horizontal"
                     app:layout_constraintTop_toBottomOf="@id/tvBmiValue">
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="15" android:background="#4A90E2" android:layout_marginEnd="2dp"/>
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="3" android:background="#50E3C2" android:layout_marginEnd="2dp"/>
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="7" android:background="@color/green" android:layout_marginEnd="2dp"/>
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="5" android:background="#F5A623" android:layout_marginEnd="2dp"/>
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="10" android:background="#D0021B" />
+                    <!-- Linear mapping logic: 15 to 40 BMI range (total 25 units) -->
+                    <!-- Underweight: 15.0 - 18.5 (width 3.5) -->
+                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="3.5" android:background="#4A90E2" android:layout_marginEnd="2dp"/>
+                    <!-- Normal: 18.5 - 25.0 (width 6.5) -->
+                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="6.5" android:background="@color/green" android:layout_marginEnd="2dp"/>
+                    <!-- Overweight: 25.0 - 30.0 (width 5.0) -->
+                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="5.0" android:background="#F5A623" android:layout_marginEnd="2dp"/>
+                    <!-- Obese: 30.0 - 40.0 (width 10.0) -->
+                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="10.0" android:background="#D0021B" />
                 </LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
