@@ -121,7 +121,7 @@ document.getElementById('studentForm').onsubmit = async (e) => {
             const u = window.cacheSt.find(x => x.fid === fid);
             if (u && u.email) userData.email = u.email;
             
-            await setDoc(doc(db, "users", fid), userData, { merge: true });
+            await setDoc(doc(db, "fid", fid), userData, { merge: true });
             alert("Profile updated!");
         }
         
@@ -133,21 +133,26 @@ document.getElementById('studentForm').onsubmit = async (e) => {
     }
 };
 
-window.deleteRecord = async (coll, id) => {
-    let msg = "Delete this record?";
-    if (coll === 'users') {
-        msg = "Are you sure? This will disable account access. \n\nNote: You should also manually delete the record from Firebase Console (Authentication).";
+window.deleteRecord = async (coll, id, hardDelete = false) => {
+    let msg = hardDelete ? "PERMANENTLY DELETE this user from Firestore?" : "Delete this record?";
+    
+    if (coll === 'users' && !hardDelete) {
+        msg = "Are you sure? This will set user status to 'deleted' and force a logout on their app. \n\nNote: You must still manually delete them from 'Authentication' tab in Firebase Console to remove the email login.";
     }
 
     if(confirm(msg)) { 
         try {
             if (coll === 'users') {
-                // Find user in cache to get their email
-                const u = window.cacheSt.find(x => x.fid === id);
-                const updateData = { status: "deleted" };
-                if (u && u.email) updateData.email = u.email; // Ensure email is present for block-checks
-                
-                await setDoc(doc(db, coll, id), updateData, { merge: true });
+                if (hardDelete) {
+                    await deleteDoc(doc(db, coll, id));
+                    alert("User document removed from Firestore.");
+                } else {
+                    const u = window.cacheSt.find(x => x.fid === id);
+                    const updateData = { status: "deleted" };
+                    if (u && u.email) updateData.email = u.email;
+                    await setDoc(doc(db, coll, id), updateData, { merge: true });
+                    alert("User access revoked.");
+                }
             } else {
                 await deleteDoc(doc(db, coll, id));
             }

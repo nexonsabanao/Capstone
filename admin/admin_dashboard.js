@@ -427,7 +427,7 @@ function renderStudents() {
 
         const actionButtons = isDeleted
             ? `<button class="btn btn-secondary btn-sm" onclick="showDeletedAccountInfo('${u.fid}')">Details</button>`
-            : `<button class="btn btn-edit btn-sm" onclick="openStudentModal('${u.fid}')">Edit</button>
+            : `<button class="btn btn-secondary btn-sm" onclick="openStudentModal('${u.fid}')">Edit</button>
                <button class="btn btn-danger btn-sm" onclick="deleteRecord('users','${u.fid}')">Delete</button>`;
 
         b.innerHTML += `<tr ${rowStyle}>
