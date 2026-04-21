@@ -50,27 +50,27 @@ class WorkoutGenerator @Inject constructor() {
         var order = 0
 
         // 2. Add Warmup (Smart Scaling)
-        val numWarmup = if (difficulty == "Advanced") 2 else 2
+        val numWarmup = 2
         pickExercises(warmupPool, numWarmup, usedExerciseIds, random).forEach { ex ->
-            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "warmup", order++, difficulty), ex))
+            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "warmup", order++, difficulty, random), ex))
         }
 
         // 3. Add Main Exercises (Genius Scaling)
         val numMain = when (difficulty) {
-            "Beginner" -> random.nextInt(3, 4)
-            "Intermediate" -> random.nextInt(3, 5)
-            "Advanced" -> random.nextInt(3, 6)
-            else -> 4
+            "Beginner" -> random.nextInt(4, 6)
+            "Intermediate" -> random.nextInt(5, 7)
+            "Advanced" -> random.nextInt(6, 8)
+            else -> 5
         }
         
         pickExercises(mainPool, numMain, usedExerciseIds, random).forEach { ex ->
-            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "Exercise", order++, difficulty), ex))
+            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "Exercise", order++, difficulty, random), ex))
         }
 
         // 4. Add Cooldown (Smart Scaling)
-        val numCooldown = if (difficulty == "Advanced") 1 else 2
+        val numCooldown = random.nextInt(1, 3)
         pickExercises(cooldownPool, numCooldown, usedExerciseIds, random).forEach { ex ->
-            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "cooldown", order++, difficulty), ex))
+            assignments.add(WorkoutExerciseWithDetail(createAssignment(id, ex, "cooldown", order++, difficulty, random), ex))
         }
 
         // 5. Update Duration
@@ -97,38 +97,38 @@ class WorkoutGenerator @Inject constructor() {
         return (unused + used).take(count)
     }
 
-    private fun createAssignment(workoutId: Int, ex: Exercise, category: String, order: Int, difficulty: String): WorkoutExercise {
+    private fun createAssignment(workoutId: Int, ex: Exercise, category: String, order: Int, difficulty: String, random: Random): WorkoutExercise {
         val isMain = category == "Exercise"
         
+        // BUG FIX: Inject variation into sets/reps based on difficulty to avoid identical daily stats
         val sets = when {
             !isMain -> 1
-            difficulty == "Beginner" -> 2
-            difficulty == "Intermediate" -> 3
-            difficulty == "Advanced" -> 4
+            difficulty == "Beginner" -> random.nextInt(2, 4) // 2-3
+            difficulty == "Intermediate" -> random.nextInt(3, 5) // 3-4
+            difficulty == "Advanced" -> random.nextInt(4, 6) // 4-5
             else -> 3
         }
 
         val reps = when {
             !isMain -> "1"
-            difficulty == "Beginner" -> "8-12"
-            difficulty == "Intermediate" -> "12-15"
-            difficulty == "Advanced" -> "15-20"
+            difficulty == "Beginner" -> "${random.nextInt(8, 11)}-${random.nextInt(12, 14)}"
+            difficulty == "Intermediate" -> "${random.nextInt(10, 13)}-${random.nextInt(15, 17)}"
+            difficulty == "Advanced" -> "${random.nextInt(12, 16)}-${random.nextInt(18, 21)}"
             else -> "10-12"
         }
 
         val rest = when {
             !isMain -> "0s"
-            difficulty == "Beginner" -> "90s"
-            difficulty == "Intermediate" -> "60s"
-            difficulty == "Advanced" -> "45s"
+            difficulty == "Beginner" -> "${random.nextInt(60, 91)}s"
+            difficulty == "Intermediate" -> "${random.nextInt(45, 61)}s"
+            difficulty == "Advanced" -> "${random.nextInt(30, 46)}s"
             else -> "60s"
         }
 
         val duration = when {
             isMain -> ""
-            difficulty == "Beginner" -> "1 min"
-            difficulty == "Intermediate" -> "1 min"
-            difficulty == "Advanced" -> "1 min"
+            category == "warmup" -> "${random.nextInt(1, 3)} min"
+            category == "cooldown" -> "${random.nextInt(1, 3)} min"
             else -> "1 min"
         }
 

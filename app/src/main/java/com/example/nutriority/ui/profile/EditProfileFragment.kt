@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +23,7 @@ import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.util.DatePickerUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.EmailAuthProvider
@@ -101,12 +103,12 @@ class EditProfileFragment : Fragment() {
         binding.rowAge.root.setOnClickListener { 
             DatePickerUtil.showDatePicker(requireContext(), currentUser?.birthDate) { selection ->
                 val age = calculateAgeFromMillis(selection)
-                if (age in 17..28) {
+                if (age in 17..65) {
                     if (selection != currentUser?.birthDate) {
                         handleFieldUpdateWithPlanChoice("Birthday") { it.copy(birthDate = selection) }
                     }
                 } else {
-                    Toast.makeText(requireContext(), "Age must be between 17 and 28 years old", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), "Age must be between 17 and 65 years old", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -165,8 +167,66 @@ class EditProfileFragment : Fragment() {
             }
         }
 
+        binding.btnAbout.setOnClickListener { showAboutDialog() }
+        binding.btnTerms.setOnClickListener { showTermsDialog() }
         binding.btnLogout.setOnClickListener { showLogoutConfirmation() }
         binding.btnDeleteAccount.setOnClickListener { showDeleteAccountConfirmation() }
+    }
+
+    private fun showAboutDialog() {
+        val aboutText = """
+            <b>Nutriority</b> is a cutting-edge, personalized fitness and nutrition companion owned and operated by <b>Xfactor Fitness Gym</b>. Our mission is to transform lives by providing expert-level guidance that is accessible to everyone.<br><br>
+            <b>Key Features:</b><br>
+            • <b>Personalized Workout Plans:</b> Tailored to your fitness level, goals, and available equipment.<br>
+            • <b>Nutrition Tracking:</b> Smart meal logging and diet plans based on your preferences.<br>
+            • <b>Progress Monitoring:</b> Track your body metrics and workout consistency over time.<br>
+            • <b>Expert Guidance:</b> Science-backed routines designed to maximize results and minimize injury risk.<br><br>
+            Whether you are looking to lose weight, build muscle, or maintain a healthy lifestyle, <b>Nutriority</b> provides the tools and motivation you need to succeed.<br><br>
+            <i>Version 1.0.0</i>
+        """.trimIndent()
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("About Nutriority")
+            .setMessage(HtmlCompat.fromHtml(aboutText, HtmlCompat.FROM_HTML_MODE_COMPACT))
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showTermsDialog() {
+        val termsAndServicesText = """
+            Welcome to <b>Nutriority</b>! By using this app, you agree to the following terms. Please read them carefully.<br><br>
+            <b>1. Who Can Use This App</b><br>
+            Nutriority is a service provided by <b>Xfactor Fitness Gym</b>. By registering, you agree to provide accurate information to receive the best possible fitness and nutrition guidance.<br><br>
+            <b>2. Health Disclaimer</b><br>
+            ⚠ <b>IMPORTANT:</b> Nutriority is <b>NOT recommended</b> for users with significant health problems or injuries without medical clearance.<br><br>
+            The workout plans and nutrition content in this app are for general wellness purposes only and do not constitute medical advice. Do not use this app if you have any of the following:<br>
+            • Pre-existing medical conditions (e.g., heart disease, diabetes, hypertension)<br>
+            • Current or recent injuries (e.g., joint, muscle, or spinal injuries)<br>
+            • Any condition for which a doctor has advised you to avoid physical activity<br>
+            • Pregnancy or postpartum recovery<br><br>
+            If you are unsure whether this app is safe for you, please consult a licensed healthcare professional before use. <b>Stop using the app immediately</b> and seek medical attention if you feel pain, dizziness, or discomfort.<br><br>
+            <b>3. User Responsibilities</b><br>
+            By using Nutriority, you agree to:<br>
+            • Provide honest and accurate information about yourself<br>
+            • Use the app only for personal health and fitness purposes<br>
+            • Not share your account with others<br>
+            • Not misuse or attempt to damage the app or its data<br><br>
+            <b>4. Privacy</b><br>
+            Any personal information you provide (such as your name, age, and health data) will only be used to operate and improve Nutriority. Your data will be handled securely by <b>Xfactor Fitness Gym</b>.<br><br>
+            <b>5. Limitation of Liability</b><br>
+            Nutriority and <b>Xfactor Fitness Gym</b> are not liable for any injury, health issue, or damages that may result from using the app. You use the app at your own risk.<br><br>
+            <b>6. Changes to These Terms</b><br>
+            We may update these Terms from time to time. Continued use of the app after any changes means you accept the updated Terms.<br><br>
+            <b>7. Contact</b><br>
+            For questions or concerns, please reach out to the <b>Xfactor Fitness Gym</b> team through our official contact channels.<br><br>
+            By using Nutriority, you confirm that you have read and agree to these Terms and Conditions.
+        """.trimIndent()
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Terms and Conditions")
+            .setMessage(HtmlCompat.fromHtml(termsAndServicesText, HtmlCompat.FROM_HTML_MODE_COMPACT))
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     private fun showWeightLogBottomSheet() {

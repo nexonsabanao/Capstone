@@ -33,6 +33,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -50,7 +51,7 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
 
     private val loggedFoodAdapter by lazy {
         LoggedFoodAdapter { log ->
-            profileViewModel.deleteMealLog(log)
+            showDeleteConfirmationDialog(log)
         }
     }
 
@@ -68,6 +69,42 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
             adapter = loggedFoodAdapter
             setHasFixedSize(true)
         }
+    }
+
+    private fun showDeleteConfirmationDialog(log: DailyMealLog) {
+        val builder = AlertDialog.Builder(requireContext())
+        val dialogView = layoutInflater.inflate(R.layout.dialog_plan_update_choice, null)
+        
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
+        val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
+        val btnDelete = dialogView.findViewById<MaterialButton>(R.id.btnUpdatePlan)
+        val btnKeep = dialogView.findViewById<MaterialButton>(R.id.btnKeepCurrent)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+
+        tvTitle?.text = "Remove Meal?"
+        tvMessage?.text = "Are you sure you want to remove \"${log.name}\" from your log? This action cannot be undone."
+        
+        btnDelete?.text = "DELETE"
+        btnDelete?.setBackgroundColor(Color.parseColor("#E74C3C")) // Red for delete
+        
+        btnKeep?.text = "KEEP MEAL"
+        btnCancel?.visibility = View.GONE // We only need two options for this confirmation
+
+        builder.setView(dialogView)
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnDelete?.setOnClickListener {
+            profileViewModel.deleteMealLog(log)
+            Toast.makeText(requireContext(), "Meal removed", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        btnKeep?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun setupClickListeners() {

@@ -1,5 +1,6 @@
 package com.example.nutriority.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
@@ -9,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import com.example.nutriority.MainActivity
 import com.example.nutriority.databinding.FragmentHomeBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.adapter.MealAdapter
@@ -87,6 +89,13 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Session Check / Navigation to Login
+                launch {
+                    homeViewModel.navigateToLogin.collect {
+                        restartApp()
+                    }
+                }
+
                 // Ongoing Workout Visibility
                 launch {
                     workoutViewModel.isWorkoutActive.collect { isActive ->
@@ -112,7 +121,7 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                     }
                 }
 
-                // Global Data Ready check - simplified as specific loaders take over
+                // Global Data Ready check
                 launch {
                     homeViewModel.isDataReady.collect { isReady ->
                         if (isReady) {
@@ -121,7 +130,7 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                     }
                 }
 
-                // Meals Loader Fix
+                // Meals Loader
                 launch {
                     homeViewModel.allMeals.collect { meals ->
                         if (meals == null) {
@@ -136,7 +145,7 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                     }
                 }
 
-                // Workouts Loader Fix
+                // Workouts Loader
                 launch {
                     homeViewModel.allWorkouts.collect { workouts ->
                         if (workouts == null) {
@@ -151,6 +160,7 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                                 binding.workoutsIndicator.visibility = if (workouts.size > 1) View.VISIBLE else View.GONE
                                 if (workouts.size > 1) binding.workoutsIndicator.createIndicators(workouts.size, 0)
                             }
+                            workoutAdapter.notifyDataSetChanged()
                             binding.workoutsRecyclerView.isVisible = true
                             binding.workoutsProgressBar.isVisible = false
                         }
@@ -176,6 +186,13 @@ class HomeFragment : BaseBindingFragment<FragmentHomeBinding>(FragmentHomeBindin
                 }
             }
         }
+    }
+
+    private fun restartApp() {
+        val intent = Intent(requireContext(), MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
+        requireActivity().finish()
     }
 
     private fun setupClickListeners() {

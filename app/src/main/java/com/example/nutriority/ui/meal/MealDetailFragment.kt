@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -71,17 +72,52 @@ class MealDetailFragment : BaseBindingFragment<FragmentMealDetailBinding>(Fragme
         binding.btnLogMeal.setOnClickListener {
             if (isProfileComplete()) {
                 currentMeal?.let { meal ->
-                    profileViewModel.logMeal(meal)
-                    binding.btnLogMeal.apply {
-                        text = "LOGGED"
-                        isEnabled = false
-                        alpha = 0.7f
-                        setIconResource(R.drawable.ic_check_circle)
-                    }
-                    Toast.makeText(requireContext(), "${meal.name} added to profile", Toast.LENGTH_SHORT).show()
+                    showLogConfirmationDialog(meal)
                 }
             }
         }
+    }
+
+    private fun showLogConfirmationDialog(meal: Meal) {
+        val builder = AlertDialog.Builder(requireContext())
+        val dialogView = layoutInflater.inflate(R.layout.dialog_plan_update_choice, null)
+        
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
+        val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
+        val btnLog = dialogView.findViewById<MaterialButton>(R.id.btnUpdatePlan)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnKeepCurrent)
+        val btnExtraCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+
+        tvTitle?.text = "Log this meal?"
+        tvMessage?.text = "Would you like to add \"${meal.name}\" to your daily meal log? This will update your calorie and macronutrient progress for today."
+        
+        btnLog?.text = "YES, LOG MEAL"
+        btnLog?.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.primary_dark))
+        
+        btnCancel?.text = "CANCEL"
+        btnExtraCancel?.visibility = View.GONE
+
+        builder.setView(dialogView)
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnLog?.setOnClickListener {
+            profileViewModel.logMeal(meal)
+            binding.btnLogMeal.apply {
+                text = "LOGGED"
+                isEnabled = false
+                alpha = 0.7f
+                setIconResource(R.drawable.ic_check_circle)
+            }
+            Toast.makeText(requireContext(), "${meal.name} added to profile", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        btnCancel?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun isProfileComplete(): Boolean {

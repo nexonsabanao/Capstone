@@ -57,7 +57,8 @@ class WorkoutPlanner @Inject constructor(
         val allAssignments = mutableListOf<WorkoutExercise>()
         val usedExerciseIds = mutableSetOf<String>()
 
-        val seed = user.id.hashCode().toLong()
+        // Use a more dynamic seed to ensure variation across users AND plans
+        val seed = user.id.hashCode().toLong() + System.currentTimeMillis()
         val random = Random(seed)
 
         for (week in 0 until 4) {
@@ -88,6 +89,8 @@ class WorkoutPlanner @Inject constructor(
 
                     val durationStr = WorkoutUtil.calculateTotalDuration(generated.exerciseAssignments, true)
                     val durationMinutes = durationStr.filter { it.isDigit() }.toIntOrNull() ?: 30
+                    
+                    // Formula: Calories = (MET * 3.5 * weightKg / 200) * durationInMinutes
                     val caloriesBurned = ((generated.workout.metValue * 3.5 * user.weightKg) / 200 * durationMinutes).toInt()
 
                     val warmupList = generated.exerciseAssignments

@@ -71,7 +71,14 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
                     var isAccountValid = firebaseUser != null
                     var isMarkedDeleted = false
 
-                    if (firebaseUser != null) {
+                    // BUG FIX: Check local status first to catch deleted accounts immediately (offline or cached)
+                    val localUser = withContext(Dispatchers.IO) { userRepository.getInitialUser() }
+                    if (localUser?.status == "deleted") {
+                        isMarkedDeleted = true
+                        isAccountValid = false
+                    }
+
+                    if (firebaseUser != null && !isMarkedDeleted) {
                         try {
                             firebaseUser.reload().await()
 
@@ -87,19 +94,29 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
                                     isMarkedDeleted = true
                                     isAccountValid = false
                                 }
+                            } else {
+                                // BUG FIX: If document doesn't exist in Firestore, treat as invalid/deleted
+                                isAccountValid = false
                             }
                         } catch (e: Exception) {
                             if (e is FirebaseAuthInvalidUserException) {
                                 isAccountValid = false
                             } else if (e is FirebaseNetworkException) {
-                                isAccountValid = true // Allow offline access
+                                // Offline - rely on local status (already checked above)
+                                isAccountValid = !isMarkedDeleted
                             }
                         }
                     }
 
                     if (isMarkedDeleted || (firebaseUser != null && !isAccountValid)) {
                         auth.signOut()
-                        userRepository.deleteAll()
+                        withContext(Dispatchers.IO) { userRepository.deleteAll() }
+                        
+                        // BUG FIX: Reset onboarding flag so they don't skip to Home on next login attempt
+                        requireActivity().getSharedPreferences("onBoarding", Context.MODE_PRIVATE).edit {
+                            putBoolean("Finished", false)
+                        }
+                        isAccountValid = false
                     }
 
                     // 3. Navigation Decision
@@ -107,15 +124,15 @@ class SplashFragment : BaseBindingFragment<FragmentSplashBinding>(FragmentSplash
                     val isOnboardingFinished = sharedPref.getBoolean("Finished", false)
 
                     val destination = if (isAccountValid) {
-                        // Check if we have local or cloud data to skip onboarding
-                        val localUser = userRepository.getInitialUser()
+                        // Check local user again (might have been cleared above)
+                        val currentUser = withContext(Dispatchers.IO) { userRepository.getInitialUser() }
 
-                        if (localUser != null || isOnboardingFinished) {
+                        if (currentUser != null || isOnboardingFinished) {
                             // If local data exists, we proceed to Home
-                            if (localUser != null && !localUser.personalizedPlanJson.isNullOrBlank()) {
+                            if (currentUser != null && !currentUser.personalizedPlanJson.isNullOrBlank()) {
                                 launch(Dispatchers.IO) {
                                     try {
-                                        val plan = gson.fromJson(localUser.personalizedPlanJson, WorkoutPlan::class.java)
+                                        val plan = gson.fromJson(currentUser.personalizedPlanJson, WorkoutPlan::class.java)
                                         workoutPlanner.syncPlanToDatabase(plan)
                                     } catch (_: Exception) { }
                                 }

@@ -80,8 +80,8 @@ class AgeFragment : BaseBindingFragment<FragmentAgeBinding>(FragmentAgeBinding::
                 binding.nextButton.isEnabled = false
                 false
             }
-            calculatedAge > 28 -> {
-                binding.tvDateError.text = "Age must be 28 or below"
+            calculatedAge > 65 -> {
+                binding.tvDateError.text = "Age must be 65 or below"
                 binding.tvDateError.visibility = View.VISIBLE
                 binding.nextButton.isEnabled = false
                 false

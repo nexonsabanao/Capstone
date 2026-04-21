@@ -12,9 +12,12 @@ import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.planner.NutritionCalculator
 import com.example.nutriority.ui.util.AgeUtil
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -31,7 +34,7 @@ class HomeViewModel @Inject constructor(
     private val mealRepository: MealRepository,
     private val workoutRepository: WorkoutRepository,
     private val articleRepository: ArticleRepository,
-    userRepository: UserRepository,
+    private val userRepository: UserRepository,
     private val recommendedWorkoutRepository: RecommendedWorkoutRepository
 ) : ViewModel() {
 
@@ -43,6 +46,9 @@ class HomeViewModel @Inject constructor(
     val isDataReady: StateFlow<Boolean> = _isDataReady
     val calorieGoal: StateFlow<String>
 
+    private val _navigateToLogin = MutableSharedFlow<Unit>()
+    val navigateToLogin: SharedFlow<Unit> = _navigateToLogin
+
     init {
         // Start real-time Firestore listeners
         mealRepository.startRealtimeMealSync(viewModelScope)
@@ -52,6 +58,8 @@ class HomeViewModel @Inject constructor(
         userRepository.startRealtimeUserSync(viewModelScope)
 
         viewModelScope.launch {
+            checkUserSession()
+            
             launch { try { articleRepository.syncArticlesFromCloud() } catch (_: Exception) {} }
             launch { try { mealRepository.syncMealsFromCloud() } catch (_: Exception) {} }
             launch { try { workoutRepository.syncExercisesFromCloud() } catch (_: Exception) {} }
@@ -172,6 +180,35 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = "1800-2200 kcal / day"
         )
+        
+        // Listen for user changes to catch "deleted" status in real-time
+        viewModelScope.launch {
+            userRepository.getUser.collect { user ->
+                if (user?.status == "deleted") {
+                    handleSessionExpired()
+                }
+            }
+        }
+    }
+
+    private suspend fun checkUserSession() {
+        val auth = FirebaseAuth.getInstance()
+        if (auth.currentUser == null) {
+            _navigateToLogin.emit(Unit)
+            return
+        }
+
+        // Double check local user status
+        val localUser = userRepository.getInitialUser()
+        if (localUser?.status == "deleted") {
+            handleSessionExpired()
+        }
+    }
+
+    private suspend fun handleSessionExpired() {
+        userRepository.deleteAll()
+        FirebaseAuth.getInstance().signOut()
+        _navigateToLogin.emit(Unit)
     }
 
     private fun normalizeIngredient(input: String): String {

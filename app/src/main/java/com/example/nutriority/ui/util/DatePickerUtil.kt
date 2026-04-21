@@ -30,21 +30,21 @@ object DatePickerUtil {
         // --- AGE RESTRICTION --- 
         val today = Calendar.getInstance()
 
-        // Max date: 17 years ago from today
+        // Max date (youngest): 17 years ago from today
         val maxDate = Calendar.getInstance().apply {
             add(Calendar.YEAR, -17)
         }
         datePickerDialog.datePicker.maxDate = maxDate.timeInMillis
 
-        // Min date: 28 years ago from today
+        // Min date (oldest): 65 years ago from today
         val minDate = Calendar.getInstance().apply {
-            add(Calendar.YEAR, -28)
+            add(Calendar.YEAR, -65)
         }
         datePickerDialog.datePicker.minDate = minDate.timeInMillis
 
-        // Set initial display to a valid date within the range (e.g., 22 years old)
+        // Set initial display to a valid date within the range (e.g., 25 years old)
         if (initialDateMillis == null) {
-            val initial = Calendar.getInstance().apply { add(Calendar.YEAR, -22) }
+            val initial = Calendar.getInstance().apply { add(Calendar.YEAR, -25) }
             datePickerDialog.updateDate(initial.get(Calendar.YEAR), initial.get(Calendar.MONTH), initial.get(Calendar.DAY_OF_MONTH))
         }
 
