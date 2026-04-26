@@ -121,7 +121,7 @@ document.getElementById('studentForm').onsubmit = async (e) => {
             const u = window.cacheSt.find(x => x.fid === fid);
             if (u && u.email) userData.email = u.email;
             
-            await setDoc(doc(db, "fid", fid), userData, { merge: true });
+            await setDoc(doc(db, "users", fid), userData, { merge: true });
             alert("Profile updated!");
         }
         
