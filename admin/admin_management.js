@@ -11,6 +11,9 @@ window.openStudentModal = (id=null) => {
     document.getElementById('editStId').value = id || "";
     document.getElementById('stModalTitle').innerText = id ? "Edit User Profile" : "Add User Account";
     
+    const submitBtn = document.getElementById('stSubmitBtn');
+    if (submitBtn) submitBtn.innerText = id ? "Save Changes" : "Add User";
+
     const newPassGroup = document.getElementById('newAccountPass');
     const editPassGroup = document.getElementById('editAccountPass');
     const emailGroup = document.getElementById('stEmailGroup');
@@ -168,6 +171,10 @@ window.openExModal = (id=null) => {
     if (!form) return;
     form.reset();
     document.getElementById('editExId').value = id || "";
+    
+    const submitBtn = document.getElementById('exSubmitBtn');
+    if (submitBtn) submitBtn.innerText = id ? "Save Changes" : "Add Exercise";
+
     if(id && window.cacheEx) {
         const e = window.cacheEx.find(x => x.id === id);
         if(e) {
@@ -188,6 +195,10 @@ window.openMealModal = (id=null) => {
     if (!form) return;
     form.reset();
     document.getElementById('editMealId').value = id || "";
+
+    const submitBtn = document.getElementById('mealSubmitBtn');
+    if (submitBtn) submitBtn.innerText = id ? "Save Changes" : "Add Meals";
+
     if(id && window.cacheMl) {
         const m = window.cacheMl.find(x => x.id === id);
         if(m) {
@@ -212,6 +223,10 @@ window.openArtModal = (id=null) => {
     if (!form) return;
     form.reset();
     document.getElementById('editArtId').value = id || "";
+
+    const submitBtn = document.getElementById('artSubmitBtn');
+    if (submitBtn) submitBtn.innerText = id ? "Save Changes" : "Add Articles";
+
     if(id && window.cacheArt) {
         const a = window.cacheArt.find(x => x.id === id);
         if(a) {

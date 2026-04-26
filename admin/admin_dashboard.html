@@ -395,13 +395,13 @@
         </details>
         <div style="display:flex; gap:15px; justify-content:flex-end;">
             <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="submit" class="btn btn-primary" id="stSubmitBtn">Save Changes</button>
         </div>
     </form>
 </div></div>
 
 <div id="exModal" class="modal"><div class="modal-content">
-    <h2>Exercise Editor</h2>
+    <h2 id="exModalTitle">Exercise Editor</h2>
     <form id="exForm">
         <input type="hidden" id="editExId">
         <div class="input-group"><label>Title</label><input type="text" id="exName" required></div>
@@ -415,13 +415,13 @@
         <div class="input-group"><label>Execution Steps</label><textarea id="exSteps" style="height:120px;"></textarea></div>
         <div style="display:flex; gap:15px; justify-content:flex-end;">
             <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="submit" class="btn btn-primary" id="exSubmitBtn">Save Changes</button>
         </div>
     </form>
 </div></div>
 
 <div id="mealModal" class="modal"><div class="modal-content">
-    <h2>Meal & Nutrition Editor</h2>
+    <h2 id="mealModalTitle">Meal & Nutrition Editor</h2>
     <form id="mealForm">
         <input type="hidden" id="editMealId">
         <div class="input-group"><label>Recipe Name</label><input type="text" id="mName" required></div>
@@ -441,13 +441,13 @@
         <div class="input-group"><label>Directions</label><textarea id="mInst" style="height:120px;"></textarea></div>
         <div style="display:flex; gap:15px; justify-content:flex-end;">
             <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Recipe</button>
+            <button type="submit" class="btn btn-primary" id="mealSubmitBtn">Save Recipe</button>
         </div>
     </form>
 </div></div>
 
 <div id="artModal" class="modal"><div class="modal-content">
-    <h2>Article Editor</h2>
+    <h2 id="artModalTitle">Article Editor</h2>
     <form id="artForm">
         <input type="hidden" id="editArtId">
         <div class="input-group"><label>Headline</label><input type="text" id="aTitle" required></div>
@@ -463,7 +463,7 @@
         <div class="input-group"><label>Full Content</label><textarea id="aContent" style="height:200px;"></textarea></div>
         <div style="display:flex; gap:15px; justify-content:flex-end;">
             <button type="button" class="btn btn-danger btn-sm" onclick="closeModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Publish Article</button>
+            <button type="submit" class="btn btn-primary" id="artSubmitBtn">Publish Article</button>
         </div>
     </form>
 </div></div>

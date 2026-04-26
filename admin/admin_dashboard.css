@@ -174,11 +174,30 @@ tr:hover td { background: #f8fafc; }
 .modal-content { background: var(--white); width: 100%; max-width: 680px; border-radius: 28px; padding: 40px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); max-height: 90vh; overflow-y: auto; }
 .input-group { margin-bottom: 24px; }
 .input-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-dark); }
-.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 14px 18px; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 15px; font-family: inherit; font-weight: 500; transition: 0.2s; outline: none; }
-.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft); }
+.input-group input, .input-group select, .input-group textarea { 
+    width: 100%; 
+    padding: 12px 18px; 
+    border: 2px solid #e2e8f0; 
+    border-radius: 12px; 
+    font-size: 15px; 
+    font-family: inherit; 
+    font-weight: 500; 
+    transition: 0.2s; 
+    outline: none; 
+    height: 48px; /* Consistent height for input and select */
+    box-sizing: border-box;
+}
+.input-group textarea { 
+    height: auto; /* Textareas should not have a fixed small height */
+    min-height: 100px;
+}
+.input-group input:focus, .input-group select:focus, .input-group textarea:focus { 
+    border-color: var(--primary); 
+    box-shadow: 0 0 0 4px var(--primary-soft); 
+}
 
 /* Buttons */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; font-size: 14px; white-space: nowrap; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; font-size: 14px; white-space: nowrap; }
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 167, 139, 0.4); }
 .btn-secondary { background: #f1f5f9; color: var(--secondary); }
@@ -266,7 +285,14 @@ tr:hover td { background: #f8fafc; }
         font-size: 11px;
         text-align: left;
     }
-    td:first-child { justify-content: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 10px; }
+    td:first-child { 
+        justify-content: center; 
+        flex-direction: column;
+        border-bottom: 2px solid #f1f5f9; 
+        padding-bottom: 15px; 
+        margin-bottom: 10px; 
+        text-align: center;
+    }
     td:first-child::before { display: none; }
     td .avatar { width: 60px; height: 60px; border-radius: 15px; }
 }
