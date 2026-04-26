@@ -8,6 +8,7 @@ import com.example.nutriority.data.model.DailyMealLog
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.planner.PlannerService
+import com.example.nutriority.planner.DailyMacroTarget
 import com.example.nutriority.ui.util.AgeUtil
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -71,7 +72,7 @@ class MealViewModel @Inject constructor(
                 val isExpired = checkPlanExpired()
                 
                 val dailyCalories = plannerService.calculateDailyTarget(user)
-                val macros = plannerService.calculateMacroTargets(dailyCalories)
+                val macros = plannerService.calculateMacroTargets(dailyCalories, user)
                 
                 MealUiState(
                     items = items,
@@ -112,10 +113,18 @@ class MealViewModel @Inject constructor(
                 }
 
                 val dailyCalories = plannerService.calculateDailyTarget(user)
+                val macros = plannerService.calculateMacroTargets(dailyCalories, user)
+                
+                val dailyTarget = DailyMacroTarget(
+                    calories = dailyCalories,
+                    protein = macros.proteinGrams,
+                    carbs = macros.carbsGrams,
+                    fat = macros.fatGrams
+                )
                 
                 val weekPlan = withContext(Dispatchers.Default) {
                     plannerService.mealPlanner.planWeek(
-                        dailyCalories, 
+                        dailyTarget, 
                         user.preferredDiet, 
                         user.excludedIngredients, 
                         mealPool

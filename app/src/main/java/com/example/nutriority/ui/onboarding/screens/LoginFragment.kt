@@ -84,21 +84,14 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
                 // 1. Force reload to get latest verification status
                 firebaseUser.reload().await()
                 
-                // 2. Check if email is verified
-                if (!firebaseUser.isEmailVerified) {
-                    auth.signOut()
-                    showAuthOverlay(false)
-                    showError("Please verify your email before logging in. Check your inbox.")
-                    return@launch
-                }
-
-                // 3. Check Firestore for deleted status
+                // 2. Check Firestore for status and admin verification bypass
                 val doc = FirebaseFirestore.getInstance()
                     .collection("users")
                     .document(uid)
                     .get()
                     .await()
                 
+                var isAdminVerified = false
                 if (doc.exists()) {
                     val status = doc.getString("status")
                     if (status == "deleted") {
@@ -107,6 +100,16 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
                         showError("This account has been disabled by the administrator.")
                         return@launch
                     }
+                    // Check for the bypass flag added by admin dashboard
+                    isAdminVerified = doc.getBoolean("isEmailVerified") ?: false
+                }
+
+                // 3. Final verification check: either Firebase Auth says yes OR Admin manually verified in Firestore
+                if (!firebaseUser.isEmailVerified && !isAdminVerified) {
+                    auth.signOut()
+                    showAuthOverlay(false)
+                    showError("Please verify your email before logging in. Check your inbox.")
+                    return@launch
                 }
                 
                 // Proceed to data restoration or new user creation

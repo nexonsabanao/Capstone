@@ -117,8 +117,9 @@ document.getElementById('studentForm').onsubmit = async (e) => {
             userData.email = email;
             userData.lastCompletedWorkoutDay = 0;
             userData.status = "active";
+            userData.isEmailVerified = true; // Instant verification flag for admin-created accounts
             await setDoc(doc(db, "users", uid), userData);
-            alert("Account created!");
+            alert("Account created and instantly verified!");
         } else {
             // Ensure email is preserved on edit
             const u = window.cacheSt.find(x => x.fid === fid);

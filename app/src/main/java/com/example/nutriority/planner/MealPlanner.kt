@@ -9,14 +9,22 @@ import kotlin.math.abs
 
 @Singleton
 class MealPlanner @Inject constructor(
-    val mealRepository: MealRepository
+    private val mealRepository: MealRepository
 ) {
 
+    private val meatKeywords = listOf(
+        "chicken", "beef", "pork", "lamb", "fish", "tuna", "salmon", "bacon", "shrimp", "steak", "meat"
+    )
+
+    private val carbHeavyKeywords = listOf(
+        "bread", "pasta", "rice", "potato", "noodle", "dough", "flour", "tortilla"
+    )
+
     /**
-     * Generates a full 7-day meal plan with variety.
+     * Generates a full 7-day meal plan with variety and macro-awareness.
      */
     suspend fun planWeek(
-        dailyCalories: Int,
+        macroTarget: DailyMacroTarget,
         preferredDiet: String,
         excludedIngredients: List<String>,
         mealPool: List<Meal>? = null
@@ -26,31 +34,29 @@ class MealPlanner @Inject constructor(
         val weekPlan = mutableListOf<List<Meal>>()
 
         repeat(7) {
-            val dayMeals = planMeals(dailyCalories, preferredDiet, excludedIngredients, allMeals, usedMealIds)
+            val dayMeals = planMealsSmart(macroTarget, preferredDiet, excludedIngredients, allMeals, usedMealIds)
             weekPlan.add(dayMeals)
             // track used meals to encourage variety across the week
             usedMealIds.addAll(dayMeals.map { it.id })
             
-            // If we've used a lot of meals, we might want to allow some repeats if the pool is small
-            // but for 7 days (21 meals), if the filtered pool has > 30 meals, it should be fine.
+            // Allow some repetition if we've gone through a lot of the database
+            if (usedMealIds.size > (allMeals.size * 0.7)) {
+                usedMealIds.clear()
+            }
         }
         return weekPlan
     }
 
     /**
-     * Optimized meal planning for a single day.
-     * @param usedMealIds Optional set of IDs to avoid for variety.
+     * Optimized macro-aware meal planning for a single day.
      */
-    suspend fun planMeals(
-        dailyCalories: Int, 
-        preferredDiet: String, 
+    suspend fun planMealsSmart(
+        target: DailyMacroTarget,
+        preferredDiet: String,
         excludedIngredients: List<String>,
         mealPool: List<Meal>? = null,
         usedMealIds: Set<String> = emptySet()
     ): List<Meal> {
-        val splits = listOf(0.30, 0.35, 0.35) // Breakfast, Lunch, Dinner percentages
-        val targetCalories = splits.map { (dailyCalories * it).toInt() }
-
         val allMeals = mealPool ?: mealRepository.getAllMealsList()
 
         if (allMeals.isEmpty()) {
@@ -58,80 +64,110 @@ class MealPlanner @Inject constructor(
             return emptyList()
         }
 
-        // 1. Pre-filter by exclusions and diet once
+        // 1. Filter by diet and exclusions
         val filteredMeals = allMeals.filter { meal ->
-            val isExcluded = excludedIngredients.any { excluded ->
-                val normalizedExcluded = normalizeIngredient(excluded)
-                meal.ingredients.any { ingredient ->
-                    val normalizedIngredient = normalizeIngredient(ingredient)
-                    normalizedIngredient.contains(normalizedExcluded, true) || 
-                    normalizedExcluded.contains(normalizedIngredient, true)
-                }
-            }
+            isMealAllowed(meal, preferredDiet, excludedIngredients)
+        }
+
+        // 2. Define meal distribution (Breakfast, Lunch, Dinner)
+        val mealConfig = listOf(
+            Triple("Breakfast", 0.30, 0.30), // Time, Calorie Ratio, Protein Ratio
+            Triple("Lunch", 0.35, 0.35),
+            Triple("Dinner", 0.35, 0.35)
+        )
+
+        val selectedMeals = mutableListOf<Meal>()
+        val availablePool = filteredMeals.toMutableList()
+
+        for ((time, calRatio, proteinRatio) in mealConfig) {
+            val targetCals = (target.calories * calRatio).toInt()
+            val targetProtein = (target.protein * proteinRatio)
+
+            val candidates = availablePool.filter { it.mealTime.equals(time, true) }
             
-            if (isExcluded) return@filter false
+            if (candidates.isNotEmpty()) {
+                // Prioritize unused meals
+                val unusedCandidates = candidates.filter { !usedMealIds.contains(it.id) }
+                val currentPool = if (unusedCandidates.size >= 2) unusedCandidates else candidates
 
-            if (preferredDiet.isNotBlank() && !preferredDiet.equals("Balanced", ignoreCase = true)) {
-                if (meal.preferredDiet.isNotBlank() && 
-                    !meal.preferredDiet.equals("Balanced", ignoreCase = true) && 
-                    !meal.preferredDiet.equals(preferredDiet, ignoreCase = true)) {
-                    return@filter false
+                // Score meals based on calorie and protein proximity
+                val bestMeal = currentPool.minByOrNull { meal ->
+                    scoreMeal(meal, targetCals, targetProtein)
                 }
-            }
 
-            when (preferredDiet.lowercase()) {
-                "vegetarian" -> !containsMeat(meal)
-                "low carb" -> isLowCarb(meal)
-                else -> true 
-            }
-        }
-
-        val mealTimes = listOf("Breakfast", "Lunch", "Dinner")
-        val availableMeals = filteredMeals.toMutableList()
-        val plannedMeals = mutableListOf<Meal>()
-
-        mealTimes.zip(targetCalories).forEach { (time, targetCal) ->
-            val timeMatchingMeals = availableMeals.filter { it.mealTime.equals(time, ignoreCase = true) }
-            
-            if (timeMatchingMeals.isNotEmpty()) {
-                // Prioritize variety: try to pick from meals not used yet in the week
-                val unusedOptions = timeMatchingMeals.filter { !usedMealIds.contains(it.id) }
-                
-                // If we have enough unused options, pick from them. Otherwise, use all available for this time.
-                val poolToPickFrom = if (unusedOptions.size >= 3) unusedOptions else timeMatchingMeals
-
-                val bestMealsForTime = poolToPickFrom
-                    .sortedBy { abs(it.calories - targetCal) } 
-                    .take(10) // Take top 10 closest to target calories
-
-                if (bestMealsForTime.isNotEmpty()) {
-                    val chosenMeal = bestMealsForTime.random()
-                    plannedMeals.add(chosenMeal)
-                    // Remove from available so we don't pick the same meal twice in the SAME day
-                    availableMeals.removeAll { it.id == chosenMeal.id }
+                if (bestMeal != null) {
+                    selectedMeals.add(bestMeal)
+                    availablePool.removeAll { it.id == bestMeal.id }
                 }
             }
         }
 
-        return plannedMeals
+        // Fallback: If we missed a meal time, try to fill it without time restriction if necessary
+        if (selectedMeals.size < 3 && availablePool.isNotEmpty()) {
+            val missingCount = 3 - selectedMeals.size
+            repeat(missingCount) {
+                val fallback = availablePool.minByOrNull { scoreMeal(it, (target.calories * 0.33).toInt(), (target.protein * 0.33)) }
+                fallback?.let { 
+                    selectedMeals.add(it)
+                    availablePool.remove(it)
+                }
+            }
+        }
+
+        return selectedMeals
     }
 
-    private fun normalizeIngredient(input: String): String {
-        val lower = input.lowercase().trim()
-        return if (lower.endsWith("s") && lower.length > 3) {
-            lower.substring(0, lower.length - 1)
-        } else {
-            lower
+    private fun scoreMeal(meal: Meal, targetCals: Int, targetProtein: Double): Double {
+        val calorieDiff = abs(meal.calories - targetCals).toDouble()
+        // Protein is weighted higher (x2) because it's critical for fitness goals
+        val proteinDiff = abs(meal.macros.protein - targetProtein) * 2.0
+        return calorieDiff + proteinDiff
+    }
+
+    private fun isMealAllowed(meal: Meal, diet: String, exclusions: List<String>): Boolean {
+        // Check exclusions
+        val hasExclusion = exclusions.any { excluded ->
+            val normEx = excluded.trim().lowercase()
+            meal.ingredients.any { it.contains(normEx, true) }
+        }
+        if (hasExclusion) return false
+
+        // Check diet
+        return when (diet.lowercase()) {
+            "vegetarian" -> !containsMeat(meal)
+            "low-carb", "low carb" -> isLowCarb(meal)
+            "vegan" -> !containsAnimalProducts(meal)
+            else -> true
         }
     }
 
-    private fun containsMeat(meal: Meal): Boolean = meal.ingredients.any { 
-        val norm = normalizeIngredient(it)
-        norm.contains("chicken") || norm.contains("beef") || norm.contains("pork") 
+    private fun containsMeat(meal: Meal): Boolean {
+        return meal.ingredients.any { ing ->
+            meatKeywords.any { keyword -> ing.contains(keyword, true) }
+        }
     }
-    
-    private fun isLowCarb(meal: Meal): Boolean = !meal.ingredients.any { 
-        val norm = normalizeIngredient(it)
-        norm.contains("bread") || norm.contains("pasta") || norm.contains("rice") || norm.contains("potato") 
+
+    private fun isLowCarb(meal: Meal): Boolean {
+        // Checks if meal explicitly labeled low carb OR ingredients are safe
+        if (meal.preferredDiet.contains("Low Carb", true)) return true
+        
+        val hasHeavyCarbs = meal.ingredients.any { ing ->
+            carbHeavyKeywords.any { keyword -> ing.contains(keyword, true) }
+        }
+        return !hasHeavyCarbs
+    }
+
+    private fun containsAnimalProducts(meal: Meal): Boolean {
+        val animalProducts = meatKeywords + listOf("egg", "milk", "cheese", "dairy", "honey", "yogurt", "butter")
+        return meal.ingredients.any { ing ->
+            animalProducts.any { keyword -> ing.contains(keyword, true) }
+        }
     }
 }
+
+data class DailyMacroTarget(
+    val calories: Int,
+    val protein: Int,
+    val carbs: Int,
+    val fat: Int
+)

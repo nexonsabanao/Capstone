@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.nutriority.data.model.User
 import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
+import com.example.nutriority.planner.DailyMacroTarget
 import com.example.nutriority.planner.PlannerService
 import com.example.nutriority.planner.WorkoutPlan
 import com.example.nutriority.planner.WorkoutPlanner
@@ -75,10 +76,18 @@ class UserViewModel @Inject constructor(
                 
                 // 2. Restart Meal Plan
                 val dailyCalories = plannerService.calculateDailyTarget(currentUser)
+                val macros = plannerService.calculateMacroTargets(dailyCalories, currentUser)
+                val dailyTarget = DailyMacroTarget(
+                    calories = dailyCalories,
+                    protein = macros.proteinGrams,
+                    carbs = macros.carbsGrams,
+                    fat = macros.fatGrams
+                )
+                
                 val mealPool = mealRepository.getAllMealsList()
                 val weekPlan = withContext(Dispatchers.Default) {
                     plannerService.mealPlanner.planWeek(
-                        dailyCalories,
+                        dailyTarget,
                         currentUser.preferredDiet,
                         currentUser.excludedIngredients,
                         mealPool

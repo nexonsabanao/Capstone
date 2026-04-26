@@ -25,20 +25,27 @@ class PlannerService @Inject constructor(
         val workoutPlanDeferred = async { workoutPlanner.planWorkouts(user) }
 
         // 2. Calculate nutritional targets
+        val age = AgeUtil.calculateAge(user.birthDate)
         val dailyCalories = NutritionCalculator.calculateTdeeDailyCalories(
-            user.weightKg, user.heightCm, AgeUtil.calculateAge(user.birthDate), user.gender, user.activityLevel, user.goal
+            user.weightKg, user.heightCm, age, user.gender, user.activityLevel, user.goal
         )
+        val macros = NutritionCalculator.macronutrientTargets(dailyCalories, user.weightKg, user.goal)
         
-        // 3. Generate 7-day meal plan in parallel
-        val mealPool = mealPlanner.mealRepository.getAllMealsList()
-        val mealPlanDeferred = (0 until 7).map {
-            async { 
-                mealPlanner.planMeals(dailyCalories, user.preferredDiet, user.excludedIngredients, mealPool) 
-            }
-        }
+        val dailyTarget = DailyMacroTarget(
+            calories = dailyCalories,
+            protein = macros.proteinGrams,
+            carbs = macros.carbsGrams,
+            fat = macros.fatGrams
+        )
+
+        // 3. Generate 7-day meal plan
+        val mealPlan = mealPlanner.planWeek(
+            dailyTarget, 
+            user.preferredDiet, 
+            user.excludedIngredients
+        )
 
         val workoutPlan = workoutPlanDeferred.await()
-        val mealPlan = mealPlanDeferred.awaitAll()
 
         workoutPlan to mealPlan
     }
@@ -55,7 +62,7 @@ class PlannerService @Inject constructor(
     /**
      * Calculates the macronutrient targets for the user.
      */
-    fun calculateMacroTargets(calories: Int): MacroTargets {
-        return NutritionCalculator.macronutrientTargets(calories)
+    fun calculateMacroTargets(calories: Int, user: User): MacroTargets {
+        return NutritionCalculator.macronutrientTargets(calories, user.weightKg, user.goal)
     }
 }

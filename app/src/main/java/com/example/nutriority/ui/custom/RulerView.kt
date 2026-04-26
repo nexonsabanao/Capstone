@@ -83,7 +83,7 @@ class RulerView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        scrollToValue(defaultValue, false)
+        scrollToValue(currentValue, false)
     }
 
     override fun onDraw(canvas: Canvas) {
