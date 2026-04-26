@@ -13,7 +13,9 @@ import com.example.nutriority.data.repository.WorkoutRepository
 import com.example.nutriority.planner.NutritionCalculator
 import com.example.nutriority.ui.util.AgeUtil
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +27,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
 import kotlin.random.Random
@@ -46,7 +50,7 @@ class HomeViewModel @Inject constructor(
     val isDataReady: StateFlow<Boolean> = _isDataReady
     val calorieGoal: StateFlow<String>
 
-    private val _navigateToLogin = MutableSharedFlow<Unit>()
+    private val _navigateToLogin = MutableSharedFlow<Unit>(replay = 1)
     val navigateToLogin: SharedFlow<Unit> = _navigateToLogin
 
     init {
@@ -58,6 +62,18 @@ class HomeViewModel @Inject constructor(
         userRepository.startRealtimeUserSync(viewModelScope)
 
         viewModelScope.launch {
+            // Force a direct cloud status check first (stronger than waiting for sync)
+            try {
+                val uid = FirebaseAuth.getInstance().currentUser?.uid
+                if (uid != null) {
+                    val doc = FirebaseFirestore.getInstance().collection("users").document(uid).get().await()
+                    if (doc.getString("status") == "deleted") {
+                        handleSessionExpired()
+                        return@launch
+                    }
+                }
+            } catch (_: Exception) {}
+
             checkUserSession()
             
             launch { try { articleRepository.syncArticlesFromCloud() } catch (_: Exception) {} }
@@ -82,7 +98,7 @@ class HomeViewModel @Inject constructor(
                 filtered = meals
             }
 
-            // Improved Filtering by Excluded Ingredients (Plural handling)
+            // Improved Filtering by Excluded Ingredients
             if (user.excludedIngredients.isNotEmpty()) {
                 filtered = filtered.filter { meal ->
                     user.excludedIngredients.none { excluded ->
@@ -112,7 +128,7 @@ class HomeViewModel @Inject constructor(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null // Changed to null to indicate loading
+            initialValue = null
         )
 
         allArticles = articleRepository.allArticles.stateIn(
@@ -159,7 +175,7 @@ class HomeViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null // Changed to null to indicate loading
+            initialValue = null
         )
 
         allWorkouts = recommendedWorkouts
@@ -198,7 +214,6 @@ class HomeViewModel @Inject constructor(
             return
         }
 
-        // Double check local user status
         val localUser = userRepository.getInitialUser()
         if (localUser?.status == "deleted") {
             handleSessionExpired()
@@ -206,9 +221,12 @@ class HomeViewModel @Inject constructor(
     }
 
     private suspend fun handleSessionExpired() {
-        userRepository.deleteAll()
-        FirebaseAuth.getInstance().signOut()
-        _navigateToLogin.emit(Unit)
+        // Use NonCancellable to ensure cleanup completes even if system tries to kill the coroutine
+        withContext(NonCancellable) {
+            userRepository.deleteAll()
+            FirebaseAuth.getInstance().signOut()
+            _navigateToLogin.emit(Unit)
+        }
     }
 
     private fun normalizeIngredient(input: String): String {
