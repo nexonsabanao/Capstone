@@ -56,8 +56,10 @@ class UserRepository @Inject constructor(
                     excludedIngredients = (data["excludedIngredients"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                     personalizedPlanJson = data["personalizedPlanJson"] as? String,
                     mealPlanJson = data["mealPlanJson"] as? String,
+                    mealPlanStartDate = data["mealPlanStartDate"] as? String,
                     lastCompletedWorkoutDay = (data["lastCompletedWorkoutDay"] as? Number)?.toInt() ?: 0,
                     status = data["status"] as? String ?: "active",
+                    isEmailVerified = data["isEmailVerified"] as? Boolean ?: false,
                     totalCaloriesBurned = (data["totalCaloriesBurned"] as? Number)?.toInt() ?: 0,
                     totalWorkoutMinutes = (data["totalWorkoutMinutes"] as? Number)?.toLong() ?: 0L,
                     totalWorkoutsCompleted = (data["totalWorkoutsCompleted"] as? Number)?.toInt() ?: 0
@@ -74,12 +76,13 @@ class UserRepository @Inject constructor(
         val localSuccess = userDao.insertUser(user) > 0
         
         auth.currentUser?.uid?.let { uid ->
-            // First, fetch current cloud status to avoid overwriting a "deleted" status
+            // First, fetch current cloud status to avoid overwriting admin-set flags
             val currentDoc = try { 
                 db.collection("users").document(uid).get().await() 
             } catch (e: Exception) { null }
             
             val cloudStatus = currentDoc?.getString("status") ?: user.status
+            val cloudVerified = currentDoc?.getBoolean("isEmailVerified") ?: user.isEmailVerified
 
             val userMap = hashMapOf(
                 "id" to uid,
@@ -97,8 +100,10 @@ class UserRepository @Inject constructor(
                 "excludedIngredients" to user.excludedIngredients,
                 "personalizedPlanJson" to user.personalizedPlanJson,
                 "mealPlanJson" to user.mealPlanJson,
+                "mealPlanStartDate" to user.mealPlanStartDate,
                 "lastCompletedWorkoutDay" to user.lastCompletedWorkoutDay,
-                "status" to cloudStatus, // Preserve the "deleted" status if set by admin
+                "status" to cloudStatus, 
+                "isEmailVerified" to cloudVerified,
                 "totalCaloriesBurned" to user.totalCaloriesBurned,
                 "totalWorkoutMinutes" to user.totalWorkoutMinutes,
                 "totalWorkoutsCompleted" to user.totalWorkoutsCompleted
@@ -132,8 +137,10 @@ class UserRepository @Inject constructor(
                     excludedIngredients = (data["excludedIngredients"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                     personalizedPlanJson = data["personalizedPlanJson"] as? String,
                     mealPlanJson = data["mealPlanJson"] as? String,
+                    mealPlanStartDate = data["mealPlanStartDate"] as? String,
                     lastCompletedWorkoutDay = (data["lastCompletedWorkoutDay"] as? Number)?.toInt() ?: 0,
                     status = data["status"] as? String ?: "active",
+                    isEmailVerified = data["isEmailVerified"] as? Boolean ?: false,
                     totalCaloriesBurned = (data["totalCaloriesBurned"] as? Number)?.toInt() ?: 0,
                     totalWorkoutMinutes = (data["totalWorkoutMinutes"] as? Number)?.toLong() ?: 0L,
                     totalWorkoutsCompleted = (data["totalWorkoutsCompleted"] as? Number)?.toInt() ?: 0

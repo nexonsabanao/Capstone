@@ -25,8 +25,10 @@ data class User(
     var excludedIngredients: List<String> = emptyList(),
     var personalizedPlanJson: String? = null,
     var mealPlanJson: String? = null,
+    var mealPlanStartDate: String? = null, // Added to track plan timeline across devices
     var lastCompletedWorkoutDay: Int = 0,
     var status: String = "active", // Added status field
+    var isEmailVerified: Boolean = false, // Track admin verification bypass
     
     // Progress Stats
     var totalCaloriesBurned: Int = 0,

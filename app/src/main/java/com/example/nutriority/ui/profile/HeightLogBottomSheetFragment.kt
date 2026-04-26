@@ -81,7 +81,8 @@ class HeightLogBottomSheetFragment(
             ruler.setMaxValue(heightInchesRange.endInclusive)
             ruler.setDecimalPlaces(0)
             val inches = (currentHeightCm / CM_PER_INCH).toFloat()
-            val coercedValue = inches.coerceIn(heightInchesRange.start, heightInchesRange.endInclusive)
+            // If height is 0 or less, we want RulerView to handle midpoint
+            val coercedValue = if (currentHeightCm <= 0) 0f else inches.coerceIn(heightInchesRange.start, heightInchesRange.endInclusive)
             ruler.setCurrentValue(coercedValue)
             updateHeight(coercedValue)
         } else {
@@ -91,7 +92,8 @@ class HeightLogBottomSheetFragment(
             ruler.setMaxValue(heightCmRange.endInclusive)
             ruler.setDecimalPlaces(0)
             val cm = currentHeightCm.toFloat()
-            val coercedValue = cm.coerceIn(heightCmRange.start, heightCmRange.endInclusive)
+            // If height is 0 or less, we want RulerView to handle midpoint
+            val coercedValue = if (currentHeightCm <= 0) 0f else cm.coerceIn(heightCmRange.start, heightCmRange.endInclusive)
             ruler.setCurrentValue(coercedValue)
             updateHeight(coercedValue)
         }
@@ -100,18 +102,20 @@ class HeightLogBottomSheetFragment(
     }
 
     private fun updateHeight(value: Float) {
-        // Ensure the stored value is rounded to the nearest whole CM/Inch to avoid decimals
+        // If value is 0 (handled by RulerView as midpoint), we display that midpoint value correctly
+        val finalValue = if (value <= 0f) (binding.heightRuler.getValue()) else value
+        
         currentHeightCm = if (isImperial) {
-            (value * CM_PER_INCH).roundToInt().toDouble()
+            (finalValue * CM_PER_INCH).roundToInt().toDouble()
         } else {
-            value.roundToInt().toDouble()
+            finalValue.roundToInt().toDouble()
         }
 
         if (isImperial) {
-            binding.tvHeightValue.text = formatInchesToFeetAndInches(value)
+            binding.tvHeightValue.text = formatInchesToFeetAndInches(finalValue)
             binding.tvUnitLabel.text = "ft"
         } else {
-            binding.tvHeightValue.text = value.roundToInt().toString()
+            binding.tvHeightValue.text = finalValue.roundToInt().toString()
             binding.tvUnitLabel.text = "cm"
         }
     }

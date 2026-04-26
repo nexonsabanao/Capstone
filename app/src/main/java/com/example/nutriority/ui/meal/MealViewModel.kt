@@ -122,12 +122,15 @@ class MealViewModel @Inject constructor(
                     fat = macros.fatGrams
                 )
                 
+                // Shuffle the pool for variety during regeneration
+                val shuffledPool = mealPool.shuffled()
+                
                 val weekPlan = withContext(Dispatchers.Default) {
                     plannerService.mealPlanner.planWeek(
                         dailyTarget, 
                         user.preferredDiet, 
                         user.excludedIngredients, 
-                        mealPool
+                        shuffledPool
                     )
                 }
 
@@ -149,21 +152,21 @@ class MealViewModel @Inject constructor(
             val plan: List<List<Meal>> = gson.fromJson(json, object : com.google.gson.reflect.TypeToken<List<List<Meal>>>() {}.type)
             val items = mutableListOf<MealListItem>()
             val startDateStr = getPlanStartDate()
+            
             val startDate = if (startDateStr != null) LocalDate.parse(startDateStr) else LocalDate.now()
             val today = LocalDate.now()
 
             plan.forEachIndexed { dayIndex, dayMeals ->
                 val targetDate = startDate.plusDays(dayIndex.toLong())
-                val daysDiff = ChronoUnit.DAYS.between(today, targetDate).toInt()
+                val daysDiffFromToday = ChronoUnit.DAYS.between(today, targetDate).toInt()
                 
-                val dateHeader = when (daysDiff) {
+                val dateHeader = when (daysDiffFromToday) {
                     -1 -> "Yesterday"
                     0 -> "Today"
                     1 -> "Tomorrow"
                     else -> targetDate.format(DateTimeFormatter.ofPattern("MMMM d", Locale.getDefault()))
                 }
                 
-                // Keep the day name (Monday, Tuesday, etc.) for better context
                 val dayName = targetDate.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
                 items.add(MealListItem.HeaderItem("$dateHeader, $dayName", dayIndex))
 
@@ -193,7 +196,6 @@ class MealViewModel @Inject constructor(
         val startDateStr = getPlanStartDate() ?: return false
         val startDate = LocalDate.parse(startDateStr)
         val today = LocalDate.now()
-        // Plan expires if today is more than 6 days after the start date
         return ChronoUnit.DAYS.between(startDate, today) >= 7
     }
 

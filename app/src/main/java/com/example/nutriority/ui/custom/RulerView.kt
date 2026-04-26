@@ -51,7 +51,11 @@ class RulerView @JvmOverloads constructor(
             majorTickFactor = typedArray.getInt(R.styleable.RulerView_ruler_majorTickFactor, 10)
             minValue = (typedArray.getFloat(R.styleable.RulerView_ruler_minValue, 0f) * multiplier).roundToInt()
             maxValue = (typedArray.getFloat(R.styleable.RulerView_ruler_maxValue, 100f) * multiplier).roundToInt()
-            defaultValue = (typedArray.getFloat(R.styleable.RulerView_ruler_defaultValue, minValue.toFloat() / multiplier) * multiplier).roundToInt()
+            
+            // Default to midpoint if not explicitly set in XML
+            val midpoint = (minValue + maxValue) / 2f / multiplier
+            defaultValue = (typedArray.getFloat(R.styleable.RulerView_ruler_defaultValue, midpoint) * multiplier).roundToInt()
+            
             tickInterval = typedArray.getDimension(R.styleable.RulerView_ruler_tickInterval, 40f)
             tickColor = typedArray.getColor(R.styleable.RulerView_ruler_tickColor, Color.GRAY)
             textColor = typedArray.getColor(R.styleable.RulerView_ruler_textColor, Color.BLACK)
@@ -198,10 +202,18 @@ class RulerView @JvmOverloads constructor(
     }
 
     fun setCurrentValue(value: Float) {
-        val newValue = (value * multiplier).roundToInt().coerceIn(minValue, maxValue)
+        // If value is 0 or less (unset), default to the middle of the range
+        val newValue = if (value <= 0f) {
+            (minValue + maxValue) / 2
+        } else {
+            (value * multiplier).roundToInt().coerceIn(minValue, maxValue)
+        }
+        
         if (newValue != currentValue) {
             currentValue = newValue
-            scrollToValue(currentValue, false)
+            if (width > 0) {
+                scrollToValue(currentValue, false)
+            }
         }
     }
 

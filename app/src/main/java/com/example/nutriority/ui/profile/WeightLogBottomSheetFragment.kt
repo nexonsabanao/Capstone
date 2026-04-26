@@ -110,14 +110,16 @@ class WeightLogBottomSheetFragment(
             ruler.setMinValue(weightLbsRange.start)
             ruler.setMaxValue(weightLbsRange.endInclusive)
             val lbs = (currentWeightKg * LBS_PER_KG).toFloat()
-            val coercedValue = lbs.coerceIn(weightLbsRange.start, weightLbsRange.endInclusive)
+            // If weight is 0 or less, we want RulerView to handle midpoint
+            val coercedValue = if (currentWeightKg <= 0) 0f else lbs.coerceIn(weightLbsRange.start, weightLbsRange.endInclusive)
             ruler.setCurrentValue(coercedValue)
             updateWeight(coercedValue)
         } else {
             ruler.setMinValue(weightKgRange.start)
             ruler.setMaxValue(weightKgRange.endInclusive)
             val kg = currentWeightKg.toFloat()
-            val coercedValue = kg.coerceIn(weightKgRange.start, weightKgRange.endInclusive)
+            // If weight is 0 or less, we want RulerView to handle midpoint
+            val coercedValue = if (currentWeightKg <= 0) 0f else kg.coerceIn(weightKgRange.start, weightKgRange.endInclusive)
             ruler.setCurrentValue(coercedValue)
             updateWeight(coercedValue)
         }
@@ -126,8 +128,10 @@ class WeightLogBottomSheetFragment(
     }
 
     private fun updateWeight(value: Float) {
-        currentWeightKg = if (isImperial) value / LBS_PER_KG else value.toDouble()
-        binding.tvWeightValue.text = String.format("%.1f", value)
+        // If value is 0 (handled by RulerView as midpoint), we display that midpoint value correctly
+        val finalValue = if (value <= 0f) (binding.weightRuler.getValue()) else value
+        currentWeightKg = if (isImperial) finalValue / LBS_PER_KG else finalValue.toDouble()
+        binding.tvWeightValue.text = String.format("%.1f", finalValue)
         binding.tvUnitLabel.text = if (isImperial) "lbs" else "kg"
     }
 

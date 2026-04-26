@@ -100,16 +100,25 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
                         showError("This account has been disabled by the administrator.")
                         return@launch
                     }
-                    // Check for the bypass flag added by admin dashboard
                     isAdminVerified = doc.getBoolean("isEmailVerified") ?: false
                 }
 
-                // 3. Final verification check: either Firebase Auth says yes OR Admin manually verified in Firestore
+                // 3. Final verification check
                 if (!firebaseUser.isEmailVerified && !isAdminVerified) {
                     auth.signOut()
                     showAuthOverlay(false)
                     showError("Please verify your email before logging in. Check your inbox.")
                     return@launch
+                }
+                
+                // 4. Sync verification status back to Firestore for regular users
+                // This ensures that if a regular user verified via link, 
+                // it gets marked in Firestore so they benefit from the same bypass later.
+                if (firebaseUser.isEmailVerified && !isAdminVerified) {
+                    FirebaseFirestore.getInstance()
+                        .collection("users")
+                        .document(uid)
+                        .update("isEmailVerified", true)
                 }
                 
                 // Proceed to data restoration or new user creation
@@ -150,11 +159,11 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding>(FragmentLoginBin
                     }
                 } else {
                     // New user - First time login after email verification
-                    // Create their profile record now
                     val newUser = User(
                         id = 1,
                         email = firebaseUser.email ?: "",
                         status = "active",
+                        isEmailVerified = true, // We already checked this in checkAccountStatusAndProceed
                         lastCompletedWorkoutDay = 0
                     )
                     userRepository.insertUser(newUser)

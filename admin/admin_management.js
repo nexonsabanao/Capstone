@@ -106,8 +106,10 @@ document.getElementById('studentForm').onsubmit = async (e) => {
             const email = document.getElementById('stEmail').value.toLowerCase().trim();
             const password = document.getElementById('stPass').value;
 
-            if (password.length < 8) {
-                alert("Password must be at least 8 characters");
+            // Updated password validation: 8+ chars, upper, lower, number
+            const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!passRegex.test(password)) {
+                alert("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.");
                 return;
             }
 
@@ -119,7 +121,7 @@ document.getElementById('studentForm').onsubmit = async (e) => {
             userData.status = "active";
             userData.isEmailVerified = true; // Instant verification flag for admin-created accounts
             await setDoc(doc(db, "users", uid), userData);
-            alert("Account created and instantly verified!");
+            alert("Account added!");
         } else {
             // Ensure email is preserved on edit
             const u = window.cacheSt.find(x => x.fid === fid);

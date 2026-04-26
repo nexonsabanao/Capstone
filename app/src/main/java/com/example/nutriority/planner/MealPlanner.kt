@@ -71,7 +71,7 @@ class MealPlanner @Inject constructor(
 
         // 2. Define meal distribution (Breakfast, Lunch, Dinner)
         val mealConfig = listOf(
-            Triple("Breakfast", 0.30, 0.30), // Time, Calorie Ratio, Protein Ratio
+            Triple("Breakfast", 0.30, 0.30), // Time, Calorie Ratio, Macro Ratio
             Triple("Lunch", 0.35, 0.35),
             Triple("Dinner", 0.35, 0.35)
         )
@@ -79,9 +79,11 @@ class MealPlanner @Inject constructor(
         val selectedMeals = mutableListOf<Meal>()
         val availablePool = filteredMeals.toMutableList()
 
-        for ((time, calRatio, proteinRatio) in mealConfig) {
+        for ((time, calRatio, macroRatio) in mealConfig) {
             val targetCals = (target.calories * calRatio).toInt()
-            val targetProtein = (target.protein * proteinRatio)
+            val targetProtein = (target.protein * macroRatio)
+            val targetCarbs = (target.carbs * macroRatio)
+            val targetFat = (target.fat * macroRatio)
 
             val candidates = availablePool.filter { it.mealTime.equals(time, true) }
             
@@ -90,9 +92,9 @@ class MealPlanner @Inject constructor(
                 val unusedCandidates = candidates.filter { !usedMealIds.contains(it.id) }
                 val currentPool = if (unusedCandidates.size >= 2) unusedCandidates else candidates
 
-                // Score meals based on calorie and protein proximity
+                // Score meals based on calorie and full macro proximity
                 val bestMeal = currentPool.minByOrNull { meal ->
-                    scoreMeal(meal, targetCals, targetProtein)
+                    scoreMeal(meal, targetCals, targetProtein, targetCarbs, targetFat)
                 }
 
                 if (bestMeal != null) {
@@ -102,11 +104,11 @@ class MealPlanner @Inject constructor(
             }
         }
 
-        // Fallback: If we missed a meal time, try to fill it without time restriction if necessary
+        // Fallback: If we missed a meal time, fill it without time restriction
         if (selectedMeals.size < 3 && availablePool.isNotEmpty()) {
             val missingCount = 3 - selectedMeals.size
             repeat(missingCount) {
-                val fallback = availablePool.minByOrNull { scoreMeal(it, (target.calories * 0.33).toInt(), (target.protein * 0.33)) }
+                val fallback = availablePool.minByOrNull { scoreMeal(it, (target.calories * 0.33).toInt(), (target.protein * 0.33), (target.carbs * 0.33), (target.fat * 0.33)) }
                 fallback?.let { 
                     selectedMeals.add(it)
                     availablePool.remove(it)
@@ -117,11 +119,15 @@ class MealPlanner @Inject constructor(
         return selectedMeals
     }
 
-    private fun scoreMeal(meal: Meal, targetCals: Int, targetProtein: Double): Double {
+    private fun scoreMeal(meal: Meal, targetCals: Int, targetProtein: Double, targetCarbs: Double, targetFat: Double): Double {
         val calorieDiff = abs(meal.calories - targetCals).toDouble()
-        // Protein is weighted higher (x2) because it's critical for fitness goals
+        // Protein is weighted highest (x2.0)
         val proteinDiff = abs(meal.macros.protein - targetProtein) * 2.0
-        return calorieDiff + proteinDiff
+        // Carbs and Fats are weighted normally (x1.0)
+        val carbDiff = abs(meal.macros.carbs - targetCarbs) * 1.0
+        val fatDiff = abs(meal.macros.fats - targetFat) * 1.0
+        
+        return calorieDiff + proteinDiff + carbDiff + fatDiff
     }
 
     private fun isMealAllowed(meal: Meal, diet: String, exclusions: List<String>): Boolean {
