@@ -24,15 +24,17 @@ object WorkoutUtil {
             } else {
                 // If there are reps, handle ranges ("8-12") or lists ("10,10,10")
                 val representativeReps = parseAverageReps(assignment.reps)
-                // Estimate 3 seconds per rep (adjusted from 5s for better realism)
-                representativeReps * 3
+                // Estimate 5 seconds per rep to account for controlled movement and setup
+                representativeReps * 5
             }
             
             // Apply (Sets * Work) + (Rest intervals between sets) to ALL categories
             // This ensures adding sets to warmups/cooldowns actually increases total time
             val exerciseTime = (sets * workSec) + ((sets - 1).coerceAtLeast(0) * restSec)
             
-            exerciseTime.coerceIn(0, 3600)
+            // Add a 90-second transition/setup buffer per exercise to realistically account for
+            // moving between equipment, water breaks, and preparation.
+            (exerciseTime + 90).coerceIn(0, 3600)
         }
 
         val totalMinutes = ceil(totalSeconds / 60.0).toInt()

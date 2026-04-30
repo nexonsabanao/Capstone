@@ -22,20 +22,14 @@ class WorkoutPlanner @Inject constructor(
 
     /**
      * Generates a 4-week focus-rotating schedule.
-     * Day 3 is always Abs (replacing Core).
-     * Day 4 rotates through specific upper body parts since generic "Upper Body" was removed.
+     * New schedule: Chest & Shoulders -> Back & Arms -> Rest -> Abs -> Rest -> Legs -> Rest
      */
     private fun getFocusForDay(week: Int, dayInWeek: Int): String {
         return when (dayInWeek) {
-            0 -> "Full Body"
-            1 -> "Rest Day"
-            2 -> "Abs"
-            3 -> when (week) {
-                0 -> "Chest"
-                1 -> "Back"
-                2 -> "Shoulders"
-                else -> "Arms"
-            }
+            0 -> "Chest and Shoulders"
+            1 -> "Back and Arms"
+            2 -> "Rest Day"
+            3 -> "Abs"
             4 -> "Rest Day"
             5 -> "Legs"
             6 -> "Rest Day"
@@ -57,7 +51,6 @@ class WorkoutPlanner @Inject constructor(
         val allAssignments = mutableListOf<WorkoutExercise>()
         val usedExerciseIds = mutableSetOf<String>()
 
-        // Use a more dynamic seed to ensure variation across users AND plans
         val seed = user.id.hashCode().toLong() + System.currentTimeMillis()
         val random = Random(seed)
 
@@ -81,7 +74,6 @@ class WorkoutPlanner @Inject constructor(
                         usedExerciseIds = usedExerciseIds
                     )
                     
-                    // Track used exercises to prioritize variety in future sessions
                     usedExerciseIds.addAll(generated.exerciseAssignments.map { it.assignment.exerciseId })
 
                     allWorkouts.add(generated.workout)
@@ -90,7 +82,6 @@ class WorkoutPlanner @Inject constructor(
                     val durationStr = WorkoutUtil.calculateTotalDuration(generated.exerciseAssignments, true)
                     val durationMinutes = durationStr.filter { it.isDigit() }.toIntOrNull() ?: 30
                     
-                    // Formula: Calories = (MET * 3.5 * weightKg / 200) * durationInMinutes
                     val caloriesBurned = ((generated.workout.metValue * 3.5 * user.weightKg) / 200 * durationMinutes).toInt()
 
                     val warmupList = generated.exerciseAssignments
@@ -180,10 +171,10 @@ class WorkoutPlanner @Inject constructor(
             val isGeneralCooldown = category.contains("cooldown") || category.contains("stretch")
 
             val isFocusMatch = when (focusLower) {
-                "full body" -> true 
-                "upper body" -> bodyPart.contains("arm") || bodyPart.contains("chest") || 
-                               bodyPart.contains("back") || bodyPart.contains("shoulder") ||
-                               bodyPart.contains("waist") || bodyPart.contains("neck")
+                "chest and shoulders" -> bodyPart.contains("chest") || bodyPart.contains("shoulder") || 
+                                        target.contains("chest") || target.contains("shoulder")
+                "back and arms" -> bodyPart.contains("back") || bodyPart.contains("arm") || 
+                                  target.contains("back") || target.contains("arm")
                 "legs" -> bodyPart.contains("leg") || target.contains("quad") || 
                          target.contains("glute") || target.contains("hamstring")
                 "abs", "core" -> bodyPart.contains("waist") || target.contains("abs") || target.contains("core")

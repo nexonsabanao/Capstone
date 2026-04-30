@@ -9,12 +9,9 @@ import com.example.nutriority.data.repository.MealRepository
 import com.example.nutriority.data.repository.UserRepository
 import com.example.nutriority.planner.PlannerService
 import com.example.nutriority.planner.DailyMacroTarget
-import com.example.nutriority.ui.util.AgeUtil
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,8 +65,10 @@ class MealViewModel @Inject constructor(
             if (planJson == null) {
                 MealUiState(isGenerating = isGenerating, isInitialLoading = false)
             } else {
-                val items = parseMealPlan(planJson, logs)
-                val isExpired = checkPlanExpired()
+                val startDateStr = user.mealPlanStartDate ?: getPlanStartDateFromPrefs() ?: LocalDate.now().toString()
+                
+                val items = parseMealPlan(planJson, startDateStr, logs)
+                val isExpired = checkPlanExpired(startDateStr)
                 
                 val dailyCalories = plannerService.calculateDailyTarget(user)
                 val macros = plannerService.calculateMacroTargets(dailyCalories, user)
@@ -107,10 +106,7 @@ class MealViewModel @Inject constructor(
                     mealPool = mealRepository.getAllMealsList()
                 }
 
-                if (mealPool.isEmpty()) {
-                    _isGenerating.value = false
-                    return@launch
-                }
+                if (mealPool.isEmpty()) return@launch
 
                 val dailyCalories = plannerService.calculateDailyTarget(user)
                 val macros = plannerService.calculateMacroTargets(dailyCalories, user)
@@ -122,22 +118,23 @@ class MealViewModel @Inject constructor(
                     fat = macros.fatGrams
                 )
                 
-                // Shuffle the pool for variety during regeneration
-                val shuffledPool = mealPool.shuffled()
-                
                 val weekPlan = withContext(Dispatchers.Default) {
                     plannerService.mealPlanner.planWeek(
                         dailyTarget, 
                         user.preferredDiet, 
                         user.excludedIngredients, 
-                        shuffledPool
+                        mealPool.shuffled()
                     )
                 }
 
                 if (weekPlan.any { it.isNotEmpty() }) {
                     val json = Gson().toJson(weekPlan)
-                    userRepository.insertUser(user.copy(mealPlanJson = json))
-                    savePlanStartDate(LocalDate.now().toString())
+                    val todayStr = LocalDate.now().toString()
+                    savePlanStartDateToPrefs(todayStr) 
+                    userRepository.insertUser(user.copy(
+                        mealPlanJson = json,
+                        mealPlanStartDate = todayStr
+                    ))
                 }
             } catch (e: Exception) {
             } finally {
@@ -146,29 +143,28 @@ class MealViewModel @Inject constructor(
         }
     }
 
-    private fun parseMealPlan(json: String, logs: List<DailyMealLog>): List<MealListItem> {
+    private fun parseMealPlan(json: String, startDateStr: String, logs: List<DailyMealLog>): List<MealListItem> {
         return try {
             val gson = Gson()
             val plan: List<List<Meal>> = gson.fromJson(json, object : com.google.gson.reflect.TypeToken<List<List<Meal>>>() {}.type)
             val items = mutableListOf<MealListItem>()
-            val startDateStr = getPlanStartDate()
             
-            val startDate = if (startDateStr != null) LocalDate.parse(startDateStr) else LocalDate.now()
+            val startDate = LocalDate.parse(startDateStr)
             val today = LocalDate.now()
 
             plan.forEachIndexed { dayIndex, dayMeals ->
                 val targetDate = startDate.plusDays(dayIndex.toLong())
-                val daysDiffFromToday = ChronoUnit.DAYS.between(today, targetDate).toInt()
+                val daysDiff = ChronoUnit.DAYS.between(today, targetDate).toInt()
                 
-                val dateHeader = when (daysDiffFromToday) {
-                    -1 -> "Yesterday"
-                    0 -> "Today"
-                    1 -> "Tomorrow"
-                    else -> targetDate.format(DateTimeFormatter.ofPattern("MMMM d", Locale.getDefault()))
+                val formattedDate = targetDate.format(DateTimeFormatter.ofPattern("MMMM d", Locale.getDefault()))
+                val dateHeader = when (daysDiff) {
+                    -1 -> "Yesterday, $formattedDate"
+                    0 -> "Today, $formattedDate"
+                    1 -> "Tomorrow, $formattedDate"
+                    else -> targetDate.format(DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.getDefault()))
                 }
                 
-                val dayName = targetDate.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
-                items.add(MealListItem.HeaderItem("$dateHeader, $dayName", dayIndex))
+                items.add(MealListItem.HeaderItem(dateHeader, dayIndex))
 
                 dayMeals.sortedBy {
                     when(it.mealTime.lowercase()) {
@@ -182,7 +178,6 @@ class MealViewModel @Inject constructor(
                         val logDate = Instant.ofEpochMilli(log.date).atZone(ZoneId.systemDefault()).toLocalDate()
                         log.mealId == meal.id && logDate == targetDate
                     }
-                    
                     items.add(MealListItem.MealItem(meal, dayIndex, isLogged))
                 }
             }
@@ -192,20 +187,28 @@ class MealViewModel @Inject constructor(
         }
     }
 
-    private fun checkPlanExpired(): Boolean {
-        val startDateStr = getPlanStartDate() ?: return false
-        val startDate = LocalDate.parse(startDateStr)
-        val today = LocalDate.now()
-        return ChronoUnit.DAYS.between(startDate, today) >= 7
+    private fun checkPlanExpired(startDateStr: String?): Boolean {
+        val startDate = if (startDateStr != null) LocalDate.parse(startDateStr) else return false
+        return ChronoUnit.DAYS.between(startDate, LocalDate.now()) >= 7
     }
 
     fun deleteMealPlan() {
         viewModelScope.launch {
             val user = userRepository.getInitialUser()
             if (user != null) {
-                userRepository.insertUser(user.copy(mealPlanJson = null))
+                userRepository.insertUser(user.copy(mealPlanJson = null, mealPlanStartDate = null))
             }
         }
+    }
+
+    private fun savePlanStartDateToPrefs(date: String) {
+        val prefs = application.getSharedPreferences("meal_prefs", android.content.Context.MODE_PRIVATE)
+        prefs.edit().putString("plan_start_date", date).apply()
+    }
+
+    private fun getPlanStartDateFromPrefs(): String? {
+        val prefs = application.getSharedPreferences("meal_prefs", android.content.Context.MODE_PRIVATE)
+        return prefs.getString("plan_start_date", null)
     }
 
     fun swapMeal(mealToReplace: Meal, dayIndex: Int) {
@@ -288,15 +291,5 @@ class MealViewModel @Inject constructor(
 
     fun onSwapCancelled() {
         _swapState.value = null
-    }
-
-    private fun savePlanStartDate(date: String) {
-        val prefs = application.getSharedPreferences("meal_prefs", android.content.Context.MODE_PRIVATE)
-        prefs.edit().putString("plan_start_date", date).apply()
-    }
-
-    private fun getPlanStartDate(): String? {
-        val prefs = application.getSharedPreferences("meal_prefs", android.content.Context.MODE_PRIVATE)
-        return prefs.getString("plan_start_date", null)
     }
 }

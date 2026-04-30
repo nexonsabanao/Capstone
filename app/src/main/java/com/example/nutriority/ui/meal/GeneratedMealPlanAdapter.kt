@@ -20,11 +20,14 @@ sealed class MealListItem {
     abstract val id: String
 
     data class HeaderItem(val dateText: String, val dayIndex: Int) : MealListItem() {
-        override val id: String = dateText
+        // Use a stable ID based on dayIndex so headers don't "re-create" when text changes (e.g. Tomorrow -> Today)
+        override val id: String = "header_$dayIndex"
     }
 
     data class MealItem(val meal: Meal, val dayIndex: Int, val isLogged: Boolean = false) : MealListItem() {
-        override val id: String = meal.name + meal.mealTime + dayIndex + isLogged
+        // Use a stable ID that doesn't change when logged status changes for better DiffUtil performance, 
+        // but include enough to be unique.
+        override val id: String = "${meal.id}_${dayIndex}_${meal.mealTime}"
     }
 }
 
@@ -82,7 +85,6 @@ class GeneratedMealPlanAdapter(
         private val mealName: TextView = itemView.findViewById(R.id.meal_name)
         private val swapButton: ImageView = itemView.findViewById(R.id.reorder_button)
         
-        // New views for logged status
         private val loggedOverlay: View = itemView.findViewById(R.id.logged_overlay)
         private val checkBadge: ImageView = itemView.findViewById(R.id.iv_check_badge)
         private val loggedStatusText: TextView = itemView.findViewById(R.id.tv_logged_status)
@@ -96,7 +98,7 @@ class GeneratedMealPlanAdapter(
             loggedOverlay.isVisible = item.isLogged
             checkBadge.isVisible = item.isLogged
             loggedStatusText.isVisible = item.isLogged
-            swapButton.isVisible = !item.isLogged // Hide swap if already logged
+            swapButton.isVisible = !item.isLogged 
             
             Glide.with(itemView.context)
                 .load(meal.imageName)
@@ -105,10 +107,10 @@ class GeneratedMealPlanAdapter(
 
             val mealTimeDrawable = mealTime.background.mutate() as? GradientDrawable
             mealTimeDrawable?.let { drawable ->
-                val color = when (meal.mealTime) {
-                    "Breakfast" -> Color.parseColor("#537770")
-                    "Lunch"     -> Color.parseColor("#c27d36")
-                    "Dinner"    -> Color.parseColor("#416491")
+                val color = when (meal.mealTime.lowercase()) {
+                    "breakfast" -> Color.parseColor("#537770")
+                    "lunch"     -> Color.parseColor("#c27d36")
+                    "dinner"    -> Color.parseColor("#416491")
                     else        -> Color.parseColor("#888888")
                 }
                 drawable.setColor(color)
