@@ -66,25 +66,25 @@ class EditProfileFragment : Fragment() {
     private fun setupFieldStaticContent() {
         binding.rowAge.tvLabel.text = "Birthday"
         binding.rowAge.ivIcon.setImageResource(R.drawable.ic_calendar)
-        
+
         binding.rowGender.tvLabel.text = "Sex"
         binding.rowGender.ivIcon.setImageResource(R.drawable.outline_account_circle_50)
 
         binding.rowWeight.tvLabel.text = "Weight"
         binding.rowWeight.ivIcon.setImageResource(R.drawable.ic_scale_24)
-        
+
         binding.rowHeight.tvLabel.text = "Height"
         binding.rowHeight.ivIcon.setImageResource(R.drawable.ic_height_24)
-        
+
         binding.rowActivity.tvLabel.text = "Activity Level"
         binding.rowActivity.ivIcon.setImageResource(R.drawable.ic_exercise_24)
-        
+
         binding.rowGoal.tvLabel.text = "Goal"
         binding.rowGoal.ivIcon.setImageResource(R.drawable.ic_fitness_24)
-        
+
         binding.rowDiet.tvLabel.text = "Preferred Diet"
         binding.rowDiet.ivIcon.setImageResource(R.drawable.ic_award_meal_24)
-        
+
         binding.rowExclusions.tvLabel.text = "Excluded Ingredients"
         binding.rowExclusions.ivIcon.setImageResource(R.drawable.ic_allergy)
     }
@@ -92,7 +92,7 @@ class EditProfileFragment : Fragment() {
     private fun setupClickListeners() {
         binding.btnBack.setOnClickListener { navigationViewModel.goBack() }
 
-        binding.rowName.setOnClickListener { 
+        binding.rowName.setOnClickListener {
             showEditBottomSheet("Full Name", "What should we call you?", currentUser?.name ?: "", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS) { newVal ->
                 if (newVal != currentUser?.name) {
                     updateUserField(false) { it.copy(name = newVal) }
@@ -100,7 +100,7 @@ class EditProfileFragment : Fragment() {
             }
         }
 
-        binding.rowAge.root.setOnClickListener { 
+        binding.rowAge.root.setOnClickListener {
             DatePickerUtil.showDatePicker(requireContext(), currentUser?.birthDate) { selection ->
                 val age = calculateAgeFromMillis(selection)
                 if (age in 17..65) {
@@ -122,15 +122,15 @@ class EditProfileFragment : Fragment() {
             }
         }
 
-        binding.rowWeight.root.setOnClickListener { 
+        binding.rowWeight.root.setOnClickListener {
             showWeightLogBottomSheet()
         }
 
-        binding.rowHeight.root.setOnClickListener { 
+        binding.rowHeight.root.setOnClickListener {
             showHeightLogBottomSheet()
         }
 
-        binding.rowActivity.root.setOnClickListener { 
+        binding.rowActivity.root.setOnClickListener {
             val options = arrayOf("Sedentary", "Lightly Active", "Active")
             showOptionsBottomSheet("Activity Level", "Choose your daily activity level", options) { selection ->
                 if (selection != currentUser?.activityLevel) {
@@ -139,7 +139,7 @@ class EditProfileFragment : Fragment() {
             }
         }
 
-        binding.rowGoal.root.setOnClickListener { 
+        binding.rowGoal.root.setOnClickListener {
             val options = arrayOf("Lose Weight", "Keep Fit", "Build Muscle")
             showOptionsBottomSheet("Main Goal", "What do you want to achieve?", options) { selection ->
                 if (selection != currentUser?.goal) {
@@ -148,7 +148,7 @@ class EditProfileFragment : Fragment() {
             }
         }
 
-        binding.rowDiet.root.setOnClickListener { 
+        binding.rowDiet.root.setOnClickListener {
             val options = arrayOf("Balanced", "Low-Carb", "Vegetarian")
             showOptionsBottomSheet("Preferred Diet", "Choose a nutrition style", options) { selection ->
                 if (selection != currentUser?.preferredDiet) {
@@ -174,7 +174,7 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun showAboutDialog() {
-        val aboutText = """
+        val infoText = """
             <b>Nutriority</b> is a cutting-edge, personalized fitness and nutrition companion owned and operated by <b>Xfactor Fitness Gym</b>. Our mission is to transform lives by providing expert-level guidance that is accessible to everyone.<br><br>
             <b>Key Features:</b><br>
             • <b>Personalized Workout Plans:</b> Tailored to your fitness level, goals, and available equipment.<br>
@@ -182,12 +182,26 @@ class EditProfileFragment : Fragment() {
             • <b>Progress Monitoring:</b> Track your body metrics and workout consistency over time.<br>
             • <b>Expert Guidance:</b> Science-backed routines designed to maximize results and minimize injury risk.<br><br>
             Whether you are looking to lose weight, build muscle, or maintain a healthy lifestyle, <b>Nutriority</b> provides the tools and motivation you need to succeed.<br><br>
+            
+            <b>Research & Development:</b><br>
+            <b>Study Conducted at:</b><br>
+            XFactor Fitness Gym Trece<br><br>
+            
+            <b>Professional Guidance:</b><br>
+            • Headcoach: Skylove Panaligan<br>
+            • Nutritionist: Mark Anthony Rimando<br><br>
+            
+            <b>Creators & Researchers:</b><br>
+            • Nexon Jr. Y. Sabañao<br>
+            • Kenneth Ian B. Benedicto<br>
+            • Ivan A. Pamaran<br><br>
+            
             <i>Version 1.0.0</i>
         """.trimIndent()
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("About Nutriority")
-            .setMessage(HtmlCompat.fromHtml(aboutText, HtmlCompat.FROM_HTML_MODE_COMPACT))
+            .setMessage(HtmlCompat.fromHtml(infoText, HtmlCompat.FROM_HTML_MODE_COMPACT))
             .setPositiveButton("OK", null)
             .show()
     }
@@ -252,13 +266,13 @@ class EditProfileFragment : Fragment() {
 
     private fun isPlanReady(user: User?): Boolean {
         if (user == null) return false
-        return user.birthDate != null && 
-               user.heightCm > 0 && 
-               user.weightKg > 0 && 
-               user.gender.isNotBlank() && 
-               user.activityLevel.isNotBlank() && 
-               user.goal.isNotBlank() &&
-               user.preferredDiet.isNotBlank()
+        return user.birthDate != null &&
+                user.heightCm > 0 &&
+                user.weightKg > 0 &&
+                user.gender.isNotBlank() &&
+                user.activityLevel.isNotBlank() &&
+                user.goal.isNotBlank() &&
+                user.preferredDiet.isNotBlank()
     }
 
     private fun handleFieldUpdateWithPlanChoice(fieldName: String, updateAction: (User) -> User) {
@@ -337,7 +351,7 @@ class EditProfileFragment : Fragment() {
         etValue.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         etValue.hint = "Password"
         btnSave.text = "CONFIRM & DELETE"
-        
+
         btnSave.setOnClickListener {
             val password = etValue.text.toString()
             if (password.isNotBlank()) { dialog.dismiss(); performReauthAndDeletion(password) }
@@ -391,10 +405,10 @@ class EditProfileFragment : Fragment() {
                 binding.rowAge.tvValue.text = it.birthDate?.let { date -> sdf.format(Date(date)) } ?: "Not set"
                 binding.rowGender.tvValue.text = it.gender
                 binding.rowWeight.tvValue.text = "${it.weightKg} kg"
-                
+
                 // Fix: Round height to nearest whole number for display in the list row
                 binding.rowHeight.tvValue.text = "${it.heightCm.roundToInt()} cm"
-                
+
                 binding.rowActivity.tvValue.text = it.activityLevel
                 binding.rowGoal.tvValue.text = it.goal
                 binding.rowDiet.tvValue.text = it.preferredDiet
@@ -429,7 +443,7 @@ class EditProfileFragment : Fragment() {
         etValue.inputType = inputType
         etValue.setText(currentVal)
         etValue.setSelection(etValue.text?.length ?: 0)
-        
+
         btnSave.setOnClickListener {
             val newVal = etValue.text.toString()
             if (newVal.isNotBlank() || title == "Exclusions") { onSave(newVal); dialog.dismiss() }
@@ -443,12 +457,12 @@ class EditProfileFragment : Fragment() {
         val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
         val view = layoutInflater.inflate(R.layout.layout_edit_field_bottom_sheet, null)
         val container = view.findViewById<ViewGroup>(R.id.optionsContainer) ?: (view as ViewGroup)
-        
+
         view.findViewById<TextView>(R.id.tvSheetTitle).text = title
         view.findViewById<TextView>(R.id.tvSheetSubtitle).text = subtitle
         view.findViewById<View>(R.id.textInputLayout).visibility = View.GONE
         view.findViewById<View>(R.id.btnSave).visibility = View.GONE
-        
+
         options.forEach { option ->
             val itemView = layoutInflater.inflate(R.layout.item_selection_option, container, false)
             val tvOption = itemView.findViewById<TextView>(R.id.tvOptionText)

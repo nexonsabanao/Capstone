@@ -35,6 +35,10 @@ class WelcomeFragment : BaseBindingFragment<FragmentWelcomeBinding>(FragmentWelc
             showTermsDialog()
         }
 
+        binding.btnInfo.setOnClickListener {
+            showStudyInfoDialog()
+        }
+
         binding.acceptButton.setOnClickListener {
             // Check if user has already completed onboarding (has a plan)
             val user = userViewModel.user.value
@@ -46,6 +50,41 @@ class WelcomeFragment : BaseBindingFragment<FragmentWelcomeBinding>(FragmentWelc
                 setFragmentResult("navigationRequestNext", Bundle())
             }
         }
+    }
+
+    private fun showStudyInfoDialog() {
+        val infoText = """
+            <b>Nutriority</b> is a cutting-edge, personalized fitness and nutrition companion owned and operated by <b>Xfactor Fitness Gym</b>. Our mission is to transform lives by providing expert-level guidance that is accessible to everyone.<br><br>
+            <b>Key Features:</b><br>
+            • <b>Personalized Workout Plans:</b> Tailored to your fitness level, goals, and available equipment.<br>
+            • <b>Nutrition Tracking:</b> Smart meal logging and diet plans based on your preferences.<br>
+            • <b>Progress Monitoring:</b> Track your body metrics and workout consistency over time.<br>
+            • <b>Expert Guidance:</b> Science-backed routines designed to maximize results and minimize injury risk.<br><br>
+            Whether you are looking to lose weight, build muscle, or maintain a healthy lifestyle, <b>Nutriority</b> provides the tools and motivation you need to succeed.<br><br>
+            
+            <b>Research & Development:</b><br>
+            <b>Study Conducted at:</b><br>
+            XFactor Fitness Gym Trece<br><br>
+            
+            <b>Professional Guidance:</b><br>
+            • Headcoach: Skylove Panaligan<br>
+            • Nutritionist: Mark Anthony Rimando<br><br>
+            
+            <b>Creators & Researchers:</b><br>
+            • Nexon Jr. Y. Sabañao<br>
+            • Kenneth Ian B. Benedicto<br>
+            • Ivan A. Pamaran<br><br>
+            
+            <i>Version 1.0.0</i>
+        """.trimIndent()
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("About Nutriority")
+            .setMessage(HtmlCompat.fromHtml(infoText, HtmlCompat.FROM_HTML_MODE_COMPACT))
+            .setPositiveButton("Close", null)
+            .show()
+
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_dark))
     }
 
     private fun showTermsDialog() {
