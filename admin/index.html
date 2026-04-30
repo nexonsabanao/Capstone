@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nutriority | Effective Health and Fitness Management</title>
+    <title>Nutriority | Health Comes First</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -171,11 +171,16 @@
             gap: 15px;
             animation: scroll 30s linear infinite;
             width: max-content;
+            transition: transform 0.5s ease;
         }
 
-        /* Only pause on devices that support proper hover (desktops) to avoid "sticky hover" bugs on mobile */
+        .carousel-track.paused {
+            animation-play-state: paused;
+        }
+
+        /* Only pause on devices that support proper hover (desktops) */
         @media (hover: hover) {
-            .carousel-container:hover .carousel-track {
+            .carousel-container:hover .carousel-track:not(.paused) {
                 animation-play-state: paused;
             }
         }
@@ -187,10 +192,19 @@
             border-radius: 20px;
             width: 320px;
             flex-shrink: 0;
-            transition: 0.3s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             backdrop-filter: blur(5px);
             position: relative;
             z-index: 2;
+            cursor: pointer;
+        }
+
+        .tip-card.active {
+            border-color: var(--primary);
+            background: rgba(0, 167, 139, 0.1);
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 0 30px var(--primary-glow);
         }
 
         .tip-tag {
@@ -240,7 +254,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            padding: 40px 5% 60px;
+            padding: 60px 5% 80px;
             max-width: 600px;
             margin: 0 auto;
         }
@@ -386,7 +400,7 @@
     <span class="motto">Train Hard, Eat Smart</span>
     <h1>A Practical Approach<br>to Your Fitness Goals.</h1>
     <p>Nutriority provides a structured framework for managing your nutrition and exercise routines. Achieve consistent progress through organized planning and tracking.</p>
-    <a href="#" class="cta-btn">Download Nutriority APK (24MB)</a>
+    <a href="https://github.com/Nutriority/Installer/releases/download/v1.0.0/Nutriority.apk" class="cta-btn">Download Nutriority APK (20MB)</a>
 </header>
 
 <section class="carousel-section">
@@ -434,7 +448,7 @@
                 <h3>Effective Planning</h3>
                 <p>Preparing your schedule in advance helps you stay committed to your goals and reduces the likelihood of making unplanned choices.</p>
             </div>
-            <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
+            <!-- Set 2 -->
             <div class="tip-card">
                 <span class="tip-tag">Nutrition</span>
                 <h3>The Value of Consistency</h3>
@@ -516,8 +530,27 @@
 </section>
 
 <footer>
-    <p>&copy; 2024 Nutriority. Designed for effective health and fitness management.</p>
+    <p>&copy; 2026 Nutriority. Designed for effective health and fitness management.</p>
 </footer>
+
+<script>
+    // Handle card clicks for highlighting and pausing carousel
+    document.querySelectorAll('.tip-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            const track = document.querySelector('.carousel-track');
+            const isActive = card.classList.contains('active');
+            
+            // Remove active from all cards
+            document.querySelectorAll('.tip-card').forEach(c => c.classList.remove('active'));
+            track.classList.remove('paused');
+
+            if (!isActive) {
+                card.classList.add('active');
+                track.classList.add('paused');
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
