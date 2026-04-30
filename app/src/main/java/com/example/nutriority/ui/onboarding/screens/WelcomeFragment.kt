@@ -54,23 +54,25 @@ class WelcomeFragment : BaseBindingFragment<FragmentWelcomeBinding>(FragmentWelc
 
     private fun showStudyInfoDialog() {
         val infoText = """
-            <b>Nutriority</b> is a cutting-edge, personalized fitness and nutrition companion owned and operated by <b>Xfactor Fitness Gym</b>. Our mission is to transform lives by providing expert-level guidance that is accessible to everyone.<br><br>
-            <b>Key Features:</b><br>
-            • <b>Personalized Workout Plans:</b> Tailored to your fitness level, goals, and available equipment.<br>
-            • <b>Nutrition Tracking:</b> Smart meal logging and diet plans based on your preferences.<br>
-            • <b>Progress Monitoring:</b> Track your body metrics and workout consistency over time.<br>
-            • <b>Expert Guidance:</b> Science-backed routines designed to maximize results and minimize injury risk.<br><br>
-            Whether you are looking to lose weight, build muscle, or maintain a healthy lifestyle, <b>Nutriority</b> provides the tools and motivation you need to succeed.<br><br>
+            <b>Nutriority</b> is a student-made app developed for our capstone project in partnership with <b>Xfactor Fitness Gym</b>. We want to make it easier for everyone to start their fitness journey and stay consistent with healthy habits.<br><br>
             
-            <b>Research & Development:</b><br>
-            <b>Study Conducted at:</b><br>
+            <b>What you can do:</b><br>
+            • <b>Custom Workouts:</b> Get exercise lists that match what you can do.<br>
+            • <b>Meal planner:</b> Easily record what you eat and see meal suggestions that fit your taste.<br>
+            • <b>Track Your Progress:</b> See how your weight and body changes as you keep exercising.<br>
+            • <b>Coach-Approved Plans:</b> Our routines were checked by gym coaches to make sure they are safe to follow.<br><br>
+            
+            Whether you want to get stronger, lose weight, or just keep moving, <b>Nutriority</b> is here to help you stay on track.<br><br>
+            
+            <b>Project Information:</b><br>
+            <b>Where we studied:</b><br>
             XFactor Fitness Gym Trece<br><br>
             
-            <b>Professional Guidance:</b><br>
+            <b>People who helped us:</b><br>
             • Headcoach: Skylove Panaligan<br>
             • Nutritionist: Mark Anthony Rimando<br><br>
             
-            <b>Creators & Researchers:</b><br>
+            <b>Student Team:</b><br>
             • Nexon Jr. Y. Sabañao<br>
             • Kenneth Ian B. Benedicto<br>
             • Ivan A. Pamaran<br><br>
