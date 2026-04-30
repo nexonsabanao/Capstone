@@ -289,9 +289,26 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
 
         val allDone = currentSets.all { it.isCompleted }
         val active = currentSets.find { it.isActive }
+        val isLast = (navigationViewModel.exercisePosition.value) == (navigationViewModel.totalExercises.value)
+
+        // Disable/Enable Auto-Log based on workout status
+        if (allDone && isLast) {
+            isAutoLogOn = false
+            workoutViewModel.stopAutoLogTimer()
+            binding.btnAutoLog.apply {
+                text = "Auto-Log: OFF"
+                isEnabled = false
+                setOnClickListener(null)
+            }
+        } else {
+            binding.btnAutoLog.apply {
+                isEnabled = true
+                text = if (isAutoLogOn) "Auto-Log: ON" else "Auto-Log: OFF"
+                setOnClickListener { showAutoLogBottomSheet() }
+            }
+        }
 
         if (allDone) {
-            val isLast = (navigationViewModel.exercisePosition.value) == (navigationViewModel.totalExercises.value)
             binding.btnLogSet.apply {
                 text = if (isLast) "FINISH WORKOUT" else "NEXT EXERCISE"
                 setIconResource(if (isLast) R.drawable.ic_check_circle else R.drawable.ic_play_arrow)
@@ -312,7 +329,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         binding.backButton.setOnClickListener { workoutViewModel.stopRestTimer(); navigationViewModel.goBack() }
         binding.btnAboutExercise.setOnClickListener { viewModel.exercise.value?.let { AboutExerciseBottomSheet.newInstance(it).show(childFragmentManager, "AboutExerciseBottomSheet") } }
         binding.btnRest.setOnClickListener { isRestOn = !isRestOn; binding.btnRest.text = if (isRestOn) "Rest : ON" else "Rest : OFF" }
-        binding.btnAutoLog.setOnClickListener { showAutoLogBottomSheet() }
+        // Note: btnAutoLog listener is now managed in updateAndSubmitList
         binding.btnCheck.setOnClickListener { ensureWorkoutStarted(); completeAllSets() }
         binding.btnLogSet.setOnClickListener {
             ensureWorkoutStarted()
