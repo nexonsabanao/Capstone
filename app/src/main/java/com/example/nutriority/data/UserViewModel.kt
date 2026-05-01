@@ -94,17 +94,16 @@ class UserViewModel @Inject constructor(
                     )
                 }
                 val mealJson = gson.toJson(weekPlan)
+                val todayStr = LocalDate.now().toString()
                 
                 val updatedUser = currentUser.copy(
                     personalizedPlanJson = workoutJson,
                     mealPlanJson = mealJson,
+                    mealPlanStartDate = todayStr,
                     lastCompletedWorkoutDay = 0
                 )
                 
                 repository.insertUser(updatedUser)
-                // Note: savePlanStartDate logic is usually in MealViewModel, 
-                // but since we update user here, it will trigger UI refresh.
-                // We should also ideally update the shared pref for start date.
             } catch (e: Exception) {
             } finally {
                 _isLoading.value = false
@@ -136,9 +135,11 @@ class UserViewModel @Inject constructor(
     suspend fun saveFullPlan(workoutPlanJson: String, mealPlanJson: String): Boolean {
         return withContext(Dispatchers.IO) {
             val currentUser = repository.getInitialUser() ?: User(id = 1)
+            val todayStr = LocalDate.now().toString()
             val updatedUser = currentUser.copy(
                 personalizedPlanJson = workoutPlanJson,
-                mealPlanJson = mealPlanJson
+                mealPlanJson = mealPlanJson,
+                mealPlanStartDate = todayStr
             )
             val success = repository.insertUser(updatedUser)
             

@@ -38,7 +38,8 @@ data class MealUiState(
     val targetProtein: Int = 0,
     val targetCarbs: Int = 0,
     val targetFat: Int = 0,
-    val isInitialLoading: Boolean = true 
+    val isInitialLoading: Boolean = true,
+    val startDate: LocalDate? = null
 )
 
 @HiltViewModel
@@ -53,6 +54,9 @@ class MealViewModel @Inject constructor(
     private val _swapState = MutableStateFlow<MealSwapState?>(null)
     val swapState: StateFlow<MealSwapState?> = _swapState.asStateFlow()
 
+    private val _errorEvents = MutableSharedFlow<String>()
+    val errorEvents: SharedFlow<String> = _errorEvents.asSharedFlow()
+
     val uiState: StateFlow<MealUiState> = combine(
         userRepository.getUser, 
         mealRepository.getAllLogs(),
@@ -65,8 +69,22 @@ class MealViewModel @Inject constructor(
             if (planJson == null) {
                 MealUiState(isGenerating = isGenerating, isInitialLoading = false)
             } else {
-                val startDateStr = user.mealPlanStartDate ?: getPlanStartDateFromPrefs() ?: LocalDate.now().toString()
+                var startDateStr = user.mealPlanStartDate ?: getPlanStartDateFromPrefs()
                 
+                if (startDateStr == null) {
+                    startDateStr = LocalDate.now().toString()
+                    savePlanStartDateToPrefs(startDateStr)
+                    viewModelScope.launch {
+                        userRepository.insertUser(user.copy(mealPlanStartDate = startDateStr))
+                    }
+                } else if (user.mealPlanStartDate == null) {
+                    val dateToSync = startDateStr
+                    viewModelScope.launch {
+                        userRepository.insertUser(user.copy(mealPlanStartDate = dateToSync))
+                    }
+                }
+                
+                val startDate = try { LocalDate.parse(startDateStr) } catch (e: Exception) { LocalDate.now() }
                 val items = parseMealPlan(planJson, startDateStr, logs)
                 val isExpired = checkPlanExpired(startDateStr)
                 
@@ -82,7 +100,8 @@ class MealViewModel @Inject constructor(
                     targetProtein = macros.proteinGrams,
                     targetCarbs = macros.carbsGrams,
                     targetFat = macros.fatGrams,
-                    isInitialLoading = false
+                    isInitialLoading = false,
+                    startDate = startDate
                 )
             }
         }
@@ -95,10 +114,15 @@ class MealViewModel @Inject constructor(
     )
 
     fun generateNewMealPlan() {
+        if (_isGenerating.value) return
+        
         viewModelScope.launch {
             _isGenerating.value = true
             try {
-                val user = userRepository.getInitialUser() ?: return@launch
+                val user = userRepository.getInitialUser() ?: run {
+                    _errorEvents.emit("User profile not found")
+                    return@launch
+                }
                 
                 var mealPool = mealRepository.getAllMealsList()
                 if (mealPool.isEmpty()) {
@@ -106,7 +130,10 @@ class MealViewModel @Inject constructor(
                     mealPool = mealRepository.getAllMealsList()
                 }
 
-                if (mealPool.isEmpty()) return@launch
+                if (mealPool.isEmpty()) {
+                    _errorEvents.emit("Meal database is empty. Please check your connection.")
+                    return@launch
+                }
 
                 val dailyCalories = plannerService.calculateDailyTarget(user)
                 val macros = plannerService.calculateMacroTargets(dailyCalories, user)
@@ -135,8 +162,11 @@ class MealViewModel @Inject constructor(
                         mealPlanJson = json,
                         mealPlanStartDate = todayStr
                     ))
+                } else {
+                    _errorEvents.emit("Could not generate plan with current filters. Try relaxing your exclusions.")
                 }
             } catch (e: Exception) {
+                _errorEvents.emit("An error occurred while generating your plan.")
             } finally {
                 _isGenerating.value = false
             }
@@ -197,11 +227,12 @@ class MealViewModel @Inject constructor(
             val user = userRepository.getInitialUser()
             if (user != null) {
                 userRepository.insertUser(user.copy(mealPlanJson = null, mealPlanStartDate = null))
+                savePlanStartDateToPrefs(null)
             }
         }
     }
 
-    private fun savePlanStartDateToPrefs(date: String) {
+    private fun savePlanStartDateToPrefs(date: String?) {
         val prefs = application.getSharedPreferences("meal_prefs", android.content.Context.MODE_PRIVATE)
         prefs.edit().putString("plan_start_date", date).apply()
     }

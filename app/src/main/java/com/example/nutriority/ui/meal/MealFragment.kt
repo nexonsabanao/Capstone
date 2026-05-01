@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 @AndroidEntryPoint
@@ -47,7 +48,10 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
-        updateDateViews()
+        
+        // Initial state
+        updateDateViews(LocalDate.now())
+        
         setupClickListeners()
         observeViewModel()
     }
@@ -86,8 +90,9 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
         if (missingFields.isNotEmpty()) {
             showProfileIncompleteDialog(missingFields)
         } else {
-            // Immediate UI feedback to prevent perceived delay
+            // Immediate UI feedback: hide everything and show loader
             binding.initialView.isVisible = false
+            binding.generatedMealPlanRecyclerView.isVisible = false
             binding.loadingProgressBar.isVisible = true
             mealViewModel.generateNewMealPlan()
         }
@@ -122,6 +127,12 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
     private fun showPopupMenu(view: View) {
         val popup = PopupMenu(requireContext(), view)
         popup.menuInflater.inflate(R.menu.menu_meal_plan, popup.menu)
+        
+        // Disable actions while generating
+        val isGenerating = mealViewModel.uiState.value.isGenerating
+        popup.menu.findItem(R.id.action_regenerate)?.isEnabled = !isGenerating
+        popup.menu.findItem(R.id.action_delete_plan)?.isEnabled = !isGenerating
+
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_delete_plan -> {
@@ -143,6 +154,7 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
+                    var wasGenerating = false
                     mealViewModel.uiState.collectLatest { state ->
                         if (state.isInitialLoading) {
                             binding.loadingProgressBar.isVisible = true
@@ -159,11 +171,23 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
                         binding.nextButton.isEnabled = !state.isGenerating
                         binding.doneButton.isVisible = state.hasPlan && state.isPlanExpired
                         
-                        // FIX: Ensure button visibility respects the generating state to prevent it from reappearing 
-                        // due to explicit visibility overrides.
                         binding.nextButton.isVisible = (!state.hasPlan || state.isPlanExpired) && !state.isGenerating
                         
-                        mealAdapter.submitList(state.items)
+                        state.startDate?.let { updateDateViews(it) }
+                        
+                        mealAdapter.submitList(state.items) {
+                            // If we just finished generating, scroll to the top to see the new plan
+                            if (wasGenerating && !state.isGenerating && state.hasPlan) {
+                                binding.mealNestedScrollView.smoothScrollTo(0, 0)
+                            }
+                            wasGenerating = state.isGenerating
+                        }
+                    }
+                }
+
+                launch {
+                    mealViewModel.errorEvents.collect { message ->
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
                     }
                 }
 
@@ -186,13 +210,21 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
         }
     }
 
-    private fun updateDateViews() {
+    private fun updateDateViews(startDate: LocalDate) {
         val today = LocalDate.now()
-        val endDate = today.plusDays(6)
+        val endDate = startDate.plusDays(6)
         val monthDayFormatter = DateTimeFormatter.ofPattern("MMM d", Locale.getDefault())
         val dayNameFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())
 
-        binding.startDateText.text = today.format(monthDayFormatter)
+        val startDayLabel = when (ChronoUnit.DAYS.between(today, startDate).toInt()) {
+            0 -> "Today"
+            -1 -> "Yesterday"
+            1 -> "Tomorrow"
+            else -> startDate.format(dayNameFormatter)
+        }
+
+        binding.startDayName.text = startDayLabel
+        binding.startDateText.text = startDate.format(monthDayFormatter)
         binding.endDayName.text = endDate.format(dayNameFormatter)
         binding.endDateText.text = endDate.format(monthDayFormatter)
     }
