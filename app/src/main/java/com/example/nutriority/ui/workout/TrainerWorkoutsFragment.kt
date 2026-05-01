@@ -66,16 +66,19 @@ class TrainerWorkoutsFragment : BaseBindingFragment<LayoutTrainerWorkoutsBinding
                     val officialWorkouts = workouts.filter { it.category == "Official" || it.id in 1..25 }
 
                     if (officialWorkouts.isNotEmpty() && user != null) {
-                        // 2. Determine allowed difficulties based on user activity level (lowercase for safety)
+                        // 2. Determine allowed difficulties and display label based on user activity level
                         val activity = user.activityLevel.lowercase().trim()
-                        val allowedDifficulties = when {
-                            activity.contains("sedentary") -> listOf("Beginner")
-                            activity.contains("lightly active") -> listOf("Beginner", "Intermediate")
-                            activity.contains("active") -> listOf("Intermediate", "Advanced")
-                            else -> listOf("Beginner") // Safe default
+                        val (displayDifficulty, allowedDifficulties) = when {
+                            activity.contains("sedentary") -> "Beginner" to listOf("Beginner")
+                            activity.contains("lightly active") -> "Intermediate" to listOf("Intermediate", "Beginner")
+                            activity.contains("active") -> "Advanced" to listOf("Advanced", "Intermediate")
+                            else -> "Beginner" to listOf("Beginner")
                         }
                         
-                        // 3. Apply the strict filter
+                        // Update the starter plan subtitle dynamically
+                        binding.tvPlanSubtitle.text = "1 Month • $displayDifficulty"
+                        
+                        // 3. Apply the strict filter for the list
                         val filteredList = officialWorkouts.filter { it.difficulty in allowedDifficulties }
 
                         // 4. Update UI

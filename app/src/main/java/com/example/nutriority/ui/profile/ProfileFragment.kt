@@ -470,13 +470,24 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
             user.weightKg, user.heightCm, AgeUtil.calculateAge(user.birthDate), user.gender, user.activityLevel, user.goal
         )
         
-        val left = (goalCalories - totalLogged).coerceAtLeast(0)
-        val percentage = ((totalLogged.toFloat() / goalCalories) * 100).toInt().coerceIn(0, 100)
-
+        val diff = goalCalories - totalLogged
         val calCard = binding.calorieCard
-        calCard.caloriesLeft.text = left.toString()
+        
+        if (diff >= 0) {
+            calCard.caloriesLeft.text = diff.toString()
+            calCard.root.findViewById<TextView>(R.id.tvCaloriesLabel)?.text = "KCAL LEFT"
+            calCard.caloriesLeft.setTextColor(Color.parseColor("#212121"))
+        } else {
+            calCard.caloriesLeft.text = Math.abs(diff).toString()
+            calCard.root.findViewById<TextView>(R.id.tvCaloriesLabel)?.text = "SURPLUS"
+            calCard.caloriesLeft.setTextColor(Color.parseColor("#E74C3C")) // Red for surplus
+        }
+
+        val percentage = ((totalLogged.toFloat() / goalCalories) * 100).toInt()
         calCard.caloriesPercentage.text = "$percentage%"
-        calCard.circleCalories.progress = percentage.toFloat()
+        
+        // Progress bar capped at 100 for visual consistency, but percentage shows truth
+        calCard.circleCalories.progress = percentage.toFloat().coerceAtMost(100f)
         
         val tvTotalKcal = calCard.root.findViewById<TextView>(R.id.tv_total_kcal)
         tvTotalKcal?.text = "$totalLogged kcal"
@@ -490,8 +501,6 @@ class ProfileFragment : BaseBindingFragment<FragmentProfileBinding>(FragmentProf
         val targetF = (goalCalories * 0.35 / 9).toInt()
 
         // Set different colors for macro progress bars
-        val macroLayout = calCard.macroProtein.root.parent as LinearLayout
-        
         updateMacroItem(calCard.macroProtein.root, "PROTEIN", totalP, targetP, R.drawable.progress_bar_protein)
         updateMacroItem(calCard.macroCarbs.root, "CARBS", totalC, targetC, R.drawable.progress_bar_carbs)
         updateMacroItem(calCard.macroFats.root, "FATS", totalF, targetF, R.drawable.progress_bar_fats)

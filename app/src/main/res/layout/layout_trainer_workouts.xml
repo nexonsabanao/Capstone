@@ -56,11 +56,12 @@
                             android:textSize="22sp" />
 
                         <TextView
+                            android:id="@+id/tvPlanSubtitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:fontFamily="sans-serif-medium"
-                            android:text="7 Days • Beginner"
+                            android:text="1 Month • Beginner"
                             android:textColor="@color/green"
                             android:textSize="14sp" />
                     </LinearLayout>

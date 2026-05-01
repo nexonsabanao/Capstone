@@ -20,9 +20,6 @@ class MealPlanner @Inject constructor(
         "bread", "pasta", "rice", "potato", "noodle", "dough", "flour", "tortilla"
     )
 
-    /**
-     * Generates a full 7-day meal plan with variety and macro-awareness.
-     */
     suspend fun planWeek(
         macroTarget: DailyMacroTarget,
         preferredDiet: String,
@@ -36,12 +33,9 @@ class MealPlanner @Inject constructor(
         repeat(7) { dayIndex ->
             val dayMeals = planMealsSmart(macroTarget, preferredDiet, excludedIngredients, allMeals, usedMealIds)
             weekPlan.add(dayMeals)
-            // Track used meals to encourage variety across the week
             usedMealIds.addAll(dayMeals.map { it.id })
             
-            // Allow some repetition if we've gone through a large portion of the database
             if (usedMealIds.size > (allMeals.size * 0.7)) {
-                Log.d("MealPlanner", "Variety pool depleted for day $dayIndex, clearing used meals cache.")
                 usedMealIds.clear()
             }
         }
@@ -49,7 +43,8 @@ class MealPlanner @Inject constructor(
     }
 
     /**
-     * Optimized macro-aware meal planning for a single day.
+     * Optimized macro-aware meal planning that dynamically adjusts targets 
+     * based on previously selected meals for the day.
      */
     suspend fun planMealsSmart(
         target: DailyMacroTarget,
@@ -60,67 +55,69 @@ class MealPlanner @Inject constructor(
     ): List<Meal> {
         val allMeals = mealPool ?: mealRepository.getAllMealsList()
 
-        if (allMeals.isEmpty()) {
-            Log.w("MealPlanner", "The meal database is empty.")
-            return emptyList()
-        }
+        if (allMeals.isEmpty()) return emptyList()
 
-        // 1. Filter by diet and exclusions
         val filteredMeals = allMeals.filter { meal ->
             isMealAllowed(meal, preferredDiet, excludedIngredients)
         }
 
-        if (filteredMeals.isEmpty()) {
-            Log.e("MealPlanner", "No meals match the diet ($preferredDiet) and exclusions.")
-            return emptyList()
-        }
-
-        // 2. Define meal distribution (Breakfast, Lunch, Dinner)
-        val mealConfig = listOf(
-            Triple("Breakfast", 0.30, 0.30),
-            Triple("Lunch", 0.35, 0.35),
-            Triple("Dinner", 0.35, 0.35)
-        )
+        if (filteredMeals.isEmpty()) return emptyList()
 
         val selectedMeals = mutableListOf<Meal>()
         val availablePool = filteredMeals.toMutableList()
 
-        for ((time, calRatio, macroRatio) in mealConfig) {
-            val targetCals = (target.calories * calRatio).toInt()
-            val targetProtein = (target.protein * macroRatio)
-            val targetCarbs = (target.carbs * macroRatio)
-            val targetFat = (target.fat * macroRatio)
+        // Track remaining needs for the day to adjust targets dynamically
+        var remainingCals = target.calories.toDouble()
+        var remainingProtein = target.protein.toDouble()
+        var remainingCarbs = target.carbs.toDouble()
+        var remainingFat = target.fat.toDouble()
+
+        val mealTimes = listOf("Breakfast", "Lunch", "Dinner")
+
+        for (i in mealTimes.indices) {
+            val time = mealTimes[i]
+            val mealsRemaining = 3 - i
+            
+            // Distribute remaining macros among remaining meals
+            val targetCals = (remainingCals / mealsRemaining).toInt()
+            val targetProtein = remainingProtein / mealsRemaining
+            val targetCarbs = remainingCarbs / mealsRemaining
+            val targetFat = remainingFat / mealsRemaining
 
             val candidates = availablePool.filter { it.mealTime.equals(time, true) }
             
             if (candidates.isNotEmpty()) {
-                // Prioritize unused meals
                 val unusedCandidates = candidates.filter { !usedMealIds.contains(it.id) }
                 val currentPool = if (unusedCandidates.size >= 2) unusedCandidates else candidates
 
-                // Score meals and pick from top candidates for variety
-                // Shuffle first to randomize tie-breakers
-                val sortedCandidates = currentPool.shuffled()
+                val bestMeal = currentPool.shuffled()
                     .map { it to scoreMeal(it, targetCals, targetProtein, targetCarbs, targetFat) }
                     .sortedBy { it.second }
-                
-                // Pick one randomly from the top 5 matches to ensure "Regenerate" feels fresh
-                val topCandidates = sortedCandidates.take(5)
-                val bestMeal = topCandidates.randomOrNull()?.first
+                    .take(5)
+                    .randomOrNull()?.first
 
                 if (bestMeal != null) {
                     selectedMeals.add(bestMeal)
                     availablePool.removeAll { it.id == bestMeal.id }
+                    
+                    // Subtract selected meal from remaining daily target
+                    remainingCals -= bestMeal.calories
+                    remainingProtein -= bestMeal.macros.protein
+                    remainingCarbs -= bestMeal.macros.carbs
+                    remainingFat -= bestMeal.macros.fats
                 }
             }
         }
 
-        // Fallback: If we missed a meal time, fill it without time restriction
+        // Fallback for missing slots
         if (selectedMeals.size < 3 && availablePool.isNotEmpty()) {
             val missingCount = 3 - selectedMeals.size
             repeat(missingCount) {
+                val mealsRemaining = 3 - selectedMeals.size
+                if (mealsRemaining <= 0) return@repeat
+
                 val fallback = availablePool.shuffled()
-                    .map { it to scoreMeal(it, (target.calories * 0.33).toInt(), (target.protein * 0.33), (target.carbs * 0.33), (target.fat * 0.33)) }
+                    .map { it to scoreMeal(it, (remainingCals / mealsRemaining).toInt(), remainingProtein / mealsRemaining, remainingCarbs / mealsRemaining, remainingFat / mealsRemaining) }
                     .sortedBy { it.second }
                     .take(5)
                     .randomOrNull()?.first
@@ -128,6 +125,7 @@ class MealPlanner @Inject constructor(
                 fallback?.let { 
                     selectedMeals.add(it)
                     availablePool.remove(it)
+                    remainingCals -= it.calories
                 }
             }
         }
@@ -137,7 +135,6 @@ class MealPlanner @Inject constructor(
 
     private fun scoreMeal(meal: Meal, targetCals: Int, targetProtein: Double, targetCarbs: Double, targetFat: Double): Double {
         val calorieDiff = abs(meal.calories - targetCals).toDouble()
-        // Protein is weighted highest
         val proteinDiff = abs(meal.macros.protein - targetProtein) * 2.0
         val carbDiff = abs(meal.macros.carbs - targetCarbs) * 1.0
         val fatDiff = abs(meal.macros.fats - targetFat) * 1.0
@@ -146,7 +143,6 @@ class MealPlanner @Inject constructor(
     }
 
     private fun isMealAllowed(meal: Meal, diet: String, exclusions: List<String>): Boolean {
-        // Check exclusions
         val hasExclusion = exclusions.any { excluded ->
             val normEx = excluded.trim().lowercase()
             if (normEx.isBlank()) return@any false
@@ -154,7 +150,6 @@ class MealPlanner @Inject constructor(
         }
         if (hasExclusion) return false
 
-        // Check diet
         return when (diet.lowercase()) {
             "vegetarian" -> !containsMeat(meal)
             "low-carb", "low carb" -> isLowCarb(meal)
@@ -163,10 +158,8 @@ class MealPlanner @Inject constructor(
         }
     }
 
-    private fun containsMeat(meal: Meal): Boolean {
-        return meal.ingredients.any { ing ->
-            meatKeywords.any { keyword -> ing.contains(keyword, true) }
-        }
+    private fun containsMeat(meal: Meal): Boolean = meal.ingredients.any { ing ->
+        meatKeywords.any { keyword -> ing.contains(keyword, true) }
     }
 
     private fun isLowCarb(meal: Meal): Boolean {
