@@ -68,7 +68,7 @@ onAuthStateChanged(auth, async (user) => {
 
 // Logout function
 window.logoutAdmin = async () => {
-    if (confirm("Sign out of the Command Center?")) {
+    if (confirm("Are you sure you want to sign out?")) {
         try {
             await signOut(auth);
             window.location.href = 'admin_login.html';
