@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebas
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
-const firebaseConfig = { 
+export const firebaseConfig = { 
     apiKey: "AIzaSyA7ML7csl8bwO_n1EWtYSscPlcZ7KS0gCY", 
     authDomain: "nutriority.firebaseapp.com", 
     projectId: "nutriority", 

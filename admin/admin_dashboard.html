@@ -10,8 +10,44 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="admin_dashboard.css">
+    <style>
+        /* Security Splash Screen */
+        #securityShield {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        #securityShield.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .shield-icon {
+            font-size: 60px;
+            color: #00A78B;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
 </head>
-<body>
+<body class="auth-pending">
+
+<div id="securityShield">
+    <div class="shield-icon"><i class="fas fa-shield-halved"></i></div>
+    <h2 style="font-weight: 800; letter-spacing: 1px;">SECURITY VERIFICATION</h2>
+    <p style="color: #94a3b8; margin-top: 10px;">Authenticating administrative access...</p>
+</div>
 
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
@@ -37,6 +73,12 @@
     <div class="nav-section">
         <div class="nav-label">Automation</div>
         <div class="nav-item" onclick="switchTab('syncEng'); toggleSidebar(false)"><i class="fas fa-bolt-lightning"></i> Sync Center</div>
+    </div>
+
+    <div class="nav-section" style="margin-top: auto; margin-bottom: 0;">
+        <div class="nav-item logout-item" onclick="logoutAdmin()" style="color: #fb7185;">
+            <i class="fas fa-right-from-bracket"></i> Logout
+        </div>
     </div>
 </div>
 
@@ -159,12 +201,10 @@
                     <canvas id="genderChart"></canvas>
                 </div>
             </div>
-            
+
         </div>
     </div>
 
-    <!-- STUDENTS, EXERCISES, MEALS, ARTICLES TAB CONTENT -->
-    <!-- (Keeping existing structures for these tabs) -->
     <div id="students" class="tab-content">
         <div class="data-card">
             <div class="table-header">

@@ -1,5 +1,6 @@
-import { db, settings } from "./firebase_init.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+import { db, auth, firebaseConfig, settings } from "./firebase_init.js";
+import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import "./admin_management.js";
 import "./admin_sync.js";
 
@@ -10,10 +11,65 @@ let stPage = 1, exPage = 1, mlPage = 1, artPage = 1;
 let sortConfig = { field: '', dir: 'asc' };
 const limitVal = settings.limitVal || 10;
 
-// Global Chart Defaults
-if (typeof Chart !== 'undefined') {
-    Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-    Chart.defaults.color = '#64748b';
+// Security Guard: Monitor Auth State
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = 'admin_login.html';
+        return;
+    }
+
+    // Secondary verification: Ensure user exists in 'admins' collection
+    try {
+        const adminDoc = await getDoc(doc(db, "admins", user.uid));
+        if (!adminDoc.exists()) {
+            console.warn("Unauthorized access attempt detected.");
+            await signOut(auth);
+            window.location.href = 'admin_login.html?error=unauthorized';
+            return;
+        }
+        
+        // Access Granted: Remove Security Shield
+        const shield = document.getElementById('securityShield');
+        if (shield) {
+            shield.classList.add('hidden');
+            setTimeout(() => shield.style.display = 'none', 500);
+        }
+        document.body.classList.remove('auth-pending');
+
+        // Initialize Dashboard
+        initDashboard();
+    } catch (error) {
+        console.error("Security verification failed:", error);
+        window.location.href = 'admin_login.html';
+    }
+});
+
+// Logout function
+window.logoutAdmin = async () => {
+    if (confirm("Sign out of the Command Center?")) {
+        try {
+            await signOut(auth);
+            window.location.href = 'admin_login.html';
+        } catch (error) {
+            console.error("Logout error:", error);
+            alert("Logout failed. Please try again.");
+        }
+    }
+};
+
+function initDashboard() {
+    updateStats();
+    
+    // Global Chart Defaults
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+        Chart.defaults.color = '#64748b';
+    }
+
+    setInterval(() => { 
+        const timeDisplay = document.getElementById('timeDisplay');
+        if (timeDisplay) timeDisplay.innerHTML = `<i class="far fa-clock"></i> ${new Date().toLocaleTimeString()}`; 
+    }, 1000);
 }
 
 function toggleSidebar(force) {
@@ -26,11 +82,6 @@ function toggleSidebar(force) {
     else { s.classList.remove('show'); o.classList.remove('show'); }
 }
 window.toggleSidebar = toggleSidebar;
-
-setInterval(() => { 
-    const timeDisplay = document.getElementById('timeDisplay');
-    if (timeDisplay) timeDisplay.innerHTML = `<i class="far fa-clock"></i> ${new Date().toLocaleTimeString()}`; 
-}, 1000);
 
 async function updateStats() {
     try {
@@ -188,7 +239,7 @@ function renderCharts(users) {
         });
     }
 
-    // 4. Training Progress (Line) - Updated to 4 Weeks (28 Days)
+    // 4. Training Progress (Line)
     const stages = new Array(29).fill(0);
     activeUsers.forEach(u => {
         const d = parseInt(u.lastCompletedWorkoutDay || 0);
@@ -237,7 +288,6 @@ function renderCharts(users) {
                         grid: { display: false },
                         ticks: {
                             callback: function(val, index) {
-                                // Only show label for every 7 days to avoid crowding
                                 return index % 7 === 0 ? this.getLabelForValue(val) : '';
                             }
                         }
@@ -279,7 +329,7 @@ function renderCharts(users) {
         });
     }
 
-    // 6. Exclusion Breakdown (Horizontal Bar) - Improved robustness with icons
+    // 6. Exclusion Breakdown
     const exclusionMap = {};
     const foodIcons = {
         'Egg': '🥚', 'Peanut': '🥜', 'Milk': '🥛', 'Dairy': '🥛', 'Soy': '🫘', 'Wheat': '🌾',
@@ -290,35 +340,23 @@ function renderCharts(users) {
     };
 
     activeUsers.forEach(u => {
-        // Handle all possible fields and formats
         let exclusions = u.excludedIngredients || u.exclusions || u.excluded_ingredients || [];
-
-        // Convert to array if it's a string
         let rawItems = [];
-        if (Array.isArray(exclusions)) {
-            rawItems = exclusions;
-        } else if (typeof exclusions === 'string') {
-            rawItems = exclusions.split(',').map(i => i.trim());
-        }
+        if (Array.isArray(exclusions)) rawItems = exclusions;
+        else if (typeof exclusions === 'string') rawItems = exclusions.split(',').map(i => i.trim());
 
         rawItems.forEach(item => {
             let clean = String(item).trim().toLowerCase();
             if (!clean || clean === "none") return;
-
-            // Normalize singular/plural
             if (clean.endsWith('ies') && clean.length > 4) clean = clean.slice(0, -3) + 'y';
             else if (clean.endsWith('es') && (clean.endsWith('oes') || clean.endsWith('ches') || clean.endsWith('shes'))) clean = clean.slice(0, -2);
             else if (clean.endsWith('s') && !clean.endsWith('ss') && clean.length > 3) clean = clean.slice(0, -1);
-
             const displayLabel = clean.charAt(0).toUpperCase() + clean.slice(1);
             exclusionMap[displayLabel] = (exclusionMap[displayLabel] || 0) + 1;
         });
     });
 
-    const sortedExclusions = Object.entries(exclusionMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
-
+    const sortedExclusions = Object.entries(exclusionMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
     const exclusionCtx = document.getElementById('exclusionChart');
     if (exclusionCtx) {
         charts.exclusion = new Chart(exclusionCtx, {
@@ -355,18 +393,14 @@ function renderCharts(users) {
 
     const genderCtx = document.getElementById('genderChart');
     if (genderCtx) {
-        const labels = ['Male', 'Female', 'Not Specified'];
-        const data = labels.map(l => genderCounts[l]);
-        const colors = ['#0ea5e9', '#ec4899', '#94a3b8']; // Blue for Male, Pink for Female, Gray for Unspecified
-
         charts.gender = new Chart(genderCtx, {
             type: 'bar',
             data: {
-                labels: labels,
+                labels: ['Male', 'Female', 'Not Specified'],
                 datasets: [{
                     label: 'Users',
-                    data: data,
-                    backgroundColor: colors,
+                    data: [genderCounts['Male'], genderCounts['Female'], genderCounts['Not Specified']],
+                    backgroundColor: ['#0ea5e9', '#ec4899', '#94a3b8'],
                     borderRadius: 10,
                     barThickness: 30
                 }]
@@ -376,18 +410,10 @@ function renderCharts(users) {
                 maintainAspectRatio: false,
                 plugins: { 
                     legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => ` ${context.raw} Users`
-                        }
-                    }
+                    tooltip: { callbacks: { label: (context) => ` ${context.raw} Users` } }
                 },
                 scales: {
-                    x: { 
-                        beginAtZero: true, 
-                        grid: { color: '#f1f5f9' },
-                        ticks: { stepSize: 1 }
-                    },
+                    x: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1 } },
                     y: { grid: { display: false } }
                 }
             }
@@ -421,10 +447,8 @@ function renderStudents() {
         const isDeleted = u.status === 'deleted';
         const emailFallback = u.email || `ID: ${u.fid || 'Unknown'}`;
         const nameFallback = u.name || "User";
-
         const rowStyle = isDeleted ? 'style="background: #fff5f5; opacity: 0.8;"' : '';
         const nameDisplay = isDeleted ? `<del>${nameFallback}</del> <span class="badge" style="background:#fee2e2; color:#ef4444; font-size:10px; padding:2px 6px">DELETED</span>` : `<b>${nameFallback}</b>`;
-
         const actionButtons = isDeleted
             ? `<button class="btn btn-secondary btn-sm" onclick="showDeletedAccountInfo('${u.fid}')">Details</button>`
             : `<button class="btn btn-secondary btn-sm" onclick="openStudentModal('${u.fid}')">Edit</button>
@@ -435,9 +459,7 @@ function renderStudents() {
             <td data-label="Goal"><span class="badge" style="background:#f1f5f9">${u.goal || 'Not set'}</span></td>
             <td data-label="Activity">${u.activityLevel || 'Not set'}</td>
             <td data-label="Progress" style="color:var(--primary); font-weight:800">Day ${u.lastCompletedWorkoutDay||0}</td>
-            <td data-label="Actions">
-                ${actionButtons}
-            </td>
+            <td data-label="Actions">${actionButtons}</td>
         </tr>`;
     });
     const totalPages = Math.ceil(stFilteredData.length / limitVal) || 1;
@@ -524,97 +546,48 @@ function sortData(category, field) {
     else if (category === 'meals') { data = mlFilteredData; renderFn = renderMeals; }
     else if (category === 'articleLib') { data = artFilteredData; renderFn = renderArticles; }
     else if (category === 'students') { data = stFilteredData; renderFn = renderStudents; }
-
     if (!data) return;
-
-    if (sortConfig.field === field) {
-        sortConfig.dir = sortConfig.dir === 'asc' ? 'desc' : 'asc';
-    } else {
-        sortConfig.field = field;
-        sortConfig.dir = 'asc';
-    }
-
+    if (sortConfig.field === field) sortConfig.dir = sortConfig.dir === 'asc' ? 'desc' : 'asc';
+    else { sortConfig.field = field; sortConfig.dir = 'asc'; }
     data.sort((a, b) => {
-        let valA = a[field] ?? '';
-        let valB = b[field] ?? '';
-
+        let valA = a[field] ?? '', valB = b[field] ?? '';
         if (typeof valA === 'string') valA = valA.toLowerCase();
         if (typeof valB === 'string') valB = valB.toLowerCase();
-
         if (valA < valB) return sortConfig.dir === 'asc' ? -1 : 1;
         if (valA > valB) return sortConfig.dir === 'asc' ? 1 : -1;
         return 0;
     });
-
     renderFn();
 }
 window.sortData = sortData;
 
 function handleSearch(type) {
     const q = document.getElementById(type+'Search').value.toLowerCase();
-    if(type === 'st') {
-        stFilteredData = window.cacheSt.filter(u => (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q));
-        stPage = 1; renderStudents();
-    } else if(type === 'ex') {
-        exFilteredData = window.cacheEx.filter(e => (e.name||'').toLowerCase().includes(q) || (e.target||'').toLowerCase().includes(q));
-        exPage = 1; renderExercises();
-    } else if(type === 'meal') {
-        mlFilteredData = window.cacheMl.filter(m => (m.name||'').toLowerCase().includes(q) || (m.preferredDiet||'').toLowerCase().includes(q));
-        mlPage = 1; renderMeals();
-    } else if(type === 'art') {
-        artFilteredData = window.cacheArt.filter(a => (a.title||'').toLowerCase().includes(q) || (a.category||'').toLowerCase().includes(q));
-        artPage = 1; renderArticles();
-    }
+    if(type === 'st') { stFilteredData = window.cacheSt.filter(u => (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q)); stPage = 1; renderStudents(); }
+    else if(type === 'ex') { exFilteredData = window.cacheEx.filter(e => (e.name||'').toLowerCase().includes(q) || (e.target||'').toLowerCase().includes(q)); exPage = 1; renderExercises(); }
+    else if(type === 'meal') { mlFilteredData = window.cacheMl.filter(m => (m.name||'').toLowerCase().includes(q) || (m.preferredDiet||'').toLowerCase().includes(q)); mlPage = 1; renderMeals(); }
+    else if(type === 'art') { artFilteredData = window.cacheArt.filter(a => (a.title||'').toLowerCase().includes(q) || (a.category||'').toLowerCase().includes(q)); artPage = 1; renderArticles(); }
 }
 window.handleSearch = handleSearch;
 
 function changePage(type, dir) {
-    if(type==='st') {
-        if(dir==='next' && stPage < Math.ceil(stFilteredData.length/limitVal)) stPage++;
-        else if(dir==='prev' && stPage > 1) stPage--;
-        renderStudents();
-    } else if(type==='ex') {
-        if(dir==='next' && exPage < Math.ceil(exFilteredData.length/limitVal)) exPage++;
-        else if(dir==='prev' && exPage > 1) exPage--;
-        renderExercises();
-    } else if(type==='meal') {
-        if(dir==='next' && mlPage < Math.ceil(mlFilteredData.length/limitVal)) mlPage++;
-        else if(dir==='prev' && mlPage > 1) mlPage--;
-        renderMeals();
-    } else if(type==='art') {
-        if(dir==='next' && artPage < Math.ceil(artFilteredData.length/limitVal)) artPage++;
-        else if(dir==='prev' && artPage > 1) artPage--;
-        renderArticles();
-    }
+    if(type==='st') { if(dir==='next' && stPage < Math.ceil(stFilteredData.length/limitVal)) stPage++; else if(dir==='prev' && stPage > 1) stPage--; renderStudents(); }
+    else if(type==='ex') { if(dir==='next' && exPage < Math.ceil(exFilteredData.length/limitVal)) exPage++; else if(dir==='prev' && exPage > 1) exPage--; renderExercises(); }
+    else if(type==='meal') { if(dir==='next' && mlPage < Math.ceil(mlFilteredData.length/limitVal)) mlPage++; else if(dir==='prev' && mlPage > 1) mlPage--; renderMeals(); }
+    else if(type==='art') { if(dir==='next' && artPage < Math.ceil(artFilteredData.length/limitVal)) artPage++; else if(dir==='prev' && artPage > 1) artPage--; renderArticles(); }
 }
 window.changePage = changePage;
 
-async function loadStudents() {
-    if(!window.cacheSt.length) await updateStats();
-    stFilteredData = [...window.cacheSt];
-    renderStudents();
-}
+async function loadStudents() { if(!window.cacheSt.length) await updateStats(); stFilteredData = [...window.cacheSt]; renderStudents(); }
 window.loadStudents = loadStudents;
 
-async function loadExercises() {
-    if(!window.cacheEx.length) await updateStats();
-    exFilteredData = [...window.cacheEx];
-    renderExercises();
-}
+async function loadExercises() { if(!window.cacheEx.length) await updateStats(); exFilteredData = [...window.cacheEx]; renderExercises(); }
 window.loadExercises = loadExercises;
 
-async function loadMeals() {
-    if(!window.cacheMl.length) await updateStats();
-    mlFilteredData = [...window.cacheMl];
-    renderMeals();
-}
+async function loadMeals() { if(!window.cacheMl.length) await updateStats(); mlFilteredData = [...window.cacheMl]; renderMeals(); }
 window.loadMeals = loadMeals;
 
-async function loadArticles() {
-    if(!window.cacheArt.length) await updateStats();
-    artFilteredData = [...window.cacheArt];
-    renderArticles();
-}
+async function loadArticles() { if(!window.cacheArt.length) await updateStats(); artFilteredData = [...window.cacheArt]; renderArticles(); }
 window.loadArticles = loadArticles;
 
 function switchTab(t) {
@@ -622,20 +595,10 @@ function switchTab(t) {
     document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
     const target = document.getElementById(t);
     if (target) target.classList.add('active');
-
     const mapping = { overview: 'Overview', students: 'Users', exercises: 'Exercises', meals: 'Meal Library', articleLib: 'Article Hub', syncEng: 'Sync Center' };
     Array.from(document.querySelectorAll('.nav-item')).find(x => x.textContent.trim().includes(mapping[t]))?.classList.add('active');
-
     const title = document.getElementById('tabTitle');
     if (title) title.innerText = mapping[t];
-
-    if(t==='students') loadStudents();
-    if(t==='exercises') loadExercises();
-    if(t==='meals') loadMeals();
-    if(t==='articleLib') loadArticles();
-    if(t==='overview') updateStats();
+    if(t==='students') loadStudents(); if(t==='exercises') loadExercises(); if(t==='meals') loadMeals(); if(t==='articleLib') loadArticles(); if(t==='overview') updateStats();
 }
 window.switchTab = switchTab;
-
-// INITIALIZATION
-updateStats();

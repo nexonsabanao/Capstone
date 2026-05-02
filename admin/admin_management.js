@@ -1,6 +1,7 @@
-import { db, auth } from "./firebase_init.js";
+import { db, auth, firebaseConfig } from "./firebase_init.js";
 import { doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-import { createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { createUserWithEmailAndPassword, sendPasswordResetEmail, getAuth, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 
 window.closeModal = () => document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
 
@@ -101,29 +102,49 @@ document.getElementById('studentForm').onsubmit = async (e) => {
         mealPlanJson: document.getElementById('stMealJson').value,
     };
 
+    const submitBtn = document.getElementById('stSubmitBtn');
+    const originalBtnText = submitBtn.innerText;
+    submitBtn.innerText = "Processing...";
+    submitBtn.disabled = true;
+
     try {
         if (!fid) {
             const email = document.getElementById('stEmail').value.toLowerCase().trim();
             const password = document.getElementById('stPass').value;
 
-            // Updated password validation: 8+ chars, upper, lower, number
             const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
             if (!passRegex.test(password)) {
                 alert("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.");
+                submitBtn.innerText = originalBtnText;
+                submitBtn.disabled = false;
                 return;
             }
 
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const uid = userCredential.user.uid;
-            userData.id = uid;
-            userData.email = email;
-            userData.lastCompletedWorkoutDay = 0;
-            userData.status = "active";
-            userData.isEmailVerified = true; // Instant verification flag for admin-created accounts
-            await setDoc(doc(db, "users", uid), userData);
-            alert("Account added!");
+            // Create a secondary app to avoid signing out the admin
+            const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+            const secondaryAuth = getAuth(secondaryApp);
+            
+            try {
+                // IMPORTANT: Set persistence to NONE (in-memory) for the secondary app
+                // This prevents it from overwriting the admin's session in LocalStorage
+                await setPersistence(secondaryAuth, inMemoryPersistence);
+                
+                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                const uid = userCredential.user.uid;
+                
+                userData.id = uid;
+                userData.email = email;
+                userData.lastCompletedWorkoutDay = 0;
+                userData.status = "active";
+                userData.isEmailVerified = true;
+
+                await setDoc(doc(db, "users", uid), userData);
+                alert("Account added successfully!");
+            } finally {
+                // Always delete secondary app to clean up memory
+                await secondaryApp.delete();
+            }
         } else {
-            // Ensure email is preserved on edit
             const u = window.cacheSt.find(x => x.fid === fid);
             if (u && u.email) userData.email = u.email;
             
@@ -136,6 +157,9 @@ document.getElementById('studentForm').onsubmit = async (e) => {
     } catch (error) {
         console.error("Error saving user:", error);
         alert("Error: " + error.message);
+    } finally {
+        submitBtn.innerText = originalBtnText;
+        submitBtn.disabled = false;
     }
 };
 
