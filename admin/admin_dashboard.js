@@ -11,6 +11,28 @@ let stPage = 1, exPage = 1, mlPage = 1, artPage = 1;
 let sortConfig = { field: '', dir: 'asc' };
 const limitVal = settings.limitVal || 10;
 
+// Idle Session Management (20 Minutes)
+let idleTimer;
+const resetIdleTimer = () => {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(async () => {
+        console.warn("Session expired due to inactivity.");
+        try {
+            await signOut(auth);
+            window.location.href = 'admin_login.html?error=timeout';
+        } catch (err) {
+            window.location.href = 'admin_login.html';
+        }
+    }, 20 * 60 * 1000);
+};
+
+function startIdleMonitoring() {
+    ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(name => {
+        document.addEventListener(name, resetIdleTimer, true);
+    });
+    resetIdleTimer();
+}
+
 // Security Guard: Monitor Auth State
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -59,6 +81,7 @@ window.logoutAdmin = async () => {
 
 function initDashboard() {
     updateStats();
+    startIdleMonitoring();
     
     // Global Chart Defaults
     if (typeof Chart !== 'undefined') {
