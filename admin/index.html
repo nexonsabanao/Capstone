@@ -120,6 +120,36 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .nav-guide-btn {
+            background: var(--primary-glow);
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border: 1px solid rgba(0, 137, 123, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-guide-btn::before {
+            content: '✦';
+            font-size: 0.8rem;
+        }
+
+        .nav-guide-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px var(--primary-glow);
+            transform: translateY(-1px);
+        }
+
         /* --- Hero Section --- */
         .hero {
             padding: 80px 5% 50px;
@@ -176,6 +206,132 @@
         .cta-btn:hover {
             transform: translateY(-3px);
             animation: none;
+        }
+
+        .version-text {
+            display: block;
+            margin-top: 15px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- User Guide Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .close-modal {
+            background: var(--icon-bg);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            transition: 0.3s;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff4444;
+        }
+
+        .guide-gallery {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .guide-gallery::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .guide-gallery::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .guide-slide {
+            flex: 0 0 100%;
+            scroll-snap-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .guide-slide img {
+            width: 100%;
+            border-radius: 15px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            background: var(--icon-bg);
+            height: 500px;
+        }
+
+        .guide-slide p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            padding: 0 10px 10px;
+        }
+
+        .swipe-hint {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* --- Tips Carousel --- */
@@ -423,7 +579,7 @@
 
 <nav>
     <div class="logo">NUTRIORITY</div>
-    <div style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600;">v1.0 Stable Release</div>
+    <button id="openGuide" class="nav-guide-btn">User Guide</button>
 </nav>
 
 <header class="hero">
@@ -431,6 +587,7 @@
     <h1>A Practical Approach<br>to Your Fitness Goals.</h1>
     <p>Nutriority provides a structured framework for managing your nutrition and exercise routines. Achieve consistent progress through organized planning and tracking.</p>
     <a href="https://github.com/Nutriority/Installer/releases/download/v1.0.0/Nutriority.apk" class="cta-btn">Download Nutriority APK (20MB)</a>
+    <div class="version-text">v1.0 Stable Release</div>
 </header>
 
 <section class="carousel-section">
@@ -563,14 +720,73 @@
     <p>&copy; 2026 Nutriority. Designed for effective health and fitness management.</p>
 </footer>
 
+<!-- User Guide Modal Structure -->
+<div class="modal-overlay" id="guideModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>User Guide</h2>
+            <button class="close-modal" id="closeGuide">&times;</button>
+        </div>
+        <div class="guide-gallery">
+            <!-- Slide 1: Login -->
+            <div class="guide-slide">
+                <img src="assets/login-page.jpg" alt="Login Page">
+                <p>Access your account to stay on track with your fitness goals.</p>
+            </div>
+            <!-- Slide 2: Home -->
+            <div class="guide-slide">
+                <img src="assets/home-page.jpg" alt="Home Page">
+                <p>Get a quick overview of your journey and upcoming tasks.</p>
+            </div>
+            <!-- Slide 3: Workout -->
+            <div class="guide-slide">
+                <img src="assets/workout-page.jpg" alt="Workout Page">
+                <p>Discover and follow structured workout plans tailored for you.</p>
+            </div>
+            <!-- Slide 4: Meal -->
+            <div class="guide-slide">
+                <img src="assets/meal-page.jpg" alt="Meal Page">
+                <p>Plan and track your nutrition with balanced meal recommendations.</p>
+            </div>
+            <!-- Slide 5: Profile -->
+            <div class="guide-slide">
+                <img src="assets/profile-page.jpg" alt="Profile Page">
+                <p>Manage your personal data and monitor your overall progress.</p>
+            </div>
+        </div>
+        <div class="swipe-hint">Swipe to see more &rarr;</div>
+    </div>
+</div>
+
 <script>
+    // User Guide Modal Logic
+    const openBtn = document.getElementById('openGuide');
+    const closeBtn = document.getElementById('closeGuide');
+    const modal = document.getElementById('guideModal');
+
+    openBtn.addEventListener('click', () => {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+
     // Handle card clicks for highlighting and pausing carousel
     document.querySelectorAll('.tip-card').forEach(card => {
         card.addEventListener('click', (e) => {
             const track = document.querySelector('.carousel-track');
             const isActive = card.classList.contains('active');
             
-            // Remove active from all cards
             document.querySelectorAll('.tip-card').forEach(c => c.classList.remove('active'));
             track.classList.remove('paused');
 
