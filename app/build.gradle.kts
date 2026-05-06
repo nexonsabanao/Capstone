@@ -120,4 +120,7 @@ dependencies {
 
     // Konfetti for celebration effects
     implementation("nl.dionsegijn:konfetti-xml:2.0.4")
+
+    // WorkManager for background notifications
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 }
