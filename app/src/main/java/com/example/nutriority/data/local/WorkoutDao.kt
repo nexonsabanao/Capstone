@@ -51,6 +51,9 @@ interface WorkoutDao {
     @Query("SELECT COUNT(id) FROM exercises")
     suspend fun getExerciseCount(): Int
 
+    @Query("SELECT id FROM exercises")
+    suspend fun getAllExerciseIds(): List<String>
+
     @Query("SELECT * FROM workouts ORDER BY name ASC")
     fun getAllWorkouts(): Flow<List<Workout>>
 
@@ -118,7 +121,14 @@ interface WorkoutDao {
             updateWorkout(workout)
         }
         deleteWorkoutExercises(workout.id)
-        insertAllWorkoutExercises(workoutExercises)
+        
+        // Safety check: only insert exercises that exist in the database
+        val validExerciseIds = getAllExerciseIds().toSet()
+        val validAssignments = workoutExercises.filter { validExerciseIds.contains(it.exerciseId) }
+        
+        if (validAssignments.isNotEmpty()) {
+            insertAllWorkoutExercises(validAssignments)
+        }
     }
 
     @Transaction
@@ -128,7 +138,14 @@ interface WorkoutDao {
         }
         val ids = workouts.map { it.id }
         deleteWorkoutExercisesList(ids)
-        insertAllWorkoutExercises(workoutExercises)
+        
+        // Safety check: only insert exercises that exist in the database
+        val validExerciseIds = getAllExerciseIds().toSet()
+        val validAssignments = workoutExercises.filter { validExerciseIds.contains(it.exerciseId) }
+        
+        if (validAssignments.isNotEmpty()) {
+            insertAllWorkoutExercises(validAssignments)
+        }
     }
 
     @Transaction

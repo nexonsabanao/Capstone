@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -22,8 +23,11 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
         val lastUsageDate = prefs.getString("last_usage_date", "")
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
+        Log.d("NotificationWorker", "Checking notification. Today: $today, Last used: $lastUsageDate")
+
         // If the app was already used today, don't show notification
         if (lastUsageDate == today) {
+            Log.d("NotificationWorker", "App already used today. Skipping notification.")
             return Result.success()
         }
 
@@ -33,10 +37,11 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
 
     private fun showNotification() {
         val builder = NotificationCompat.Builder(applicationContext, NutriorityApp.CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_nutrition_24)
             .setContentTitle("Nutriority Reminder")
             .setContentText("You haven't checked your nutrition today. Stay consistent with your goals!")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setAutoCancel(true)
 
         try {
@@ -45,9 +50,12 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
                 with(NotificationManagerCompat.from(applicationContext)) {
                     notify(System.currentTimeMillis().toInt(), builder.build())
                 }
+                Log.d("NotificationWorker", "Notification sent successfully.")
+            } else {
+                Log.w("NotificationWorker", "Notification permission not granted.")
             }
-        } catch (e: SecurityException) {
-            // Permission might have been revoked
+        } catch (e: Exception) {
+            Log.e("NotificationWorker", "Error showing notification: ${e.message}")
         }
     }
 }
