@@ -194,7 +194,7 @@ class MealViewModel @Inject constructor(
                     else -> targetDate.format(DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.getDefault()))
                 }
                 
-                items.add(MealListItem.HeaderItem(dateHeader, dayIndex))
+                items.add(MealListItem.HeaderItem(dateHeader, dayIndex, isToday = (daysDiff == 0)))
 
                 dayMeals.sortedBy {
                     when(it.mealTime.lowercase()) {
@@ -208,7 +208,7 @@ class MealViewModel @Inject constructor(
                         val logDate = Instant.ofEpochMilli(log.date).atZone(ZoneId.systemDefault()).toLocalDate()
                         log.mealId == meal.id && logDate == targetDate
                     }
-                    items.add(MealListItem.MealItem(meal, dayIndex, isLogged))
+                    items.add(MealListItem.MealItem(meal, dayIndex, isLogged, isPastDay = (daysDiff < 0)))
                 }
             }
             items

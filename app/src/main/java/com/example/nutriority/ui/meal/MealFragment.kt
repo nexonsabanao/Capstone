@@ -45,6 +45,8 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
         )
     }
 
+    private var hasAutoScrolled = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
@@ -176,9 +178,16 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
                         state.startDate?.let { updateDateViews(it) }
                         
                         mealAdapter.submitList(state.items) {
-                            // If we just finished generating, scroll to the top to see the new plan
-                            if (wasGenerating && !state.isGenerating && state.hasPlan) {
-                                binding.mealNestedScrollView.smoothScrollTo(0, 0)
+                            if (state.hasPlan && !state.isGenerating) {
+                                if (wasGenerating) {
+                                    binding.mealNestedScrollView.smoothScrollTo(0, 0)
+                                    hasAutoScrolled = true
+                                } else if (!hasAutoScrolled && state.items.isNotEmpty()) {
+                                    scrollToToday(state.items)
+                                    hasAutoScrolled = true
+                                }
+                            } else if (!state.hasPlan) {
+                                hasAutoScrolled = false
                             }
                             wasGenerating = state.isGenerating
                         }
@@ -205,6 +214,20 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
                             mealViewModel.onSwapCancelled()
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun scrollToToday(items: List<MealListItem>) {
+        val todayIndex = items.indexOfFirst { it is MealListItem.HeaderItem && it.isToday }
+        if (todayIndex != -1) {
+            binding.generatedMealPlanRecyclerView.post {
+                val layoutManager = binding.generatedMealPlanRecyclerView.layoutManager as? LinearLayoutManager
+                val view = layoutManager?.findViewByPosition(todayIndex)
+                if (view != null) {
+                    val scrollY = binding.generatedMealPlanRecyclerView.top + view.top
+                    binding.mealNestedScrollView.smoothScrollTo(0, scrollY)
                 }
             }
         }

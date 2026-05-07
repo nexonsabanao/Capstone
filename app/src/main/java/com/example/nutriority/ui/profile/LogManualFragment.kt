@@ -65,16 +65,19 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
         IngredientInfo("🍚 Malagkit (Sticky Rice, Cooked)", 97.0, 2.0, 21.0, 0.2, "Rice & Grains"),
         IngredientInfo("🥣 Lugaw (Rice Porridge)", 52.0, 1.2, 11.0, 0.2, "Rice & Grains"),
         IngredientInfo("🥣 Champorado (Chocolate Rice)", 110.0, 3.0, 22.0, 2.5, "Rice & Grains"),
-        
-        // PROTEIN
+        IngredientInfo("🍚 White Rice (Cooked)", 130.0, 2.7, 28.0, 0.3, "Rice & Grains"),
+        IngredientInfo("🥣 Oatmeal", 68.0, 2.4, 12.0, 1.4, "Rice & Grains"),
+        IngredientInfo("🍞 Bread (Whole Wheat)", 247.0, 13.0, 41.0, 3.4, "Rice & Grains"),
+
+        // MEAT & POULTRY
         IngredientInfo("🍗 Chicken Breast", 165.0, 31.0, 0.0, 3.6, "Meat & Poultry"),
+        IngredientInfo("🥚 Egg", 155.0, 13.0, 1.1, 11.0, "Meat & Poultry"),
         IngredientInfo("🥩 Beef (Lean)", 250.0, 26.0, 0.0, 15.0, "Meat & Poultry"),
         IngredientInfo("🥓 Pork Belly (Liempo)", 518.0, 9.0, 0.0, 53.0, "Meat & Poultry"),
-        IngredientInfo("🥩 Beef Tapa (Cured Beef)", 210.0, 24.0, 3.0, 11.0, "Meat & Poultry"),
-        IngredientInfo("🥓 Tocino (Cured Pork)", 320.0, 14.0, 25.0, 18.0, "Meat & Poultry"),
         IngredientInfo("🌭 Longganisa (Pork/Sweet)", 335.0, 13.0, 2.0, 30.0, "Meat & Poultry"),
-        IngredientInfo("🥚 Egg", 155.0, 13.0, 1.1, 11.0, "Meat & Poultry"),
-        
+        IngredientInfo("🥓 Tocino (Cured Pork)", 320.0, 14.0, 25.0, 18.0, "Meat & Poultry"),
+        IngredientInfo("🥩 Beef Tapa (Cured Beef)", 210.0, 24.0, 3.0, 11.0, "Meat & Poultry"),
+
         // SEAFOOD
         IngredientInfo("🐟 Salmon", 208.0, 20.0, 0.0, 13.0, "Seafood"),
         IngredientInfo("🐟 Tuna", 132.0, 28.0, 0.0, 1.3, "Seafood"),
@@ -100,6 +103,10 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
 
         // VEGETABLES & LEGUMES
         IngredientInfo("🥦 Broccoli", 34.0, 2.8, 7.0, 0.4, "Vegetables & Legumes"),
+        IngredientInfo("🥔 Potato", 77.0, 2.0, 17.0, 0.1, "Vegetables & Legumes"),
+        IngredientInfo("🍃 Spinach", 23.0, 2.9, 3.6, 0.4, "Vegetables & Legumes"),
+        IngredientInfo("🥕 Carrots", 41.0, 0.9, 10.0, 0.2, "Vegetables & Legumes"),
+        IngredientInfo("🧊 Tokwa (Tofu)", 76.0, 8.0, 1.9, 4.8, "Vegetables & Legumes"),
         IngredientInfo("🥬 Kangkong (Water Spinach)", 19.0, 2.6, 3.1, 0.2, "Vegetables & Legumes"),
         IngredientInfo("🍃 Malunggay (Moringa Leaves)", 64.0, 9.4, 8.2, 1.4, "Vegetables & Legumes"),
         IngredientInfo("🍐 Sayote (Chayote)", 19.0, 0.8, 4.5, 0.1, "Vegetables & Legumes"),
@@ -112,27 +119,24 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
         IngredientInfo("🥒 Sigarilyas (Winged Bean)", 49.0, 7.0, 4.0, 1.0, "Vegetables & Legumes"),
         IngredientInfo("🥒 Upong (Bottle Gourd)", 14.0, 0.6, 3.4, 0.1, "Vegetables & Legumes"),
         IngredientInfo("🫘 Munggo (Mung Beans, Dried)", 341.0, 24.0, 63.0, 1.2, "Vegetables & Legumes"),
-        IngredientInfo("🧊 Tokwa (Tofu)", 76.0, 8.0, 1.9, 4.8, "Vegetables & Legumes"),
-        IngredientInfo("🍃 Spinach", 23.0, 2.9, 3.6, 0.4, "Vegetables & Legumes"),
-        IngredientInfo("🥕 Carrots", 41.0, 0.9, 10.0, 0.2, "Vegetables & Legumes"),
 
         // FRUITS & TUBERS
+        IngredientInfo("🍌 Banana", 89.0, 1.1, 23.0, 0.3, "Fruits & Tubers"),
+        IngredientInfo("🥑 Avocado", 160.0, 2.0, 8.5, 15.0, "Fruits & Tubers"),
         IngredientInfo("🥭 Mango (Carabao)", 60.0, 0.8, 15.0, 0.4, "Fruits & Tubers"),
         IngredientInfo("🥭 Papaya (Ripe)", 43.0, 0.5, 11.0, 0.3, "Fruits & Tubers"),
         IngredientInfo("🍌 Banana (Saba, Raw)", 122.0, 1.3, 31.0, 0.1, "Fruits & Tubers"),
         IngredientInfo("🍌 Banana (Latundan)", 90.0, 1.0, 23.0, 0.3, "Fruits & Tubers"),
-        IngredientInfo("🍌 Banana", 89.0, 1.1, 23.0, 0.3, "Fruits & Tubers"),
-        IngredientInfo("🥑 Avocado", 160.0, 2.0, 8.5, 15.0, "Fruits & Tubers"),
         IngredientInfo("🍞 Pandesal", 310.0, 10.0, 58.0, 4.5, "Fruits & Tubers"),
         IngredientInfo("🍠 Ube (Purple Yam)", 120.0, 1.5, 27.0, 0.1, "Fruits & Tubers"),
         IngredientInfo("🍠 Kamote (Sweet Potato)", 86.0, 1.6, 20.0, 0.1, "Fruits & Tubers"),
         IngredientInfo("🍠 Gabi (Taro)", 112.0, 1.5, 26.0, 0.2, "Fruits & Tubers"),
         IngredientInfo("🍠 Cassava (Kamoteng Kahoy)", 160.0, 1.4, 38.0, 0.3, "Fruits & Tubers"),
-        IngredientInfo("🥔 Potato", 77.0, 2.0, 17.0, 0.1, "Fruits & Tubers"),
         IngredientInfo("🥥 Buko (Coconut Water)", 19.0, 0.7, 3.7, 0.2, "Fruits & Tubers"),
         IngredientInfo("🥥 Buko Meat (Young)", 354.0, 3.3, 15.0, 33.0, "Fruits & Tubers"),
 
         // CONDIMENTS & DAIRY
+        IngredientInfo("🥛 Milk (Whole)", 61.0, 3.2, 4.8, 3.3, "Condiments & Dairy"),
         IngredientInfo("🍶 Patis (Fish Sauce)", 35.0, 5.0, 3.7, 0.0, "Condiments & Dairy"),
         IngredientInfo("🍶 Toyo (Soy Sauce)", 53.0, 8.0, 4.9, 0.1, "Condiments & Dairy"),
         IngredientInfo("🍶 Suka (Cane Vinegar)", 18.0, 0.0, 0.0, 0.0, "Condiments & Dairy"),
@@ -144,9 +148,6 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
         IngredientInfo("🥤 Kalamansi Juice", 30.0, 0.5, 7.0, 0.1, "Condiments & Dairy"),
         IngredientInfo("🥛 Condensed Milk", 321.0, 7.9, 54.0, 8.7, "Condiments & Dairy"),
         IngredientInfo("🥛 Evaporated Milk", 135.0, 6.8, 10.0, 7.6, "Condiments & Dairy"),
-        IngredientInfo("🥛 Milk (Whole)", 61.0, 3.2, 4.8, 3.3, "Condiments & Dairy"),
-        IngredientInfo("🥣 Oatmeal", 68.0, 2.4, 12.0, 1.4, "Condiments & Dairy"),
-        IngredientInfo("🍞 Bread (Whole Wheat)", 247.0, 13.0, 41.0, 3.4, "Condiments & Dairy"),
         IngredientInfo("🍝 Filipino Spaghetti Sauce", 100.0, 2.0, 16.0, 2.5, "Condiments & Dairy")
     )
 
@@ -198,6 +199,8 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_ingredient, null)
         val spinner = dialogView.findViewById<AutoCompleteTextView>(R.id.spinnerIngredient)
         val etWeight = dialogView.findViewById<TextInputEditText>(R.id.etWeight)
+        val btnCancel = dialogView.findViewById<View>(R.id.btnCancel)
+        val btnAdd = dialogView.findViewById<View>(R.id.btnAdd)
 
         // Group ingredients and prepare items with headers
         val dropdownItems = mutableListOf<Any>()
@@ -212,28 +215,37 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
         spinner.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) spinner.showDropDown() }
         spinner.setOnClickListener { spinner.showDropDown() }
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Add Ingredient")
+        val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
-            .setPositiveButton("Add") { _, _ ->
-                val selectedName = spinner.text.toString().trim()
-                val weight = etWeight.text.toString().toDoubleOrNull() ?: 0.0
-                
-                val ingredientInfo = commonIngredients.find { it.name.equals(selectedName, ignoreCase = true) }
-                
-                if (ingredientInfo != null && weight > 0) {
-                    selectedIngredients.add(SelectedIngredient(ingredientInfo, weight))
-                    updateIngredientsUi()
-                    calculateTotals()
-                } else if (ingredientInfo == null) {
-                    Toast.makeText(requireContext(), "Ingredient not found. Please select from the list.", Toast.LENGTH_SHORT).show()
-                } else if (weight <= 0) {
-                    Toast.makeText(requireContext(), "Please enter a valid weight", Toast.LENGTH_SHORT).show()
-                }
-                KeyboardUtil.hideKeyboard(requireActivity())
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnCancel.setOnClickListener {
+            KeyboardUtil.hideKeyboard(requireActivity())
+            dialog.dismiss()
+        }
+
+        btnAdd.setOnClickListener {
+            val selectedName = spinner.text.toString().trim()
+            val weight = etWeight.text.toString().toDoubleOrNull() ?: 0.0
+            
+            val ingredientInfo = commonIngredients.find { it.name.equals(selectedName, ignoreCase = true) }
+            
+            if (ingredientInfo != null && weight > 0) {
+                selectedIngredients.add(SelectedIngredient(ingredientInfo, weight))
+                updateIngredientsUi()
+                calculateTotals()
+                dialog.dismiss()
+            } else if (ingredientInfo == null) {
+                Toast.makeText(requireContext(), "Ingredient not found. Please select from the list.", Toast.LENGTH_SHORT).show()
+            } else if (weight <= 0) {
+                Toast.makeText(requireContext(), "Please enter a valid weight", Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Cancel") { _, _ -> KeyboardUtil.hideKeyboard(requireActivity()) }
-            .show()
+            KeyboardUtil.hideKeyboard(requireActivity())
+        }
+
+        dialog.show()
     }
 
     private fun calculateTotals() {
@@ -361,10 +373,10 @@ class LogManualFragment : BaseBindingFragment<FragmentLogManualBinding>(Fragment
                         results.count = originalItems.size
                     } else {
                         val filteredList = mutableListOf<Any>()
-                        originalItems.groupBy { item ->
-                            if (item is IngredientInfo) item.category else item as String
-                        }.forEach { (category, items) ->
-                            val matchingIngredients = items.filterIsInstance<IngredientInfo>().filter { 
+                        // Use original items to filter correctly while keeping headers
+                        originalItems.filterIsInstance<String>().forEach { category ->
+                            val itemsInCategory = originalItems.filterIsInstance<IngredientInfo>().filter { it.category == category }
+                            val matchingIngredients = itemsInCategory.filter { 
                                 it.name.lowercase(Locale.ROOT).contains(query) 
                             }
                             if (matchingIngredients.isNotEmpty()) {

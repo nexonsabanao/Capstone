@@ -19,12 +19,17 @@ import com.example.nutriority.data.model.Meal
 sealed class MealListItem {
     abstract val id: String
 
-    data class HeaderItem(val dateText: String, val dayIndex: Int) : MealListItem() {
+    data class HeaderItem(val dateText: String, val dayIndex: Int, val isToday: Boolean = false) : MealListItem() {
         // Use a stable ID based on dayIndex so headers don't "re-create" when text changes (e.g. Tomorrow -> Today)
         override val id: String = "header_$dayIndex"
     }
 
-    data class MealItem(val meal: Meal, val dayIndex: Int, val isLogged: Boolean = false) : MealListItem() {
+    data class MealItem(
+        val meal: Meal, 
+        val dayIndex: Int, 
+        val isLogged: Boolean = false,
+        val isPastDay: Boolean = false
+    ) : MealListItem() {
         // Use a stable ID that doesn't change when logged status changes for better DiffUtil performance, 
         // but include enough to be unique.
         override val id: String = "${meal.id}_${dayIndex}_${meal.mealTime}"
@@ -72,6 +77,11 @@ class GeneratedMealPlanAdapter(
 
         fun bind(item: MealListItem.HeaderItem) {
             header.text = item.dateText
+            if (item.isToday) {
+                header.setTextColor(ContextCompat.getColor(itemView.context, R.color.primary_dark))
+            } else {
+                header.setTextColor(Color.GRAY)
+            }
         }
     }
 
@@ -98,7 +108,17 @@ class GeneratedMealPlanAdapter(
             loggedOverlay.isVisible = item.isLogged
             checkBadge.isVisible = item.isLogged
             loggedStatusText.isVisible = item.isLogged
-            swapButton.isVisible = !item.isLogged 
+            
+            // Disable swap for past days and logged meals
+            swapButton.isVisible = !item.isLogged && !item.isPastDay
+            
+            // Past day design: Dim the whole card if it's a past day and NOT logged
+            if (item.isPastDay && !item.isLogged) {
+                itemView.alpha = 0.6f
+                // Maybe a slight grayscale or just alpha is enough for "missed" look
+            } else {
+                itemView.alpha = 1.0f
+            }
             
             Glide.with(itemView.context)
                 .load(meal.imageName)
@@ -114,7 +134,12 @@ class GeneratedMealPlanAdapter(
                     else        -> Color.parseColor("#888888")
                 }
                 drawable.setColor(color)
-                mealName.setTextColor(ContextCompat.getColor(itemView.context, R.color.primary_dark))
+                
+                if (item.isPastDay && !item.isLogged) {
+                    mealName.setTextColor(Color.GRAY)
+                } else {
+                    mealName.setTextColor(ContextCompat.getColor(itemView.context, R.color.primary_dark))
+                }
             }
 
             itemView.setOnClickListener { onMealClick(meal) }
