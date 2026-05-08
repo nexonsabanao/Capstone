@@ -291,6 +291,7 @@ td[data-label="Actions"] {
 }
 
 @media (max-width: 1024px) {
+    body.sidebar-open { overflow: hidden; height: 100vh; position: fixed; width: 100%; }
     .sidebar { transform: translateX(-100%); padding-bottom: 80px; } /* Added padding for logout */
     .sidebar.show { transform: translateX(0); }
     .main-content { margin-left: 0; width: 100%; padding: 25px; }

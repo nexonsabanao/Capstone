@@ -102,8 +102,16 @@ function toggleSidebar(force) {
     const isShowing = s.classList.contains('show');
     const show = force !== undefined ? force : !isShowing;
     
-    if (show) { s.classList.add('show'); o.classList.add('show'); }
-    else { s.classList.remove('show'); o.classList.remove('show'); }
+    if (show) { 
+        s.classList.add('show'); 
+        o.classList.add('show'); 
+        document.body.classList.add('sidebar-open');
+    }
+    else { 
+        s.classList.remove('show'); 
+        o.classList.remove('show'); 
+        document.body.classList.remove('sidebar-open');
+    }
 }
 window.toggleSidebar = toggleSidebar;
 
