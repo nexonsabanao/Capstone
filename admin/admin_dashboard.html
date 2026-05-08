@@ -210,7 +210,10 @@
         <div class="data-card">
             <div class="table-header">
                 <h2>Active Users</h2>
-                <button class="btn btn-primary" onclick="openStudentModal()"><i class="fas fa-user-plus"></i> Add Account</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary btn-sm" onclick="exportAllUsersSummary()"><i class="fas fa-file-export"></i> Export All</button>
+                    <button class="btn btn-primary btn-sm" onclick="openStudentModal()"><i class="fas fa-user-plus"></i> Add Account</button>
+                </div>
             </div>
             <div class="table-controls">
                 <div class="search-box">
@@ -510,5 +513,6 @@
 </div></div>
 
 <script type="module" src="admin_dashboard.js"></script>
+<script type="module" src="admin_report.js"></script>
 </body>
 </html>

@@ -8,7 +8,8 @@ import java.util.Date
 data class WorkoutLog(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val workoutId: Int, // Corrected from exerciseId
+    val workoutId: Int,
+    val exerciseName: String = "",
     val date: Date,
     val reps: String, // e.g., "12,11,10"
     val weightKg: Double = 0.0

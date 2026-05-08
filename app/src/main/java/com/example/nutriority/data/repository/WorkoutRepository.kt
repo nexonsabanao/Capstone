@@ -231,6 +231,7 @@ class WorkoutRepository(
                     val timestamp = doc.get("date") as? Timestamp
                     val log = WorkoutLog(
                         workoutId = (doc.get("workoutId") as? Number)?.toInt() ?: 0,
+                        exerciseName = doc.get("exerciseName") as? String ?: "",
                         date = timestamp?.toDate() ?: Date(),
                         reps = doc.get("reps") as? String ?: "",
                         weightKg = (doc.get("weightKg") as? Number)?.toDouble() ?: 0.0

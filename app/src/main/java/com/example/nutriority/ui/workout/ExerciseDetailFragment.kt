@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.nutriority.R
 import com.example.nutriority.data.model.ExerciseSet
+import com.example.nutriority.data.model.WorkoutLog
 import com.example.nutriority.databinding.FragmentExerciseDetailBinding
 import com.example.nutriority.ui.NavigationViewModel
 import com.example.nutriority.ui.util.BaseBindingFragment
@@ -30,6 +31,7 @@ import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.util.Date
 import java.util.Locale
 
 @Suppress("DEPRECATION")
@@ -361,6 +363,18 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         }
     }
 
+    private fun saveExercisePerformanceLog() {
+        val detail = viewModel.exerciseWithDetail.value ?: return
+        val log = WorkoutLog(
+            workoutId = detail.assignment.workoutId,
+            exerciseName = detail.exercise.name,
+            date = Date(),
+            reps = currentSets.joinToString(",") { it.value.toString() },
+            weightKg = 0.0
+        )
+        viewModel.logWorkout(log)
+    }
+
     private fun logSetAndAdvance() {
         val index = currentSets.indexOfFirst { it.isActive }
         if (index == -1) return
@@ -397,6 +411,7 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
 
         val detail = viewModel.exerciseWithDetail.value ?: return
         if (mutableSets.all { it.isCompleted }) {
+            saveExercisePerformanceLog()
             workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true)
             if (!isRestOn) {
                 // BUG FIX: If rest is OFF, go to next exercise immediately
@@ -414,6 +429,9 @@ class ExerciseDetailFragment : BaseBindingFragment<FragmentExerciseDetailBinding
         val mutableSets = currentSets.map { it.copy(isCompleted = true, isActive = false) }
         updateAndSubmitList(mutableSets)
         val detail = viewModel.exerciseWithDetail.value ?: return
+        
+        saveExercisePerformanceLog()
+        
         workoutViewModel.updateExerciseCompletion(detail.assignment.workoutId, detail.assignment.exerciseId, detail.assignment.category, true)
         
         if (isRestOn) {

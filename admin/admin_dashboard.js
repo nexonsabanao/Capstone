@@ -3,6 +3,7 @@ import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/fireba
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import "./admin_management.js";
 import "./admin_sync.js";
+import "./admin_report.js";
 
 window.cacheEx = []; window.cacheMl = []; window.cacheArt = []; window.cacheSt = []; 
 let charts = {};
@@ -474,8 +475,11 @@ function renderStudents() {
         const nameDisplay = isDeleted ? `<del>${nameFallback}</del> <span class="badge" style="background:#fee2e2; color:#ef4444; font-size:10px; padding:2px 6px">DELETED</span>` : `<b>${nameFallback}</b>`;
         const actionButtons = isDeleted
             ? `<button class="btn btn-secondary btn-sm" onclick="showDeletedAccountInfo('${u.fid}')">Details</button>`
-            : `<button class="btn btn-secondary btn-sm" onclick="openStudentModal('${u.fid}')">Edit</button>
-               <button class="btn btn-danger btn-sm" onclick="deleteRecord('users','${u.fid}')">Delete</button>`;
+            : `<div class="action-btns">
+               <button class="btn btn-primary btn-sm" title="Download Report" onclick="downloadUserReport('${u.fid}', '${nameFallback}')"><i class="fas fa-file-download"></i></button>
+               <button class="btn btn-secondary btn-sm" title="Edit Profile" onclick="openStudentModal('${u.fid}')"><i class="fas fa-edit"></i></button>
+               <button class="btn btn-danger btn-sm" title="Delete User" onclick="deleteRecord('users','${u.fid}')"><i class="fas fa-trash-alt"></i></button>
+               </div>`;
 
         b.innerHTML += `<tr ${rowStyle}>
             <td data-label="User">${nameDisplay}<br><small>${emailFallback}</small></td>
@@ -504,8 +508,10 @@ function renderExercises() {
             <td data-label="Category">${e.category}</td>
             <td data-label="Level">${e.difficulty}</td>
             <td data-label="Actions">
-                <button class="btn btn-secondary btn-sm" onclick="openExModal('${e.id}')">Edit</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteRecord('exercises','${e.id}')">Delete</button>
+                <div class="action-btns">
+                    <button class="btn btn-secondary btn-sm" onclick="openExModal('${e.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteRecord('exercises','${e.id}')"><i class="fas fa-trash-alt"></i></button>
+                </div>
             </td>
         </tr>`;
     });
@@ -529,8 +535,10 @@ function renderMeals() {
             <td data-label="Diet">${m.preferredDiet}</td>
             <td data-label="Macros">P:${m.macros?.protein}g</td>
             <td data-label="Actions">
-                <button class="btn btn-secondary btn-sm" onclick="openMealModal('${m.id}')">Edit</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteRecord('meals','${m.id}')">Delete</button>
+                <div class="action-btns">
+                    <button class="btn btn-secondary btn-sm" onclick="openMealModal('${m.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteRecord('meals','${m.id}')"><i class="fas fa-trash-alt"></i></button>
+                </div>
             </td>
         </tr>`;
     });
@@ -552,8 +560,10 @@ function renderArticles() {
             <td data-label="Author">${a.author}</td>
             <td data-label="Category">${a.category}</td>
             <td data-label="Actions">
-                <button class="btn btn-secondary btn-sm" onclick="openArtModal('${a.id}')">Edit</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteRecord('articles','${a.id}')">Delete</button>
+                <div class="action-btns">
+                    <button class="btn btn-secondary btn-sm" onclick="openArtModal('${a.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteRecord('articles','${a.id}')"><i class="fas fa-trash-alt"></i></button>
+                </div>
             </td>
         </tr>`;
     });
