@@ -33,6 +33,7 @@ data class MealUiState(
     val items: List<MealListItem> = emptyList(),
     val isGenerating: Boolean = false,
     val isPlanExpired: Boolean = false,
+    val isLastDayLogged: Boolean = false,
     val hasPlan: Boolean = false,
     val targetCalories: Int = 0,
     val targetProtein: Int = 0,
@@ -91,10 +92,16 @@ class MealViewModel @Inject constructor(
                 val dailyCalories = plannerService.calculateDailyTarget(user)
                 val macros = plannerService.calculateMacroTargets(dailyCalories, user)
                 
+                // Calculate if last day's meals are all logged
+                val lastDayIndex = items.filterIsInstance<MealListItem.HeaderItem>().maxOfOrNull { it.dayIndex } ?: -1
+                val lastDayMeals = items.filterIsInstance<MealListItem.MealItem>().filter { it.dayIndex == lastDayIndex }
+                val isLastDayLogged = lastDayMeals.isNotEmpty() && lastDayMeals.all { it.isLogged }
+
                 MealUiState(
                     items = items,
                     isGenerating = isGenerating,
                     isPlanExpired = isExpired,
+                    isLastDayLogged = isLastDayLogged,
                     hasPlan = items.any { it is MealListItem.MealItem },
                     targetCalories = dailyCalories,
                     targetProtein = macros.proteinGrams,

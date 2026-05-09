@@ -68,7 +68,9 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
 
     private fun setupClickListeners() {
         binding.nextButton.setOnClickListener { validateAndGenerateMealPlan() }
-        binding.doneButton.setOnClickListener { navigationViewModel.resetToHome() }
+        binding.doneButton.setOnClickListener { 
+            mealViewModel.deleteMealPlan()
+        }
         binding.btnMenu.setOnClickListener { showPopupMenu(it) }
     }
 
@@ -156,6 +158,7 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
+                    var lastHasPlan: Boolean? = null
                     var wasGenerating = false
                     mealViewModel.uiState.collectLatest { state ->
                         if (state.isInitialLoading) {
@@ -166,19 +169,31 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
                             return@collectLatest
                         }
 
-                        binding.loadingProgressBar.isVisible = state.isGenerating
-                        binding.initialView.isVisible = !state.hasPlan && !state.isGenerating
-                        binding.generatedMealPlanRecyclerView.isVisible = state.hasPlan && !state.isGenerating
-                        binding.btnMenu.isVisible = state.hasPlan
-                        binding.nextButton.isEnabled = !state.isGenerating
-                        binding.doneButton.isVisible = state.hasPlan && state.isPlanExpired
+                        val isGenerating = state.isGenerating
+                        binding.loadingProgressBar.isVisible = isGenerating
                         
-                        binding.nextButton.isVisible = (!state.hasPlan || state.isPlanExpired) && !state.isGenerating
+                        // Core visibility logic
+                        val showPlan = state.hasPlan && !isGenerating
+                        val showInitial = !state.hasPlan && !isGenerating
+                        
+                        binding.initialView.isVisible = showInitial
+                        binding.generatedMealPlanRecyclerView.isVisible = showPlan
+                        binding.btnMenu.isVisible = showPlan
+                        binding.nextButton.isEnabled = !isGenerating
+                        
+                        // Show "Done" if plan is expired (e.g. 8th day) OR if last day's meals are all logged
+                        binding.doneButton.isVisible = showPlan && (state.isPlanExpired || state.isLastDayLogged)
+                        
+                        // Fix: When the plan is deleted, scroll back to top of the initial view
+                        if (lastHasPlan == true && !state.hasPlan) {
+                            binding.mealNestedScrollView.scrollTo(0, 0)
+                        }
+                        lastHasPlan = state.hasPlan
                         
                         state.startDate?.let { updateDateViews(it) }
                         
                         mealAdapter.submitList(state.items) {
-                            if (state.hasPlan && !state.isGenerating) {
+                            if (showPlan) {
                                 if (wasGenerating) {
                                     binding.mealNestedScrollView.smoothScrollTo(0, 0)
                                     hasAutoScrolled = true
@@ -186,10 +201,10 @@ class MealFragment : BaseBindingFragment<FragmentMealBinding>(FragmentMealBindin
                                     scrollToToday(state.items)
                                     hasAutoScrolled = true
                                 }
-                            } else if (!state.hasPlan) {
+                            } else {
                                 hasAutoScrolled = false
                             }
-                            wasGenerating = state.isGenerating
+                            wasGenerating = isGenerating
                         }
                     }
                 }
