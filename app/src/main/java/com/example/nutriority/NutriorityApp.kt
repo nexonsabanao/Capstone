@@ -54,7 +54,7 @@ class NutriorityApp : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Nutriority Notifications"
             val descriptionText = "Notifications for workouts and meals"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val importance = NotificationManager.IMPORTANCE_HIGH // Changed to HIGH for heads-up
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
             }
