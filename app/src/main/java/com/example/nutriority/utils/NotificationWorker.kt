@@ -52,7 +52,7 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
         )
 
         val builder = NotificationCompat.Builder(applicationContext, NutriorityApp.CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher_round)
+            .setSmallIcon(R.drawable.icon_green)
             .setContentTitle("Nutriority Reminder")
             .setContentText("Don't forget to track your meals and workouts today!")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
