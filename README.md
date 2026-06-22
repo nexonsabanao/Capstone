@@ -2,7 +2,15 @@
 
 **Your Intelligent Partner for Personalized Nutrition and Fitness Excellence.**
 
-Nutriority is a cutting-edge Android application designed to bridge the gap between dietary planning and physical performance. By leveraging user-specific data, the app generates rolling 7-day meal plans and personalized workout routines, tracking every calorie burned and every gram of protein consumed.
+Nutriority is a cutting-edge Android application designed to bridge the gap between dietary planning and physical performance. By leveraging user-specific data, the app generates rolling 7-day meal plans, tracks workouts, and provides actionable insights for fitness goals.
+
+---
+
+## 🔗 Quick Links
+
+*   **📚 Repository:** [github.com/nexonsabanao/Capstone](https://github.com/nexonsabanao/Capstone)
+*   **📥 Installer:** [nutriority.github.io/Installer](https://nutriority.github.io/Installer)
+*   **🔧 Admin Dashboard:** [nutriority.github.io/Admin](https://nutriority.github.io/Admin)
 
 ---
 
@@ -64,7 +72,7 @@ The app follows a modern Android architecture to ensure testability and maintain
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/your-username/Nutriority.git
+    git clone https://github.com/nexonsabanao/Capstone.git
     ```
 2.  **Firebase Configuration:**
     *   Create a project in the [Firebase Console](https://firebase.google.com/).
