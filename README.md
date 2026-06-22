@@ -2,7 +2,7 @@
 
 **Your Intelligent Partner for Personalized Nutrition and Fitness Excellence.**
 
-Nutriority is a cutting-edge Android application designed to bridge the gap between dietary planning and physical performance. By leveraging user-specific data, the app generates rolling 7-day meal plans, tracks workouts, and provides actionable insights for fitness goals.
+Nutriority is a cutting-edge Android application designed to bridge the gap between dietary planning and physical performance. By leveraging user-specific data, the app generates rolling 7-day meal plans tailored to your fitness goals.
 
 ---
 
@@ -83,17 +83,6 @@ The app follows a modern Android architecture to ensure testability and maintain
     *   Open the project in Android Studio.
     *   Sync Gradle and ensure all dependencies are resolved.
     *   Run the app on a physical device or emulator (API 26+).
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! If you'd like to improve the diet algorithms or UI responsiveness:
-1.  Fork the Project.
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the Branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
 
 ---
 
